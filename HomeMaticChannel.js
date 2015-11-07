@@ -71,6 +71,8 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 	   that.currentStateCharacteristic["STATE"] = cc;
        cc.eventEnabled = true;
        
+       this.remoteGetValue("STATE");
+
       break; 
      
      
@@ -104,6 +106,8 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 		that.currentStateCharacteristic["LEVEL"] = brightness;
        	brightness.eventEnabled = true;       
      
+        this.remoteGetValue("LEVEL");
+
      break;   
      
      // Window Covering 
@@ -136,7 +140,10 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 	   }.bind(this));
 	   this.currentStateCharacteristic["DIRECTION"] = pstate;
        pstate.eventEnabled = true;
-     
+       
+       this.remoteGetValue("LEVEL");
+       this.remoteGetValue("DIRECTION");
+
      break;   
    
      case "SHUTTER_CONTACT":
@@ -153,7 +160,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 		  
 		  this.addValueMapping("STATE","true",0);
           this.addValueMapping("STATE","false",1);
-            
+
   	      this.services.push(door);
 
 	   } else {
@@ -167,6 +174,8 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 		state.eventEnabled = true; 
 	    this.services.push(contact);
 	  }
+ 
+        this.remoteGetValue("STATE");
 	   
      break;
      
@@ -198,7 +207,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 		this.addValueMapping("STATE","2",1);
 	    this.services.push(contact);
 	  }
-	   
+ 
+ 	    this.remoteGetValue("STATE");
+
      break;
      
      case "MOTION_DETECTOR":
@@ -212,7 +223,8 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 	  this.currentStateCharacteristic["MOTION"] = state;
 	  state.eventEnabled = true; 
 	  this.services.push(sensor);
-	  
+	  this.remoteGetValue("MOTION");
+
 	   
      break;
      
