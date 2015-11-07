@@ -291,8 +291,18 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
     var mode = thermo.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
     .on('get', function(callback) {
-      var imode = (this.state["SET_TEMPERATURE"] == 4.5)?0:1;
-      callback(imode);
+      
+      this.query("SET_TEMPERATURE",function(value) {
+         if (value==4.5){
+         	that.currentStateCharacteristic["TMODE"].setValue(1, null);
+			that.currentStateCharacteristic["MODE"].setValue(1, null);
+
+           callback(0);
+         } else {
+           callback(1);
+         }
+      });
+
 
     }.bind(this));
     this.currentStateCharacteristic["MODE"] = mode;
@@ -300,8 +310,15 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
     var targetMode = thermo.getCharacteristic(Characteristic.TargetHeatingCoolingState)
     .on('get', function(callback) {
-      var imode = (this.state["SET_TEMPERATURE"] == 4.5)?0:1;
-      callback(imode);
+      
+      this.query("SET_TEMPERATURE",function(value) {
+         if (value==4.5){
+           callback(0);
+         } else {
+           callback(1);
+         }
+      });
+
     }.bind(this))
 
     .on('set', function(value, callback) {
@@ -311,7 +328,19 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       } else {
         this.cleanVirtualDevice("SET_TEMPERATURE");
       }
+      callback();
     }.bind(this));
+
+    targetMode.setProps({
+        format: Characteristic.Formats.UINT8,
+        perms: [Characteristic.Perms.READ, Characteristic.Perms.WRITE, Characteristic.Perms.NOTIFY],
+	    maxValue: 1,
+	    minValue: 0,
+    	minStep: 1,
+    });
+
+    this.currentStateCharacteristic["TMODE"] = targetMode;
+    targetMode.eventEnabled = true;
 
     var cctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
     .on('get', function(callback) {
@@ -327,8 +356,10 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       this.query("SET_TEMPERATURE",function(value) {
 		
 		if (value==4.5){
+			that.currentStateCharacteristic["TMODE"].setValue(0, null);
 			that.currentStateCharacteristic["MODE"].setValue(0, null);
 		} else {
+			that.currentStateCharacteristic["TMODE"].setValue(1, null);
 			that.currentStateCharacteristic["MODE"].setValue(1, null);
 		}
 	
