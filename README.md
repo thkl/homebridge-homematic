@@ -6,8 +6,8 @@ Supports the Homematic System on HomeBridge Platform
 
 Devices currently supported:
 
-Switches , Dimmer , RotaryHandles, WindowContacts, MotionSensor, Blinds
-ProgramStarts ....
+Switches , Dimmer , RotaryHandles, WindowContacts, MotionSensor, Blinds, Keymatic
+ProgramStarter, SmokeDetector, Thermostats ....
 
 
 # Installation
