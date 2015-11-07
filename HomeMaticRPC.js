@@ -126,8 +126,7 @@ HomeMaticRPC.prototype.init = function() {
     if (channel.indexOf("BidCos-RF.") > -1)  {
       channel = channel.substr(10);
     }
-
-    this.client.methodCall("setValue", [channel, datapoint, value], function(error, value) {
+	this.client.methodCall("setValue", [channel, datapoint, value], function(error, value) {
 
     });
   }

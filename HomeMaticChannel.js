@@ -67,11 +67,11 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 	   var cc = lightbulb.getCharacteristic(Characteristic.On)
 	   
 	   .on('get', function(callback) {
-	     that.query("STATE",callback);
+	     that.query("LEVEL",callback);
 	   }.bind(this))
 	   
 	   .on('set', function(value, callback) {
-	     that.command("set","STATE" , (value==1) ? true:false)
+	     that.command("set","LEVEL" , (value==1)? "1": "0");
 	     callback();
 	   }.bind(this));
 	   
