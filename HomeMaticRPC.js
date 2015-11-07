@@ -54,11 +54,8 @@ HomeMaticRPC.prototype.init = function() {
               var channel = "BidCos-RF." + params[1];
               var datapoint = params[2];
               var value = params[3];
-              that.log("Search Channel " + channel);
-
               that.platform.foundAccessories.map(function(accessory) {
                 if (accessory.adress == channel) {
-                  that.log("Event for " + channel + " " + datapoint);
                   accessory.event(datapoint, value);
                 }
               });

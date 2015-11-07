@@ -15,9 +15,14 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
   this.timer = [];
   this.services = [];
   
-  
+  this.i_characteristic = {};
+
   var that = this;
   var services = [];
+  
+  if (this.isSupported()==false) {
+   return;
+  }
   
   var informationService = new Service.AccessoryInformation();
     
@@ -32,7 +37,61 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
     
     // Controls
     
+   
+   switch (this.type) {
+   
+    case "SWITCH": 
+	   var lightbulb = new Service["Lightbulb"](this.name);
+	   this.services.push(lightbulb);
+	   
+	   var cc = lightbulb.getCharacteristic(Characteristic.On)
+	   
+	   .on('get', function(callback) {
+	     that.query("STATE",callback);
+	   }.bind(this))
+	   
+	   .on('set', function(value, callback) {
+	     that.command("set","STATE" , (value==1) ? true:false)
+	     callback();
+	   }.bind(this));
+	   
+	   that.currentStateCharacteristic["STATE"] = cc;
+       cc.eventEnabled = true;
+     break; 
+     
+     
+   case "DIMMER": 
+	   var lightbulb = new Service["Lightbulb"](this.name);
+	   this.services.push(lightbulb);
+	   
+	   var cc = lightbulb.getCharacteristic(Characteristic.On)
+	   
+	   .on('get', function(callback) {
+	     that.query("STATE",callback);
+	   }.bind(this))
+	   
+	   .on('set', function(value, callback) {
+	     that.command("set","STATE" , (value==1) ? true:false)
+	     callback();
+	   }.bind(this));
+	   
+       
+       var brightness = lightbulb.getCharacteristic(Characteristic.Brightness)
 
+       .on('get', function(callback) {
+	     that.query("LEVEL",callback);
+	   }.bind(this))
+	   
+	   .on('set', function(value, callback) {
+	     that.delayed("set","LEVEL" , String(value/100),100);
+	     callback();
+	   }.bind(this));
+
+		that.currentStateCharacteristic["LEVEL"] = brightness;
+       	brightness.eventEnabled = true;       
+     
+     break;   
+   }
 }
 
 
@@ -122,7 +181,7 @@ HomeMaticGenericChannel.prototype = {
     }
 	
     if (that.currentStateCharacteristic[dp]!=undefined) {
-       that.currentStateCharacteristic[dp].updateValue(value, null);
+       that.currentStateCharacteristic[dp].setValue(value, null);
     }
     this.state[dp] = value;
   },
