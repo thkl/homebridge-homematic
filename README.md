@@ -2,6 +2,9 @@
 
 Supports the Homematic System on HomeBridge Platform
 
+(THIS IS WORK IN PROGRESS) - please use the old legacy Homematic Module if you dont want beta software ...
+
+
 # Installation
 
 1. Install homebridge using: npm install -g homebridge
