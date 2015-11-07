@@ -51,7 +51,7 @@ HomeMaticRegaRequest.prototype = {
     var script = "var d = dom.GetObject(\"" + channel + "." + datapoint + "\");if (d){Write(d.State());}";
     //that.log("Rega Request " + script);
     this.script(script, function(data) {
-      that.log("Rega Response" + data);
+      //that.log("Rega Response " + data);
       if (data !== undefined) {
         callback(parseFloat(data));
       }

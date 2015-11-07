@@ -23,7 +23,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
   if (this.isSupported()==false) {
    return;
   }
-  
+    
   var informationService = new Service.AccessoryInformation();
     
     informationService
@@ -227,8 +227,73 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
 	   
      break;
-     
 
+
+	 case "KEYMATIC":
+	 
+	  var door = new Service["LockMechanism"](this.name);
+	  this.services.push(door);
+	   
+	  var cstate = door.getCharacteristic(Characteristic.LockCurrentState)
+	   
+	   .on('get', function(callback) {
+	     that.query("STATE",callback);
+	   }.bind(this))
+	   
+	   .on('set', function(value, callback) {
+	     that.command("set","STATE" , (value==1) ? "false" : "true")
+	     callback();
+	   }.bind(this));
+	   
+	   this.currentStateCharacteristic["STATE"] = cstate;
+       cstate.eventEnabled = true;       
+	   
+       this.remoteGetValue("STATE");
+       this.addValueMapping("STATE","1",0);
+       this.addValueMapping("STATE","0",1);
+
+	  var dopener = door.addCharacteristic(Characteristic.TargetDoorState)
+	   .on('get', function(callback) {
+	     callback(0);
+	   }.bind(this))
+	   
+	   .on('set', function(value, callback) {
+	     that.command("set","OPEN" , "true")
+	     callback(0);
+	   }.bind(this));
+	   
+	   
+	 break;
+	 
+	 
+	case "PROGRAM_LAUNCHER" : 
+	  var prg = new Service["ProgramLaunchService"](this.name);
+	  this.services.push(prg);
+	  
+	  var pgrl = prg.getCharacteristic(Characteristic.ProgramLaunchCharacteristic)
+	   
+	   .on('get', function(callback) {
+	     that.event("STATE",0);
+	     callback(0);
+	   }.bind(this))
+	   
+	   .on('set', function(value, callback) {
+	     if (value==1) {
+	      that.log("Launch Program " + that.name);
+          that.command("sendregacommand","","var x=dom.GetObject(\""+that.name+"\");if (x) {x.ProgramExecute();}",function() {
+           setTimeout(function(){
+           	   that.log("Setting back to false");
+			   that.event("STATE",0);
+           }, 1000 );
+          });
+          callback(0);
+	    }
+	   }.bind(this));
+	   
+	   this.currentStateCharacteristic["STATE"] = pgrl;
+	   pgrl.eventEnabled = true; 
+	  	
+	break; 
    }
 }
 
@@ -284,7 +349,6 @@ HomeMaticGenericChannel.prototype = {
   remoteGetValue:function(dp,callback) {
       var that = this;
   	  that.platform.getValue(that.adress,dp,function(newValue) {
-  	    that.log("Remote Value Response for " + that.adress + "." + dp + "->" + newValue);
   	    that.eventupdate = true;
   	    that.cache(dp,newValue);
   	    that.eventupdate = false;

@@ -26,6 +26,29 @@ module.exports = function(homebridge) {
   inherits(Service.DoorStateService, Service);
 
 
+  Characteristic.ProgramLaunchCharacteristic = function() {
+    Characteristic.call(this, 'Program', "5E0115D7-7594-4846-AFB7-F456389E81EC");
+    this.setProps({
+        format: Characteristic.Formats.BOOL,
+        perms: [
+          Characteristic.Perms.WRITE,
+          Characteristic.Perms.READ,
+          Characteristic.Perms.NOTIFY
+        ]
+    });
+    this.value = this.getDefaultValue();
+  };
+  inherits(Characteristic.ProgramLaunchCharacteristic, Characteristic);
+
+
+  Service.ProgramLaunchService = function(displayName, subtype) {
+  	Service.call(this, displayName, 'B7F46B4D-3D69-4804-8114-393F257D4039', subtype);
+    this.addCharacteristic(Characteristic.ProgramLaunchCharacteristic);
+  };
+
+  inherits(Service.ProgramLaunchService, Service);
+
+
   homebridge.registerPlatform("homebridge-homematic", "HomeMatic", HomeMaticPlatform);
 }
 
@@ -119,15 +142,18 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 
         if (that.programs!=undefined) {
           that.programs.map(function(program){
-            var accessory = new HomeMaticGenericChannel(that.log, that, "1234" , program , "PROGRAM_LAUNCHER" , "1234", Service, Characteristic);
+            var accessory = new HomeMaticGenericChannel(that.log, that, "1234" , program , "PROGRAM_LAUNCHER" , "1234", "" , Service, Characteristic);
         	that.foundAccessories.push(accessory);
           });
         }
+
 /*
-                      				    accessory = new HomeMaticGenericChannel(that.log, that, "5678" , "DummyBLIND" , "BLIND" , "5678");
-        				                that.foundAccessories.push(accessory);
+		var accessory = new HomeMaticGenericChannel(that.log, that, "5678" , "DummyKMK" , "KEYMATIC" , "5678","", Service, Characteristic);
+        if (accessory.isSupported()==true) {
+           that.foundAccessories.push(accessory);
+        }
+*/                
                   			  
-        				                */
         callback(that.foundAccessories);
                 
       } else {
