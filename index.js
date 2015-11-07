@@ -4,13 +4,28 @@ var request = require("request");
 var HomeMaticRPC = require("./HomeMaticRPC.js").HomeMaticRPC;
 var HomeMaticRegaRequest =  require("./HomeMaticRegaRequest.js").HomeMaticRegaRequest;
 var HomeMaticGenericChannel =  require("./HomeMaticChannel.js").HomeMaticGenericChannel;
+var inherits = require('util').inherits;
 
 var Service, Characteristic;
 
 module.exports = function(homebridge) {
+ 
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
   
+  // Register some required Services
+  Service.DoorStateService = function(displayName, subtype) {
+  	
+  	Service.call(this, displayName, '5243F2EA-006C-4D68-83A0-4AF6F606136C', subtype);
+    
+    this.addCharacteristic(Characteristic.CurrentDoorState);
+    this.addOptionalCharacteristic(Characteristic.Name);
+  
+  };
+
+  inherits(Service.DoorStateService, Service);
+
+
   homebridge.registerPlatform("homebridge-homematic", "HomeMatic", HomeMaticPlatform);
 }
 
@@ -114,13 +129,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                   			  
         				                */
         callback(that.foundAccessories);
-        
-        that.foundAccessories.map(function(accessory) {
-		  that.log("Accessory added : " + accessory.adress);
-		});
-		
-
-        
+                
       } else {
         callback(that.foundAccessories);
       }

@@ -41,7 +41,20 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
    switch (this.type) {
    
     case "SWITCH": 
-	   var lightbulb = new Service["Lightbulb"](this.name);
+    
+    
+       var lightbulb = new Service["Lightbulb"](this.name);
+	   
+       if (this.special=="OUTLET") {
+         
+         lightbulb = new Service["Outlet"](this.name);
+         lightbulb.getCharacteristic(Characteristic.OutletInUse)
+         .on('get', function(callback) {
+	       callback(1);
+	     }.bind(this));
+        
+       }
+    
 	   this.services.push(lightbulb);
 	   
 	   var cc = lightbulb.getCharacteristic(Characteristic.On)
@@ -57,7 +70,8 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 	   
 	   that.currentStateCharacteristic["STATE"] = cc;
        cc.eventEnabled = true;
-     break; 
+       
+      break; 
      
      
    case "DIMMER": 
@@ -91,6 +105,118 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
        	brightness.eventEnabled = true;       
      
      break;   
+     
+     // Window Covering 
+     case "BLIND": 
+	   var blind = new Service["WindowCovering"](this.name);
+	   this.services.push(blind);
+	   
+	   var cpos = blind.getCharacteristic(Characteristic.CurrentPosition)
+	   
+	   .on('get', function(callback) {
+	     that.query("LEVEL",callback);
+	   }.bind(this))
+	   
+	   this.currentStateCharacteristic["LEVEL"] = cpos;
+       cpos.eventEnabled = true;       
+	   
+	   
+       var tpos = blind.getCharacteristic(Characteristic.TargetPosition)
+       .on('get', function(callback) {
+	     that.query("LEVEL",callback);
+	   }.bind(this))
+	   .on('set', function(value, callback) {
+	     that.delayed("set","LEVEL" , String(value/100),100);
+	     callback();
+	   }.bind(this));
+
+       var pstate = blind.getCharacteristic(Characteristic.PositionState)
+       .on('get', function(callback) {
+	     that.query("DIRECTION",callback);
+	   }.bind(this));
+	   this.currentStateCharacteristic["DIRECTION"] = pstate;
+       pstate.eventEnabled = true;
+     
+     break;   
+   
+     case "SHUTTER_CONTACT":
+     
+	   if (this.special=="DOOR") {
+	  	
+	  	  var door = new Service["DoorStateService"](this.name);
+		  var cdoor = door.getCharacteristic(Characteristic.CurrentDoorState);
+		  cdoor.on('get', function(callback) {
+	     			that.query("STATE",callback);
+		  }.bind(this));
+		  this.currentStateCharacteristic["STATE"] = cdoor;
+		  cdoor.eventEnabled = true; 
+		  
+		  this.addValueMapping("STATE","true",0);
+          this.addValueMapping("STATE","false",1);
+            
+  	      this.services.push(door);
+
+	   } else {
+
+		var contact = new Service["ContactSensor"](this.name);
+		var state = contact.getCharacteristic(Characteristic.ContactSensorState)
+	  	.on('get', function(callback) {
+	     	that.query("STATE",callback);
+	   	}.bind(this))
+		that.currentStateCharacteristic["STATE"] = state;
+		state.eventEnabled = true; 
+	    this.services.push(contact);
+	  }
+	   
+     break;
+     
+     case "ROTARY_HANDLE_SENSOR":
+     
+	   if (this.special=="DOOR") {
+	  	
+	  	  var door = new Service["DoorStateService"](this.name);
+		  var cdoor = door.getCharacteristic(Characteristic.CurrentDoorState);
+		  cdoor.on('get', function(callback) {
+	     			that.query("STATE",callback);
+		  }.bind(this));
+		  this.currentStateCharacteristic["STATE"] = cdoor;
+		  cdoor.eventEnabled = true; 
+		  this.addValueMapping("STATE","0",1);
+	      this.addValueMapping("STATE","1",0);
+	      this.addValueMapping("STATE","2",0);
+          this.services.push(door);
+
+	   } else {
+
+		var contact = new Service["ContactSensor"](this.name);
+		var state = contact.getCharacteristic(Characteristic.ContactSensorState)
+	  	.on('get', function(callback) {
+	     	that.query("STATE",callback);
+	   	}.bind(this))
+		this.currentStateCharacteristic["STATE"] = state;
+		state.eventEnabled = true; 
+		this.addValueMapping("STATE","2",1);
+	    this.services.push(contact);
+	  }
+	   
+     break;
+     
+     case "MOTION_DETECTOR":
+     
+	  var sensor = new Service["MotionSensor"](this.name);
+	  var state = sensor.getCharacteristic(Characteristic.MotionDetected)
+	  	.on('get', function(callback) {
+	     	that.query("MOTION",callback);
+	   	}.bind(this))
+	
+	  this.currentStateCharacteristic["MOTION"] = state;
+	  state.eventEnabled = true; 
+	  this.services.push(sensor);
+	  
+	   
+     break;
+     
+
    }
 }
 
@@ -244,28 +370,13 @@ HomeMaticGenericChannel.prototype = {
     "THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",
     "KEYMATIC","SMOKE_DETECTOR","WEATHER_TRANSMIT","PROGRAM_LAUNCHER"].indexOf(this.type) > -1)
   
-  /*)
-    if (this.type=="SWITCH") {return true;}
-    if (this.type=="DIMMER") {return true;}
-    if (this.type=="BLIND") {return true;}
-    if (this.type=="CLIMATECONTROL_RT_TRANSCEIVER") {return true;}
-    if (this.type=="THERMALCONTROL_TRANSMIT") {return true;}
-	if (this.type=="SHUTTER_CONTACT") {return true;}
-	if (this.type=="ROTARY_HANDLE_SENSOR") {return true;}
-	if (this.type=="MOTION_DETECTOR") {return true;}
-	if (this.type=="KEYMATIC") {return true;}
-	if (this.type=="SMOKE_DETECTOR") {return true;}
-	if (this.type=="WEATHER_TRANSMIT") {return true;}
-	if (this.type=="PROGRAM_LAUNCHER") {return true;}
-  */
-  return false;
+    return false;
   }    
    
   
 };
 
-
 module.exports = {
- HomeMaticGenericChannel : HomeMaticGenericChannel
+  HomeMaticGenericChannel : HomeMaticGenericChannel 
 }
 
