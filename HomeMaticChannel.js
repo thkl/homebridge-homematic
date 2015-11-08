@@ -51,7 +51,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       lightbulb = new Service["Outlet"](this.name);
       lightbulb.getCharacteristic(Characteristic.OutletInUse)
       .on('get', function(callback) {
-        callback(1);
+        if (callback) callback(null,1);
       }.bind(this));
 
     }
@@ -61,7 +61,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
     var cc = lightbulb.getCharacteristic(Characteristic.On)
 
     .on('get', function(callback) {
-      that.query("STATE",callback);
+      that.query("STATE",function(value){
+       if (callback) callback(null,value);
+      });
     }.bind(this))
 
     .on('set', function(value, callback) {
@@ -96,7 +98,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
     var brightness = lightbulb.getCharacteristic(Characteristic.Brightness)
 
     .on('get', function(callback) {
-      that.query("LEVEL",callback);
+      that.query("LEVEL",function(value){
+       if (callback) callback(null,value);
+      });
     }.bind(this))
 
     .on('set', function(value, callback) {
@@ -119,7 +123,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
     var cpos = blind.getCharacteristic(Characteristic.CurrentPosition)
 
     .on('get', function(callback) {
-      that.query("LEVEL",callback);
+      that.query("LEVEL",function(value){
+       if (callback) callback(null,value);
+      });
     }.bind(this))
 
     this.currentStateCharacteristic["LEVEL"] = cpos;
@@ -127,18 +133,26 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
 
     var tpos = blind.getCharacteristic(Characteristic.TargetPosition)
+    
     .on('get', function(callback) {
-      that.query("LEVEL",callback);
+      that.query("LEVEL",function(value){
+       if (callback) callback(null,value);
+      });
     }.bind(this))
+    
     .on('set', function(value, callback) {
       that.delayed("set","LEVEL" , String(value/100),100);
       callback();
     }.bind(this));
 
     var pstate = blind.getCharacteristic(Characteristic.PositionState)
-    .on('get', function(callback) {
-      that.query("DIRECTION",callback);
+	
+	.on('get', function(callback) {
+      that.query("DIRECTION",function(value){
+       if (callback) callback(null,value);
+      });
     }.bind(this));
+    
     this.currentStateCharacteristic["DIRECTION"] = pstate;
     pstate.eventEnabled = true;
 
@@ -153,9 +167,14 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
       var door = new Service["DoorStateService"](this.name);
       var cdoor = door.getCharacteristic(Characteristic.CurrentDoorState);
+      
       cdoor.on('get', function(callback) {
-        that.query("STATE",callback);
+      that.query("STATE",function(value){
+       if (callback) callback(null,value);
+      });
       }.bind(this));
+      
+      
       this.currentStateCharacteristic["STATE"] = cdoor;
       cdoor.eventEnabled = true;
       
@@ -169,7 +188,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       var contact = new Service["ContactSensor"](this.name);
       var state = contact.getCharacteristic(Characteristic.ContactSensorState)
       .on('get', function(callback) {
-        that.query("STATE",callback);
+      that.query("STATE",function(value){
+       if (callback) callback(null,value);
+      });
       }.bind(this))
       
       that.currentStateCharacteristic["STATE"] = state;
@@ -188,8 +209,11 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       var door = new Service["DoorStateService"](this.name);
       var cdoor = door.getCharacteristic(Characteristic.CurrentDoorState);
       cdoor.on('get', function(callback) {
-        that.query("STATE",callback);
+      	that.query("STATE",function(value){
+       		if (callback) callback(null,value);
+      	});
       }.bind(this));
+
       this.currentStateCharacteristic["STATE"] = cdoor;
       cdoor.eventEnabled = true;
       this.addValueMapping("STATE",0,1);
@@ -218,8 +242,10 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
     var sensor = new Service["MotionSensor"](this.name);
     var state = sensor.getCharacteristic(Characteristic.MotionDetected)
-    .on('get', function(callback) {
-      that.query("MOTION",callback);
+	.on('get', function(callback) {
+      that.query("MOTION",function(value){
+       if (callback) callback(null,value);
+      });
     }.bind(this))
 
     this.currentStateCharacteristic["MOTION"] = state;
@@ -234,8 +260,10 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
     var sensor = new Service["SmokeSensor"](this.name);
     var state = sensor.getCharacteristic(Characteristic.SmokeDetected)
-    .on('get', function(callback) {
-      that.query("STATE",callback);
+	.on('get', function(callback) {
+      that.query("STATE",function(value){
+       if (callback) callback(null,value);
+      });
     }.bind(this))
 
     this.currentStateCharacteristic["STATE"] = state;
@@ -254,8 +282,10 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
     var cstate = door.getCharacteristic(Characteristic.LockCurrentState)
 
-    .on('get', function(callback) {
-      that.query("STATE",callback);
+	.on('get', function(callback) {
+      that.query("STATE",function(value){
+       if (callback) callback(null,value);
+      });
     }.bind(this))
 
     .on('set', function(value, callback) {
@@ -273,7 +303,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
     var dopener = door.addCharacteristic(Characteristic.TargetDoorState)
     .on('get', function(callback) {
-      callback(0);
+      if (callback) callback(null,0);
     }.bind(this))
 
     .on('set', function(value, callback) {
@@ -299,7 +329,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
     var ctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
 
     .on('get', function(callback) {
-      that.query("TEMPERATURE",callback);
+      that.query("TEMPERATURE",function(value){
+       if (callback) callback(null,value);
+      });
     }.bind(this))
 
     this.currentStateCharacteristic["TEMPERATURE"] = ctemp;
@@ -323,14 +355,15 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
          	that.currentStateCharacteristic["TMODE"].setValue(1, null);
 			that.currentStateCharacteristic["MODE"].setValue(1, null);
 
-           callback(0);
+           if (callback) callback(null,0);
          } else {
-           callback(1);
+           if (callback) callback(null,1);
          }
       });
 
 
     }.bind(this));
+    
     this.currentStateCharacteristic["MODE"] = mode;
     mode.eventEnabled = true;
 
@@ -339,9 +372,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       
       this.query("SET_TEMPERATURE",function(value) {
          if (value==4.5){
-           callback(0);
+          if (callback) callback(null,0);
          } else {
-           callback(1);
+          if (callback) callback(null,1);
          }
       });
 
@@ -369,8 +402,10 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
     targetMode.eventEnabled = true;
 
     var cctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
-    .on('get', function(callback) {
-      this.query("ACTUAL_TEMPERATURE",callback);
+	.on('get', function(callback) {
+      that.query("ACTUAL_TEMPERATURE",function(value){
+       if (callback) callback(null,value);
+      });
     }.bind(this));
 
     this.currentStateCharacteristic["ACTUAL_TEMPERATURE"] = cctemp;
@@ -395,7 +430,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 		if (value<10) {
 			value=10;
 		}	
-			callback(value);
+			if (callback) callback(null,value);
 		});
 		
 		
@@ -419,7 +454,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
     thermo.getCharacteristic(Characteristic.TemperatureDisplayUnits)
     .on('get', function(callback) {
-      callback(Characteristic.TemperatureDisplayUnits.CELSIUS);
+      if (callback) callback(null, Characteristic.TemperatureDisplayUnits.CELSIUS);
     }.bind(this))
 
     this.cleanVirtualDevice("ACTUAL_TEMPERATURE");
@@ -436,7 +471,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
     var pgrl = prg.getCharacteristic(Characteristic.ProgramLaunchCharacteristic)
 
     .on('get', function(callback) {
-      callback(0);
+      if (callback) callback(null,0);
     }.bind(this))
 
     .on('set', function(value, callback) {
@@ -480,7 +515,7 @@ HomeMaticGenericChannel.prototype = {
 
 
 
-    if (this.state[dp] != undefined) {
+    if ((this.state[dp] != undefined) && (this.state[dp]!=null)) {
       if (callback!=undefined){callback(this.state[dp]);}
     } else {
       //      that.log("No cached Value found start fetching and send temp 0 back");
