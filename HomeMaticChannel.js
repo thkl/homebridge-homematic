@@ -508,10 +508,39 @@ HomeMaticGenericChannel.prototype = {
     }
   },
 
+  
+  convertValue:function(dp,value) {
+    
+    var char = this.currentStateCharacteristic[dp];
+    if (char!=undefined) {
+      switch (char.props.format) {
+
+	    case "int":
+	    case "uint8":
+	    case "uint16":
+	    case "uint32":
+	    return parseInt(value);
+        break;
+
+        case "float":
+        return parseFloat(value);
+        break;
+        
+        case "bool":
+        return value=="true"?1:0;
+        break;
+      }
+    }
+    return value;
+  },
+
+
   remoteGetValue:function(dp,callback) {
     var that = this;
     that.platform.getValue(that.adress,dp,function(newValue) {
       that.eventupdate = true;
+      
+      newValue = that.convertValue(dp,newValue);
       that.cache(dp,newValue);
       that.eventupdate = false;
       if (callback!=undefined) {

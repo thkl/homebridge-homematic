@@ -53,19 +53,28 @@ HomeMaticRegaRequest.prototype = {
     this.script(script, function(data) {
       //that.log("Rega Response " + data);
       if (data !== undefined) {
-        callback(parseFloat(data));
-      }
+        callback(data);
+      } 
     });
   },
 
   setValue: function(channel, datapoint, value) {
 
     var script = "var d = dom.GetObject(\"" + channel + "." + datapoint + "\");if (d){d.State(\"" + value + "\");}";
-    this.log("Rega Request " + script);
+    //this.log("Rega Request " + script);
     this.script(script, function(data) {
 
     });
+  },
+  
+  isInt: function(n){
+    return Number(n) === n && n % 1 === 0;
+  },
+
+  isFloat: function(n){
+    return n === Number(n) && n % 1 !== 0;
   }
+
 };
 
 module.exports = {
