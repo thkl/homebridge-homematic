@@ -1,0 +1,19 @@
+{
+	"deviceinfo": [
+		{
+			  "type" : "HM-CC-TC",
+			  "filter": [
+				"WEATHER"
+			]
+                       
+		},
+		
+		{
+			  "type" : "HM-CC-VG-1",
+			  "filter": [
+				"SHUTTER_CONTACT"
+			]
+                       
+		}		
+	]
+}

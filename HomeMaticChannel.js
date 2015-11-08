@@ -1,5 +1,6 @@
 'use strict';
 
+
 function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, Service, Characteristic) {
   this.name     = name;
 
@@ -287,6 +288,24 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
     break;
 
 
+    case "WEATHER":
+    case "WEATHER_TRANSMIT":
+    
+    var thermo = new Service["TemperatureSensor"](this.name);
+    this.services.push(thermo);
+
+    var ctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
+
+    .on('get', function(callback) {
+      that.query("TEMPERATURE",callback);
+    }.bind(this))
+
+    this.currentStateCharacteristic["TEMPERATURE"] = ctemp;
+    ctemp.eventEnabled = true;
+
+    break;
+
+
     case "CLIMATECONTROL_RT_TRANSCEIVER":
     case "THERMALCONTROL_TRANSMIT":
 
@@ -354,6 +373,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
     this.currentStateCharacteristic["ACTUAL_TEMPERATURE"] = cctemp;
     cctemp.eventEnabled = true;
+
+
+
 
     var ttemp = thermo.getCharacteristic(Characteristic.TargetTemperature)
     .on('get', function(callback) {
@@ -584,7 +606,7 @@ HomeMaticGenericChannel.prototype = {
 
     return (["SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
     "THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",
-    "KEYMATIC","SMOKE_DETECTOR","WEATHER_TRANSMIT","PROGRAM_LAUNCHER"].indexOf(this.type) > -1)
+    "KEYMATIC","SMOKE_DETECTOR","WEATHER_TRANSMIT","WEATHER","PROGRAM_LAUNCHER"].indexOf(this.type) > -1)
 
     return false;
   }

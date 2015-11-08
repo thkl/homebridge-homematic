@@ -5,6 +5,8 @@ var HomeMaticRPC = require("./HomeMaticRPC.js").HomeMaticRPC;
 var HomeMaticRegaRequest =  require("./HomeMaticRegaRequest.js").HomeMaticRegaRequest;
 var HomeMaticGenericChannel =  require("./HomeMaticChannel.js").HomeMaticGenericChannel;
 var inherits = require('util').inherits;
+var path = require('path');
+var fs = require('fs');
 
 var Service, Characteristic;
 
@@ -50,6 +52,10 @@ module.exports = function(homebridge) {
 function HomeMaticPlatform(log, config) {
   
   this.log = log;
+  
+  this.log("Homematic Plugin Version " + this.getVersion());
+  this.log("Please report any issues to https://github.com/thkl/homebridge-homematic/issues");
+  
   this.ccuIP = config["ccu_ip"];
   
   this.filter_device = config["filter_device"];
@@ -83,13 +89,17 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
     this.log("Fetching Homematic devices...");
     var that = this;
     that.foundAccessories = [];
-
+    var internalconfig = this.internalConfig();
+    
     var script = "string sDeviceId;string sChannelId;boolean df = true;Write(\'{\"devices\":[\');foreach(sDeviceId, root.Devices().EnumIDs()){object oDevice = dom.GetObject(sDeviceId);if(oDevice){var oInterface = dom.GetObject(oDevice.Interface());if(df) {df = false;} else { Write(\',\');}Write(\'{\');Write(\'\"id\": \"\' # sDeviceId # \'\",\');Write(\'\"name\": \"\' # oDevice.Name() # \'\",\');Write(\'\"address\": \"\' # oDevice.Address() # \'\",\');Write(\'\"type\": \"\' # oDevice.HssType() # \'\",\');Write(\'\"channels\": [\');boolean bcf = true;foreach(sChannelId, oDevice.Channels().EnumIDs()){object oChannel = dom.GetObject(sChannelId);if(bcf) {bcf = false;} else {Write(\',\');}Write(\'{\');Write(\'\"cId\": \' # sChannelId # \',\');Write(\'\"name\": \"\' # oChannel.Name() # \'\",\');if(oInterface){Write(\'\"address\": \"\' # oInterface.Name() #\'.'\ # oChannel.Address() # \'\",\');}Write(\'\"type\": \"\' # oChannel.HssType() # \'\"\');Write(\'}\');}Write(\']}\');}}Write(\']}\');";
 
     var regarequest = new HomeMaticRegaRequest(this.log, this.ccuIP).script(script, function(data) {
       var json = JSON.parse(data);
       if (json["devices"] !== undefined) {
         json["devices"].map(function(device) {
+        
+          var cfg = that.deviceInfo(internalconfig,device["type"]);
+
           var isFiltered = false;
 
           if ((that.filter_device !== undefined) && (that.filter_device.indexOf(device.address) > -1)) {
@@ -102,13 +112,19 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
           if ((device["channels"] !== undefined) && (!isFiltered)) {
 
             device["channels"].map(function(ch) {
+              
+              
               var isChannelFiltered = false;
+
+			  if ((cfg!=undefined) && (cfg["filter"]!=undefined) && (cfg["filter"].indexOf(ch.type)>-1)) {
+			  	isChannelFiltered = true;
+			  }
 
               if ((that.filter_channel !== undefined) && (that.filter_channel.indexOf(ch.address) > -1)) {
                 isChannelFiltered = true;
-              } else {
-                isChannelFiltered = false;
-              }
+              } 
+              
+              
               // that.log('name', ch.name, ' -> address:', ch.address);
               if ((ch.address !== undefined) && (!isChannelFiltered)) {
 
@@ -125,7 +141,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                   }
 
               } else {
-                that.log(device.name + " has no address");
+                // Channel is in the filter
               }
 
             });
@@ -169,6 +185,13 @@ HomeMaticPlatform.prototype.setValue = function(channel, datapoint, value) {
       return;
     }
 
+
+    if (channel.indexOf("CUxD.") > -1)  {
+      var rega = new RegaRequest(this.log, this.ccuIP);
+      rega.setValue(channel, datapoint, value);
+      return;
+    }
+
 }
 
 
@@ -203,6 +226,11 @@ HomeMaticPlatform.prototype.getValue = function(channel, datapoint, callback) {
       return;
     }
 
+    if (channel.indexOf("CUxD.") > -1)  {
+      var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+      rega.getValue(channel, datapoint, callback);
+      return;
+    }
 }
 
 HomeMaticPlatform.prototype.prepareRequest = function(accessory, script) {
@@ -251,3 +279,42 @@ HomeMaticPlatform.prototype.delayed = function(delay) {
     this.log("New Timer was set");
 }
 
+HomeMaticPlatform.prototype.deviceInfo = function(config,devicetype) {
+  var cfg = undefined;
+  if (config != undefined) {
+  
+   var di = config["deviceinfo"];
+   di.map(function(device) {
+      
+      if (device["type"]==devicetype) {
+        cfg = device;
+      }
+      
+   });
+  }
+  
+  return cfg;
+}
+
+HomeMaticPlatform.prototype.internalConfig = function() {
+  
+  try {
+    var config_path = path.join(__dirname, './internalconfig.json');
+    var config = JSON.parse(fs.readFileSync(config_path));
+    return config;
+  }
+  
+  catch (err) {
+   throw err;
+  }
+  
+  return undefined
+}
+  
+  
+  
+HomeMaticPlatform.prototype.getVersion = function() {
+  var pjPath = path.join(__dirname, './package.json');
+  var pj = JSON.parse(fs.readFileSync(pjPath));
+  return pj.version;
+}  
