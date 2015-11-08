@@ -158,9 +158,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       }.bind(this));
       this.currentStateCharacteristic["STATE"] = cdoor;
       cdoor.eventEnabled = true;
-
-      this.addValueMapping("STATE","true",0);
-      this.addValueMapping("STATE","false",1);
+      
+      this.addValueMapping("STATE",0,1);
+      this.addValueMapping("STATE",1,0);
 
       this.services.push(door);
 
@@ -171,6 +171,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       .on('get', function(callback) {
         that.query("STATE",callback);
       }.bind(this))
+      
       that.currentStateCharacteristic["STATE"] = state;
       state.eventEnabled = true;
       this.services.push(contact);
@@ -191,9 +192,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       }.bind(this));
       this.currentStateCharacteristic["STATE"] = cdoor;
       cdoor.eventEnabled = true;
-      this.addValueMapping("STATE","0",1);
-      this.addValueMapping("STATE","1",0);
-      this.addValueMapping("STATE","2",0);
+      this.addValueMapping("STATE",0,1);
+      this.addValueMapping("STATE",1,0);
+      this.addValueMapping("STATE",2,0);
       this.services.push(door);
 
     } else {
@@ -205,7 +206,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       }.bind(this))
       this.currentStateCharacteristic["STATE"] = state;
       state.eventEnabled = true;
-      this.addValueMapping("STATE","2",1);
+      this.addValueMapping("STATE",2,1);
       this.services.push(contact);
     }
 
@@ -265,9 +266,10 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
     this.currentStateCharacteristic["STATE"] = cstate;
     cstate.eventEnabled = true;
 
+    this.addValueMapping("STATE",1,0);
+    this.addValueMapping("STATE",0,1);
+
     this.remoteGetValue("STATE");
-    this.addValueMapping("STATE","1",0);
-    this.addValueMapping("STATE","0",1);
 
     var dopener = door.addCharacteristic(Characteristic.TargetDoorState)
     .on('get', function(callback) {
@@ -513,10 +515,32 @@ HomeMaticGenericChannel.prototype = {
     
     var char = this.currentStateCharacteristic[dp];
     if (char!=undefined) {
+    
       switch (char.props.format) {
-
-	    case "int":
+		
+		case "int":
 	    case "uint8":
+	     if (value=="true") {
+	       return 1;
+	     }
+	     
+	     if (value=="false") {
+	       return 0;
+	     }
+	     
+	     if (value==true) {
+	       return 1;
+	     }
+	     
+	     if (value==false) {
+	       return 0;
+	     }
+	     
+	    return parseInt(value);
+	    
+	    break;
+	    
+	    
 	    case "uint16":
 	    case "uint32":
 	    return parseInt(value);
@@ -527,10 +551,11 @@ HomeMaticGenericChannel.prototype = {
         break;
         
         case "bool":
-        return value=="true"?1:0;
+        return (value=="true") ? 1:0;
         break;
       }
     }
+   
     return value;
   },
 
@@ -539,8 +564,9 @@ HomeMaticGenericChannel.prototype = {
     var that = this;
     that.platform.getValue(that.adress,dp,function(newValue) {
       that.eventupdate = true;
-      
+      //var ow = newValue;
       newValue = that.convertValue(dp,newValue);
+      //that.log (that.name + " " + dp + " value " + ow + " mapped to " + newValue);
       that.cache(dp,newValue);
       that.eventupdate = false;
       if (callback!=undefined) {
@@ -569,6 +595,7 @@ HomeMaticGenericChannel.prototype = {
     var map = this.datapointMappings[dp];
     if (map != undefined) {
       if (map[value]!=undefined) {
+        //that.log (that.name + " " + dp + " mapping "+ value + " to " + map[value]);
         value = map[value];
       }
     }
