@@ -275,6 +275,11 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
     .on('set', function(value, callback) {
       that.command("set","OPEN" , "true")
+      
+      setTimeout(function() {
+    		dopener.setValue(0, null);
+      },2000);
+      
       callback(0);
     }.bind(this));
 
@@ -407,26 +412,27 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
     var pgrl = prg.getCharacteristic(Characteristic.ProgramLaunchCharacteristic)
 
     .on('get', function(callback) {
-      that.event("STATE",0);
       callback(0);
     }.bind(this))
 
     .on('set', function(value, callback) {
       if (value==1) {
+      
         that.log("Launch Program " + that.name);
         that.command("sendregacommand","","var x=dom.GetObject(\""+that.name+"\");if (x) {x.ProgramExecute();}",function() {
-          setTimeout(function(){
-            that.log("Setting back to false");
-            that.event("STATE",0);
-          }, 1000 );
-        });
-        callback(0);
+    		
+    	});
+    	
+    	setTimeout(function() {
+    		pgrl.setValue(0, null);
+    
+    	},1000);
+    	
       }
+      callback(0);
     }.bind(this));
 
-    this.currentStateCharacteristic["STATE"] = pgrl;
     pgrl.eventEnabled = true;
-
     break;
   }
 }
