@@ -563,7 +563,7 @@ HomeMaticGenericChannel.prototype = {
     }
 
 
-    this.log(this.name + " delaying command "+mode + " " + dp +" with value " + value);
+    //this.log(this.name + " delaying command "+mode + " " + dp +" with value " + value);
     var that = this;
 
     this.timer[dp] = setTimeout( function(){

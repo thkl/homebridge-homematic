@@ -61,7 +61,7 @@ HomeMaticRegaRequest.prototype = {
   setValue: function(channel, datapoint, value) {
 
     var script = "var d = dom.GetObject(\"" + channel + "." + datapoint + "\");if (d){d.State(\"" + value + "\");}";
-    //this.log("Rega Request " + script);
+    this.log("Rega Request " + script);
     this.script(script, function(data) {
 
     });

@@ -180,14 +180,14 @@ HomeMaticPlatform.prototype.setValue = function(channel, datapoint, value) {
     }
 
     if (channel.indexOf("VirtualDevices.") > -1)  {
-      var rega = new RegaRequest(this.log, this.ccuIP);
+      var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
       rega.setValue(channel, datapoint, value);
       return;
     }
 
 
     if (channel.indexOf("CUxD.") > -1)  {
-      var rega = new RegaRequest(this.log, this.ccuIP);
+      var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
       rega.setValue(channel, datapoint, value);
       return;
     }
