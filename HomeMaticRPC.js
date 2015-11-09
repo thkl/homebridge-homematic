@@ -116,7 +116,7 @@ HomeMaticRPC.prototype.init = function() {
 
   HomeMaticRPC.prototype.connect = function() {
     var that = this;
-    var port = (this.system == 0) ?  2001 : 2002;
+    var port = (this.system == 0) ?  2001 : 2000;
     this.log("Creating Local HTTP Client for CCU RPC Events");
     this.client = binrpc.createClient({
       host: this.ccuip,

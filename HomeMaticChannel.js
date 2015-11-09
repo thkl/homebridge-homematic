@@ -629,7 +629,6 @@ HomeMaticGenericChannel.prototype = {
   remoteGetValue:function(dp,callback) {
     var that = this;
     that.platform.getValue(that.adress,dp,function(newValue) {
-      that.log (that.name + " " + dp + " value " + newValue);
       if (newValue != undefined) {
       that.eventupdate = true;
       //var ow = newValue;
