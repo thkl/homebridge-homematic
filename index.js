@@ -275,11 +275,11 @@ HomeMaticPlatform.prototype.getValue = function(channel, datapoint, callback) {
     
     if (channel.indexOf("BidCos-Wired.") > -1) {
      if (this.xmlrpcwired!=undefined) {
-      this.xmlrpcwired.getValue(channel, datapoint, value);
+       this.xmlrpcwired.getValue(channel, datapoint, callback);
      } else {
       // Send over Rega
       var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-      rega.getValue(channel, datapoint, value);
+       rega.getValue(channel, datapoint, callback);
      }
       return;
     }
@@ -370,3 +370,4 @@ HomeMaticPlatform.prototype.getVersion = function() {
   var pj = JSON.parse(fs.readFileSync(pjPath));
   return pj.version;
 }  
+
