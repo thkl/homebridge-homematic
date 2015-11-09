@@ -321,6 +321,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
     .on('set', function(value, callback) {
       that.command("setrega","STATE" , (value==1) ? 0 : 1)
+      setTimeout(function() {
+       that.remoteGetValue("STATE");
+      },10000);
       callback();
     }.bind(this));
 
