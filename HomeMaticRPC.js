@@ -3,12 +3,12 @@
 var xmlrpc = require("homematic-xmlrpc");
 var request = require("request");
 
-var HomeMaticRPC = function (log, ccuip,port ,platform) {
+var HomeMaticRPC = function (log, ccuip,port,system,platform) {
   
   this.log = log;
   
   this.log("init RPC");
-  
+  this.system = system;
   this.ccuip = ccuip;
   this.platform = platform;
   this.server;
@@ -16,6 +16,7 @@ var HomeMaticRPC = function (log, ccuip,port ,platform) {
   this.stopping = false;
   this.localIP;
   this.listeningPort = port;
+  this.interface = (system==0) ? "BidCos-RF." : "BidCos-Wired."
 }
 
 HomeMaticRPC.prototype.init = function() {
@@ -51,7 +52,7 @@ HomeMaticRPC.prototype.init = function() {
           events.map(function(event) {
             if ((event["methodName"] == "event") && (event["params"] !== undefined)) {
               var params = event["params"];
-              var channel = "BidCos-RF." + params[1];
+              var channel = that.interface + params[1];
               var datapoint = params[2];
               var value = params[3];
               that.platform.foundAccessories.map(function(accessory) {
@@ -66,25 +67,8 @@ HomeMaticRPC.prototype.init = function() {
       callback(null);
     });
 
-    this.log("XML-RPC server listening on port " + this.listeningPort);
+    this.log("XML-RPC server for interface " + this.interface + "is listening on port " + this.listeningPort);
     this.connect();
-
-
-    process.on("SIGINT", function() {
-      if (that.stopping) {
-        return;
-      }
-      that.stopping = true;
-      that.stop();
-    });
-
-    process.on("SIGTERM", function() {
-      if (that.stopping) {
-        return;
-      }
-      that.stopping = true;
-      that.stop();
-    });
 
   }
 
@@ -108,7 +92,7 @@ HomeMaticRPC.prototype.init = function() {
       that.log("Returning cause client is invalid");
       return;
     }
-    if (channel.indexOf("BidCos-RF.") > -1)  {
+    if (channel.indexOf(that.interface) > -1)  {
       channel = channel.substr(10);
       this.client.methodCall("getValue", [channel, datapoint], function(error, value) {
         callback(value);
@@ -123,7 +107,7 @@ HomeMaticRPC.prototype.init = function() {
 
     if (this.client === undefined) return;
 
-    if (channel.indexOf("BidCos-RF.") > -1)  {
+    if (channel.indexOf(that.interface) > -1)  {
       channel = channel.substr(10);
     }
 	this.client.methodCall("setValue", [channel, datapoint, value], function(error, value) {
@@ -133,13 +117,14 @@ HomeMaticRPC.prototype.init = function() {
 
   HomeMaticRPC.prototype.connect = function() {
     var that = this;
+    var port = (this.system == 0) ?  2001 : 2002;
     this.log("Creating Local HTTP Client for CCU RPC Events");
     this.client = xmlrpc.createClient({
       host: this.ccuip,
-      port: 2001,
+      port: port,
       path: "/"
     });
-    this.log("CCU RPC Init Call on port 2001");
+    this.log("CCU RPC Init Call on port " +  port + " for interface " + this.interface);
     this.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort, "homebridge"], function(error, value) {
       that.log("CCU Response ....");
     });
@@ -147,11 +132,10 @@ HomeMaticRPC.prototype.init = function() {
 
 
 HomeMaticRPC.prototype.stop = function() {
-    this.log("Removing Event Server");
+    this.log("Removing Event Server for Interface " +this.interface);
     this.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort], function(error, value) {
 
     });
-    setTimeout(process.exit(0), 1000);
 }
 
 module.exports = { 

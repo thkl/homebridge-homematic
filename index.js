@@ -78,9 +78,39 @@ function HomeMaticPlatform(log, config) {
    port = 9090;
   }
 
-  this.xmlrpc = new HomeMaticRPC(this.log, this.ccuIP, port, this);
+  this.xmlrpc = new HomeMaticRPC(this.log, this.ccuIP, port, 0, this);
   this.xmlrpc.init();
   
+  if (config["enable_wired"]!=undefined) {
+	  this.xmlrpcwired = new HomeMaticRPC(this.log, this.ccuIP, port+1, 1, this);
+  	  this.xmlrpcwired.init();
+  }
+  
+  var that = this;
+  
+  process.on("SIGINT", function() {
+      if (that.xmlrpc.stopping) {
+        return;
+      }
+      that.xmlrpc.stopping = true;
+      that.xmlrpc.stop();
+      if (that.xmlrpcwired!=undefined) {
+      	that.xmlrpcwired.stop();
+      }
+      setTimeout(process.exit(0), 1000);
+  });
+
+  process.on("SIGTERM", function() {
+      if (that.xmlrpc.stopping) {
+        return;
+      }
+      that.xmlrpc.stopping = true;
+      that.xmlrpc.stop();
+      if (that.xmlrpcwired!=undefined) {
+      	that.xmlrpcwired.stop();
+      }
+      setTimeout(process.exit(0), 1000);
+  });
 }
 
 
@@ -192,6 +222,17 @@ HomeMaticPlatform.prototype.setValue = function(channel, datapoint, value) {
       return;
     }
 
+    if (channel.indexOf("BidCos-Wired.") > -1) {
+     
+     if (this.xmlrpcwired!=undefined) {
+      this.xmlrpcwired.setValue(channel, datapoint, value);
+     } else {
+      // Send over Rega
+      var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+      rega.setValue(channel, datapoint, value);
+     }
+      return;
+    }
 }
 
 
@@ -229,6 +270,17 @@ HomeMaticPlatform.prototype.getValue = function(channel, datapoint, callback) {
     if (channel.indexOf("CUxD.") > -1)  {
       var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
       rega.getValue(channel, datapoint, callback);
+      return;
+    }
+    
+    if (channel.indexOf("BidCos-Wired.") > -1) {
+     if (this.xmlrpcwired!=undefined) {
+      this.xmlrpcwired.getValue(channel, datapoint, value);
+     } else {
+      // Send over Rega
+      var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+      rega.getValue(channel, datapoint, value);
+     }
       return;
     }
 }

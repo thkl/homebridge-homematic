@@ -86,7 +86,14 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
     var cc = lightbulb.getCharacteristic(Characteristic.On)
 
     .on('get', function(callback) {
-      that.query("LEVEL",callback);
+      that.query("LEVEL",function(value) {
+       that.log(value);
+       
+       if (value==undefined) {
+        value = 0;
+       }
+       if (callback) callback(null,0);
+      });
     }.bind(this))
 
     .on('set', function(value, callback) {
@@ -189,7 +196,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       var state = contact.getCharacteristic(Characteristic.ContactSensorState)
       .on('get', function(callback) {
       that.query("STATE",function(value){
-       if (callback) callback(null,value);
+       callback(null,value);
       });
       }.bind(this))
       
@@ -210,7 +217,11 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       var cdoor = door.getCharacteristic(Characteristic.CurrentDoorState);
       cdoor.on('get', function(callback) {
       	that.query("STATE",function(value){
-       		if (callback) callback(null,value);
+      	that.log(that.name + " set to " + value);
+      	  if (value==undefined) {
+          value = 0;
+       }
+		if (callback) callback(null,value);
       	});
       }.bind(this));
 
@@ -226,10 +237,14 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       var contact = new Service["ContactSensor"](this.name);
       var state = contact.getCharacteristic(Characteristic.ContactSensorState)
       .on('get', function(callback) {
-        that.query("STATE",callback);
+        that.query("STATE",function(value) {
+         if (callback) {callback(null,value);}
+        });
       }.bind(this))
       this.currentStateCharacteristic["STATE"] = state;
       state.eventEnabled = true;
+      this.addValueMapping("STATE",0,0);
+      this.addValueMapping("STATE",1,1);
       this.addValueMapping("STATE",2,1);
       this.services.push(contact);
     }
@@ -286,11 +301,6 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       that.query("STATE",function(value){
        if (callback) callback(null,value);
       });
-    }.bind(this))
-
-    .on('set', function(value, callback) {
-      that.command("set","STATE" , (value==1) ? "false" : "true")
-      callback();
     }.bind(this));
 
     this.currentStateCharacteristic["STATE"] = cstate;
@@ -299,19 +309,39 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
     this.addValueMapping("STATE",1,0);
     this.addValueMapping("STATE",0,1);
 
+
+    var tstate = door.getCharacteristic(Characteristic.LockTargetState)
+
+    .on('get', function(callback) {
+      that.query("STATE",function(value){
+       if (callback) callback(null,value);
+      });
+    }.bind(this))
+
+
+    .on('set', function(value, callback) {
+      that.command("setrega","STATE" , (value==1) ? 0 : 1)
+      callback();
+    }.bind(this));
+
+    this.currentStateCharacteristic["STATE"] = tstate;
+    tstate.eventEnabled = true;
+
+
     this.remoteGetValue("STATE");
 
     var dopener = door.addCharacteristic(Characteristic.TargetDoorState)
     .on('get', function(callback) {
-      if (callback) callback(null,0);
+      if (callback) callback(null,1);
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.command("set","OPEN" , "true")
-      
-      setTimeout(function() {
-    		dopener.setValue(0, null);
-      },2000);
+      if (value==0) {
+	      that.command("setrega","OPEN" , "true")
+    	  setTimeout(function() {
+    		dopener.setValue(1, null);
+      	  },2000);
+      }
       
       callback(0);
     }.bind(this));
@@ -513,8 +543,6 @@ HomeMaticGenericChannel.prototype = {
   query: function(dp,callback) {
     var that = this;
 
-
-
     if ((this.state[dp] != undefined) && (this.state[dp]!=null)) {
       if (callback!=undefined){callback(this.state[dp]);}
     } else {
@@ -598,15 +626,21 @@ HomeMaticGenericChannel.prototype = {
   remoteGetValue:function(dp,callback) {
     var that = this;
     that.platform.getValue(that.adress,dp,function(newValue) {
+      that.log (that.name + " " + dp + " value " + newValue);
+      if (newValue != undefined) {
       that.eventupdate = true;
       //var ow = newValue;
       newValue = that.convertValue(dp,newValue);
-      //that.log (that.name + " " + dp + " value " + ow + " mapped to " + newValue);
       that.cache(dp,newValue);
       that.eventupdate = false;
+     } else {
+      newValue = 0;
+     }
+     
       if (callback!=undefined) {
         callback(newValue);
       }
+     
     });
   },
 
@@ -635,10 +669,12 @@ HomeMaticGenericChannel.prototype = {
       }
     }
 
-    if (that.currentStateCharacteristic[dp]!=undefined) {
-      that.currentStateCharacteristic[dp].setValue(value, null);
+    if (value!=undefined) {
+	  if (that.currentStateCharacteristic[dp]!=undefined) {
+          that.currentStateCharacteristic[dp].setValue(value, null);
+      }
+    this.state[dp] = value; 
     }
-    this.state[dp] = value;
   },
 
 
