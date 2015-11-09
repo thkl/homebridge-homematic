@@ -1,6 +1,6 @@
 'use strict';
 
-var xmlrpc = require("homematic-xmlrpc");
+var binrpc = require("binrpc");
 var request = require("request");
 
 var HomeMaticRPC = function (log, ccuip,port,system,platform) {
@@ -31,7 +31,7 @@ HomeMaticRPC.prototype.init = function() {
     this.localIP = ip;
     this.log("Local IP: " + this.localIP);
 
-    this.server = xmlrpc.createServer({
+    this.server = binrpc.createServer({
       host: this.localIP,
       port: this.listeningPort
     });
@@ -93,7 +93,8 @@ HomeMaticRPC.prototype.init = function() {
       return;
     }
     if (channel.indexOf(that.interface) > -1)  {
-      channel = channel.substr(10);
+      channel = channel.substr(that.interface.length);
+
       this.client.methodCall("getValue", [channel, datapoint], function(error, value) {
         callback(value);
       });
@@ -106,12 +107,10 @@ HomeMaticRPC.prototype.init = function() {
     var that = this;
 
     if (this.client === undefined) return;
-
     if (channel.indexOf(that.interface) > -1)  {
-      channel = channel.substr(10);
+      channel = channel.substr(that.interface.length);
     }
 	this.client.methodCall("setValue", [channel, datapoint, value], function(error, value) {
-
     });
   }
 
@@ -119,13 +118,13 @@ HomeMaticRPC.prototype.init = function() {
     var that = this;
     var port = (this.system == 0) ?  2001 : 2002;
     this.log("Creating Local HTTP Client for CCU RPC Events");
-    this.client = xmlrpc.createClient({
+    this.client = binrpc.createClient({
       host: this.ccuip,
       port: port,
       path: "/"
     });
     this.log("CCU RPC Init Call on port " +  port + " for interface " + this.interface);
-    this.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort, "homebridge"], function(error, value) {
+    this.client.methodCall("init", ["xmlrpc_bin://" + this.localIP + ":" + this.listeningPort, "homebridge"], function(error, value) {
       that.log("CCU Response ....");
     });
   },
@@ -133,7 +132,7 @@ HomeMaticRPC.prototype.init = function() {
 
 HomeMaticRPC.prototype.stop = function() {
     this.log("Removing Event Server for Interface " +this.interface);
-    this.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort], function(error, value) {
+    this.client.methodCall("init", ["xmlrpc_bin://" + this.localIP + ":" + this.listeningPort], function(error, value) {
 
     });
 }
