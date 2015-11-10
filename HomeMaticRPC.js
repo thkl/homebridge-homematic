@@ -1,6 +1,6 @@
 'use strict';
 
-var binrpc = require("binrpc");
+var binrpc = require("homematic-xmlrpc");
 var request = require("request");
 
 var HomeMaticRPC = function (log, ccuip,port,system,platform) {
@@ -124,15 +124,15 @@ HomeMaticRPC.prototype.init = function() {
       path: "/"
     });
     this.log("CCU RPC Init Call on port " +  port + " for interface " + this.interface);
-    this.client.methodCall("init", ["xmlrpc_bin://" + this.localIP + ":" + this.listeningPort, "homebridge"], function(error, value) {
-      that.log("CCU Response ....");
+    this.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort, "homebridge"], function(error, value) {
+      that.log("CCU Response ...." + value + error);
     });
   },
 
 
 HomeMaticRPC.prototype.stop = function() {
     this.log("Removing Event Server for Interface " +this.interface);
-    this.client.methodCall("init", ["xmlrpc_bin://" + this.localIP + ":" + this.listeningPort], function(error, value) {
+    this.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort], function(error, value) {
 
     });
 }
