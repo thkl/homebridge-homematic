@@ -1,0 +1,9 @@
+Changelog
+=========
+
+Version: 0.0.18  
+- fixed the update message
+- removed LockStatus Event
+
+Version: 0.0.17
+- more logging
