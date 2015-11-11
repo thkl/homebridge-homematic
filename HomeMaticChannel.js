@@ -299,7 +299,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 	.on('get', function(callback) {
       that.query("STATE",function(value){
        
-       if ((that.state["WORKING"]!=undefined) && (that.state["WORKING"]==true)) {
+       if ((that.state["DIRECTION"]!=undefined) && (that.state["DIRECTION"]>0)) {
           if (callback) callback(null,3);
        } else {
           if (callback) callback(null,value);
@@ -308,8 +308,8 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       });
     }.bind(this));
 
-    this.currentStateCharacteristic["STATE"] = cstate;
-    cstate.eventEnabled = true;
+    //this.currentStateCharacteristic["STATE"] = cstate;
+    //cstate.eventEnabled = true;
 
     this.addValueMapping("STATE",1,0);
     this.addValueMapping("STATE",0,1);
@@ -676,6 +676,8 @@ HomeMaticGenericChannel.prototype = {
       }
     }
 
+    
+
     if (value!=undefined) {
 	  if (that.currentStateCharacteristic[dp]!=undefined) {
           that.currentStateCharacteristic[dp].setValue(value, null);
@@ -683,7 +685,6 @@ HomeMaticGenericChannel.prototype = {
     this.state[dp] = value; 
     }
   },
-
 
   delayed: function(mode, dp,value,delay) {
 
