@@ -2,6 +2,7 @@
 
 var binrpc = require("homematic-xmlrpc");
 var request = require("request");
+var debug = require('debug')('HomeMaticRPC');
 
 var HomeMaticRPC = function (log, ccuip,port,system,platform) {
   
@@ -51,10 +52,13 @@ HomeMaticRPC.prototype.init = function() {
         try {
           events.map(function(event) {
             if ((event["methodName"] == "event") && (event["params"] !== undefined)) {
+              
               var params = event["params"];
               var channel = that.interface + params[1];
               var datapoint = params[2];
               var value = params[3];
+          	  debug("RPC event for %s %s with value %s",channel,datapoint,value);
+
               that.platform.foundAccessories.map(function(accessory) {
                 if (accessory.adress == channel) {
                   accessory.event(datapoint, value);
@@ -92,10 +96,12 @@ HomeMaticRPC.prototype.init = function() {
       that.log("Returning cause client is invalid");
       return;
     }
-    if (channel.indexOf(that.interface) > -1)  {
+    if (channel.indexOf(that.interface) > -1)  {
       channel = channel.substr(that.interface.length);
 
-      this.client.methodCall("getValue", [channel, datapoint], function(error, value) {
+	  debug("RPC getValue Call for %s %s",channel,datapoint);
+	  this.client.methodCall("getValue", [channel, datapoint], function(error, value) {
+    	debug("RPC getValue (%s %s) Response %s Errors: %s",channel,datapoint, JSON.stringify(value),error);
         callback(value);
       });
       return;
@@ -107,10 +113,13 @@ HomeMaticRPC.prototype.init = function() {
     var that = this;
 
     if (this.client === undefined) return;
-    if (channel.indexOf(that.interface) > -1)  {
+    if (channel.indexOf(that.interface) > -1)  {
       channel = channel.substr(that.interface.length);
     }
+
+	debug("RPC setValue Call for %s %s Value %s",channel,datapoint,value);
 	this.client.methodCall("setValue", [channel, datapoint, value], function(error, value) {
+	 debug("RPC setValue (%s %s) Response %s Errors: %s",channel, datapoint, JSON.stringify(value),error);
     });
   }
 
@@ -125,7 +134,7 @@ HomeMaticRPC.prototype.init = function() {
     });
     this.log("CCU RPC Init Call on port " +  port + " for interface " + this.interface);
     this.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort, "homebridge"], function(error, value) {
-      that.log("CCU Response ...." + value + error);
+      debug("CCU Response ...%s %s",JSON.stringify(value) , error);
     });
   },
 
@@ -140,6 +149,5 @@ HomeMaticRPC.prototype.stop = function() {
 module.exports = { 
   HomeMaticRPC : HomeMaticRPC 
 }
-
 
 

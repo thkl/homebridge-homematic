@@ -97,7 +97,7 @@ function HomeMaticPlatform(log, config) {
       if (that.xmlrpcwired!=undefined) {
       	that.xmlrpcwired.stop();
       }
-      setTimeout(process.exit(0), 1000);
+      setTimeout(process.exit(0), 2000);
   });
 
   process.on("SIGTERM", function() {
@@ -109,7 +109,7 @@ function HomeMaticPlatform(log, config) {
       if (that.xmlrpcwired!=undefined) {
       	that.xmlrpcwired.stop();
       }
-      setTimeout(process.exit(0), 1000);
+      setTimeout(process.exit(0), 2000);
   });
 }
 
@@ -199,6 +199,14 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                 
       } else {
         callback(that.foundAccessories);
+      }
+    });
+    
+    // Version Check 
+    
+    this.fetch_npmVersion("homebridge-homematic",function(npmVersion){
+      if (npmVersion > that.getVersion()) {
+       that.log("There is a new Version available. Please update with sudo npm -g update homebridge-homematic");
       }
     });
 }
@@ -370,4 +378,12 @@ HomeMaticPlatform.prototype.getVersion = function() {
   var pj = JSON.parse(fs.readFileSync(pjPath));
   return pj.version;
 }  
+
+HomeMaticPlatform.prototype.fetch_npmVersion = function(pck, callback) {
+  var exec = require('child_process').exec;
+  var cmd = 'npm view '+pck+' version';
+  exec(cmd, function(error, stdout, stderr) {
+    callback(stdout);
+ });
+}
 

@@ -87,7 +87,6 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
     .on('get', function(callback) {
       that.query("LEVEL",function(value) {
-       that.log(value);
        
        if (value==undefined) {
         value = 0;
@@ -299,7 +298,13 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
 	.on('get', function(callback) {
       that.query("STATE",function(value){
-       if (callback) callback(null,value);
+       
+       if ((that.state["WORKING"]!=undefined) && (that.state["WORKING"]==true)) {
+          if (callback) callback(null,3);
+       } else {
+          if (callback) callback(null,value);
+	   }
+      
       });
     }.bind(this));
 
@@ -327,8 +332,8 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       callback();
     }.bind(this));
 
-    this.currentStateCharacteristic["STATE"] = tstate;
-    tstate.eventEnabled = true;
+   // this.currentStateCharacteristic["STATE"] = tstate;
+   // tstate.eventEnabled = true;
 
 
     this.remoteGetValue("STATE");
@@ -641,7 +646,7 @@ HomeMaticGenericChannel.prototype = {
      
       if (callback!=undefined) {
         callback(newValue);
-      }
+      } 
      
     });
   },
@@ -710,12 +715,12 @@ HomeMaticGenericChannel.prototype = {
     var that = this;
 
     if (mode == "set") {
-      this.log("Send " + value + " to Datapoint " + dp + " at " + that.adress);
+      this.log("(Rpc) Send " + value + " to Datapoint " + dp + " at " + that.adress);
       that.platform.setValue(that.adress,dp,value);
     }
 
     if (mode == "setrega") {
-      this.log("Send " + value + " to Datapoint " + dp + " at " + that.adress);
+      this.log("(Rega) Send " + value + " to Datapoint " + dp + " at " + that.adress);
       that.platform.setRegaValue(that.adress,dp,value);
     }
 
