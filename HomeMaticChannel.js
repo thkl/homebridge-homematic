@@ -187,6 +187,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
       this.addValueMapping("STATE",0,1);
       this.addValueMapping("STATE",1,0);
 
+      this.addValueMapping("STATE",false,1);
+      this.addValueMapping("STATE",true,0);
+
       this.services.push(door);
 
     } else {
@@ -313,6 +316,8 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
     this.addValueMapping("STATE",1,0);
     this.addValueMapping("STATE",0,1);
+    this.addValueMapping("STATE",false,1);
+    this.addValueMapping("STATE",true,0);
 
 
     var tstate = door.getCharacteristic(Characteristic.LockTargetState)
@@ -552,12 +557,12 @@ HomeMaticGenericChannel.prototype = {
     var that = this;
 
     if ((this.state[dp] != undefined) && (this.state[dp]!=null)) {
-      if (callback!=undefined){callback(this.state[dp]);}
+      if (callback!=undefined){
+      callback(this.state[dp]);
+      }
     } else {
-      //      that.log("No cached Value found start fetching and send temp 0 back");
       this.remoteGetValue(dp, function(value) {
-
-      });
+    });
       if (callback!=undefined){callback(0);}
     }
 
@@ -653,11 +658,9 @@ HomeMaticGenericChannel.prototype = {
 
 
   event:function(dp,newValue) {
-
     if (dp=="LEVEL") {
       newValue = newValue*100;
     }
-
     this.eventupdate = true;
     this.cache(dp,newValue);
     this.eventupdate = false;
@@ -665,23 +668,18 @@ HomeMaticGenericChannel.prototype = {
 
   cache:function(dp,value) {
     var that = this;
-
-
     // Check custom Mapping from HM to HomeKit
-    var map = this.datapointMappings[dp];
+    var map = that.datapointMappings[dp];
     if (map != undefined) {
       if (map[value]!=undefined) {
-        //that.log (that.name + " " + dp + " mapping "+ value + " to " + map[value]);
         value = map[value];
       }
     }
-
-    
-
     if (value!=undefined) {
 	  if (that.currentStateCharacteristic[dp]!=undefined) {
           that.currentStateCharacteristic[dp].setValue(value, null);
       }
+    
     this.state[dp] = value; 
     }
   },

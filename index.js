@@ -205,6 +205,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
     // Version Check 
     
     this.fetch_npmVersion("homebridge-homematic",function(npmVersion){
+      npmVersion = npmVersion.replace('\n','');
       that.log("NPM %s vs Local %s",npmVersion,that.getVersion());
       if (npmVersion > that.getVersion()) {
        that.log("There is a new Version available. Please update with sudo npm -g update homebridge-homematic");
@@ -384,7 +385,8 @@ HomeMaticPlatform.prototype.fetch_npmVersion = function(pck, callback) {
   var exec = require('child_process').exec;
   var cmd = 'npm view '+pck+' version';
   exec(cmd, function(error, stdout, stderr) {
-    var npm_version = stdout.replace('\n','');
+    var npm_version = stdout;
+    npm_version = npm_version.replace('\n','');
     callback(npm_version);
  });
 }

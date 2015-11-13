@@ -1,6 +1,9 @@
 Changelog
 =========
 
+Version: 0.0.19
+- fixed Door/Window Contact State (open vs close)
+
 Version: 0.0.18  
 - fixed the update message
 - removed LockStatus Event

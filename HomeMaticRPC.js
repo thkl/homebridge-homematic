@@ -58,7 +58,7 @@ HomeMaticRPC.prototype.init = function() {
               var datapoint = params[2];
               var value = params[3];
           	  debug("RPC event for %s %s with value %s",channel,datapoint,value);
-
+			 
               that.platform.foundAccessories.map(function(accessory) {
                 if (accessory.adress == channel) {
                   accessory.event(datapoint, value);
