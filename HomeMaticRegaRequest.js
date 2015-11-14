@@ -76,6 +76,7 @@ HomeMaticRegaRequest.prototype = {
   getVariable: function(channel, callback) {
     var that = this;
     var script = "var d = dom.GetObject(\"" + channel + "\");if (d){Write(d.State());}";
+    //this.log("RegaScript %s",script);
     this.script(script, function(data) {
       if (data !== undefined) {
         callback(data);

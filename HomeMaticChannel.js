@@ -15,7 +15,8 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
   this.datapointMappings = [];
   this.timer = [];
   this.services = [];
-
+  this.usecache = true;
+  
   this.i_characteristic = {};
 
   var that = this;
@@ -508,19 +509,14 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
     break;
 
     case "VARIABLE" :
-    
-      var vservice = new Service["Outlet"](this.name);
+      this.usecache = false;
+      var vservice = new Service["Switch"](this.name);
       this.services.push(vservice);
 
-      vservice.getCharacteristic(Characteristic.OutletInUse)
-      .on('get', function(callback) {
-        if (callback) callback(null,1);
-      }.bind(this));
-
       var cc = vservice.getCharacteristic(Characteristic.On)
-
+      
       .on('get', function(callback) {
-         that.query("STATE",function(value){
+         that.remoteGetValue("STATE",function(value){
            if (callback) callback(null,value);
          });
       }.bind(this))
@@ -535,13 +531,13 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
          callback();
       }.bind(this));
 
-
 	  this.currentStateCharacteristic["STATE"] = cc;
       cc.eventEnabled = true;
     
       this.addValueMapping("STATE",false,0);
       this.addValueMapping("STATE",true,1);
-    
+      this.remoteGetValue("STATE");
+      
     break;
 
 
@@ -594,11 +590,13 @@ HomeMaticGenericChannel.prototype = {
   query: function(dp,callback) {
     var that = this;
 
-    if ((this.state[dp] != undefined) && (this.state[dp]!=null)) {
+    if ((this.usecache == true ) && (this.state[dp] != undefined) && (this.state[dp]!=null)) {
+      that.log("Use Cache");
       if (callback!=undefined){
       callback(this.state[dp]);
       }
     } else {
+      this.log("Ask CCU");
       this.remoteGetValue(dp, function(value) {
     });
       if (callback!=undefined){callback(0);}
@@ -706,6 +704,7 @@ HomeMaticGenericChannel.prototype = {
 
   cache:function(dp,value) {
     var that = this;
+    
     // Check custom Mapping from HM to HomeKit
     var map = that.datapointMappings[dp];
     if (map != undefined) {
@@ -718,7 +717,9 @@ HomeMaticGenericChannel.prototype = {
           that.currentStateCharacteristic[dp].setValue(value, null);
       }
     
-    this.state[dp] = value; 
+    if (this.usecache) {
+	    this.state[dp] = value; 
+    }
     }
   },
 

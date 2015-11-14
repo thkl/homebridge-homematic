@@ -1,6 +1,9 @@
 Changelog
 =========
 
+Version: 0.0.22
+- improved handling for variables
+
 Version: 0.0.21
 - mapped Variables optional to Outlets
 
