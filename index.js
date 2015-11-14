@@ -64,7 +64,7 @@ function HomeMaticPlatform(log, config) {
   this.outlets = config["outlets"];
 
   this.doors = config["doors"];
-
+  this.variables = config["variables"];
   this.programs = config["programs"];
   this.subsection = config["subsection"];
   this.sendQueue = [];
@@ -208,6 +208,14 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
           });
         }
 
+// Add Optional Variables
+      if (that.variables!=undefined) {
+          that.variables.map(function(variable) {
+			var accessory = new HomeMaticGenericChannel(that.log, that, variable , variable, "VARIABLE" , variable,"", Service, Characteristic);
+    	    that.foundAccessories.push(accessory);
+          });
+      }
+
 /*
 		var accessory = new HomeMaticGenericChannel(that.log, that, "5678" , "DummyKMK" , "KEYMATIC" , "5678","", Service, Characteristic);
         if (accessory.isSupported()==true) {
@@ -234,6 +242,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 }
 
 HomeMaticPlatform.prototype.setValue = function(channel, datapoint, value) {
+    
     if (channel.indexOf("BidCos-RF.") > -1)  {
       this.xmlrpc.setValue(channel, datapoint, value);
       return;
@@ -286,10 +295,13 @@ HomeMaticPlatform.prototype.sendRegaCommand = function(command,callback) {
 
 HomeMaticPlatform.prototype.getValue = function(channel, datapoint, callback) {
 
+    if (channel != undefined) {
+
     if (channel.indexOf("BidCos-RF.") > -1)  {
       this.xmlrpc.getValue(channel, datapoint, callback);
       return;
     }
+
 
     if (channel.indexOf("VirtualDevices.") > -1)  {
       var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
@@ -313,6 +325,14 @@ HomeMaticPlatform.prototype.getValue = function(channel, datapoint, callback) {
      }
       return;
     }
+    
+    // Variable fallback
+    
+    var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+    rega.getVariable(channel, callback);
+    return;
+    
+   }
 }
 
 HomeMaticPlatform.prototype.prepareRequest = function(accessory, script) {

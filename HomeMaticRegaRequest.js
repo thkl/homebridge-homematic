@@ -49,9 +49,7 @@ HomeMaticRegaRequest.prototype = {
     var that = this;
 
     var script = "var d = dom.GetObject(\"" + channel + "." + datapoint + "\");if (d){Write(d.State());}";
-    //that.log("Rega Request " + script);
     this.script(script, function(data) {
-      //that.log("Rega Response " + data);
       if (data !== undefined) {
         callback(data);
       } 
@@ -61,9 +59,27 @@ HomeMaticRegaRequest.prototype = {
   setValue: function(channel, datapoint, value) {
 
     var script = "var d = dom.GetObject(\"" + channel + "." + datapoint + "\");if (d){d.State(\"" + value + "\");}";
-    //this.log("Rega Request " + script);
     this.script(script, function(data) {
 
+    });
+  },
+
+  setVariable: function(channel, value) {
+
+    var script = "var d = dom.GetObject(\"" + channel + "\");if (d){d.State(\"" + value + "\");}";
+    this.script(script, function(data) {
+
+    });
+  },
+
+
+  getVariable: function(channel, callback) {
+    var that = this;
+    var script = "var d = dom.GetObject(\"" + channel + "\");if (d){Write(d.State());}";
+    this.script(script, function(data) {
+      if (data !== undefined) {
+        callback(data);
+      } 
     });
   },
   

@@ -383,9 +383,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
     break;
 
 
+
     case "CLIMATECONTROL_RT_TRANSCEIVER":
     case "THERMALCONTROL_TRANSMIT":
-
 
     var thermo = new Service["Thermostat"](this.name);
     this.services.push(thermo);
@@ -506,6 +506,44 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
     this.remoteGetValue("ACTUAL_TEMPERATURE");
 
     break;
+
+    case "VARIABLE" :
+    
+      var vservice = new Service["Outlet"](this.name);
+      this.services.push(vservice);
+
+      vservice.getCharacteristic(Characteristic.OutletInUse)
+      .on('get', function(callback) {
+        if (callback) callback(null,1);
+      }.bind(this));
+
+      var cc = vservice.getCharacteristic(Characteristic.On)
+
+      .on('get', function(callback) {
+         that.query("STATE",function(value){
+           if (callback) callback(null,value);
+         });
+      }.bind(this))
+
+      .on('set', function(value, callback) {
+         that.command("sendregacommand","","var x=dom.GetObject(\""+that.name+"\");if (x) {x.State("+value+");}",function() {
+		   setTimeout(function() {
+       			that.remoteGetValue("STATE");
+      		},500);
+		});
+		 
+         callback();
+      }.bind(this));
+
+
+	  this.currentStateCharacteristic["STATE"] = cc;
+      cc.eventEnabled = true;
+    
+      this.addValueMapping("STATE",false,0);
+      this.addValueMapping("STATE",true,1);
+    
+    break;
+
 
     case "PROGRAM_LAUNCHER" :
     var prg = new Service["ProgramLaunchService"](this.name);
@@ -739,7 +777,7 @@ HomeMaticGenericChannel.prototype = {
 
     return (["SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
     "THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",
-    "KEYMATIC","SMOKE_DETECTOR","WEATHER_TRANSMIT","WEATHER","PROGRAM_LAUNCHER"].indexOf(this.type) > -1)
+    "KEYMATIC","SMOKE_DETECTOR","WEATHER_TRANSMIT","WEATHER","PROGRAM_LAUNCHER","VARIABLE"].indexOf(this.type) > -1)
 
     return false;
   }

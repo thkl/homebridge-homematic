@@ -1,6 +1,9 @@
 Changelog
 =========
 
+Version: 0.0.21
+- mapped Variables optional to Outlets
+
 Version: 0.0.20
 - Subsection Filter (see Readme)
 
