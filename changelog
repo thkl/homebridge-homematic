@@ -1,6 +1,9 @@
 Changelog
 =========
 
+Version: 0.0.20
+- Subsection Filter (see Readme)
+
 Version: 0.0.19
 - fixed Door/Window Contact State (open vs close)
 

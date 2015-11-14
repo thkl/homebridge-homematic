@@ -66,7 +66,7 @@ function HomeMaticPlatform(log, config) {
   this.doors = config["doors"];
 
   this.programs = config["programs"];
-  
+  this.subsection = config["subsection"];
   this.sendQueue = [];
   this.timer = 0;
 
@@ -121,9 +121,23 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
     that.foundAccessories = [];
     var internalconfig = this.internalConfig();
     
-    var script = "string sDeviceId;string sChannelId;boolean df = true;Write(\'{\"devices\":[\');foreach(sDeviceId, root.Devices().EnumIDs()){object oDevice = dom.GetObject(sDeviceId);if(oDevice){var oInterface = dom.GetObject(oDevice.Interface());if(df) {df = false;} else { Write(\',\');}Write(\'{\');Write(\'\"id\": \"\' # sDeviceId # \'\",\');Write(\'\"name\": \"\' # oDevice.Name() # \'\",\');Write(\'\"address\": \"\' # oDevice.Address() # \'\",\');Write(\'\"type\": \"\' # oDevice.HssType() # \'\",\');Write(\'\"channels\": [\');boolean bcf = true;foreach(sChannelId, oDevice.Channels().EnumIDs()){object oChannel = dom.GetObject(sChannelId);if(bcf) {bcf = false;} else {Write(\',\');}Write(\'{\');Write(\'\"cId\": \' # sChannelId # \',\');Write(\'\"name\": \"\' # oChannel.Name() # \'\",\');if(oInterface){Write(\'\"address\": \"\' # oInterface.Name() #\'.'\ # oChannel.Address() # \'\",\');}Write(\'\"type\": \"\' # oChannel.HssType() # \'\"\');Write(\'}\');}Write(\']}\');}}Write(\']}\');";
+    var script = "string sDeviceId;string sChannelId;boolean df = true;Write(\'{\"devices\":[\');foreach(sDeviceId, root.Devices().EnumIDs()){object oDevice = dom.GetObject(sDeviceId);if(oDevice){var oInterface = dom.GetObject(oDevice.Interface());if(df) {df = false;} else { Write(\',\');}Write(\'{\');Write(\'\"id\": \"\' # sDeviceId # \'\",\');Write(\'\"name\": \"\' # oDevice.Name() # \'\",\');Write(\'\"address\": \"\' # oDevice.Address() # \'\",\');Write(\'\"type\": \"\' # oDevice.HssType() # \'\",\');Write(\'\"channels\": [\');boolean bcf = true;foreach(sChannelId, oDevice.Channels().EnumIDs()){object oChannel = dom.GetObject(sChannelId);if(bcf) {bcf = false;} else {Write(\',\');}Write(\'{\');Write(\'\"cId\": \' # sChannelId # \',\');Write(\'\"name\": \"\' # oChannel.Name() # \'\",\');if(oInterface){Write(\'\"address\": \"\' # oInterface.Name() #\'.'\ # oChannel.Address() # \'\",\');}Write(\'\"type\": \"\' # oChannel.HssType() # \'\"\');Write(\'}\');}Write(\']}\');}}Write(\']\');";
 
+    
+    if (this.subsection!=undefined) {
+   
+     script = script + "var s = dom.GetObject(\"" ;
+     script = script + this.subsection;
+     script = script + "\");string cid;boolean sdf = true;if (s) {Write(\',\"subsection\":[\');foreach(cid, s.EnumUsedIDs()){ ";
+     script = script +" if(sdf) {sdf = false;}";
+     script = script +" else { Write(\',\');}Write(cid);}Write(\']\');}";
+    }
+    
+    
+    script = script + "Write('\}'\);";
+    
     var regarequest = new HomeMaticRegaRequest(this.log, this.ccuIP).script(script, function(data) {
+    
       var json = JSON.parse(data);
       if (json["devices"] !== undefined) {
         json["devices"].map(function(device) {
@@ -145,6 +159,12 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
               
               
               var isChannelFiltered = false;
+			  // if we have a subsection list check if the channel is here
+			  if (json["subsection"]!=undefined) {
+			   var cin = (json["subsection"].indexOf(ch.cId) > -1);
+			    // if not .. set filter flag
+			    isChannelFiltered = !cin;
+			  }
 
 			  if ((cfg!=undefined) && (cfg["filter"]!=undefined) && (cfg["filter"].indexOf(ch.type)>-1)) {
 			  	isChannelFiltered = true;
