@@ -45,15 +45,6 @@ module.exports = function(homebridge) {
 
   inherits(Service.ProgramLaunchService, Service);
 
-
-  Service.VariableService = function(displayName, subtype) {
-  	Service.call(this, displayName, '704DC130-D997-4586-A986-64A1CABD0313', subtype);
-    this.addCharacteristic(Characteristic.On);
-  };
-
-  inherits(Service.VariableService, Service);
-
-
   homebridge.registerPlatform("homebridge-homematic", "HomeMatic", HomeMaticPlatform);
 }
 
