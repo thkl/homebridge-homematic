@@ -184,7 +184,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                   if ((that.outlets!=undefined) && (that.outlets.indexOf(ch.address) > -1)) {special = "OUTLET";}
                   if ((that.doors!=undefined) && (that.doors.indexOf(ch.address) > -1)) {special = "DOOR";}
                   
-                  var accessory = new HomeMaticGenericChannel(that.log, that, ch.id, ch.name, ch.type, ch.address, special, Service, Characteristic);
+                  var accessory = new HomeMaticGenericChannel(that.log, that, ch.id, ch.name, ch.type, ch.address, special ,cfg, Service, Characteristic);
                   if (accessory.isSupported()==true) {
                   	that.foundAccessories.push(accessory);
                   }
@@ -202,7 +202,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 
         if (that.programs!=undefined) {
           that.programs.map(function(program){
-            var accessory = new HomeMaticGenericChannel(that.log, that, "1234" , program , "PROGRAM_LAUNCHER" , "1234", "" , Service, Characteristic);
+            var accessory = new HomeMaticGenericChannel(that.log, that, "1234" , program , "PROGRAM_LAUNCHER" , "1234", "" , undefined, Service, Characteristic);
         	that.foundAccessories.push(accessory);
           });
         }
@@ -210,13 +210,13 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 // Add Optional Variables
       if (that.variables!=undefined) {
           that.variables.map(function(variable) {
-			var accessory = new HomeMaticGenericChannel(that.log, that, variable , variable, "VARIABLE" , variable,"", Service, Characteristic);
+			var accessory = new HomeMaticGenericChannel(that.log, that, variable , variable, "VARIABLE" , variable,"", undefined ,Service, Characteristic);
     	    that.foundAccessories.push(accessory);
           });
       }
 
 /*
-		var accessory = new HomeMaticGenericChannel(that.log, that, "5678" , "DummyKMK" , "KEYMATIC" , "5678","", Service, Characteristic);
+		var accessory = new HomeMaticGenericChannel(that.log, that, "5678" , "DummyKMK" , "KEYMATIC" , "5678","", cfg, Service, Characteristic);
         if (accessory.isSupported()==true) {
            that.foundAccessories.push(accessory);
         }

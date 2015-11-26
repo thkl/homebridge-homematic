@@ -14,6 +14,14 @@
 				"SHUTTER_CONTACT"
 			]
                        
+		},
+		
+		{
+		     "type" : "HM-LC-RGBW-WM",
+		     "combine": { 
+		     	"source": ":2",
+		     	"target": ":1"
+		     }
 		}		
 	]
 }

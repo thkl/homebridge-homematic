@@ -1,7 +1,7 @@
 'use strict';
 
 
-function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, Service, Characteristic) {
+function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
   this.name     = name;
 
   this.type     = type;
@@ -16,6 +16,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
   this.timer = [];
   this.services = [];
   this.usecache = true;
+  this.cadress = undefined;
   
   this.i_characteristic = {};
 
@@ -24,6 +25,14 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
   if (this.isSupported()==false) {
     return;
+  }
+
+  if ((cfg!=undefined) && (cfg["combine"]!=undefined)) {
+   var src = cfg["combine"]["source"];
+   var trg = cfg["combine"]["target"];
+   if (this.adress.indexOf(src)>-1) {
+    this.cadress = this.adress.replace(src,trg);
+   }
   }
 
   var informationService = new Service.AccessoryInformation();
@@ -76,6 +85,69 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
     cc.eventEnabled = true;
 
     this.remoteGetValue("STATE");
+
+    break;
+
+
+    case "RGBW_COLOR":
+    
+    var lightbulb = new Service["Lightbulb"](this.name);
+    this.services.push(lightbulb);
+
+    var cc = lightbulb.getCharacteristic(Characteristic.On)
+
+    .on('get', function(callback) {
+      that.query("1:LEVEL",function(value) {
+       
+       if (value==undefined) {
+        value = 0;
+       }
+       if (callback) callback(null,value>0);
+      });
+    }.bind(this))
+
+    .on('set', function(value, callback) {
+      that.command("set","1:LEVEL" , (value==1)? "1": "0");
+      callback();
+    }.bind(this));
+
+
+    var brightness = lightbulb.getCharacteristic(Characteristic.Brightness)
+
+    .on('get', function(callback) {
+      that.query("1:LEVEL",function(value){
+       if (callback) callback(null,value*100);
+      });
+    }.bind(this))
+
+    .on('set', function(value, callback) {
+      that.delayed("set","1:LEVEL" , String(value/100),100);
+      callback();
+    }.bind(this));
+
+    that.currentStateCharacteristic["1:LEVEL"] = brightness;
+    brightness.eventEnabled = true;
+
+    this.remoteGetValue("1:LEVEL");
+
+    var color = lightbulb.getCharacteristic(Characteristic.Hue)
+
+    .on('get', function(callback) {
+      that.query("2:COLOR",function(value){
+       if (callback) callback(null,Math.round((value/199)*360));
+      });
+    }.bind(this))
+
+    .on('set', function(value, callback) {
+      that.delayed("set","2:COLOR" , Math.round((value/360)*199),100);
+      callback();
+    }.bind(this));
+
+    that.currentStateCharacteristic["2:COLOR"] = color;
+    color.eventEnabled = true;
+
+    this.remoteGetValue("2:COLOR");
+
 
     break;
 
@@ -383,8 +455,6 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, S
 
     break;
 
-
-
     case "CLIMATECONTROL_RT_TRANSCEIVER":
     case "THERMALCONTROL_TRANSMIT":
 
@@ -591,12 +661,12 @@ HomeMaticGenericChannel.prototype = {
     var that = this;
 
     if ((this.usecache == true ) && (this.state[dp] != undefined) && (this.state[dp]!=null)) {
-      that.log("Use Cache");
+      //that.log("Use Cache");
       if (callback!=undefined){
       callback(this.state[dp]);
       }
     } else {
-      this.log("Ask CCU");
+      //this.log("Ask CCU");
       this.remoteGetValue(dp, function(value) {
     });
       if (callback!=undefined){callback(0);}
@@ -674,7 +744,11 @@ HomeMaticGenericChannel.prototype = {
 
   remoteGetValue:function(dp,callback) {
     var that = this;
-    that.platform.getValue(that.adress,dp,function(newValue) {
+    var tp = this.transformDatapoint(dp);
+    
+    //that.platform.getValue(that.adress,dp,function(newValue) {
+    
+    that.platform.getValue(tp[0],tp[1],function(newValue) {
       if (newValue != undefined) {
       that.eventupdate = true;
       //var ow = newValue;
@@ -698,7 +772,21 @@ HomeMaticGenericChannel.prototype = {
       newValue = newValue*100;
     }
     this.eventupdate = true;
-    this.cache(dp,newValue);
+    if (this.cadress!=undefined) {
+
+    // this is dirty shit. ok there is a config that will set the cadress to a defined channel
+    // if there is an rpc event at this channel the event will be forward here.
+    // now fetch the real adress of that channel and get the channelnumber
+    // datapoints from such channels named  as channelnumber:datapoint ... (no better approach yet) 
+
+       var pos = this.adress.indexOf(":");
+ 	   if (pos !=-1 ) {
+	     var chnl = this.adress.substr(pos+1,this.adress.length);
+  	     this.cache(chnl + ":" + dp,newValue);
+	   }
+    } else {
+	    this.cache(dp,newValue);
+    }
     this.eventupdate = false;
   },
 
@@ -753,13 +841,15 @@ HomeMaticGenericChannel.prototype = {
     var that = this;
 
     if (mode == "set") {
-      this.log("(Rpc) Send " + value + " to Datapoint " + dp + " at " + that.adress);
-      that.platform.setValue(that.adress,dp,value);
+      var tp = this.transformDatapoint(dp)
+      this.log("(Rpc) Send " + value + " to Datapoint " + tp[1] + " at " + tp[0]);
+      that.platform.setValue(tp[0],tp[1],value);
     }
 
     if (mode == "setrega") {
-      this.log("(Rega) Send " + value + " to Datapoint " + dp + " at " + that.adress);
-      that.platform.setRegaValue(that.adress,dp,value);
+      var tp = this.transformDatapoint(dp)
+	  this.log("(Rega) Send " + value + " to Datapoint " + tp[1] + " at " + tp[0]);
+      that.platform.setRegaValue(tp[0],tp[1],value);
     }
 
     if (mode == "sendregacommand") {
@@ -768,6 +858,18 @@ HomeMaticGenericChannel.prototype = {
 
   },
 
+
+  transformDatapoint : function(dp) {
+    var pos = dp.indexOf(":");
+    if (pos==-1) {
+      return [this.adress,dp];
+    }
+    var ndp = dp.substr(pos+1,dp.length);
+    var nadr = this.adress.substr(0,this.adress.indexOf(":"));
+    var chnl = dp.substr(0,pos);
+    nadr = nadr + ":" + chnl;
+    return [nadr,ndp];
+  },
 
   getServices: function() {
     return this.services;
@@ -778,7 +880,7 @@ HomeMaticGenericChannel.prototype = {
 
     return (["SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
     "THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",
-    "KEYMATIC","SMOKE_DETECTOR","WEATHER_TRANSMIT","WEATHER","PROGRAM_LAUNCHER","VARIABLE"].indexOf(this.type) > -1)
+    "KEYMATIC","SMOKE_DETECTOR","WEATHER_TRANSMIT","WEATHER","PROGRAM_LAUNCHER","VARIABLE","RGBW_COLOR"].indexOf(this.type) > -1)
 
     return false;
   }

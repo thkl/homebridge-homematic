@@ -60,9 +60,11 @@ HomeMaticRPC.prototype.init = function() {
           	  debug("RPC event for %s %s with value %s",channel,datapoint,value);
 			 
               that.platform.foundAccessories.map(function(accessory) {
-                if (accessory.adress == channel) {
+                if ((accessory.adress == channel) || ((accessory.cadress != undefined) && (accessory.cadress == channel))) {
                   accessory.event(datapoint, value);
                 }
+                
+                                
               });
             }
           });
