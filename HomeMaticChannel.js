@@ -178,12 +178,12 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     .on('get', function(callback) {
       that.query("LEVEL",function(value){
-       if (callback) callback(null,value*100);
+       if (callback) callback(null,value);
       });
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.delayed("set","LEVEL" , String(value/100),100);
+      that.delayed("set","LEVEL" , value),100);
       callback();
     }.bind(this));
 
@@ -205,7 +205,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       that.query("LEVEL",function(value){
        if (callback) callback(null,value);
       });
-    }.bind(this))
+    }.bind(this));
 
     this.currentStateCharacteristic["LEVEL"] = cpos;
     cpos.eventEnabled = true;
@@ -220,7 +220,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     }.bind(this))
     
     .on('set', function(value, callback) {
-      that.delayed("set","LEVEL" , String(value/100),100);
+      that.delayed("set","LEVEL" , value,100);
       callback();
     }.bind(this));
 
@@ -768,9 +768,6 @@ HomeMaticGenericChannel.prototype = {
 
 
   event:function(dp,newValue) {
-    if (dp=="LEVEL") {
-      newValue = newValue*100;
-    }
     this.eventupdate = true;
     if (this.cadress!=undefined) {
 
