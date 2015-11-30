@@ -205,7 +205,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       that.query("LEVEL",function(value){
        if (callback) callback(null,value);
       });
-    }.bind(this))
+    }.bind(this));
 
     this.currentStateCharacteristic["LEVEL"] = cpos;
     cpos.eventEnabled = true;
