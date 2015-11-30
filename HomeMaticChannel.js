@@ -756,7 +756,9 @@ HomeMaticGenericChannel.prototype = {
       that.eventupdate = true;
       //var ow = newValue;
       newValue = that.convertValue(dp,newValue);
-      that.cache(dp,newValue);
+      if (tp[1] != 'LEVEL') {
+      	that.cache(dp,newValue);	// bug in caching?
+      }
       that.eventupdate = false;
      } else {
       newValue = 0;
