@@ -203,7 +203,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     .on('get', function(callback) {
       that.query("LEVEL",function(value){
-       if (callback) callback(null,value);
+       if (callback) callback(null,value*100);
       });
     }.bind(this))
 
@@ -215,7 +215,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     
     .on('get', function(callback) {
       that.query("LEVEL",function(value){
-       if (callback) callback(null,value);
+       if (callback) callback(null,value*100);
       });
     }.bind(this))
     
@@ -273,7 +273,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       that.query("STATE",function(value){
        callback(null,value);
       });
-      }.bind(this))
+      }.bind(this));
       
       that.currentStateCharacteristic["STATE"] = state;
       state.eventEnabled = true;
@@ -749,7 +749,10 @@ HomeMaticGenericChannel.prototype = {
     //that.platform.getValue(that.adress,dp,function(newValue) {
     
     that.platform.getValue(tp[0],tp[1],function(newValue) {
-      if (newValue != undefined) {
+      if (newValue != undefined) {
+      	if (tp[1] == 'LEVEL') {
+      		newValue = newValue * 100;	// RGBW should be 199? How to differ?
+      	}
       that.eventupdate = true;
       //var ow = newValue;
       newValue = that.convertValue(dp,newValue);
