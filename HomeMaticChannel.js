@@ -196,6 +196,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     // Window Covering
     case "BLIND":
+    this.usecache = false;	// temporary till cache bug fixed?
     var blind = new Service["WindowCovering"](this.name);
     this.services.push(blind);
 
