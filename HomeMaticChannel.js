@@ -203,7 +203,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     .on('get', function(callback) {
       that.query("LEVEL",function(value){
-       if (callback) callback(null,value);
+       if (callback) callback(null,value*100);
       });
     }.bind(this));
 
@@ -215,7 +215,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     
     .on('get', function(callback) {
       that.query("LEVEL",function(value){
-       if (callback) callback(null,value);
+       if (callback) callback(null,value*100);
       });
     }.bind(this))
     
