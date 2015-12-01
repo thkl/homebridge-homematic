@@ -203,9 +203,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     .on('get', function(callback) {
       that.query("LEVEL",function(value){
-       if (callback) callback(null,value);
+       if (callback) callback(null,value*100);
       });
-    }.bind(this))
+    }.bind(this));
 
     this.currentStateCharacteristic["LEVEL"] = cpos;
     cpos.eventEnabled = true;
@@ -214,9 +214,15 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     var tpos = blind.getCharacteristic(Characteristic.TargetPosition)
     
     .on('get', function(callback) {
-      that.query("LEVEL",function(value){
-       if (callback) callback(null,value);
-      });
+	if (that.state["LEVEL"] != undefined ) {
+		callback(null,that.state["LEVEL"]);
+	} else {
+      		that.query("LEVEL",function(value){
+			if (callback) {
+				callback(null,value*100);
+			}
+		});
+	}
     }.bind(this))
     
     .on('set', function(value, callback) {
@@ -273,7 +279,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       that.query("STATE",function(value){
        callback(null,value);
       });
-      }.bind(this))
+      }.bind(this));
       
       that.currentStateCharacteristic["STATE"] = state;
       state.eventEnabled = true;
@@ -315,7 +321,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
         that.query("STATE",function(value) {
          if (callback) {callback(null,value);}
         });
-      }.bind(this))
+      }.bind(this));
       this.currentStateCharacteristic["STATE"] = state;
       state.eventEnabled = true;
       this.addValueMapping("STATE",0,0);
@@ -336,7 +342,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       that.query("MOTION",function(value){
        if (callback) callback(null,value);
       });
-    }.bind(this))
+    }.bind(this));
 
     this.currentStateCharacteristic["MOTION"] = state;
     state.eventEnabled = true;
@@ -354,7 +360,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       that.query("STATE",function(value){
        if (callback) callback(null,value);
       });
-    }.bind(this))
+    }.bind(this));
 
     this.currentStateCharacteristic["STATE"] = state;
     state.eventEnabled = true;
@@ -448,7 +454,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       that.query("TEMPERATURE",function(value){
        if (callback) callback(null,value);
       });
-    }.bind(this))
+    }.bind(this));
 
     this.currentStateCharacteristic["TEMPERATURE"] = ctemp;
     ctemp.eventEnabled = true;
@@ -569,7 +575,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     thermo.getCharacteristic(Characteristic.TemperatureDisplayUnits)
     .on('get', function(callback) {
       if (callback) callback(null, Characteristic.TemperatureDisplayUnits.CELSIUS);
-    }.bind(this))
+    }.bind(this));
 
     this.cleanVirtualDevice("ACTUAL_TEMPERATURE");
     this.remoteGetValue("CONTROL_MODE");
@@ -668,8 +674,9 @@ HomeMaticGenericChannel.prototype = {
     } else {
       //this.log("Ask CCU");
       this.remoteGetValue(dp, function(value) {
+      if (callback!=undefined){callback(value);}
     });
-      if (callback!=undefined){callback(0);}
+      //if (callback!=undefined){callback(0);}
     }
 
   },
@@ -749,7 +756,14 @@ HomeMaticGenericChannel.prototype = {
     //that.platform.getValue(that.adress,dp,function(newValue) {
     
     that.platform.getValue(tp[0],tp[1],function(newValue) {
-      if (newValue != undefined) {
+      if (newValue != undefined) {
+      	if (tp[1] == 'LEVEL') {
+      		if (that.type == "RGBW_COLOR") {
+      			newValue = newValue * 199
+      		} else {	// BLIND and DIMMER
+      			newValue = newValue * 100;
+      		}
+      	}
       that.eventupdate = true;
       //var ow = newValue;
       newValue = that.convertValue(dp,newValue);
@@ -769,7 +783,11 @@ HomeMaticGenericChannel.prototype = {
 
   event:function(dp,newValue) {
     if (dp=="LEVEL") {
-      newValue = newValue*100;
+    	if (this.type == "RGBW_COLOR") {
+    		newValue = newValue * 199;
+    	} else {	// BLIND and DIMMER
+		newValue = newValue * 100;
+    	}
     }
     this.eventupdate = true;
     if (this.cadress!=undefined) {
