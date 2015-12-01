@@ -196,7 +196,6 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     // Window Covering
     case "BLIND":
-    this.usecache = false;	// temporary till cache bug fixed?
     var blind = new Service["WindowCovering"](this.name);
     this.services.push(blind);
 
@@ -758,9 +757,7 @@ HomeMaticGenericChannel.prototype = {
       that.eventupdate = true;
       //var ow = newValue;
       newValue = that.convertValue(dp,newValue);
-      if (tp[1] != 'LEVEL') {
-      	that.cache(dp,newValue);	// bug in caching?
-      }
+      that.cache(dp,newValue);
       that.eventupdate = false;
      } else {
       newValue = 0;
