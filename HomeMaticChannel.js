@@ -669,6 +669,7 @@ HomeMaticGenericChannel.prototype = {
     } else {
       //this.log("Ask CCU");
       this.remoteGetValue(dp, function(value) {
+      if (callback!=undefined){callback(value);}
     });
       if (callback!=undefined){callback(0);}
     }
