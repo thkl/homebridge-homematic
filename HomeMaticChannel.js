@@ -752,7 +752,11 @@ HomeMaticGenericChannel.prototype = {
     that.platform.getValue(tp[0],tp[1],function(newValue) {
       if (newValue != undefined) {
       	if (tp[1] == 'LEVEL') {
-      		newValue = newValue * 100;	// RGBW should be 199? How to differ?
+      		if (that.type == "RGBW_COLOR") {
+      			newValue = newValue * 199
+      		} else {	// BLIND and DIMMER
+      			newValue = newValue * 100;
+      		}
       	}
       that.eventupdate = true;
       //var ow = newValue;
@@ -773,7 +777,11 @@ HomeMaticGenericChannel.prototype = {
 
   event:function(dp,newValue) {
     if (dp=="LEVEL") {
-      newValue = newValue*100;
+    	if (this.type == "RGBW_COLOR") {
+    		newValue = newValue * 199;
+    	} else {	// BLIND and DIMMER
+		newValue = newValue * 100;
+    	}
     }
     this.eventupdate = true;
     if (this.cadress!=undefined) {
