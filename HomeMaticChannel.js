@@ -671,7 +671,7 @@ HomeMaticGenericChannel.prototype = {
       this.remoteGetValue(dp, function(value) {
       if (callback!=undefined){callback(value);}
     });
-      if (callback!=undefined){callback(0);}
+      //if (callback!=undefined){callback(0);}
     }
 
   },
