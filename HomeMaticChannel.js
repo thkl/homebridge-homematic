@@ -214,9 +214,15 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     var tpos = blind.getCharacteristic(Characteristic.TargetPosition)
     
     .on('get', function(callback) {
-      that.query("LEVEL",function(value){
-       if (callback) callback(null,value*100);
-      });
+	if (that.state["LEVEL"] != undefined ) {
+		callback(null,that.state["LEVEL"]);
+	} else {
+      		that.query("LEVEL",function(value){
+			if (callback) {
+				callback(null,value*100);
+			}
+		});
+	}
     }.bind(this))
     
     .on('set', function(value, callback) {
