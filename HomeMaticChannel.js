@@ -857,8 +857,9 @@ HomeMaticGenericChannel.prototype = {
     	newValue = newValue / 100;
     }
     if ((tp[1] == 'COLOR') && (this.type == "RGBW_COLOR")) {
-    	newValue = Math.round((value/360)*199);
+    	newValue = Math.round((value / 360) * 199);
     }
+    newValue = String(newValue);
 
     if (this.eventupdate==true) {
       return;
@@ -867,12 +868,12 @@ HomeMaticGenericChannel.prototype = {
 
     if (mode == "set") {
       this.log("(Rpc) Send " + newValue + " to Datapoint " + tp[1] + " at " + tp[0]);
-      that.platform.setValue(tp[0],tp[1],value);
+      that.platform.setValue(tp[0], tp[1], newValue);
     }
 
     if (mode == "setrega") {
 	  this.log("(Rega) Send " + newValue + " to Datapoint " + tp[1] + " at " + tp[0]);
-      that.platform.setRegaValue(tp[0],tp[1],value);
+      that.platform.setRegaValue(tp[0], tp[1], newValue);
     }
 
     if (mode == "sendregacommand") {
