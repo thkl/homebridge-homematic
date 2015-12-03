@@ -781,15 +781,15 @@ HomeMaticGenericChannel.prototype = {
 
 
   event:function(dp,newValue) {
-    var tp = this.transformDatapoint(dp);
-    if (tp[1]=="LEVEL") {
-      	if (tp[1] == 'LEVEL') {
-      		newValue = newValue * 100;
-      	}
-      	if ((tp[1] == 'COLOR') && (this.type == "RGBW_COLOR")) {
-      		newValue = Math.round((value/199)*360);
-      	}
-    }
+//    var tp = this.transformDatapoint(dp);
+//    if (tp[1]=="LEVEL") {
+//      	if (tp[1] == 'LEVEL') {
+//      		newValue = newValue * 100;
+//      	}
+//      	if ((tp[1] == 'COLOR') && (this.type == "RGBW_COLOR")) {
+//      		newValue = Math.round((value/199)*360);
+//      	}
+//    }
     this.eventupdate = true;
     if (this.cadress!=undefined) {
 
