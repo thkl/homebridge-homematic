@@ -857,7 +857,7 @@ HomeMaticGenericChannel.prototype = {
     var tp = this.transformDatapoint(dp);
     if (tp[1]=="LEVEL") {
       	if (tp[1] == 'LEVEL') {
-      		newValue = newValue * 100;
+      		newValue = newValue / 100;
       	}
       	if ((tp[1] == 'COLOR') && (this.type == "RGBW_COLOR")) {
       		newValue = Math.round((value/360)*199);
