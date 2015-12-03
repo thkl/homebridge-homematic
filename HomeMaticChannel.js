@@ -226,7 +226,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     }.bind(this))
     
     .on('set', function(value, callback) {
-      that.delayed("set", "LEVEL", value, 250);
+      that.delayed("set", "LEVEL", value, 750);
       callback();
     }.bind(this));
 
