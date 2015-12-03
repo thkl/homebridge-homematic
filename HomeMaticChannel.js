@@ -116,12 +116,12 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     .on('get', function(callback) {
       that.query("1:LEVEL",function(value){
-       if (callback) callback(null,value*100);
+       if (callback) callback(null,value);
       });
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.delayed("set","1:LEVEL" , String(value/100),100);
+      that.delayed("set","1:LEVEL" , value,100);
       callback();
     }.bind(this));
 
@@ -134,12 +134,12 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     .on('get', function(callback) {
       that.query("2:COLOR",function(value){
-       if (callback) callback(null,Math.round((value/199)*360));
+       if (callback) callback(null,value);
       });
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.delayed("set","2:COLOR" , Math.round((value/360)*199),100);
+      that.delayed("set","2:COLOR" ,value,100);
       callback();
     }.bind(this));
 
@@ -178,12 +178,12 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     .on('get', function(callback) {
       that.query("LEVEL",function(value){
-       if (callback) callback(null,value*100);
+       if (callback) callback(null,value);
       });
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.delayed("set","LEVEL" , String(value/100),100);
+      that.delayed("set","LEVEL" , value,100);
       callback();
     }.bind(this));
 
@@ -203,7 +203,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     .on('get', function(callback) {
       that.query("LEVEL",function(value){
-       if (callback) callback(null,value*100);
+       if (callback) callback(null,value);
       });
     }.bind(this));
 
@@ -219,14 +219,14 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 	} else {
       		that.query("LEVEL",function(value){
 			if (callback) {
-				callback(null,value*100);
+				callback(null,value);
 			}
 		});
 	}
     }.bind(this))
     
     .on('set', function(value, callback) {
-      that.delayed("set","LEVEL" , String(value/100),100);
+      that.delayed("set", "LEVEL", value, 250);
       callback();
     }.bind(this));
 
@@ -758,11 +758,10 @@ HomeMaticGenericChannel.prototype = {
     that.platform.getValue(tp[0],tp[1],function(newValue) {
       if (newValue != undefined) {
       	if (tp[1] == 'LEVEL') {
-      		if (that.type == "RGBW_COLOR") {
-      			newValue = newValue * 199
-      		} else {	// BLIND and DIMMER
-      			newValue = newValue * 100;
-      		}
+      		newValue = newValue * 100;
+      	}
+      	if ((tp[1] == 'COLOR') && (that.type == "RGBW_COLOR")) {
+      		newValue = Math.round((value/199)*360);
       	}
       that.eventupdate = true;
       //var ow = newValue;
@@ -782,12 +781,14 @@ HomeMaticGenericChannel.prototype = {
 
 
   event:function(dp,newValue) {
-    if (dp=="LEVEL") {
-    	if (this.type == "RGBW_COLOR") {
-    		newValue = newValue * 199;
-    	} else {	// BLIND and DIMMER
-		newValue = newValue * 100;
-    	}
+    var tp = this.transformDatapoint(dp);
+    if (tp[1]=="LEVEL") {
+      	if (tp[1] == 'LEVEL') {
+      		newValue = newValue * 100;
+      	}
+      	if ((tp[1] == 'COLOR') && (this.type == "RGBW_COLOR")) {
+      		newValue = Math.round((value/199)*360);
+      	}
     }
     this.eventupdate = true;
     if (this.cadress!=undefined) {
@@ -852,6 +853,16 @@ HomeMaticGenericChannel.prototype = {
   },
 
   command: function(mode,dp,value,callback) {
+    var newValue = value;
+    var tp = this.transformDatapoint(dp);
+    if (tp[1]=="LEVEL") {
+      	if (tp[1] == 'LEVEL') {
+      		newValue = newValue * 100;
+      	}
+      	if ((tp[1] == 'COLOR') && (this.type == "RGBW_COLOR")) {
+      		newValue = Math.round((value/360)*199);
+      	}
+    }
 
     if (this.eventupdate==true) {
       return;
@@ -859,19 +870,17 @@ HomeMaticGenericChannel.prototype = {
     var that = this;
 
     if (mode == "set") {
-      var tp = this.transformDatapoint(dp)
-      this.log("(Rpc) Send " + value + " to Datapoint " + tp[1] + " at " + tp[0]);
+      this.log("(Rpc) Send " + newValue + " to Datapoint " + tp[1] + " at " + tp[0]);
       that.platform.setValue(tp[0],tp[1],value);
     }
 
     if (mode == "setrega") {
-      var tp = this.transformDatapoint(dp)
-	  this.log("(Rega) Send " + value + " to Datapoint " + tp[1] + " at " + tp[0]);
+	  this.log("(Rega) Send " + newValue + " to Datapoint " + tp[1] + " at " + tp[0]);
       that.platform.setRegaValue(tp[0],tp[1],value);
     }
 
     if (mode == "sendregacommand") {
-      that.platform.sendRegaCommand(value,callback);
+      that.platform.sendRegaCommand(newValue,callback);
     }
 
   },
