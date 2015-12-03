@@ -116,12 +116,12 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     .on('get', function(callback) {
       that.query("1:LEVEL",function(value){
-       if (callback) callback(null,value*100);
+       if (callback) callback(null,value);
       });
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.delayed("set","1:LEVEL" , String(value/100),100);
+      that.delayed("set","1:LEVEL" , value,100);
       callback();
     }.bind(this));
 
@@ -134,12 +134,12 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     .on('get', function(callback) {
       that.query("2:COLOR",function(value){
-       if (callback) callback(null,Math.round((value/199)*360));
+       if (callback) callback(null,value);
       });
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.delayed("set","2:COLOR" , Math.round((value/360)*199),100);
+      that.delayed("set","2:COLOR" ,value,100);
       callback();
     }.bind(this));
 
@@ -178,12 +178,12 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     .on('get', function(callback) {
       that.query("LEVEL",function(value){
-       if (callback) callback(null,value*100);
+       if (callback) callback(null,value);
       });
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.delayed("set","LEVEL" , String(value/100),100);
+      that.delayed("set","LEVEL" , value,100);
       callback();
     }.bind(this));
 
@@ -205,7 +205,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       that.query("LEVEL",function(value){
        if (callback) callback(null,value);
       });
-    }.bind(this))
+    }.bind(this));
 
     this.currentStateCharacteristic["LEVEL"] = cpos;
     cpos.eventEnabled = true;
@@ -214,13 +214,19 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     var tpos = blind.getCharacteristic(Characteristic.TargetPosition)
     
     .on('get', function(callback) {
-      that.query("LEVEL",function(value){
-       if (callback) callback(null,value);
-      });
+	if (that.state["LEVEL"] != undefined ) {
+		callback(null,that.state["LEVEL"]);
+	} else {
+      		that.query("LEVEL",function(value){
+			if (callback) {
+				callback(null,value);
+			}
+		});
+	}
     }.bind(this))
     
     .on('set', function(value, callback) {
-      that.delayed("set","LEVEL" , String(value/100),100);
+      that.delayed("set", "LEVEL", value, 750);
       callback();
     }.bind(this));
 
@@ -273,7 +279,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       that.query("STATE",function(value){
        callback(null,value);
       });
-      }.bind(this))
+      }.bind(this));
       
       that.currentStateCharacteristic["STATE"] = state;
       state.eventEnabled = true;
@@ -315,7 +321,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
         that.query("STATE",function(value) {
          if (callback) {callback(null,value);}
         });
-      }.bind(this))
+      }.bind(this));
       this.currentStateCharacteristic["STATE"] = state;
       state.eventEnabled = true;
       this.addValueMapping("STATE",0,0);
@@ -336,7 +342,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       that.query("MOTION",function(value){
        if (callback) callback(null,value);
       });
-    }.bind(this))
+    }.bind(this));
 
     this.currentStateCharacteristic["MOTION"] = state;
     state.eventEnabled = true;
@@ -354,7 +360,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       that.query("STATE",function(value){
        if (callback) callback(null,value);
       });
-    }.bind(this))
+    }.bind(this));
 
     this.currentStateCharacteristic["STATE"] = state;
     state.eventEnabled = true;
@@ -448,7 +454,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       that.query("TEMPERATURE",function(value){
        if (callback) callback(null,value);
       });
-    }.bind(this))
+    }.bind(this));
 
     this.currentStateCharacteristic["TEMPERATURE"] = ctemp;
     ctemp.eventEnabled = true;
@@ -569,7 +575,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     thermo.getCharacteristic(Characteristic.TemperatureDisplayUnits)
     .on('get', function(callback) {
       if (callback) callback(null, Characteristic.TemperatureDisplayUnits.CELSIUS);
-    }.bind(this))
+    }.bind(this));
 
     this.cleanVirtualDevice("ACTUAL_TEMPERATURE");
     this.remoteGetValue("CONTROL_MODE");
@@ -668,8 +674,9 @@ HomeMaticGenericChannel.prototype = {
     } else {
       //this.log("Ask CCU");
       this.remoteGetValue(dp, function(value) {
+      if (callback!=undefined){callback(value);}
     });
-      if (callback!=undefined){callback(0);}
+      //if (callback!=undefined){callback(0);}
     }
 
   },
@@ -749,7 +756,13 @@ HomeMaticGenericChannel.prototype = {
     //that.platform.getValue(that.adress,dp,function(newValue) {
     
     that.platform.getValue(tp[0],tp[1],function(newValue) {
-      if (newValue != undefined) {
+      if (newValue != undefined) {
+      	if (tp[1] == 'LEVEL') {
+      		newValue = newValue * 100;
+      	}
+      	if ((tp[1] == 'COLOR') && (that.type == "RGBW_COLOR")) {
+      		newValue = Math.round((value/199)*360);
+      	}
       that.eventupdate = true;
       //var ow = newValue;
       newValue = that.convertValue(dp,newValue);
@@ -768,8 +781,12 @@ HomeMaticGenericChannel.prototype = {
 
 
   event:function(dp,newValue) {
-    if (dp=="LEVEL") {
-      newValue = newValue*100;
+    var tp = this.transformDatapoint(dp);
+    if (tp[1] == 'LEVEL') {
+    	newValue = newValue * 100;
+    }
+    if ((tp[1] == 'COLOR') && (this.type == "RGBW_COLOR")) {
+    	newValue = Math.round((value/199)*360);
     }
     this.eventupdate = true;
     if (this.cadress!=undefined) {
@@ -834,6 +851,15 @@ HomeMaticGenericChannel.prototype = {
   },
 
   command: function(mode,dp,value,callback) {
+    var newValue = value;
+    var tp = this.transformDatapoint(dp);
+    if (tp[1] == 'LEVEL') {
+    	newValue = newValue / 100;
+    }
+    if ((tp[1] == 'COLOR') && (this.type == "RGBW_COLOR")) {
+    	newValue = Math.round((value / 360) * 199);
+    }
+    newValue = String(newValue);
 
     if (this.eventupdate==true) {
       return;
@@ -841,19 +867,17 @@ HomeMaticGenericChannel.prototype = {
     var that = this;
 
     if (mode == "set") {
-      var tp = this.transformDatapoint(dp)
-      this.log("(Rpc) Send " + value + " to Datapoint " + tp[1] + " at " + tp[0]);
-      that.platform.setValue(tp[0],tp[1],value);
+      this.log("(Rpc) Send " + newValue + " to Datapoint " + tp[1] + " at " + tp[0]);
+      that.platform.setValue(tp[0], tp[1], newValue);
     }
 
     if (mode == "setrega") {
-      var tp = this.transformDatapoint(dp)
-	  this.log("(Rega) Send " + value + " to Datapoint " + tp[1] + " at " + tp[0]);
-      that.platform.setRegaValue(tp[0],tp[1],value);
+	  this.log("(Rega) Send " + newValue + " to Datapoint " + tp[1] + " at " + tp[0]);
+      that.platform.setRegaValue(tp[0], tp[1], newValue);
     }
 
     if (mode == "sendregacommand") {
-      that.platform.sendRegaCommand(value,callback);
+      that.platform.sendRegaCommand(newValue,callback);
     }
 
   },
