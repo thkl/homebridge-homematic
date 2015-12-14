@@ -756,7 +756,7 @@ HomeMaticGenericChannel.prototype = {
     //that.platform.getValue(that.adress,dp,function(newValue) {
     
     that.platform.getValue(tp[0],tp[1],function(newValue) {
-      if (newValue != undefined) {
+      if ((newValue != undefined) && (newValue != null)) {
       	if (tp[1] == 'LEVEL') {
       		newValue = newValue * 100;
       	}
@@ -769,7 +769,8 @@ HomeMaticGenericChannel.prototype = {
       that.cache(dp,newValue);
       that.eventupdate = false;
      } else {
-      newValue = 0;
+      //newValue = 0;
+      newValue = that.convertValue(dp,0)
      }
      
       if (callback!=undefined) {
