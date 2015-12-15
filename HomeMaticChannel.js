@@ -655,7 +655,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 HomeMaticGenericChannel.prototype = {
 
 
-  addValueMapping: function(dp,value,mappedvalue) {
+  addValueMapping: function(dp,value,mappedvalue) {
     if (this.datapointMappings[dp]==undefined) {
       this.datapointMappings[dp] = [];
     }
@@ -666,7 +666,7 @@ HomeMaticGenericChannel.prototype = {
   query: function(dp,callback) {
     var that = this;
 
-    if ((this.usecache == true ) && (this.state[dp] != undefined) && (this.state[dp]!=null)) {
+    if ((this.usecache == true ) && (this.state[dp] != undefined) && (this.state[dp]!=null)) {
       //that.log("Use Cache");
       if (callback!=undefined){
       callback(this.state[dp]);
