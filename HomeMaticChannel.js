@@ -448,10 +448,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     var thermo = new Service["TemperatureSensor"](this.name);
     this.services.push(thermo);
 
-    var ctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature);
-    ctemp.setProps({ minValue: -100 });
-
-    ctemp.on('get', function(callback) {
+    var ctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
+    .setProps({ minValue: -100 })
+    .on('get', function(callback) {
       that.query("TEMPERATURE",function(value){
        if (callback) callback(null,value);
       });
