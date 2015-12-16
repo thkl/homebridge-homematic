@@ -449,7 +449,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     this.services.push(thermo);
 
     var ctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
-
+    .setProps({ minValue: -100 })
     .on('get', function(callback) {
       that.query("TEMPERATURE",function(value){
        if (callback) callback(null,value);
@@ -655,7 +655,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 HomeMaticGenericChannel.prototype = {
 
 
-  addValueMapping: function(dp,value,mappedvalue) {
+  addValueMapping: function(dp,value,mappedvalue) {
     if (this.datapointMappings[dp]==undefined) {
       this.datapointMappings[dp] = [];
     }
@@ -666,7 +666,7 @@ HomeMaticGenericChannel.prototype = {
   query: function(dp,callback) {
     var that = this;
 
-    if ((this.usecache == true ) && (this.state[dp] != undefined) && (this.state[dp]!=null)) {
+    if ((this.usecache == true ) && (this.state[dp] != undefined) && (this.state[dp]!=null)) {
       //that.log("Use Cache");
       if (callback!=undefined){
       callback(this.state[dp]);
@@ -756,7 +756,7 @@ HomeMaticGenericChannel.prototype = {
     //that.platform.getValue(that.adress,dp,function(newValue) {
     
     that.platform.getValue(tp[0],tp[1],function(newValue) {
-      if (newValue != undefined) {
+      if ((newValue != undefined) && (newValue != null)) {
       	if (tp[1] == 'LEVEL') {
       		newValue = newValue * 100;
       	}
@@ -769,7 +769,8 @@ HomeMaticGenericChannel.prototype = {
       that.cache(dp,newValue);
       that.eventupdate = false;
      } else {
-      newValue = 0;
+      //newValue = 0;
+      newValue = that.convertValue(dp,0)
      }
      
       if (callback!=undefined) {
