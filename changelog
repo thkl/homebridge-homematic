@@ -1,6 +1,9 @@
 Changelog
 =========
 
+Version: 0.0.24
+- merged some Changes from https://github.com/JensBonse/homebridge-homematic
+
 Version: 0.0.23
 - added HM-LC-RGBW-WM
 

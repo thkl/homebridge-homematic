@@ -761,7 +761,7 @@ HomeMaticGenericChannel.prototype = {
       		newValue = newValue * 100;
       	}
       	if ((tp[1] == 'COLOR') && (that.type == "RGBW_COLOR")) {
-      		newValue = Math.round((value/199)*360);
+      		newValue = Math.round((newValue/199)*360);
       	}
       that.eventupdate = true;
       //var ow = newValue;
