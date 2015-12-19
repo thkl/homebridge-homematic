@@ -1,6 +1,9 @@
 Changelog
 =========
 
+Version: 0.0.25
+- fixed State on vs 1% dimmer bug
+
 Version: 0.0.24
 - merged some Changes from https://github.com/JensBonse/homebridge-homematic
 
