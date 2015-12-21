@@ -23,6 +23,10 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
   var that = this;
   var services = [];
 
+  if (that.adress.indexOf("CUxD.") > -1) {
+    this.usecache = false;
+  }
+
   if (this.isSupported()==false) {
     return;
   }
