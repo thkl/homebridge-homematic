@@ -113,7 +113,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.command("set","1:LEVEL" , (value==1)? "1": "0");
+      that.command("set","1:LEVEL" , (value==1)? "100": "0");
       callback();
     }.bind(this));
 
