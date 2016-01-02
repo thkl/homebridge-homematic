@@ -23,6 +23,10 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
   var that = this;
   var services = [];
 
+  if (that.adress.indexOf("CUxD.") > -1) {
+    this.usecache = false;
+  }
+
   if (this.isSupported()==false) {
     return;
   }
@@ -54,7 +58,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     case "SWITCH":
 
 
-    var lightbulb = new Service["Lightbulb"](this.name);
+    var lightbulb = null;
 
     if (this.special=="OUTLET") {
 
@@ -64,6 +68,8 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
         if (callback) callback(null,1);
       }.bind(this));
 
+    } else {
+    	lightbulb = new Service["Lightbulb"](this.name);
     }
 
     this.services.push(lightbulb);
@@ -799,7 +805,7 @@ HomeMaticGenericChannel.prototype = {
     	newValue = newValue * 100;
     }
     if ((tp[1] == 'COLOR') && (this.type == "RGBW_COLOR")) {
-    	newValue = Math.round((value/199)*360);
+    	newValue = Math.round((newValue/199)*360);
     }
     this.eventupdate = true;
     if (this.cadress!=undefined) {
