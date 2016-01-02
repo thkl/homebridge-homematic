@@ -107,7 +107,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.command("set","1:LEVEL" , (value==1)? "1": "0");
+      that.command("set","1:LEVEL" , (value==1)? "100": "0");
       callback();
     }.bind(this));
 
@@ -234,12 +234,24 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 	
 	.on('get', function(callback) {
       that.query("DIRECTION",function(value){
-       if (callback) callback(null,value);
+       if (callback) {
+          if (value!=undefined) {
+            callback(null,value);
+          } else {
+            callback(null,"0");
+          }
+                
+       }
       });
     }.bind(this));
     
     this.currentStateCharacteristic["DIRECTION"] = pstate;
     pstate.eventEnabled = true;
+
+    this.addValueMapping("DIRECTION",0,2);
+    this.addValueMapping("DIRECTION",1,1);
+    this.addValueMapping("DIRECTION",2,0);
+    this.addValueMapping("DIRECTION",3,2);
 
     this.remoteGetValue("LEVEL");
     this.remoteGetValue("DIRECTION");
