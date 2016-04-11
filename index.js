@@ -53,6 +53,8 @@ function HomeMaticPlatform(log, config) {
   this.log = log;
   
   this.log("Homematic Plugin Version " + this.getVersion());
+  this.log("Plugin by thkl  https://github.com/thkl");
+  this.log("Homematic is a registered trademark of the EQ-3 AG");
   this.log("Please report any issues to https://github.com/thkl/homebridge-homematic/issues");
   
   this.ccuIP = config["ccu_ip"];
@@ -66,6 +68,11 @@ function HomeMaticPlatform(log, config) {
   this.variables = config["variables"];
   this.programs = config["programs"];
   this.subsection = config["subsection"];
+  
+  if ((this.subsection!=undefined) && (this.subsection=="")) {
+    this.log("there is no value for the key subsection in config.json. There will be no devices fetched from your ccu.");
+  }
+  
   this.sendQueue = [];
   this.timer = 0;
 

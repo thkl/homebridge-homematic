@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Version 0.0.26
+- implemented TILT Sensor
+- added old Thermostats
+- added Key Channels -> usefull for Scenetrigger (if you want to use keys you have to select your devices by a subsection)
+
+
 Version: 0.0.25
 - fixed State on vs 1% dimmer bug
 
