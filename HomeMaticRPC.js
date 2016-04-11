@@ -38,7 +38,7 @@ HomeMaticRPC.prototype.init = function() {
     });
 
     this.server.on("NotFound", function(method, params) {
-      that.log("Method " + method + " does not exist");
+      //that.log("Method " + method + " does not exist");
     });
 
     this.server.on("system.listMethods", function(err, params, callback) {

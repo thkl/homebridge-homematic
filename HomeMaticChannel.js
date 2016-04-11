@@ -27,7 +27,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     this.usecache = false;
   }
 
-  if (this.isSupported()==false) {
+
+  if (this.isSupported(true)==false) {
+	that.log("Channeltype %s not supported",type);
     return;
   }
 
@@ -94,6 +96,13 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     break;
 
+
+    case "KEY": 
+	  var key = new Service.StatelessProgrammableSwitch(this.name);
+	  var cc = key.getCharacteristic(Characteristic.ProgrammableSwitchEvent);
+	  this.currentStateCharacteristic["PRESS_SHORT"] = cc;
+	  this.services.push(key);
+   	break;
 
     case "RGBW_COLOR":
     
@@ -264,6 +273,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     break;
 
+    case "TILT_SENSOR":
     case "SHUTTER_CONTACT":
 
     if (this.special=="DOOR") {
@@ -478,7 +488,96 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     ctemp.eventEnabled = true;
 
     break;
+    
+    
+    
 
+	case "CLIMATECONTROL_REGULATOR":
+    
+    var thermo = new Service["Thermostat"](this.name);
+    this.services.push(thermo);
+
+    var mode = thermo.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
+    .on('get', function(callback) {
+      
+      this.query("SETPOINT",function(value) {
+         if (value==6.0){
+			that.currentStateCharacteristic["MODE"].setValue(1, null);
+           if (callback) callback(null,0);
+         } else {
+           if (callback) callback(null,1);
+         }
+      });
+
+
+    }.bind(this));
+
+    this.currentStateCharacteristic["MODE"] = mode;
+    mode.eventEnabled = true;
+
+    var targetMode = thermo.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+    .on('get', function(callback) {
+      
+      this.query("SETPOINT",function(value) {
+         if (value==6.0){
+          if (callback) callback(null,0);
+         } else {
+          if (callback) callback(null,1);
+         }
+      });
+
+    }.bind(this))
+
+    .on('set', function(value, callback) {
+      if (value==0) {
+        this.command("setrega", "SETPOINT", 6.0);
+        this.cleanVirtualDevice("SETPOINT");
+      } else {
+        this.cleanVirtualDevice("SETPOINT");
+      }
+      callback();
+    }.bind(this));
+
+    targetMode.setProps({
+        format: Characteristic.Formats.UINT8,
+        perms: [Characteristic.Perms.READ, Characteristic.Perms.WRITE, Characteristic.Perms.NOTIFY],
+	    maxValue: 1,
+	    minValue: 0,
+    	minStep: 1,
+    });
+
+
+    var ttemp = thermo.getCharacteristic(Characteristic.TargetTemperature)
+    .on('get', function(callback) {
+    
+      this.query("SETPOINT",function(value) {
+		
+	
+		if (value<10) {
+			value=10;
+		}	
+			if (callback) callback(null,value);
+		});
+		
+    }.bind(this))
+
+    .on('set', function(value, callback) {
+        this.delayed("setrega", "SETPOINT", value,500);
+        callback();
+    }.bind(this));
+    
+    this.currentStateCharacteristic["SETPOINT"] = ttemp;
+    ttemp.eventEnabled = true;
+
+    thermo.getCharacteristic(Characteristic.TemperatureDisplayUnits)
+    .on('get', function(callback) {
+      if (callback) callback(null, Characteristic.TemperatureDisplayUnits.CELSIUS);
+    }.bind(this));
+
+    this.remoteGetValue("SETPOINT");
+    break;
+    
+    
     case "CLIMATECONTROL_RT_TRANSCEIVER":
     case "THERMALCONTROL_TRANSMIT":
 
@@ -800,13 +899,26 @@ HomeMaticGenericChannel.prototype = {
 
 
   event:function(dp,newValue) {
+  
+    var that = this;
     var tp = this.transformDatapoint(dp);
+    
+    
     if (tp[1] == 'LEVEL') {
     	newValue = newValue * 100;
     }
     if ((tp[1] == 'COLOR') && (this.type == "RGBW_COLOR")) {
     	newValue = Math.round((newValue/199)*360);
     }
+    
+    if (tp[1] == 'PRESS_SHORT') {
+		var targetChar = that.currentStateCharacteristic[tp[1]];
+		targetChar.setValue(1);
+        setTimeout(function(){targetChar.setValue(0);}, 1000);
+	    return;
+    }
+    
+    
     this.eventupdate = true;
     if (this.cadress!=undefined) {
 
@@ -919,11 +1031,19 @@ HomeMaticGenericChannel.prototype = {
   } ,
 
 
-  isSupported:function() {
+  isSupported:function(subsectionInclude) {
 
-    return (["SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
-    "THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",
-    "KEYMATIC","SMOKE_DETECTOR","WEATHER_TRANSMIT","WEATHER","PROGRAM_LAUNCHER","VARIABLE","RGBW_COLOR"].indexOf(this.type) > -1)
+    if (subsectionInclude) {
+	    return (["SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
+    	"THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",
+    	"KEYMATIC","SMOKE_DETECTOR","WEATHER_TRANSMIT","WEATHER","PROGRAM_LAUNCHER","VARIABLE",
+    	"RGBW_COLOR","TILT_SENSOR","CLIMATECONTROL_REGULATOR","KEY"].indexOf(this.type) > -1)
+    } else {
+    	return (["SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
+    	"THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",
+    	"KEYMATIC","SMOKE_DETECTOR","WEATHER_TRANSMIT","WEATHER","PROGRAM_LAUNCHER","VARIABLE",
+    	"RGBW_COLOR","TILT_SENSOR","CLIMATECONTROL_REGULATOR"].indexOf(this.type) > -1)
+    }
 
     return false;
   }

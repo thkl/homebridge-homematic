@@ -158,11 +158,13 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
               
               
               var isChannelFiltered = false;
+              var isSubsectionSelected = false;
 			  // if we have a subsection list check if the channel is here
 			  if (json["subsection"]!=undefined) {
 			   var cin = (json["subsection"].indexOf(ch.cId) > -1);
 			    // if not .. set filter flag
 			    isChannelFiltered = !cin;
+			    isSubsectionSelected = cin;
 			  }
 
 			  if ((cfg!=undefined) && (cfg["filter"]!=undefined) && (cfg["filter"].indexOf(ch.type)>-1)) {
@@ -185,7 +187,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                   if ((that.doors!=undefined) && (that.doors.indexOf(ch.address) > -1)) {special = "DOOR";}
                   
                   var accessory = new HomeMaticGenericChannel(that.log, that, ch.id, ch.name, ch.type, ch.address, special ,cfg, Service, Characteristic);
-                  if (accessory.isSupported()==true) {
+                  if (accessory.isSupported(isSubsectionSelected)==true) {
                   	that.foundAccessories.push(accessory);
                   }
 
@@ -221,9 +223,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
            that.foundAccessories.push(accessory);
         }
 */                
-                  			  
         callback(that.foundAccessories);
-                
       } else {
         callback(that.foundAccessories);
       }
@@ -234,7 +234,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
     this.fetch_npmVersion("homebridge-homematic",function(npmVersion){
       npmVersion = npmVersion.replace('\n','');
       that.log("NPM %s vs Local %s",npmVersion,that.getVersion());
-      if (npmVersion > that.getVersion()) {
+      if (npmVersion > that.getVersion()) {
        that.log("There is a new Version available. Please update with sudo npm -g update homebridge-homematic");
       }
     });
@@ -242,19 +242,19 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 
 HomeMaticPlatform.prototype.setValue = function(channel, datapoint, value) {
     
-    if (channel.indexOf("BidCos-RF.") > -1)  {
+    if (channel.indexOf("BidCos-RF.") > -1)  {
       this.xmlrpc.setValue(channel, datapoint, value);
       return;
     }
 
-    if (channel.indexOf("VirtualDevices.") > -1)  {
+    if (channel.indexOf("VirtualDevices.") > -1)  {
       var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
       rega.setValue(channel, datapoint, value);
       return;
     }
 
 
-    if (channel.indexOf("CUxD.") > -1)  {
+    if (channel.indexOf("CUxD.") > -1)  {
       var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
       rega.setValue(channel, datapoint, value);
       return;
@@ -296,19 +296,19 @@ HomeMaticPlatform.prototype.getValue = function(channel, datapoint, callback) {
 
     if (channel != undefined) {
 
-    if (channel.indexOf("BidCos-RF.") > -1)  {
+    if (channel.indexOf("BidCos-RF.") > -1)  {
       this.xmlrpc.getValue(channel, datapoint, callback);
       return;
     }
 
 
-    if (channel.indexOf("VirtualDevices.") > -1)  {
+    if (channel.indexOf("VirtualDevices.") > -1)  {
       var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
       rega.getValue(channel, datapoint, callback);
       return;
     }
 
-    if (channel.indexOf("CUxD.") > -1)  {
+    if (channel.indexOf("CUxD.") > -1)  {
       var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
       rega.getValue(channel, datapoint, callback);
       return;
@@ -429,4 +429,3 @@ HomeMaticPlatform.prototype.fetch_npmVersion = function(pck, callback) {
     callback(npm_version);
  });
 }
-
