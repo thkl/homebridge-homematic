@@ -487,6 +487,19 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     this.currentStateCharacteristic["TEMPERATURE"] = ctemp;
     ctemp.eventEnabled = true;
 
+	var humidity = new Service["HumiditySensor"](this.name);
+ 	  this.services.push(humidity);
+ 	    
+      var chum = humidity.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+      .on('get', function(callback) {
+         that.query("HUMIDITY",function(value){
+            if (callback) callback(null,value);
+         });
+     }.bind(this));
+ 
+     this.currentStateCharacteristic["HUMIDITY"] = chum;
+     chum.eventEnabled= true;
+
     break;
     
     

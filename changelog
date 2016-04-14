@@ -1,6 +1,10 @@
 Changelog
 =========
 
+Version 0.0.27
+- added pull Request from xfjx:master
+
+
 Version 0.0.26
 - implemented TILT Sensor
 - added old Thermostats
