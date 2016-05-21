@@ -85,7 +85,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.command("set","STATE" , (value==1) ? true:false)
+      that.delayed("set","STATE" , (value==1) ? true:false)
       callback();
     }.bind(this));
 
