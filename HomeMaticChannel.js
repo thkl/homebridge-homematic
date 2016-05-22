@@ -84,7 +84,12 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       });
     }.bind(this))
 
-    .on('set', function(value, callback) {
+    .on('set', function(value, callback) {var onTime = that.state['ON_TIME'];
+
+      if ((onTime!=undefined) && (onTime>0) && (value==1)) {
+        that.command("set","ON_TIME" , onTime)
+      }
+
       that.delayed("set","STATE" , (value==1) ? true:false)
       callback();
     }.bind(this));
@@ -92,8 +97,6 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     that.currentStateCharacteristic["STATE"] = cc;
     cc.eventEnabled = true;
 
-    this.remoteGetValue("STATE");
-      
       var onTimeProperties = {
           format: Characteristic.Formats.FLOAT,
           unit: Characteristic.Units.SECONDS,
@@ -103,15 +106,17 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
           perms: [Characteristic.Perms.WRITE]
         };
 
-      var on_time = new Characteristic("OnTime","CEA288AC-EAC5-447A-A2DD-D684E4517440", onTimeProperties)
+      var on_time = new Characteristic("On duration","CEA288AC-EAC5-447A-A2DD-D684E4517440", onTimeProperties)
           .on('set', function(value, callback) {
-            that.command("set","ON_TIME" , value);
+            that.state['ON_TIME']=value;
             callback();
           }.bind(this));
 
         on_time.eventEnabled = true;
 
         lightbulb.addCharacteristic(on_time);
+
+      this.remoteGetValue("STATE");
 
     break;
 
