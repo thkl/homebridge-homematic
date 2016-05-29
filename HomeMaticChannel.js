@@ -356,7 +356,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       var cdoor = door.getCharacteristic(Characteristic.CurrentDoorState);
       
       cdoor.on('get', function(callback) {
-      that.query("STATE",function(value){
+      that.query("SENSOR",function(value){
        if (callback) callback(null,value);
       });
       }.bind(this));
