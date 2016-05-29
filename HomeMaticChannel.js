@@ -17,6 +17,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
   this.services = [];
   this.usecache = true;
   this.cadress = undefined;
+
   
   this.i_characteristic = {};
 
@@ -85,16 +86,41 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.command("set","STATE" , (value==1) ? true:false)
+
+      var onTime = that.state['ON_TIME'];
+	  if ((onTime!=undefined) && (onTime>0) && (value==1)) {
+		  that.command("set","ON_TIME" , onTime)
+	  }
+
+	  that.delayed("set","STATE" , (value==1) ? true:false)
       callback();
     }.bind(this));
 
     that.currentStateCharacteristic["STATE"] = cc;
     cc.eventEnabled = true;
 
-    this.remoteGetValue("STATE");
+    var onTimeProperties = {
+           format: Characteristic.Formats.FLOAT,
+           unit: Characteristic.Units.SECONDS,
+           minValue: 0,
+           maxValue: 3600.0, // normally defined as 85825945.6 but that`s in Hesperus inconvenient and unusable
+           minStep: 1,
+           perms: [Characteristic.Perms.WRITE]
+         };
+ 
+       var on_time = new Characteristic("OnTime","CEA288AC-EAC5-447A-A2DD-D684E4517440", onTimeProperties)
+           .on('set', function(value, callback) {
+             that.state['ON_TIME']=value;
+             callback();
+           }.bind(this));
+ 
+         on_time.eventEnabled = true;
+ 
+         lightbulb.addCharacteristic(on_time);
+    
+	this.remoteGetValue("STATE");
 
-    break;
+   break;
 
 
     case "KEY": 
@@ -326,10 +352,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       var cdoor = door.getCharacteristic(Characteristic.CurrentDoorState);
       cdoor.on('get', function(callback) {
       	that.query("STATE",function(value){
-      	that.log(that.name + " set to " + value);
-      	  if (value==undefined) {
+      	if (value==undefined) {
           value = 0;
-       }
+        }
 		if (callback) callback(null,value);
       	});
       }.bind(this));

@@ -1,6 +1,10 @@
 Changelog
 =========
 
+Version 0.0.29
+- changed Rega Port to 8181
+
+
 Version 0.0.27
 - added pull Request from xfjx:master
 

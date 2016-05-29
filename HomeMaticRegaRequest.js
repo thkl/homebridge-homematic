@@ -12,7 +12,7 @@ HomeMaticRegaRequest.prototype = {
 
     var post_options = {
       host: this.ccuIP,
-      port: "80",
+      port: "8181",
       path: "/tclrega.exe",
       method: "POST",
       headers: {
