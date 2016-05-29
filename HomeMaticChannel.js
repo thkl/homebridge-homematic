@@ -58,6 +58,8 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
   switch (this.type) {
 
+
+	case "DIGITAL_OUTPUT":
     case "SWITCH":
 
 
@@ -299,6 +301,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     break;
 
+
     case "TILT_SENSOR":
     case "SHUTTER_CONTACT":
 
@@ -343,6 +346,52 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     this.remoteGetValue("STATE");
 
     break;
+
+
+    case "SENSOR":
+
+    if (this.special=="DOOR") {
+
+      var door = new Service["DoorStateService"](this.name);
+      var cdoor = door.getCharacteristic(Characteristic.CurrentDoorState);
+      
+      cdoor.on('get', function(callback) {
+      that.query("STATE",function(value){
+       if (callback) callback(null,value);
+      });
+      }.bind(this));
+      
+      
+      this.currentStateCharacteristic["SENSOR"] = cdoor;
+      cdoor.eventEnabled = true;
+      
+      this.addValueMapping("SENSOR",0,1);
+      this.addValueMapping("SENSOR",1,0);
+
+      this.addValueMapping("SENSOR",false,1);
+      this.addValueMapping("SENSOR",true,0);
+
+      this.services.push(door);
+
+    } else {
+
+      var contact = new Service["ContactSensor"](this.name);
+      var state = contact.getCharacteristic(Characteristic.ContactSensorState)
+      .on('get', function(callback) {
+      that.query("SENSOR",function(value){
+       callback(null,value);
+      });
+      }.bind(this));
+      
+      that.currentStateCharacteristic["SENSOR"] = state;
+      state.eventEnabled = true;
+      this.services.push(contact);
+    }
+
+    this.remoteGetValue("SENSOR");
+
+    break;
+
 
     case "ROTARY_HANDLE_SENSOR":
 
@@ -1072,12 +1121,12 @@ HomeMaticGenericChannel.prototype = {
   isSupported:function(subsectionInclude) {
 
     if (subsectionInclude) {
-	    return (["SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
+	    return (["SENSOR","DIGITAL_OUTPUT","SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
     	"THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",
     	"KEYMATIC","SMOKE_DETECTOR","WEATHER_TRANSMIT","WEATHER","PROGRAM_LAUNCHER","VARIABLE",
     	"RGBW_COLOR","TILT_SENSOR","CLIMATECONTROL_REGULATOR","KEY"].indexOf(this.type) > -1)
     } else {
-    	return (["SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
+    	return (["SENSOR","DIGITAL_OUTPUT","SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
     	"THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",
     	"KEYMATIC","SMOKE_DETECTOR","WEATHER_TRANSMIT","WEATHER","PROGRAM_LAUNCHER","VARIABLE",
     	"RGBW_COLOR","TILT_SENSOR","CLIMATECONTROL_REGULATOR"].indexOf(this.type) > -1)
