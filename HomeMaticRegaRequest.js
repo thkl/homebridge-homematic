@@ -4,12 +4,16 @@ var http = require("http");
 function HomeMaticRegaRequest(log, ccuip) {
   this.log = log;
   this.ccuIP = ccuip;
+  this.timeout = 60;
 }
 
 HomeMaticRegaRequest.prototype = {
 
   script: function(script, callback) {
-
+    var that = this;
+    
+    var ls = script;
+    
     var post_options = {
       host: this.ccuIP,
       port: "8181",
@@ -19,30 +23,41 @@ HomeMaticRegaRequest.prototype = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Content-Length": script.length
       },
-      timeout: 60
     };
 
     var post_req = http.request(post_options, function(res) {
       var data = "";
+      var that = this;
+      
       res.setEncoding("binary");
+      
       res.on("data", function(chunk) {
         data += chunk.toString();
       });
+      
       res.on("end", function() {
         var pos = data.lastIndexOf("<xml><exec>");
         var response = (data.substring(0, pos));
         callback(response);
       });
+
+      
     });
+
 
     post_req.on("error", function(e) {
-      callback("{}");
+	    that.log("Error while executing rega script " + ls);
+        callback(undefined);
     });
 
+    post_req.on("timeout", function(e) {
+	    that.log("timeout while executing rega script");
+        callback(undefined);
+    });
+    
+	post_req.setTimeout(this.timeout * 1000);
     post_req.write(script);
     post_req.end();
-
-
   },
 
   getValue: function(channel, datapoint, callback) {

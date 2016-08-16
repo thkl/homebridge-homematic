@@ -65,6 +65,45 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     var lightbulb = null;
 
+    if (this.special=="PROGRAM") {
+    
+      lightbulb = new Service["Outlet"](this.name);
+      lightbulb.getCharacteristic(Characteristic.OutletInUse)
+		.on('get', function(callback) {
+        	if (callback) callback(null,1);
+      	}.bind(this));
+    
+
+
+    this.services.push(lightbulb);
+    var cc = lightbulb.getCharacteristic(Characteristic.On)
+
+    .on('get', function(callback) {
+      if (callback) callback(null,0);
+     }.bind(this))
+
+    .on('set', function(value, callback) {
+      if (value==1) {
+      
+        that.log("Launch Program " + that.name);
+        that.command("sendregacommand","","var x=dom.GetObject(\""+that.name+"\");if (x) {x.ProgramExecute();}",function() {
+    		
+    	});
+    	
+    	setTimeout(function() {
+    		cc.setValue(0, null);
+    
+    	},1000);
+    	
+      }
+      callback(0);
+
+    }.bind(this));
+
+
+    
+    } else {
+    
     if (this.special=="OUTLET") {
 
       lightbulb = new Service["Outlet"](this.name);
@@ -98,8 +137,6 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       callback();
     }.bind(this));
 
-    that.currentStateCharacteristic["STATE"] = cc;
-    cc.eventEnabled = true;
 
     var onTimeProperties = {
            format: Characteristic.Formats.FLOAT,
@@ -121,6 +158,12 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
          lightbulb.addCharacteristic(on_time);
     
 	this.remoteGetValue("STATE");
+
+    }
+    
+    that.currentStateCharacteristic["STATE"] = cc;
+    cc.eventEnabled = true;
+
 
    break;
 
@@ -576,8 +619,121 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     break;
     
+  
+     case "CLIMATECONTROL_REGULATOR":
     
+    this.usecache = false;
+   var thermo = new Service["Thermostat"](this.name);
+    this.services.push(thermo);
+
+    var mode = thermo.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
+    .on('get', function(callback) {
+      
+      this.query("2:SETPOINT",function(value) {
+         if (value==6.0){
+         that.currentStateCharacteristic["MODE"].setValue(1, null);
+           if (callback) callback(null,0);
+         } else {
+           if (callback) callback(null,1);
+         }
+      });
+
+
+    }.bind(this));
+
+    this.currentStateCharacteristic["MODE"] = mode;
+    mode.eventEnabled = true;
+
+    var targetMode = thermo.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+    .on('get', function(callback) {
+      
+      this.query("2:SETPOINT",function(value) {
+         if (value==6.0){
+          if (callback) callback(null,0);
+         } else {
+          if (callback) callback(null,1);
+         }
+      });
+
+    }.bind(this))
+
+    .on('set', function(value, callback) {
+      if (value==0) {
+        this.command("setrega", "2:SETPOINT", 6.0);
+        this.cleanVirtualDevice("SETPOINT");
+      } else {
+        this.cleanVirtualDevice("SETPOINT");
+      }
+      callback();
+    }.bind(this));
+
+    targetMode.setProps({
+        format: Characteristic.Formats.UINT8,
+        perms: [Characteristic.Perms.READ, Characteristic.Perms.WRITE, Characteristic.Perms.NOTIFY],
+       maxValue: 1,
+       minValue: 0,
+       minStep: 1,
+    });
+   
+   var cctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
+   .setProps({ minValue: -100 })
+    .on('get', function(callback) {
+      this.remoteGetValue("1:TEMPERATURE",function(value){
+       if (callback) callback(null,value);
+      });
+    }.bind(this));
+
+    this.currentStateCharacteristic["TEMPERATURE"] = cctemp;
+    cctemp.eventEnabled = true;
+   
+   
+   var cchum = thermo.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+   .on('get', function(callback) {
+      this.remoteGetValue("1:HUMIDITY",function(value){
+       if (callback) callback(null,value);
+      });
+    }.bind(this));
+
+    this.currentStateCharacteristic["HUMIDITY"] = cchum;
+    cchum.eventEnabled = true;
     
+
+    var ttemp = thermo.getCharacteristic(Characteristic.TargetTemperature)
+    .on('get', function(callback) {
+    
+      this.query("2:SETPOINT",function(value) {
+      
+   
+      if (value<6) {
+         value=6;
+      }   
+         if (callback) callback(null,value);
+      });
+      
+    }.bind(this))
+
+    .on('set', function(value, callback) {
+        this.delayed("setrega", "2:SETPOINT", value,500);
+        callback();
+    }.bind(this));
+    
+    this.currentStateCharacteristic["SETPOINT"] = ttemp;
+    ttemp.eventEnabled = true;
+
+    thermo.getCharacteristic(Characteristic.TemperatureDisplayUnits)
+    .on('get', function(callback) {
+      if (callback) callback(null, Characteristic.TemperatureDisplayUnits.CELSIUS);
+    }.bind(this));
+
+
+   this.remoteGetValue("TEMPERATURE");
+   this.remoteGetValue("HUMIDITY");
+   this.remoteGetValue("SETPOINT");
+   
+
+    break;
+    
+/*    
 
 	case "CLIMATECONTROL_REGULATOR":
     
@@ -663,7 +819,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     this.remoteGetValue("SETPOINT");
     break;
-    
+ */   
     
     case "CLIMATECONTROL_RT_TRANSCEIVER":
     case "THERMALCONTROL_TRANSMIT":

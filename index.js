@@ -63,7 +63,7 @@ function HomeMaticPlatform(log, config) {
   this.filter_channel = config["filter_channel"];
   
   this.outlets = config["outlets"];
-
+  this.iosworkaround = config["ios10"];
   this.doors = config["doors"];
   this.variables = config["variables"];
   this.programs = config["programs"];
@@ -127,6 +127,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
     that.foundAccessories = [];
     var internalconfig = this.internalConfig();
     
+        
     var script = "string sDeviceId;string sChannelId;boolean df = true;Write(\'{\"devices\":[\');foreach(sDeviceId, root.Devices().EnumIDs()){object oDevice = dom.GetObject(sDeviceId);if(oDevice){var oInterface = dom.GetObject(oDevice.Interface());if(df) {df = false;} else { Write(\',\');}Write(\'{\');Write(\'\"id\": \"\' # sDeviceId # \'\",\');Write(\'\"name\": \"\' # oDevice.Name() # \'\",\');Write(\'\"address\": \"\' # oDevice.Address() # \'\",\');Write(\'\"type\": \"\' # oDevice.HssType() # \'\",\');Write(\'\"channels\": [\');boolean bcf = true;foreach(sChannelId, oDevice.Channels().EnumIDs()){object oChannel = dom.GetObject(sChannelId);if(bcf) {bcf = false;} else {Write(\',\');}Write(\'{\');Write(\'\"cId\": \' # sChannelId # \',\');Write(\'\"name\": \"\' # oChannel.Name() # \'\",\');if(oInterface){Write(\'\"address\": \"\' # oInterface.Name() #\'.'\ # oChannel.Address() # \'\",\');}Write(\'\"type\": \"\' # oChannel.HssType() # \'\"\');Write(\'}\');}Write(\']}\');}}Write(\']\');";
 
     
@@ -141,11 +142,47 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
     
     
     script = script + "Write('\}'\);";
-    
+     
+    var localcache = './.homebridge/ccu.json';
+
     var regarequest = new HomeMaticRegaRequest(this.log, this.ccuIP).script(script, function(data) {
+	  var json;
     
-      var json = JSON.parse(data);
-      if (json["devices"] !== undefined) {
+      if (data != undefined) {
+	     try {
+	      // read Json 
+	      json = JSON.parse(data)
+          if ((json != undefined) && (json["devices"] !== undefined)) {
+			// seems to be valid json
+			fs.writeFile(localcache, data, function (err) {
+			  if (err) {
+				  that.log('Cannot cache ccu data ',err);
+			  }
+				  that.log('will cache ccu response ...');
+    	      });
+          }
+		 } catch (e) {
+  				that.log("Unable to parse live ccu data. Will try cache if there is one");
+		 }
+      }
+      
+      // check if we got valid json from ccu
+      if (json == undefined) {
+      // try to load Data
+      data = fs.readFileSync(localcache).toString();
+	  if (data != undefined) {
+	      try {
+	       json = JSON.parse(data)
+		   that.log("loaded ccu data from local cache ... WARNING: your mileage may vary");
+		  } catch (e) {
+  				that.log("Unable to parse cached ccu data. giving up");
+		  }
+  	  }
+      }
+      
+      if ((json != undefined) && (json["devices"] !== undefined)) {
+      
+      
         json["devices"].map(function(device) {
         
           var cfg = that.deviceInfo(internalconfig,device["type"]);
@@ -211,8 +248,20 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 
         if (that.programs!=undefined) {
           that.programs.map(function(program){
-            var accessory = new HomeMaticGenericChannel(that.log, that, "1234" , program , "PROGRAM_LAUNCHER" , "1234", "" , undefined, Service, Characteristic);
-        	that.foundAccessories.push(accessory);
+            
+            var prgtype = ""
+            
+            if (that.iosworkaround==undefined) {
+                that.log('Program ' + program + ' added as Program_Launcher');
+	            var accessory = new HomeMaticGenericChannel(that.log, that, "1234" , program , "PROGRAM_LAUNCHER" , "1234", "" , undefined, Service, Characteristic);
+    	    	that.foundAccessories.push(accessory);
+            } else {
+	            var cfg = that.deviceInfo(internalconfig,"");
+                that.log('Program ' + program + ' added as SWITCH cause of IOS 10');
+        	    var accessory = new HomeMaticGenericChannel(that.log, that, "-1" , program , "SWITCH" , "1234", "PROGRAM" , undefined, Service, Characteristic);
+        		that.foundAccessories.push(accessory);
+            }
+          
           });
         }
 
