@@ -167,9 +167,8 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
       }
       
       // check if we got valid json from ccu
-      if (json == undefined) {
+/*      if (json == undefined) {
       // try to load Data
-      if (path.existsSync(localcache)) { 
       data = fs.readFileSync(localcache).toString();
 	  if (data != undefined) {
 	      try {
@@ -179,8 +178,9 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
   				that.log("Unable to parse cached ccu data. giving up");
 		  }
   	  }
+      
       }
-      }
+*/
       if ((json != undefined) && (json["devices"] !== undefined)) {
       
       
