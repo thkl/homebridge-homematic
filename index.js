@@ -167,20 +167,27 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
       }
       
       // check if we got valid json from ccu
-/*      if (json == undefined) {
+      if (json == undefined) {
       // try to load Data
-      data = fs.readFileSync(localcache).toString();
-	  if (data != undefined) {
+      
+      try {
+	    fs.accessSync(localcache, fs.F_OK);
+    	  // try to load Data
+        data = fs.readFileSync(localcache).toString();
+	    if (data != undefined) {
 	      try {
 	       json = JSON.parse(data)
 		   that.log("loaded ccu data from local cache ... WARNING: your mileage may vary");
 		  } catch (e) {
   				that.log("Unable to parse cached ccu data. giving up");
 		  }
-  	  }
-      
+  	    }
+       } catch (e) {
+  				that.log("Unable to load cached ccu data. giving up");
+       }
       }
-*/
+
+      
       if ((json != undefined) && (json["devices"] !== undefined)) {
       
       
@@ -285,7 +292,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
         callback(that.foundAccessories);
       }
     });
-    
+ 
     // Version Check 
     
     this.fetch_npmVersion("homebridge-homematic",function(npmVersion){
