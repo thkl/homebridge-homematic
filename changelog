@@ -2,6 +2,12 @@ Changelog
 =========
 
 Version 0.0.31
+- optional ccu cache
+
+Version 0.0.31
+- bugfix
+
+Version 0.0.31
 - Changes for CLIMATECONTROL_REGULATOR (tnx to BPoHVoodoo)
 - implemented CCU response caching
 - prepared for use with IOS10 Beta Home App - 

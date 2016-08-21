@@ -68,6 +68,7 @@ function HomeMaticPlatform(log, config) {
   this.variables = config["variables"];
   this.programs = config["programs"];
   this.subsection = config["subsection"];
+  this.localCache = config["lcache"];
   
   if ((this.subsection!=undefined) && (this.subsection=="")) {
     this.log("there is no value for the key subsection in config.json. There will be no devices fetched from your ccu.");
@@ -152,14 +153,17 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 	     try {
 	      // read Json 
 	      json = JSON.parse(data)
-          if ((json != undefined) && (json["devices"] !== undefined)) {
+          if ((json != undefined) && (json["devices"] != undefined)) {
 			// seems to be valid json
-			fs.writeFile(localcache, data, function (err) {
-			  if (err) {
-				  that.log('Cannot cache ccu data ',err);
-			  }
-				  that.log('will cache ccu response ...');
-    	      });
+			if (that.localCache != undefined) {
+				fs.writeFile(localcache, data, function (err) {
+				  if (err) {
+					  that.log('Cannot cache ccu data ',err);
+				  }
+					  that.log('will cache ccu response ...');
+    	      	});
+    	     }
+    	     
           }
 		 } catch (e) {
   				that.log("Unable to parse live ccu data. Will try cache if there is one");
@@ -167,7 +171,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
       }
       
       // check if we got valid json from ccu
-      if (json == undefined) {
+      if ((json == undefined) && (that.localCache != undefined)) {
       // try to load Data
       
       try {
