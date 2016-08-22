@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Version 0.0.33
+- optional ccu cache
+
+Version 0.0.32
+- bugfix
+
 Version 0.0.31
 - Changes for CLIMATECONTROL_REGULATOR (tnx to BPoHVoodoo)
 - implemented CCU response caching
