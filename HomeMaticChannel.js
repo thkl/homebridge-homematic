@@ -239,6 +239,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
 
     case "DIMMER":
+	
     var lightbulb = new Service["Lightbulb"](this.name);
     this.services.push(lightbulb);
 
@@ -493,7 +494,20 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     state.eventEnabled = true;
     this.services.push(sensor);
     this.remoteGetValue("MOTION");
-
+    
+	var brightness = new Service["LightSensor"](this.name);
+ 	var cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
+      .on('get', function(callback) {
+         that.query("BRIGHTNESS",function(value){
+            if (callback) callback(null,value);
+         });
+     }.bind(this));
+ 
+     this.currentStateCharacteristic["BRIGHTNESS"] = cbright;
+     cbright.eventEnabled= true;
+	 this.services.push(brightness);
+	
+	
 
     break;
 
@@ -617,14 +631,27 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
  
      this.currentStateCharacteristic["HUMIDITY"] = chum;
      chum.eventEnabled= true;
+	 
+	 var brightness = new Service["LightSensor"](this.name);
+ 	  this.services.push(brightness);
+ 	    
+      var cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
+      .on('get', function(callback) {
+         that.query("BRIGHTNESS",function(value){
+            if (callback) callback(null,value);
+         });
+     }.bind(this));
+ 
+     this.currentStateCharacteristic["BRIGHTNESS"] = cbright;
+     cbright.eventEnabled= true;
 
     break;
     
   
-     case "CLIMATECONTROL_REGULATOR":
+    case "CLIMATECONTROL_REGULATOR":
     
     this.usecache = false;
-   var thermo = new Service["Thermostat"](this.name);
+    var thermo = new Service["Thermostat"](this.name);
     this.services.push(thermo);
 
     var mode = thermo.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
@@ -700,7 +727,8 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     
 
     var ttemp = thermo.getCharacteristic(Characteristic.TargetTemperature)
-    .on('get', function(callback) {
+    .setProps({ minValue: 6.0, maxValue: 30.0, minStep: 0.1 })
+	.on('get', function(callback) {
     
       this.query("2:SETPOINT",function(value) {
       
@@ -1124,6 +1152,9 @@ HomeMaticGenericChannel.prototype = {
       	if ((tp[1] == 'COLOR') && (that.type == "RGBW_COLOR")) {
       		newValue = Math.round((newValue/199)*360);
       	}
+		if (tp[1] == 'BRIGHTNESS') {
+			newValue = Math.pow(10,(newValue/51));
+		}
       that.eventupdate = true;
       //var ow = newValue;
       newValue = that.convertValue(dp,newValue);
@@ -1154,7 +1185,9 @@ HomeMaticGenericChannel.prototype = {
     if ((tp[1] == 'COLOR') && (this.type == "RGBW_COLOR")) {
     	newValue = Math.round((newValue/199)*360);
     }
-    
+    if (tp[1] == 'BRIGHTNESS') {
+		newValue = Math.pow(10,(newValue/51));
+	}
     if (tp[1] == 'PRESS_SHORT') {
 		var targetChar = that.currentStateCharacteristic[tp[1]];
 		targetChar.setValue(1);
@@ -1280,12 +1313,12 @@ HomeMaticGenericChannel.prototype = {
     if (subsectionInclude) {
 	    return (["SENSOR","DIGITAL_OUTPUT","SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
     	"THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",
-    	"KEYMATIC","SMOKE_DETECTOR","SMOKE_DETECTOR_TEAM","WEATHER_TRANSMIT","WEATHER","PROGRAM_LAUNCHER","VARIABLE",
+    	"KEYMATIC","SMOKE_DETECTOR","SMOKE_DETECTOR_TEAM","WEATHER_TRANSMIT","WEATHER","RAINDETECTOR","RAINDETECTOR_HEAT","PROGRAM_LAUNCHER","VARIABLE",
     	"RGBW_COLOR","TILT_SENSOR","CLIMATECONTROL_REGULATOR","KEY"].indexOf(this.type) > -1)
     } else {
     	return (["SENSOR","DIGITAL_OUTPUT","SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
     	"THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",
-    	"KEYMATIC","SMOKE_DETECTOR","SMOKE_DETECTOR_TEAM","WEATHER_TRANSMIT","WEATHER","PROGRAM_LAUNCHER","VARIABLE",
+    	"KEYMATIC","SMOKE_DETECTOR","SMOKE_DETECTOR_TEAM","WEATHER_TRANSMIT","WEATHER","RAINDETECTOR","RAINDETECTOR_HEAT","PROGRAM_LAUNCHER","VARIABLE",
     	"RGBW_COLOR","TILT_SENSOR","CLIMATECONTROL_REGULATOR"].indexOf(this.type) > -1)
     }
 
