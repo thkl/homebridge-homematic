@@ -658,7 +658,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     .on('get', function(callback) {
       
       this.query("2:SETPOINT",function(value) {
-         if (value==6.0){
+         if (value<6.0){
          that.currentStateCharacteristic["MODE"].setValue(1, null);
            if (callback) callback(null,0);
          } else {
@@ -676,7 +676,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     .on('get', function(callback) {
       
       this.query("2:SETPOINT",function(value) {
-         if (value==6.0){
+         if (value<6.0){
           if (callback) callback(null,0);
          } else {
           if (callback) callback(null,1);
@@ -687,7 +687,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     .on('set', function(value, callback) {
       if (value==0) {
-        this.command("setrega", "2:SETPOINT", 6.0);
+        this.command("setrega", "2:SETPOINT", 0);
         this.cleanVirtualDevice("SETPOINT");
       } else {
         this.cleanVirtualDevice("SETPOINT");
@@ -727,7 +727,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     
 
     var ttemp = thermo.getCharacteristic(Characteristic.TargetTemperature)
-    .setProps({ minValue: 6.0, maxValue: 30.0, minStep: 0.1 })
+    .setProps({ minValue: 6.0, maxValue: 30.5, minStep: 0.1 })
 	.on('get', function(callback) {
     
       this.query("2:SETPOINT",function(value) {
@@ -735,14 +735,20 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
    
       if (value<6) {
          value=6;
-      }   
+      }
+	  if (value>30) {
+         value=30.5;
+      }
          if (callback) callback(null,value);
       });
       
     }.bind(this))
 
     .on('set', function(value, callback) {
-        this.delayed("setrega", "2:SETPOINT", value,500);
+      if (value>30) {
+         this.delayed("setrega", "2:SETPOINT", 100,500);
+      }
+		this.delayed("setrega", "2:SETPOINT", value,500);
         callback();
     }.bind(this));
     
