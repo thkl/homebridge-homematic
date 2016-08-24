@@ -747,9 +747,10 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     .on('set', function(value, callback) {
       if (value>30) {
          this.delayed("setrega", "2:SETPOINT", 100,500);
-      }
+      }  else {
 		this.delayed("setrega", "2:SETPOINT", value,500);
-        callback();
+	  }
+      callback();
     }.bind(this));
     
     this.currentStateCharacteristic["SETPOINT"] = ttemp;
