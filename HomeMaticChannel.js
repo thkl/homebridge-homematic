@@ -353,7 +353,6 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
       var door = new Service["DoorStateService"](this.name);
       var cdoor = door.getCharacteristic(Characteristic.CurrentDoorState);
-      
       cdoor.on('get', function(callback) {
       that.query("STATE",function(value){
        if (callback) callback(null,value);
@@ -513,6 +512,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     case "SMOKE_DETECTOR":
 	case "SMOKE_DETECTOR_TEAM":
+	case "SMOKE_DETECTOR_TEAM_V2":
 
     var sensor = new Service["SmokeSensor"](this.name);
     var state = sensor.getCharacteristic(Characteristic.SmokeDetected)
@@ -644,9 +644,114 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
  
      this.currentStateCharacteristic["BRIGHTNESS"] = cbright;
      cbright.eventEnabled= true;
+	 
+	var rain= new Service["IsRainingService"](this.name);
+    this.services.push(rain);
+	var crain = rain.getCharacteristic(Characteristic.IsRainingCharacteristic)
+      .on('get', function(callback) {
+         this.query("RAINING",function(value){
+           if (callback) callback(null,value);
+         });
+      }.bind(this))
+	  
+	 this.currentStateCharacteristic["RAINING"] = crain;
+     crain.eventEnabled= true;  
+	 
+	var windspeed= new Service["WindSpeedService"](this.name);
+    this.services.push(windspeed);
+	var cwindspeed = windspeed.getCharacteristic(Characteristic.WindSpeedCharacteristic)
+      .on('get', function(callback) {
+         this.query("WIND_SPEED",function(value){
+           if (callback) callback(null,value);
+         });
+      }.bind(this))
+	  
+	 this.currentStateCharacteristic["WINDSPEED"] = cwindspeed;
+     cwindspeed.eventEnabled= true;  
+	 
+	var winddirection= new Service["WindDirectionService"](this.name);
+    this.services.push(winddirection);
+	var cwinddirection = winddirection.getCharacteristic(Characteristic.WindDirectionCharacteristic)
+      .on('get', function(callback) {
+         this.query("WIND_DIRECTION",function(value){
+           if (callback) callback(null,value);
+         });
+      }.bind(this))
+	  
+	 this.currentStateCharacteristic["WIND_DIRECTION"] = cwinddirection;
+     cwinddirection.eventEnabled= true;  
+	 
+	var windrange= new Service["WindRangeService"](this.name);
+    this.services.push(windrange);
+	var cwindrange = windrange.getCharacteristic(Characteristic.WindRangeCharacteristic)
+      .on('get', function(callback) {
+         this.query("WIND_DIRECTION_RANGE",function(value){
+           if (callback) callback(null,value);
+         });
+      }.bind(this))
+	  
+	 this.currentStateCharacteristic["WIND_DIRECTION_RANGE"] = cwindrange;
+     cwindrange.eventEnabled= true;  
+	 
 
     break;
     
+	case "LUXMETER":
+
+	var brightness = new Service["LightSensor"](this.name);
+	this.services.push(brightness); 
+	var cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
+      .on('get', function(callback) {
+         that.query("LUX",function(value){
+            if (callback) callback(null,value);
+         });
+     }.bind(this));
+ 
+     this.currentStateCharacteristic["LUX"] = cbright;
+     cbright.eventEnabled= true;
+
+    break;
+	
+	
+	
+	case "RAINDETECTOR":
+    
+    var rain= new Service["IsRainingService"](this.name);
+    this.services.push(rain);
+	var crain = rain.getCharacteristic(Characteristic.IsRainingCharacteristic)
+      .on('get', function(callback) {
+         this.query("STATE",function(value){
+           if (callback) callback(null,value);
+         });
+      }.bind(this))
+	  
+	 this.currentStateCharacteristic["RAINING"] = crain;
+     crain.eventEnabled= true;  
+		
+	break;
+	
+	case "RAINDETECTOR_HEAT":
+	
+	var heat= new Service["Switch"](this.name); 
+	this.services.push(heat);
+	var cheat = heat.getCharacteristic(Characteristic.On)
+    
+      .on('get', function(callback) {
+         that.query("STATE",function(value){
+           if (callback) callback(null,value);
+         });
+      }.bind(this))
+	  
+	  .on('set', function(value, callback) {
+         that.delayed("set","STATE" , (value==1) ? true:false)
+             callback();
+      }.bind(this));
+	  
+	 this.currentStateCharacteristic["STATE"] = cheat;
+     cheat.eventEnabled= true;  
+
+    break;
+  
   
     case "CLIMATECONTROL_REGULATOR":
     
@@ -750,7 +855,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       }  else {
 		this.delayed("setrega", "2:SETPOINT", value,500);
 	  }
-      callback();
+        callback();
     }.bind(this));
     
     this.currentStateCharacteristic["SETPOINT"] = ttemp;
@@ -919,16 +1024,26 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
     var cctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
 	.on('get', function(callback) {
-      that.query("ACTUAL_TEMPERATURE",function(value){
-       if (callback) callback(null,value);
-      });
+		that.query("ACTUAL_TEMPERATURE",function(value){
+			if (callback) callback(null,value);
+		});
     }.bind(this));
 
     this.currentStateCharacteristic["ACTUAL_TEMPERATURE"] = cctemp;
     cctemp.eventEnabled = true;
 
-
-
+	
+	if (this.type=="THERMALCONTROL_TRANSMIT") {
+		var cchum = thermo.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+		.on('get', function(callback) {
+			that.query("ACTUAL_HUMIDITY",function(value){
+				if (callback) callback(null,value);
+			});
+		}.bind(this));
+		
+		this.currentStateCharacteristic["ACTUAL_HUMIDITY"] = cchum;
+		cchum.eventEnabled = true;
+	}
 
     var ttemp = thermo.getCharacteristic(Characteristic.TargetTemperature)
     .on('get', function(callback) {
@@ -977,6 +1092,11 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     this.remoteGetValue("CONTROL_MODE");
     this.remoteGetValue("SET_TEMPERATURE");
     this.remoteGetValue("ACTUAL_TEMPERATURE");
+	
+	if (this.type=="THERMALCONTROL_TRANSMIT") {
+		this.cleanVirtualDevice("ACTUAL_HUMITIDY");
+		this.remoteGetValue("ACTUAL_HUMITIDY");
+	}
 
     break;
 
@@ -1320,12 +1440,14 @@ HomeMaticGenericChannel.prototype = {
     if (subsectionInclude) {
 	    return (["SENSOR","DIGITAL_OUTPUT","SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
     	"THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",
-    	"KEYMATIC","SMOKE_DETECTOR","SMOKE_DETECTOR_TEAM","WEATHER_TRANSMIT","WEATHER","RAINDETECTOR","RAINDETECTOR_HEAT","PROGRAM_LAUNCHER","VARIABLE",
+    	"KEYMATIC","SMOKE_DETECTOR","SMOKE_DETECTOR_TEAM","SMOKE_DETECTOR_TEAM_V2",
+		"WEATHER_TRANSMIT","WEATHER","LUXMETER","RAINDETECTOR","RAINDETECTOR_HEAT","PROGRAM_LAUNCHER","VARIABLE",
     	"RGBW_COLOR","TILT_SENSOR","CLIMATECONTROL_REGULATOR","KEY"].indexOf(this.type) > -1)
     } else {
     	return (["SENSOR","DIGITAL_OUTPUT","SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
     	"THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",
-    	"KEYMATIC","SMOKE_DETECTOR","SMOKE_DETECTOR_TEAM","WEATHER_TRANSMIT","WEATHER","RAINDETECTOR","RAINDETECTOR_HEAT","PROGRAM_LAUNCHER","VARIABLE",
+    	"KEYMATIC","SMOKE_DETECTOR","SMOKE_DETECTOR_TEAM","SMOKE_DETECTOR_TEAM_V2",
+		"WEATHER_TRANSMIT","WEATHER","LUXMETER","RAINDETECTOR","RAINDETECTOR_HEAT","PROGRAM_LAUNCHER","VARIABLE",
     	"RGBW_COLOR","TILT_SENSOR","CLIMATECONTROL_REGULATOR"].indexOf(this.type) > -1)
     }
 

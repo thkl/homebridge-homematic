@@ -7,11 +7,12 @@ var HomeMaticGenericChannel =  require("./HomeMaticChannel.js").HomeMaticGeneric
 var inherits = require('util').inherits;
 var path = require('path');
 var fs = require('fs');
+var uuid;
 
 var Service, Characteristic;
 
 module.exports = function(homebridge) {
- 
+  uuid = homebridge.hap.uuid;
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
   
@@ -26,6 +27,93 @@ module.exports = function(homebridge) {
   };
 
   inherits(Service.DoorStateService, Service);
+  
+  
+  Characteristic.IsRainingCharacteristic = function() {
+    var charUUID = uuid.generate('HomeMatic:customchar:IsRainingCharacteristic');
+	Characteristic.call(this, 'Regen', charUUID);
+    this.setProps({
+        format: Characteristic.Formats.BOOL,
+        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+            });
+    this.value = this.getDefaultValue();
+  };
+  inherits(Characteristic.IsRainingCharacteristic, Characteristic);
+  
+  
+  Service.IsRainingService = function(displayName, subtype) {
+  	var servUUID = uuid.generate('HomeMatic:customchar:IsRainingService');
+  	Service.call(this, displayName, servUUID, subtype);
+	this.addCharacteristic(Characteristic.IsRainingCharacteristic);
+  };
+  
+  inherits(Service.IsRainingService, Service);
+  
+  Characteristic.WindSpeedCharacteristic = function() {
+    var charUUID = uuid.generate('HomeMatic:customchar:WindSpeedCharacteristic');
+	Characteristic.call(this, 'Wind Geschwindigkeit', charUUID);
+    this.setProps({
+        format: Characteristic.Formats.FLOAT,
+		unit: 'km/h',
+		minStep: 0.1,
+        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+            });
+    this.value = this.getDefaultValue();
+  };
+  inherits(Characteristic.WindSpeedCharacteristic, Characteristic);
+  
+  
+  Service.WindSpeedService = function(displayName, subtype) {
+  	var servUUID = uuid.generate('HomeMatic:customchar:WindSpeedService');
+  	Service.call(this, displayName, servUUID, subtype);
+	this.addCharacteristic(Characteristic.WindSpeedCharacteristic);
+  };
+  
+  inherits(Service.WindSpeedService, Service);
+  
+  
+  Characteristic.WindDirectionCharacteristic = function() {
+    var charUUID = uuid.generate('HomeMatic:customchar:WindDirectionCharacteristic');
+	Characteristic.call(this, 'Wind Richtung', charUUID);
+    this.setProps({
+        format: Characteristic.Formats.INTEGER,
+		unit: 'Grad',
+        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+            });
+    this.value = this.getDefaultValue();
+  };
+  inherits(Characteristic.WindDirectionCharacteristic, Characteristic);
+  
+  
+  Service.WindDirectionService = function(displayName, subtype) {
+  	var servUUID = uuid.generate('HomeMatic:customchar:WindDirectionService');
+  	Service.call(this, displayName, servUUID, subtype);
+	this.addCharacteristic(Characteristic.WindDirectionCharacteristic);
+  };
+  
+  inherits(Service.WindDirectionService, Service);
+  
+  Characteristic.WindRangeCharacteristic = function() {
+    var charUUID = uuid.generate('HomeMatic:customchar:WindRangeCharacteristic');
+	Characteristic.call(this, 'Wind Schwankungsbreite', charUUID);
+    this.setProps({
+        format: Characteristic.Formats.INTEGER,
+		unit: 'Grad',
+        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+            });
+    this.value = this.getDefaultValue();
+  };
+  inherits(Characteristic.WindRangeCharacteristic, Characteristic);
+  
+  
+  Service.WindRangeService = function(displayName, subtype) {
+  	var servUUID = uuid.generate('HomeMatic:customchar:WindRangeService');
+  	Service.call(this, displayName, servUUID, subtype);
+	this.addCharacteristic(Characteristic.WindRangeCharacteristic);
+  };
+  
+  inherits(Service.WindRangeService, Service);
+  
 
   Characteristic.ProgramLaunchCharacteristic = function() {
     Characteristic.call(this, 'Program', "5E0115D7-7594-4846-AFB7-F456389E81EC");
