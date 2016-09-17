@@ -169,6 +169,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
 
     case "KEY": 
+    case "VIRTUAL_KEY":
 	  var key = new Service.StatelessProgrammableSwitch(this.name);
 	  var cc = key.getCharacteristic(Characteristic.ProgrammableSwitchEvent);
 	  this.currentStateCharacteristic["PRESS_SHORT"] = cc;
@@ -1280,7 +1281,7 @@ HomeMaticGenericChannel.prototype = {
 	    return (["SENSOR","DIGITAL_OUTPUT","SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
     	"THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",
     	"KEYMATIC","SMOKE_DETECTOR","WEATHER_TRANSMIT","WEATHER","PROGRAM_LAUNCHER","VARIABLE",
-    	"RGBW_COLOR","TILT_SENSOR","CLIMATECONTROL_REGULATOR","KEY"].indexOf(this.type) > -1)
+    	"RGBW_COLOR","TILT_SENSOR","CLIMATECONTROL_REGULATOR","KEY","VIRTUAL_KEY"].indexOf(this.type) > -1)
     } else {
     	return (["SENSOR","DIGITAL_OUTPUT","SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
     	"THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",
