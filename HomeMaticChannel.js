@@ -350,6 +350,38 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     case "TILT_SENSOR":
     case "SHUTTER_CONTACT":
 
+
+    if (this.special=="WINDOW") {
+
+      var window = new Service["Window"](this.name);
+      var cwindow = window.getCharacteristic(Characteristic.CurrentPosition);
+      cwindow.on('get', function(callback) {
+      that.query("STATE",function(value){
+       if (callback) {
+         if (value==0) {callback(null,0);}
+         if (value==1) {callback(null,100);}
+       }
+      });
+      }.bind(this));
+      
+      
+      this.currentStateCharacteristic["STATE"] = cwindow;
+      cwindow.eventEnabled = true;
+      
+      this.addValueMapping("STATE",false,0);
+      this.addValueMapping("STATE",true,100);
+
+      var swindow = window.getCharacteristic(Characteristic.PositionState);
+      swindow.on('get', function(callback) {
+	     if (callback) callback(null, Characteristic.PositionState.STOPPED);
+      }.bind(this));
+      
+
+
+      this.services.push(window);
+
+    } else 
+
     if (this.special=="DOOR") {
 
       var door = new Service["DoorStateService"](this.name);

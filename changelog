@@ -1,9 +1,12 @@
 Changelog
 =========
 
+Version 0.0.35
+- added optional Window Config 
+
 Version 0.0.34
 -implemented virtual keys
-merged changes from 
+merged changes from https://github.com/bpohvoodoo/homebridge-homematic
 
 Version 0.0.33
 - optional ccu cache

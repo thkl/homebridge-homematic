@@ -153,6 +153,7 @@ function HomeMaticPlatform(log, config) {
   this.outlets = config["outlets"];
   this.iosworkaround = config["ios10"];
   this.doors = config["doors"];
+  this.windows = config["windows"];
   this.variables = config["variables"];
   this.programs = config["programs"];
   this.subsection = config["subsection"];
@@ -329,6 +330,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                   var special = undefined;
                   if ((that.outlets!=undefined) && (that.outlets.indexOf(ch.address) > -1)) {special = "OUTLET";}
                   if ((that.doors!=undefined) && (that.doors.indexOf(ch.address) > -1)) {special = "DOOR";}
+                  if ((that.windows!=undefined) && (that.windows.indexOf(ch.address) > -1)) {special = "WINDOW";}
                   
                   var accessory = new HomeMaticGenericChannel(that.log, that, ch.id, ch.name, ch.type, ch.address, special ,cfg, Service, Characteristic);
                   if (accessory.isSupported(isSubsectionSelected)==true) {
