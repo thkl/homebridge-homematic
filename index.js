@@ -158,6 +158,7 @@ function HomeMaticPlatform(log, config) {
   this.programs = config["programs"];
   this.subsection = config["subsection"];
   this.localCache = config["lcache"];
+  this.vuc = config["variable_update_trigger_channel"];
   
   if ((this.subsection!=undefined) && (this.subsection=="")) {
     this.log("there is no value for the key subsection in config.json. There will be no devices fetched from your ccu.");
@@ -332,10 +333,20 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                   if ((that.doors!=undefined) && (that.doors.indexOf(ch.address) > -1)) {special = "DOOR";}
                   if ((that.windows!=undefined) && (that.windows.indexOf(ch.address) > -1)) {special = "WINDOW";}
                   
-                  var accessory = new HomeMaticGenericChannel(that.log, that, ch.id, ch.name, ch.type, ch.address, special ,cfg, Service, Characteristic);
-                  if (accessory.isSupported(isSubsectionSelected)==true) {
-                  	that.foundAccessories.push(accessory);
+                  // Check if VIRTUAL KEY is Set as Variable Trigger
+                  if ((that.vuc != undefined) && (ch.type=="VIRTUAL_KEY") && (ch.name == that.vuc)) {
+                     that.log('Channel ' + that.vuc + ' added as Variable Update Trigger');
+	    			 var accessory = new HomeMaticGenericChannel(that.log, that, ch.id , that.vuc , "VARIABLE_UPDATE_TRIGGER" , ch.address , that.variables , cfg, Service, Characteristic);
+			 	     that.foundAccessories.push(accessory);
+
+                  } else {
+                	 var accessory = new HomeMaticGenericChannel(that.log, that, ch.id, ch.name, ch.type, ch.address, special ,cfg, Service, Characteristic);
+                  	 if (accessory.isSupported(isSubsectionSelected)==true) {
+                  	 that.foundAccessories.push(accessory);
+                  	}
+                  
                   }
+                  
 
               } else {
                 // Channel is in the filter
@@ -374,6 +385,8 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
     	    that.foundAccessories.push(accessory);
           });
       }
+
+
 
 /*
 		var accessory = new HomeMaticGenericChannel(that.log, that, "5678" , "DummyKMK" , "KEYMATIC" , "5678","", cfg, Service, Characteristic);
@@ -431,6 +444,16 @@ HomeMaticPlatform.prototype.setValue = function(channel, datapoint, value) {
     }
 }
 
+HomeMaticPlatform.prototype.remoteSetValue = function(channel,datapoint,value) {
+	 var that = this;
+	 this.foundAccessories.map(function(accessory) {
+          if ((accessory.adress == channel) || ((accessory.cadress != undefined) && (accessory.cadress == channel))) {
+             accessory.event(datapoint, value);
+    }
+    });
+    return;
+}
+
 
 HomeMaticPlatform.prototype.setRegaValue = function(channel, datapoint, value) {
       var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
@@ -444,7 +467,7 @@ HomeMaticPlatform.prototype.sendRegaCommand = function(command,callback) {
       var that = this;
       rega.script(command, function(data) {
 		if (callback!=undefined) {
-		 callback();
+		 callback(data);
 		}
       });
 	 return;

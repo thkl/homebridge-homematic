@@ -1168,6 +1168,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     break;
 
     case "VARIABLE" :
+    
       this.usecache = false;
       var vservice = new Service["Switch"](this.name);
       this.services.push(vservice);
@@ -1228,6 +1229,42 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
     }.bind(this));
 
     pgrl.eventEnabled = true;
+    break;
+    
+    
+    case "VARIABLE_UPDATE_TRIGGER":
+    	var vup = new Service.StatelessProgrammableSwitch(this.name);
+	  	var cc = vup.getCharacteristic(Characteristic.ProgrammableSwitchEvent)
+		.on('set', function(value,callback) {
+		// triggerd twice so only react on value = 1
+		   if (value==1) {
+			// Special is a list of my Variables so create a Rega Request
+			var script = "";
+			this.special.map(function(variable) {
+			  script = script + "WriteLine('"+variable+"(---)'#dom.GetObject('"+variable+"').State());";
+			});
+
+			that.command("sendregacommand","",script,function(result) {
+    		 // Parse result an set all Variables	
+    		   result.split("\r\n").map( function(tmpvar) {
+	    		 
+	    		 var vn = tmpvar.split("(---)")[0];
+	    		 var vv = tmpvar.split("(---)")[1];
+	    		 if ((vn!=undefined) && (vv!=undefined)) {
+					that.platform.remoteSetValue(vn,"STATE",vv);
+	    		 }
+	    		 
+    		   });
+	    	});
+					
+      		 if (callback) callback(null,value);
+      	   }
+	    }.bind(this));
+    
+		this.currentStateCharacteristic["PRESS_SHORT"] = cc;
+		cc.eventEnabled = true;
+	    this.services.push(vup);
+
     break;
   }
 }
@@ -1382,6 +1419,7 @@ HomeMaticGenericChannel.prototype = {
     if (tp[1] == 'BRIGHTNESS') {
 		newValue = Math.pow(10,(newValue/51));
 	}
+   
     if (tp[1] == 'PRESS_SHORT') {
 		var targetChar = that.currentStateCharacteristic[tp[1]];
 		targetChar.setValue(1);
@@ -1392,7 +1430,6 @@ HomeMaticGenericChannel.prototype = {
     
     this.eventupdate = true;
     if (this.cadress!=undefined) {
-
     // this is dirty shit. ok there is a config that will set the cadress to a defined channel
     // if there is an rpc event at this channel the event will be forward here.
     // now fetch the real adress of that channel and get the channelnumber
@@ -1404,7 +1441,7 @@ HomeMaticGenericChannel.prototype = {
   	     this.cache(chnl + ":" + dp,newValue);
 	   }
     } else {
-	    this.cache(dp,newValue);
+        this.cache(dp,newValue);
     }
     this.eventupdate = false;
   },
@@ -1509,7 +1546,7 @@ HomeMaticGenericChannel.prototype = {
     	"THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",
     	"KEYMATIC","SMOKE_DETECTOR","SMOKE_DETECTOR_TEAM","SMOKE_DETECTOR_TEAM_V2",
 		"WEATHER_TRANSMIT","WEATHER","LUXMETER","RAINDETECTOR","RAINDETECTOR_HEAT","PROGRAM_LAUNCHER","VARIABLE",
-    	"RGBW_COLOR","TILT_SENSOR","CLIMATECONTROL_REGULATOR","KEY","VIRTUAL_KEY"].indexOf(this.type) > -1)
+    	"RGBW_COLOR","TILT_SENSOR","CLIMATECONTROL_REGULATOR","KEY","VIRTUAL_KEY","VARIABLE_UPDATE_TRIGGER"].indexOf(this.type) > -1)
     } else {
     	return (["SENSOR","DIGITAL_OUTPUT","SWITCH","DIMMER","BLIND","CLIMATECONTROL_RT_TRANSCEIVER",
     	"THERMALCONTROL_TRANSMIT","SHUTTER_CONTACT","ROTARY_HANDLE_SENSOR","MOTION_DETECTOR",

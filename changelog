@@ -1,6 +1,11 @@
 Changelog
 =========
 
+Version 0.0.37
+added VirtualKey Event to trigger Update of all used Variables.
+config -> "variable_update_trigger_channel":"NameOfVirtualKey"
+
+
 Version 0.0.36
 -BugFix 
 
