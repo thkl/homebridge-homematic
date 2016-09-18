@@ -17,7 +17,7 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
   this.services = [];
   this.usecache = true;
   this.cadress = undefined;
-
+  this.cfg = cfg;
   
   this.i_characteristic = {};
 
@@ -699,6 +699,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
      this.currentStateCharacteristic["HUMIDITY"] = chum;
      chum.eventEnabled= true;
 	 
+ 
+    if ((this.cfg != undefined) && (this.cfg["isWeatherStation"]!=undefined)) {
+
 	 var brightness = new Service["LightSensor"](this.name);
  	  this.services.push(brightness);
  	    
@@ -708,7 +711,8 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
             if (callback) callback(null,value);
          });
      }.bind(this));
- 
+
+    
      this.currentStateCharacteristic["BRIGHTNESS"] = cbright;
      cbright.eventEnabled= true;
 	 
@@ -759,6 +763,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 	  
 	 this.currentStateCharacteristic["WIND_DIRECTION_RANGE"] = cwindrange;
      cwindrange.eventEnabled= true;  
+    
+    }
+ 
 	 
 
     break;

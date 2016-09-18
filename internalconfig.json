@@ -22,6 +22,11 @@
 		     	"source": ":2",
 		     	"target": ":1"
 		     }
+		},
+		
+		{
+			"type"  : "HM-WDS100-C6-O-2",
+			"isWeatherStation": "true"
 		}		
 	]
 }
