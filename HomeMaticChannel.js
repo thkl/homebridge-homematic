@@ -358,8 +358,9 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       cwindow.on('get', function(callback) {
       that.query("STATE",function(value){
        if (callback) {
-         if (value==0) {callback(null,0);}
-         if (value==1) {callback(null,100);}
+         var cbvalue = 0;
+         if (value>0) {cbvalue = 100;}
+         callback(null,cbvalue);
        }
       });
       }.bind(this));
@@ -368,6 +369,8 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
       this.currentStateCharacteristic["STATE"] = cwindow;
       cwindow.eventEnabled = true;
       
+      this.addValueMapping("STATE",0,0);
+      this.addValueMapping("STATE",1,100);
       this.addValueMapping("STATE",false,0);
       this.addValueMapping("STATE",true,100);
 
@@ -376,7 +379,6 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 	     if (callback) callback(null, Characteristic.PositionState.STOPPED);
       }.bind(this));
       
-
 
       this.services.push(window);
 
@@ -470,6 +472,38 @@ function HomeMaticGenericChannel(log,platform, id ,name, type ,adress,special, c
 
 
     case "ROTARY_HANDLE_SENSOR":
+
+    if (this.special=="WINDOW") {
+
+      var window = new Service["Window"](this.name);
+      var cwindow = window.getCharacteristic(Characteristic.CurrentPosition);
+      cwindow.on('get', function(callback) {
+      that.query("STATE",function(value){
+       if (callback) {
+         var cbvalue = 0;
+         if (value>0) {cbvalue = 100;}
+         callback(null,cbvalue);
+       }
+      });
+      }.bind(this));
+      
+      
+      this.currentStateCharacteristic["STATE"] = cwindow;
+      cwindow.eventEnabled = true;
+      
+      this.addValueMapping("STATE",0,0);
+      this.addValueMapping("STATE",1,100);
+      this.addValueMapping("STATE",2,100);
+
+      var swindow = window.getCharacteristic(Characteristic.PositionState);
+      swindow.on('get', function(callback) {
+	     if (callback) callback(null, Characteristic.PositionState.STOPPED);
+      }.bind(this));
+      
+      this.services.push(window);
+
+    } else 
+
 
     if (this.special=="DOOR") {
 
