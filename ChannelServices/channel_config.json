@@ -1,0 +1,169 @@
+{
+	"deviceinfo": [
+		{
+			  "type" : "HM-CC-TC",
+			  "filter": [
+				"WEATHER"
+			]
+                       
+		},
+		
+		{
+			  "type" : "HM-CC-VG-1",
+			  "filter": [
+				"SHUTTER_CONTACT"
+			]
+                       
+		},
+		
+		{
+		     "type" : "HM-LC-RGBW-WM",
+		     "combine": { 
+		     	"source": ":2",
+		     	"target": ":1"
+		     }
+		},
+		
+		{
+			"type"  : "HM-WDS100-C6-O-2",
+			"isWeatherStation": "true"
+		}		
+	],
+	
+	
+	"channelconfig": [
+	
+	{
+	   "type": "SWITCH",
+	   "service": "HomeMaticHomeKitSwitchService"
+	},
+	
+	{
+	   "type": "HM-LC-Sw1-FM:SWITCH",
+	   "service": "HomeMaticHomeKitSwitchService"
+	},
+	
+	{
+	   "type": "DIMMER",
+	   "service": "HomeMaticHomeKitDimmerService"
+	},
+
+	{
+	   "type": "KEY",
+	   "service": "HomeMaticHomeKitKeyService"
+	},
+	
+	{
+	   "type": "VIRTUAL_KEY",
+	   "service": "HomeMaticHomeKitKeyService"
+	},
+	
+	{
+	   "type": "TILT_SENSOR",
+	   "service": "HomeMaticHomeKitContactService"
+	},
+	
+	{
+	   "type": "SHUTTER_CONTACT",
+	   "service": "HomeMaticHomeKitContactService"
+	},
+
+	{
+	   "type": "RGBW_COLOR",
+	   "service": "HomeMaticHomeKitRGBWService"
+	},
+
+	{
+	   "type": "BLIND",
+	   "service": "HomeMaticHomeKitBlindService"
+	},
+
+	{
+	   "type": "SENSOR",
+	   "service": "HomeMaticHomeKitSensorService"
+	},
+
+	{
+	   "type": "ROTARY_HANDLE_SENSOR",
+	   "service": "HomeMaticHomeKitRotaryHandleService"
+	},
+
+	{
+	   "type": "MOTION_DETECTOR",
+	   "service": "HomeMaticHomeKitMotionDetectorService"
+	},
+
+	{
+	   "type": "SMOKE_DETECTOR",
+	   "service": "HomeMaticHomeKitSmokeDetectorService"
+	},
+
+	{
+	   "type": "SMOKE_DETECTOR_TEAM",
+	   "service": "HomeMaticHomeKitSmokeDetectorService"
+	},
+
+	{
+	   "type": "SMOKE_DETECTOR_TEAM_V2",
+	   "service": "HomeMaticHomeKitSmokeDetectorService"
+	},
+
+	{
+	   "type": "KEYMATIC",
+	   "service": "HomeMaticHomeKitKeymaticService"
+	},
+
+	{
+	   "type": "WEATHER",
+	   "service": "HomeMaticHomeKitThermostatWeatherService"
+	},
+
+	{
+	   "type": "WEATHER_TRANSMIT",
+	   "service": "HomeMaticHomeKitThermostatWeatherService"
+	},
+
+	{
+	   "type": "HM-WDS100-C6-O-2:WEATHER",
+	   "service": "HomeMaticHomeKitWeatherStationService"
+	},
+
+	{
+	   "type": "LUXMETER",
+	   "service": "HomeMaticHomeKitLuxMeterService"
+	},
+
+	{
+	   "type": "RAINDETECTOR",
+	   "service": "HomeMaticHomeKitRaindetectorService"
+	},
+
+	{
+	   "type": "RAINDETECTOR_HEAT",
+	   "service": "HomeMaticHomeKitSwitchService"
+	},
+
+	{
+	   "type": "CLIMATECONTROL_REGULATOR",
+	   "service": "HomeMaticHomeKitThermostatService"
+	},
+
+	{
+	   "type": "VARIABLE",
+	   "service": "HomeMaticHomeKitVariableService"
+	},
+
+	{
+	   "type": "PROGRAM_LAUNCHER",
+	   "service": "HomeMaticHomeKitProgramService"
+	},
+	{
+	   "type": "VARIABLE_UPDATE_TRIGGER",
+	   "service": "HomeMaticHomeKitVariableUpdaterService"
+	}
+
+	
+		
+	
+	]
+}

@@ -3,7 +3,8 @@
 var request = require("request");
 var HomeMaticRPC = require("./HomeMaticRPC.js").HomeMaticRPC;
 var HomeMaticRegaRequest =  require("./HomeMaticRegaRequest.js").HomeMaticRegaRequest;
-var HomeMaticGenericChannel =  require("./HomeMaticChannel.js").HomeMaticGenericChannel;
+var HomeMaticChannelLoader =  require("./HomeMaticChannelLoader.js").HomeMaticChannelLoader;
+
 var inherits = require('util').inherits;
 var path = require('path');
 var fs = require('fs');
@@ -15,124 +16,6 @@ module.exports = function(homebridge) {
   uuid = homebridge.hap.uuid;
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
-  
-  // Register some required Services
-  Service.DoorStateService = function(displayName, subtype) {
-  	
-  	Service.call(this, displayName, '5243F2EA-006C-4D68-83A0-4AF6F606136C', subtype);
-    
-    this.addCharacteristic(Characteristic.CurrentDoorState);
-    this.addOptionalCharacteristic(Characteristic.Name);
-  
-  };
-
-  inherits(Service.DoorStateService, Service);
-  
-  
-  Characteristic.IsRainingCharacteristic = function() {
-    var charUUID = uuid.generate('HomeMatic:customchar:IsRainingCharacteristic');
-	Characteristic.call(this, 'Regen', charUUID);
-    this.setProps({
-        format: Characteristic.Formats.BOOL,
-        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-            });
-    this.value = this.getDefaultValue();
-  };
-  inherits(Characteristic.IsRainingCharacteristic, Characteristic);
-  
-  
-  Service.IsRainingService = function(displayName, subtype) {
-  	var servUUID = uuid.generate('HomeMatic:customchar:IsRainingService');
-  	Service.call(this, displayName, servUUID, subtype);
-	this.addCharacteristic(Characteristic.IsRainingCharacteristic);
-  };
-  
-  inherits(Service.IsRainingService, Service);
-  
-  Characteristic.WindSpeedCharacteristic = function() {
-    var charUUID = uuid.generate('HomeMatic:customchar:WindSpeedCharacteristic');
-	Characteristic.call(this, 'Wind Geschwindigkeit', charUUID);
-    this.setProps({
-        format: Characteristic.Formats.FLOAT,
-		unit: 'km/h',
-		minStep: 0.1,
-        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-            });
-    this.value = this.getDefaultValue();
-  };
-  inherits(Characteristic.WindSpeedCharacteristic, Characteristic);
-  
-  
-  Service.WindSpeedService = function(displayName, subtype) {
-  	var servUUID = uuid.generate('HomeMatic:customchar:WindSpeedService');
-  	Service.call(this, displayName, servUUID, subtype);
-	this.addCharacteristic(Characteristic.WindSpeedCharacteristic);
-  };
-  
-  inherits(Service.WindSpeedService, Service);
-  
-  
-  Characteristic.WindDirectionCharacteristic = function() {
-    var charUUID = uuid.generate('HomeMatic:customchar:WindDirectionCharacteristic');
-	Characteristic.call(this, 'Wind Richtung', charUUID);
-    this.setProps({
-        format: Characteristic.Formats.INTEGER,
-		unit: 'Grad',
-        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-            });
-    this.value = this.getDefaultValue();
-  };
-  inherits(Characteristic.WindDirectionCharacteristic, Characteristic);
-  
-  
-  Service.WindDirectionService = function(displayName, subtype) {
-  	var servUUID = uuid.generate('HomeMatic:customchar:WindDirectionService');
-  	Service.call(this, displayName, servUUID, subtype);
-	this.addCharacteristic(Characteristic.WindDirectionCharacteristic);
-  };
-  
-  inherits(Service.WindDirectionService, Service);
-  
-  Characteristic.WindRangeCharacteristic = function() {
-    var charUUID = uuid.generate('HomeMatic:customchar:WindRangeCharacteristic');
-	Characteristic.call(this, 'Wind Schwankungsbreite', charUUID);
-    this.setProps({
-        format: Characteristic.Formats.INTEGER,
-		unit: 'Grad',
-        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-            });
-    this.value = this.getDefaultValue();
-  };
-  inherits(Characteristic.WindRangeCharacteristic, Characteristic);
-  
-  
-  Service.WindRangeService = function(displayName, subtype) {
-  	var servUUID = uuid.generate('HomeMatic:customchar:WindRangeService');
-  	Service.call(this, displayName, servUUID, subtype);
-	this.addCharacteristic(Characteristic.WindRangeCharacteristic);
-  };
-  
-  inherits(Service.WindRangeService, Service);
-  
-
-  Characteristic.ProgramLaunchCharacteristic = function() {
-    Characteristic.call(this, 'Program', "5E0115D7-7594-4846-AFB7-F456389E81EC");
-    this.setProps({
-        format: Characteristic.Formats.BOOL,
-        perms: [Characteristic.Perms.READ, Characteristic.Perms.WRITE, Characteristic.Perms.NOTIFY]
-            });
-    this.value = this.getDefaultValue();
-  };
-  inherits(Characteristic.ProgramLaunchCharacteristic, Characteristic);
-
-
-  Service.ProgramLaunchService = function(displayName, subtype) {
-  	Service.call(this, displayName, 'B7F46B4D-3D69-4804-8114-393F257D4039', subtype);
-    this.addCharacteristic(Characteristic.ProgramLaunchCharacteristic);
-  };
-
-  inherits(Service.ProgramLaunchService, Service);
-
   homebridge.registerPlatform("homebridge-homematic", "HomeMatic", HomeMaticPlatform);
 }
 
@@ -218,7 +101,9 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
     that.foundAccessories = [];
     var internalconfig = this.internalConfig();
     
-        
+    var channelLoader = new HomeMaticChannelLoader(this.log);
+    channelLoader.init();
+    
     var script = "string sDeviceId;string sChannelId;boolean df = true;Write(\'{\"devices\":[\');foreach(sDeviceId, root.Devices().EnumIDs()){object oDevice = dom.GetObject(sDeviceId);if(oDevice){var oInterface = dom.GetObject(oDevice.Interface());if(df) {df = false;} else { Write(\',\');}Write(\'{\');Write(\'\"id\": \"\' # sDeviceId # \'\",\');Write(\'\"name\": \"\' # oDevice.Name() # \'\",\');Write(\'\"address\": \"\' # oDevice.Address() # \'\",\');Write(\'\"type\": \"\' # oDevice.HssType() # \'\",\');Write(\'\"channels\": [\');boolean bcf = true;foreach(sChannelId, oDevice.Channels().EnumIDs()){object oChannel = dom.GetObject(sChannelId);if(bcf) {bcf = false;} else {Write(\',\');}Write(\'{\');Write(\'\"cId\": \' # sChannelId # \',\');Write(\'\"name\": \"\' # oChannel.Name() # \'\",\');if(oInterface){Write(\'\"address\": \"\' # oInterface.Name() #\'.'\ # oChannel.Address() # \'\",\');}Write(\'\"type\": \"\' # oChannel.HssType() # \'\"\');Write(\'}\');}Write(\']}\');}}Write(\']\');";
 
     
@@ -336,15 +221,12 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                   // Check if VIRTUAL KEY is Set as Variable Trigger
                   if ((that.vuc != undefined) && (ch.type=="VIRTUAL_KEY") && (ch.name == that.vuc)) {
                      that.log('Channel ' + that.vuc + ' added as Variable Update Trigger');
-	    			 var accessory = new HomeMaticGenericChannel(that.log, that, ch.id , that.vuc , "VARIABLE_UPDATE_TRIGGER" , ch.address , that.variables , cfg, Service, Characteristic);
-			 	     that.foundAccessories.push(accessory);
+	    			 
+                	 channelLoader.loadChannelService(that.foundAccessories,"VARIABLE_UPDATE_TRIGGER","VARIABLE_UPDATE_TRIGGER",that.log , that, ch.id, ch.name, ch.address, that.variables ,cfg, Service, Characteristic);
+
 
                   } else {
-                	 var accessory = new HomeMaticGenericChannel(that.log, that, ch.id, ch.name, ch.type, ch.address, special ,cfg, Service, Characteristic);
-                  	 if (accessory.isSupported(isSubsectionSelected)==true) {
-                  	 that.foundAccessories.push(accessory);
-                  	}
-                  
+                	 channelLoader.loadChannelService(that.foundAccessories, device["type"],ch.type,that.log , that, ch.id, ch.name, ch.address, special ,cfg, Service, Characteristic);
                   }
                   
 
@@ -366,13 +248,14 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
             
             if (that.iosworkaround==undefined) {
                 that.log('Program ' + program + ' added as Program_Launcher');
-	            var accessory = new HomeMaticGenericChannel(that.log, that, "1234" , program , "PROGRAM_LAUNCHER" , "1234", "" , undefined, Service, Characteristic);
-    	    	that.foundAccessories.push(accessory);
+                
+                channelLoader.loadChannelService(that.foundAccessories, "PROGRAM_LAUNCHER","PROGRAM_LAUNCHER",that.log , that, "1234", program, "1234", "" ,undefined, Service, Characteristic);
+
             } else {
 	            var cfg = that.deviceInfo(internalconfig,"");
                 that.log('Program ' + program + ' added as SWITCH cause of IOS 10');
-        	    var accessory = new HomeMaticGenericChannel(that.log, that, "-1" , program , "SWITCH" , "1234", "PROGRAM" , undefined, Service, Characteristic);
-        		that.foundAccessories.push(accessory);
+                channelLoader.loadChannelService(that.foundAccessories, "SWITCH","SWITCH",that.log , that, "1234", program, "1234", "PROGRAM" ,undefined, Service, Characteristic);
+
             }
           
           });
@@ -381,19 +264,11 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 // Add Optional Variables
       if (that.variables!=undefined) {
           that.variables.map(function(variable) {
-			var accessory = new HomeMaticGenericChannel(that.log, that, variable , variable, "VARIABLE" , variable,"", undefined ,Service, Characteristic);
-    	    that.foundAccessories.push(accessory);
+                channelLoader.loadChannelService(that.foundAccessories, "VARIABLE","VARIABLE",that.log , that, "1234", variable, variable , "" ,undefined, Service, Characteristic);
           });
       }
 
-
-
-/*
-		var accessory = new HomeMaticGenericChannel(that.log, that, "5678" , "DummyKMK" , "KEYMATIC" , "5678","", cfg, Service, Characteristic);
-        if (accessory.isSupported()==true) {
-           that.foundAccessories.push(accessory);
-        }
-*/                
+             
         callback(that.foundAccessories);
       } else {
         callback(that.foundAccessories);
