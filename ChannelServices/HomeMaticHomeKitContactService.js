@@ -34,7 +34,8 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     
     }
     
-    
+    if (this.adress.indexOf("HmIP-RF.") > -1) {this.usecache = false;}
+
     
     if (this.special=="WINDOW") {
 

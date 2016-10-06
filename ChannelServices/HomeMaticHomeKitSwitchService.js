@@ -18,6 +18,7 @@ HomeMaticHomeKitSwitchService.prototype.createDeviceService = function(Service, 
     var that = this;
 	var lightbulb = null;
 	
+	if (this.adress.indexOf("HmIP-RF.") > -1) {this.usecache = false;}
 
     if (this.special=="PROGRAM") {
     
