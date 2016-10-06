@@ -18,15 +18,29 @@ var HomeMaticChannelLoader = function (log) {
 
     // try to load device:type
     var serviceclass;
+    var options;
+    
     serviceclass = this.getServiceClass(deviceType+":"+channelType);
+    options = this.getOptions(deviceType+":"+channelType);
+    
     if (serviceclass == undefined) {
       // not found try to find channeltype
       serviceclass = this.getServiceClass(channelType);
+      options = this.getOptions(channelType);
     }
   
   
     if (serviceclass != undefined) {
-      var service = require ('./ChannelServices/' + serviceclass)
+      var service = require ('./ChannelServices/' + serviceclass);
+      // add Options 
+      if (options != undefined) {
+        if (cfg != undefined) {
+            cfg.push.apply(cfg, options);
+        } else {
+          	cfg = options;
+        }
+      }
+      
 	  var accessory = new service(log,platform, id ,name, channelType ,adress,special, cfg, Service, Characteristic);
 	  list.push(accessory);	
     } else {
@@ -34,6 +48,22 @@ var HomeMaticChannelLoader = function (log) {
    	}
   };
   
+
+  HomeMaticChannelLoader.prototype.getOptions = function(type) {
+   var that = this;
+   var options = undefined;
+   
+   if (this.config != undefined) {
+  		var ci = this.config["channelconfig"];
+   			ci.map(function(service) {
+   			  	if (service["type"]==type) {
+   			  	  options = service["options"];
+				}
+			});
+   }
+   return options;
+  }
+
   
   HomeMaticChannelLoader.prototype.getServiceClass = function(type) {
    var that = this;

@@ -26,6 +26,16 @@ HomeMaticHomeKitContactService.prototype.propagateServices = function(Service, C
 HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service, Characteristic) {
 
     var that = this;
+    var reverse = false;
+    if (this.cfg != undefined) {
+     if (this.cfg["reverse"]!=undefined) {
+      reverse = true;
+     }
+    
+    }
+    
+    
+    
     if (this.special=="WINDOW") {
 
       var window = new Service["Window"](this.name);
@@ -44,10 +54,18 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
       this.currentStateCharacteristic["STATE"] = cwindow;
       cwindow.eventEnabled = true;
       
-      this.addValueMapping("STATE",0,0);
-      this.addValueMapping("STATE",1,100);
-      this.addValueMapping("STATE",false,0);
-      this.addValueMapping("STATE",true,100);
+      if (reverse == true ) {
+	    this.addValueMapping("STATE",1,0);
+    	this.addValueMapping("STATE",0,100);
+      	this.addValueMapping("STATE",true,0);
+      	this.addValueMapping("STATE",false,100);
+      } else {
+      	this.addValueMapping("STATE",0,0);
+     	this.addValueMapping("STATE",1,100);
+      	this.addValueMapping("STATE",false,0);
+      	this.addValueMapping("STATE",true,100);
+      }
+      
 
       var swindow = window.getCharacteristic(Characteristic.PositionState);
       swindow.on('get', function(callback) {
@@ -73,11 +91,17 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
       this.currentStateCharacteristic["STATE"] = cdoor;
       cdoor.eventEnabled = true;
       
-      this.addValueMapping("STATE",0,1);
-      this.addValueMapping("STATE",1,0);
-
-      this.addValueMapping("STATE",false,1);
-      this.addValueMapping("STATE",true,0);
+      if (reverse == true) {
+	     this.addValueMapping("STATE",1,1);
+   		 this.addValueMapping("STATE",0,0);
+   	  	 this.addValueMapping("STATE",true,1);
+     	 this.addValueMapping("STATE",false,0);
+      } else {
+	     this.addValueMapping("STATE",0,1);
+   		 this.addValueMapping("STATE",1,0);
+   	  	 this.addValueMapping("STATE",false,1);
+     	 this.addValueMapping("STATE",true,0);
+      }
 
       this.services.push(door);
 
@@ -87,12 +111,25 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
       var state = contact.getCharacteristic(Characteristic.ContactSensorState)
       .on('get', function(callback) {
       that.query("STATE",function(value){
+      
+       if (reverse == true) {
+         that.log("Reverse from " + value);
+       }
+      
        callback(null,value);
       });
       }.bind(this));
       
       that.currentStateCharacteristic["STATE"] = state;
       state.eventEnabled = true;
+      
+      if (reverse == true ) {
+	    this.addValueMapping("STATE",1,0);
+    	this.addValueMapping("STATE",0,100);
+      	this.addValueMapping("STATE",true,0);
+      	this.addValueMapping("STATE",false,100);
+      }
+      
       this.services.push(contact);
     }
 

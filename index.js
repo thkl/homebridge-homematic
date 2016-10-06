@@ -66,6 +66,12 @@ function HomeMaticPlatform(log, config) {
   	  this.xmlrpcwired.init();
   }
   
+  if (config["enable_hmip"]!=undefined) {
+	  this.xmlrpchmip = new HomeMaticRPC(this.log, this.ccuIP, port+2, 2, this);
+  	  this.xmlrpchmip.init();
+  }
+
+  
   var that = this;
   
   process.on("SIGINT", function() {
@@ -77,6 +83,11 @@ function HomeMaticPlatform(log, config) {
       if (that.xmlrpcwired!=undefined) {
       	that.xmlrpcwired.stop();
       }
+
+      if (that.xmlrpchmip!=undefined) {
+      	that.xmlrpchmip.stop();
+      }
+
       setTimeout(process.exit(0), 2000);
   });
 
@@ -89,6 +100,10 @@ function HomeMaticPlatform(log, config) {
       if (that.xmlrpcwired!=undefined) {
       	that.xmlrpcwired.stop();
       }
+      if (that.xmlrpchmip!=undefined) {
+      	that.xmlrpchmip.stop();
+      }
+
       setTimeout(process.exit(0), 2000);
   });
 }
@@ -317,6 +332,21 @@ HomeMaticPlatform.prototype.setValue = function(channel, datapoint, value) {
      }
       return;
     }
+    
+    
+    if (channel.indexOf("HmIP-RF.") > -1) {
+     
+     if (this.xmlrpchmip!=undefined) {
+      this.xmlrpchmip.setValue(channel, datapoint, value);
+     } else {
+      // Send over Rega
+      var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+      rega.setValue(channel, datapoint, value);
+     }
+      return;
+    }
+
+
 }
 
 HomeMaticPlatform.prototype.remoteSetValue = function(channel,datapoint,value) {
@@ -380,6 +410,20 @@ HomeMaticPlatform.prototype.getValue = function(channel, datapoint, callback) {
      }
       return;
     }
+    
+    if (channel.indexOf("HmIP-RF.") > -1) {
+     if (this.xmlrpchmip!=undefined) {
+       this.xmlrpchmip.getValue(channel, datapoint, callback);
+     } else {
+      // Send over Rega
+      var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+       rega.getValue(channel, datapoint, callback);
+     }
+      return;
+    }
+    
+
+    
     
     // Variable fallback
     

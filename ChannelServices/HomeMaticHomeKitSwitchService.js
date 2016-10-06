@@ -17,6 +17,7 @@ HomeMaticHomeKitSwitchService.prototype.createDeviceService = function(Service, 
 
     var that = this;
 	var lightbulb = null;
+	
 
     if (this.special=="PROGRAM") {
     
@@ -75,7 +76,7 @@ HomeMaticHomeKitSwitchService.prototype.createDeviceService = function(Service, 
 
     .on('get', function(callback) {
       that.query("STATE",function(value){
-       if (callback) callback(null,value);
+	       if (callback) callback(null,value);
       });
     }.bind(this))
 
@@ -85,8 +86,11 @@ HomeMaticHomeKitSwitchService.prototype.createDeviceService = function(Service, 
 	  if ((onTime!=undefined) && (onTime>0) && (value==1)) {
 		  that.command("set","ON_TIME" , onTime)
 	  }
-
-	  that.delayed("set","STATE" , (value==1) ? true:false)
+	  if (value==0) {
+		  that.delayed("set","STATE" , false)
+	  } else {
+		  that.delayed("set","STATE" , true)
+	  }
       callback();
     }.bind(this));
 

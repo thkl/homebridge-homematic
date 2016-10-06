@@ -17,7 +17,27 @@ var HomeMaticRPC = function (log, ccuip,port,system,platform) {
   this.stopping = false;
   this.localIP;
   this.listeningPort = port;
-  this.interface = (system==0) ? "BidCos-RF." : "BidCos-Wired."
+  switch (system) {
+  
+    case 0 : 
+    this.interface = "BidCos-RF.";
+	this.ccuport = 2001;
+    break;
+    
+    case 1 : 
+    this.interface = "BidCos-Wired.";
+  	this.ccuport = 2000;
+	break;
+
+
+    case 2 : 
+    this.interface = "HmIP-RF.";
+    this.ccuport = 2010;
+	break;
+
+  }
+  
+  
 }
 
 HomeMaticRPC.prototype.init = function() {
@@ -119,7 +139,8 @@ HomeMaticRPC.prototype.init = function() {
       channel = channel.substr(that.interface.length);
     }
 
-	debug("RPC setValue Call for %s %s Value %s",channel,datapoint,value);
+	debug("RPC setValue Call for %s %s Value %s Type %s",channel,datapoint,value, typeof value);
+	
 	this.client.methodCall("setValue", [channel, datapoint, value], function(error, value) {
 	 debug("RPC setValue (%s %s) Response %s Errors: %s",channel, datapoint, JSON.stringify(value),error);
     });
@@ -127,7 +148,7 @@ HomeMaticRPC.prototype.init = function() {
 
   HomeMaticRPC.prototype.connect = function() {
     var that = this;
-    var port = (this.system == 0) ?  2001 : 2000;
+    var port = this.ccuport;
     this.log("Creating Local HTTP Client for CCU RPC Events");
     this.client = binrpc.createClient({
       host: this.ccuip,

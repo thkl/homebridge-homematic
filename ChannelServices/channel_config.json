@@ -37,6 +37,12 @@
 	   "type": "SWITCH",
 	   "service": "HomeMaticHomeKitSwitchService"
 	},
+
+
+	{
+	   "type": "SWITCH_VIRTUAL_RECEIVER",
+	   "service": "HomeMaticHomeKitSwitchService"
+	},	
 	
 	{
 	   "type": "HM-LC-Sw1-FM:SWITCH",

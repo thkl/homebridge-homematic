@@ -68,6 +68,12 @@ HomeKitGenericService.prototype = {
   // Return current States
   query: function(dp,callback) {
     var that = this;
+    if (this.usecache == false) {
+      this.remoteGetValue(dp, function(value) {
+      	if (callback!=undefined){callback(value);}
+		});
+    } else 
+
 
     if ((this.usecache == true ) && (this.state[dp] != undefined) && (this.state[dp]!=null)) {
       //that.log("Use Cache");
@@ -81,6 +87,7 @@ HomeKitGenericService.prototype = {
     });
       //if (callback!=undefined){callback(0);}
     }
+    
 
   },
 
@@ -107,7 +114,6 @@ HomeKitGenericService.prototype = {
     
     var char = this.currentStateCharacteristic[dp];
     if (char!=undefined) {
-    
       switch (char.props.format) {
 		
 		case "int":
@@ -143,7 +149,9 @@ HomeKitGenericService.prototype = {
         break;
         
         case "bool":
-        return (value=="true") ? 1:0;
+        if (value==true) {return 1;}
+        if (value=="true") {return 1;}
+        return 0;
         break;
       }
     }
@@ -155,17 +163,19 @@ HomeKitGenericService.prototype = {
   remoteGetValue:function(dp,callback) {
     var that = this;
     var tp = this.transformDatapoint(dp);
-    
     //that.platform.getValue(that.adress,dp,function(newValue) {
     
     that.platform.getValue(tp[0],tp[1],function(newValue) {
       if ((newValue != undefined) && (newValue != null)) {
+
       	if (tp[1] == 'LEVEL') {
       		newValue = newValue * 100;
       	}
+
       	if ((tp[1] == 'COLOR') && (that.type == "RGBW_COLOR")) {
       		newValue = Math.round((newValue/199)*360);
       	}
+
 		if (tp[1] == 'BRIGHTNESS') {
 			newValue = Math.pow(10,(newValue/51));
 		}
@@ -178,7 +188,9 @@ HomeKitGenericService.prototype = {
       //newValue = 0;
       newValue = that.convertValue(dp,0)
      }
-     
+
+
+
       if (callback!=undefined) {
         callback(newValue);
       } 
@@ -268,6 +280,7 @@ HomeKitGenericService.prototype = {
     this.timer[dp] = setTimeout( function(){
       clearTimeout(that.timer[dp]);
       that.timer[dp] = undefined;
+
       that.command(mode,dp,value)
     }, delay?delay:100 );
   },
@@ -281,7 +294,8 @@ HomeKitGenericService.prototype = {
     if ((tp[1] == 'COLOR') && (this.type == "RGBW_COLOR")) {
     	newValue = Math.round((value / 360) * 199);
     }
-    newValue = String(newValue);
+    
+    //newValue = String(newValue);
 
     if (this.eventupdate==true) {
       return;
