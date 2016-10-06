@@ -75,6 +75,11 @@
 	},
 
 	{
+	   "type": "SHUTTER_CONTACT_TRANSCEIVER",
+	   "service": "HomeMaticHomeKitContactService"
+	},
+
+	{
 	   "type": "RGBW_COLOR",
 	   "service": "HomeMaticHomeKitRGBWService"
 	},
