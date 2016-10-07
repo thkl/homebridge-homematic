@@ -167,6 +167,7 @@ HomeMaticRPC.prototype.init = function() {
 
   HomeMaticRPC.prototype.connect = function() {
     var that = this;
+    this.lastMessage = Math.floor((new Date()).getTime() / 1000);
     var port = this.ccuport;
     this.log("Creating Local HTTP Client for CCU RPC Events");
     this.client = binrpc.createClient({
