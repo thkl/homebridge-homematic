@@ -18,6 +18,8 @@ var HomeMaticRPC = function (log, ccuip,port,system,platform) {
   this.localIP;
   this.listeningPort = port;
   this.lastMessage = 0;
+  this.watchDogTimer;
+  
   
   switch (system) {
   
@@ -65,7 +67,7 @@ HomeMaticRPC.prototype.init = function() {
 
     this.server.on("system.listMethods", function(err, params, callback) {
       debug("Method call params for 'system.listMethods': " +  JSON.stringify(params));
-      callback(null, ["event","system.listMethods", "system.multicall"]);
+      callback(null, ["system.listMethods", "system.multicall"]);
     });
     
     this.server.on("listDevices", function(err, params, callback) {
@@ -82,6 +84,9 @@ HomeMaticRPC.prototype.init = function() {
 
 
     this.server.on("system.multicall", function(err, params, callback) {
+    
+      this.lastMessage = Math.floor((new Date()).getTime() / 1000);
+      
       params.map(function(events) {
         try {
           events.map(function(event) {
@@ -172,16 +177,42 @@ HomeMaticRPC.prototype.init = function() {
     this.log("CCU RPC Init Call on port " +  port + " for interface " + this.interface);
     this.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort, "homebridge_" + this.interface], function(error, value) {
       debug("CCU Response ...Value (%s) Error : (%s)",JSON.stringify(value) , error);
+      that.lastMessage = Math.floor((new Date()).getTime() / 1000);
     });
-  },
+    
+    this.ccuWatchDog();
+  }
 
 
-HomeMaticRPC.prototype.stop = function() {
+  HomeMaticRPC.prototype.ccuWatchDog = function() {
+    var that = this;
+	
+	if (this.lastMessage != undefined) {
+	    var now = Math.floor((new Date()).getTime() / 1000);
+    	var timeDiff = now - this.lastMessage;
+    	if (timeDiff > 600) {
+     		that.log("Watchdog Trigger - Reinit Connection ");
+		    this.lastMessage = now;
+		    this.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort, "homebridge_" + this.interface], function(error, value) {
+      			debug("CCU Response ...Value (%s) Error : (%s)",JSON.stringify(value) , error);
+      			that.lastMessage = Math.floor((new Date()).getTime() / 1000);
+   			 });
+    	}
+    }
+	
+	var recall = function() {
+	 that.ccuWatchDog();
+	}
+
+    this.watchDogTimer = setTimeout(recall, 10000);
+  }
+
+  HomeMaticRPC.prototype.stop = function() {
     this.log("Removing Event Server for Interface " +this.interface);
     this.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort], function(error, value) {
 
     });
-}
+   }
 
 module.exports = { 
   HomeMaticRPC : HomeMaticRPC 

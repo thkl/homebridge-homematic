@@ -105,6 +105,11 @@
 	},
 
 	{
+	   "type": "MOTIONDETECTOR_TRANSCEIVER",
+	   "service": "HomeMaticHomeKitMotionDetectorServiceIP"
+	},
+
+	{
 	   "type": "SMOKE_DETECTOR",
 	   "service": "HomeMaticHomeKitSmokeDetectorService"
 	},
@@ -117,6 +122,11 @@
 	{
 	   "type": "SMOKE_DETECTOR_TEAM_V2",
 	   "service": "HomeMaticHomeKitSmokeDetectorService"
+	},
+
+	{
+	   "type": "HmIP-SWSD:SMOKE_DETECTOR",
+	   "service": "HomeMaticHomeKitSmokeDetectorServiceIP"
 	},
 
 	{
