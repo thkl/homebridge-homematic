@@ -17,6 +17,8 @@ var HomeMaticRPC = function (log, ccuip,port,system,platform) {
   this.stopping = false;
   this.localIP;
   this.listeningPort = port;
+  this.lastMessage = 0;
+  
   switch (system) {
   
     case 0 : 
@@ -58,12 +60,24 @@ HomeMaticRPC.prototype.init = function() {
     });
 
     this.server.on("NotFound", function(method, params) {
-      //that.log("Method " + method + " does not exist");
+      debug("Method " + method + " does not exist. - " + JSON.stringify(params));
     });
 
     this.server.on("system.listMethods", function(err, params, callback) {
-      that.log("Method call params for 'system.listMethods': " + params);
-      callback(null, ["system.listMethods", "system.multicall"]);
+      debug("Method call params for 'system.listMethods': " +  JSON.stringify(params));
+      callback(null, ["event","system.listMethods", "system.multicall"]);
+    });
+    
+    this.server.on("listDevices", function(err, params, callback) {
+      debug('rpc <- listDevices ' + JSON.stringify(params));
+      callback(null,[]);
+    });
+
+
+	this.server.on("newDevices", function(err, params, callback) {
+      debug('rpc <- newDevices ' + JSON.stringify(params));
+      // we are not intrested in new devices cause we will fetch them at launch
+      callback(null,[]);
     });
 
 
@@ -156,8 +170,8 @@ HomeMaticRPC.prototype.init = function() {
       path: "/"
     });
     this.log("CCU RPC Init Call on port " +  port + " for interface " + this.interface);
-    this.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort, "homebridge"], function(error, value) {
-      debug("CCU Response ...%s %s",JSON.stringify(value) , error);
+    this.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort, "homebridge_" + this.interface], function(error, value) {
+      debug("CCU Response ...Value (%s) Error : (%s)",JSON.stringify(value) , error);
     });
   },
 
