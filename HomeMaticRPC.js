@@ -69,13 +69,13 @@ HomeMaticRPC.prototype.init = function() {
     });
     
     this.server.on("listDevices", function(err, params, callback) {
-      debug('rpc <- listDevices ' + JSON.stringify(params));
+      debug('rpc <- listDevices - Zero Reply');
       callback(null,[]);
     });
 
 
 	this.server.on("newDevices", function(err, params, callback) {
-      debug('rpc <- newDevices ' + JSON.stringify(params));
+      debug('rpc <- newDevices nobody is interested in newdevices ... ');
       // we are not intrested in new devices cause we will fetch them at launch
       callback(null,[]);
     });
