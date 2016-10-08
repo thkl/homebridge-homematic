@@ -71,19 +71,21 @@ HomeMaticRPC.prototype.init = function() {
     });
     
     this.server.on("listDevices", function(err, params, callback) {
-      debug('rpc <- listDevices - Zero Reply');
+      debug('rpc <- listDevices on '  + that.interface + ' - Zero Reply');
       callback(null,[]);
     });
 
 
 	this.server.on("newDevices", function(err, params, callback) {
-      debug('rpc <- newDevices nobody is interested in newdevices ... ');
+      debug('rpc <- newDevices on '  + that.interface + ' nobody is interested in newdevices ... ');
       // we are not intrested in new devices cause we will fetch them at launch
       callback(null,[]);
     });
 
 
 	this.server.on("event", function(err, params, callback) {
+ 	  debug('rpc <- event  on '  + this.interface );
+ 	  that.lastMessage = Math.floor((new Date()).getTime() / 1000);
       var channel = that.interface + params[1];
       var datapoint = params[2];
       var value = params[3];
@@ -99,8 +101,8 @@ HomeMaticRPC.prototype.init = function() {
 	});
     
     this.server.on("system.multicall", function(err, params, callback) {
-    
-      this.lastMessage = Math.floor((new Date()).getTime() / 1000);
+ 	  debug('rpc <- system.multicall on '  + that.interface);
+      that.lastMessage = Math.floor((new Date()).getTime() / 1000);
       
       params.map(function(events) {
         try {
@@ -173,7 +175,13 @@ HomeMaticRPC.prototype.init = function() {
       channel = channel.substr(that.interface.length);
     }
 
+    if (that.interface != "HmIP-RF.") {
+      value = String(value);
+    }
+
 	debug("RPC setValue Call for %s %s Value %s Type %s",channel,datapoint,value, typeof value);
+	
+	
 	
 	this.client.methodCall("setValue", [channel, datapoint, value], function(error, value) {
 	 debug("RPC setValue (%s %s) Response %s Errors: %s",channel, datapoint, JSON.stringify(value),error);
@@ -207,7 +215,7 @@ HomeMaticRPC.prototype.init = function() {
 	    var now = Math.floor((new Date()).getTime() / 1000);
     	var timeDiff = now - this.lastMessage;
     	if (timeDiff > 600) {
-     		that.log("Watchdog Trigger - Reinit Connection ");
+     		that.log("Watchdog Trigger - Reinit Connection for " + this.interface + " after idle time of " + timeDiff + " seconds");
 		    this.lastMessage = now;
 		    this.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort, "homebridge_" + this.interface], function(error, value) {
       			debug("CCU Response ...Value (%s) Error : (%s)",JSON.stringify(value) , error);
