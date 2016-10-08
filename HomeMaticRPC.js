@@ -83,6 +83,20 @@ HomeMaticRPC.prototype.init = function() {
     });
 
 
+	this.server.on("event", function(err, params, callback) {
+      var channel = that.interface + params[1];
+      var datapoint = params[2];
+      var value = params[3];
+      debug("RPC event for %s %s with value %s",channel,datapoint,value);
+			 
+      that.platform.foundAccessories.map(function(accessory) {
+       if ((accessory.adress == channel) || ((accessory.cadress != undefined) && (accessory.cadress == channel))) {
+         accessory.event(datapoint, value);
+       }
+      });
+      callback(null,[]);
+	});
+    
     this.server.on("system.multicall", function(err, params, callback) {
     
       this.lastMessage = Math.floor((new Date()).getTime() / 1000);
