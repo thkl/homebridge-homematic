@@ -90,7 +90,7 @@ var HomeMaticChannelLoader = function (log) {
   }
   
   catch (err) {
-   this.log("Internal Channel config has errors, or was found");
+   this.log("Internal Channel config has errors, or was not found. You may ceck the file ChannelService/channel_config.json");
    throw err;
   }
   

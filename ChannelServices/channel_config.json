@@ -181,8 +181,15 @@
 	{
 	   "type": "VARIABLE_UPDATE_TRIGGER",
 	   "service": "HomeMaticHomeKitVariableUpdaterService"
+	},
+	{
+	   "type": "HM-WDS30-T-O:WEATHER",
+	   "service": "HomeMaticHomeKitThermometerService"
+	},
+	{
+	   "type": "HM-WDS30-OT2-SM:WEATHER",
+	   "service": "HomeMaticHomeKitThermometerService"
 	}
-
 	
 		
 	
