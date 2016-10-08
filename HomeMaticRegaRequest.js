@@ -46,7 +46,7 @@ HomeMaticRegaRequest.prototype = {
 
 
     post_req.on("error", function(e) {
-	    that.log("Error while executing rega script " + ls);
+	    that.log("Error " + e + "while executing rega script " + ls);
         callback(undefined);
     });
 
