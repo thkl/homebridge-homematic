@@ -67,7 +67,7 @@ HomeMaticRPC.prototype.init = function() {
 
     this.server.on("system.listMethods", function(err, params, callback) {
       debug("Method call params for 'system.listMethods': " +  JSON.stringify(params));
-      callback(null, ["system.listMethods", "system.multicall"]);
+      callback(null, ["event","system.listMethods", "system.multicall"]);
     });
     
     this.server.on("listDevices", function(err, params, callback) {
@@ -87,7 +87,7 @@ HomeMaticRPC.prototype.init = function() {
       var channel = that.interface + params[1];
       var datapoint = params[2];
       var value = params[3];
-      debug("RPC event for %s %s with value %s",channel,datapoint,value);
+      debug("RPC single event for %s %s with value %s",channel,datapoint,value);
 			 
       that.platform.foundAccessories.map(function(accessory) {
        if ((accessory.adress == channel) || ((accessory.cadress != undefined) && (accessory.cadress == channel))) {
