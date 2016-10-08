@@ -60,7 +60,7 @@ There is a issue with ios10. The build in Home App doesnt handle custom Services
 
 # Doors and Windows
 
-Homematic Shutter Contacts will map as Contacts into HomeKit by default. If you want to ask Siri about open Windows, you have to add them to a windows config switch:
+Homematic Shutter Contacts will be mapped as Contacts into HomeKit by default. If you want to ask Siri about open Windows, you have to add them to a windows config switch:
 
 So they will be mapped into an motorized Window Device. If you add the channel to the doors configuration switch, this channel will be mapped as automated door.
 
