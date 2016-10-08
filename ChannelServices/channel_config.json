@@ -169,6 +169,18 @@
 	   "service": "HomeMaticHomeKitThermostatService"
 	},
 
+
+	{
+	   "type": "THERMALCONTROL_TRANSMIT",
+	   "service": "HomeMaticHomeKitThermalControlService"
+	},
+
+	{
+	   "type": "CLIMATECONTROL_RT_TRANSCEIVER",
+	   "service": "HomeMaticHomeKitThermalControlService"
+	},
+
+	
 	{
 	   "type": "VARIABLE",
 	   "service": "HomeMaticHomeKitVariableService"
