@@ -217,7 +217,7 @@ HomeKitGenericService.prototype = {
    
     if (tp[1] == 'PRESS_SHORT') {
 		var targetChar = that.currentStateCharacteristic[tp[1]];
-		if (targetChar != undefined) {}
+		if (targetChar != undefined) {
 			targetChar.setValue(1);
     	    setTimeout(function(){targetChar.setValue(0);}, 1000);
         }
