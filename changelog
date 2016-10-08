@@ -1,6 +1,9 @@
 Changelog
 =========
 
+Version 0.0.41
+fix for setting values via RPC on the RF or wired Layer
+
 Version 0.0.40
 HM-CC-VG-1 is back
 
