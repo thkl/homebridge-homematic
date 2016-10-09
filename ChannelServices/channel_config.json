@@ -201,7 +201,11 @@
 	{
 	   "type": "HM-WDS30-OT2-SM:WEATHER",
 	   "service": "HomeMaticHomeKitThermometerService"
-	}
+	},
+	{
+	   "type": "WINMATIC",
+	   "service": "HomeMaticHomeKitWinMaticService"
+	},
 	
 		
 	
