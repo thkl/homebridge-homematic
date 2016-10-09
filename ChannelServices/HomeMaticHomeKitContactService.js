@@ -70,36 +70,57 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
 	     if (callback) callback(null, Characteristic.PositionState.STOPPED);
       }.bind(this));
       
-
+      var owindow = window.getCharacteristic(Characteristic.ObstructionDetected);
+      owindow.on('get', function(callback) {
+	     if (callback) callback(null, 1);
+      }.bind(this));
+      
       this.services.push(window);
 
     } else 
 
     if (this.special=="DOOR") {
 
-      var door = new Service["DoorStateService"](this.name);
-      var cdoor = door.getCharacteristic(Characteristic.CurrentDoorState);
+      var door = new Service.Door(this.name);
+
+      var cdoor = door.getCharacteristic(Characteristic.CurrentPosition);
       cdoor.on('get', function(callback) {
       that.query("STATE",function(value){
-       if (callback) callback(null,value);
+       if (callback) {
+         var cbvalue = 0;
+         if (value>0) {cbvalue = 100;}
+         callback(null,cbvalue);
+       }
       });
-      }.bind(this));
-      
+      }.bind(this));      
       
       this.currentStateCharacteristic["STATE"] = cdoor;
       cdoor.eventEnabled = true;
       
       if (reverse == true) {
 	     this.addValueMapping("STATE",1,1);
-   		 this.addValueMapping("STATE",0,0);
+   		 this.addValueMapping("STATE",0,100);
    	  	 this.addValueMapping("STATE",true,1);
-     	 this.addValueMapping("STATE",false,0);
+     	 this.addValueMapping("STATE",false,100);
       } else {
 	     this.addValueMapping("STATE",0,1);
-   		 this.addValueMapping("STATE",1,0);
-   	  	 this.addValueMapping("STATE",false,1);
-     	 this.addValueMapping("STATE",true,0);
+   		 this.addValueMapping("STATE",1,100);
+   	  	 this.addValueMapping("STATE",false,0);
+     	 this.addValueMapping("STATE",true,100);
       }
+
+	  var sdoor = door.getCharacteristic(Characteristic.PositionState);
+      sdoor.on('get', function(callback) {
+	     if (callback) callback(null, Characteristic.PositionState.STOPPED);
+      }.bind(this));
+      
+      
+      var odoor = door.getCharacteristic(Characteristic.ObstructionDetected);
+      odoor.on('get', function(callback) {
+	     if (callback) callback(null, 1);
+      }.bind(this));
+
+	  
 
       this.services.push(door);
 
