@@ -95,3 +95,11 @@ Please setup HMIP by adding the following key to your config.json
 ```
 "enable_hmip":"true"
 ```
+
+# Troubleshooting
+
+If the Home app on your iOS device cannot connect to the Homebridge after entering the PIN (and just tells you "there was a problem"), this may be caused by too many devices being presented by the bridge. In this case, try to filter some unused devices, e.g. like this if you don't use the "virtual keys":
+
+```
+"filter_device":["BidCoS-Wir","BidCoS-RF"]
+```
