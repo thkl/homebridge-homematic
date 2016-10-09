@@ -31,7 +31,7 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
       that.query("LEVEL",function(value){
        value = value * 100;
        if (callback) callback(null,value);
-    });
+    })
     }.bind(this));
 
 
@@ -41,8 +41,6 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
      value = value / 100;
      that.delayed("set","LEVEL" , value)
 	 callback();
-     
-    });
     }.bind(this));
 
 
@@ -55,7 +53,7 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
        hcvalue = value;
        // may there are some mappings needed
        if (callback) callback(null,hcvalue);
-    });
+    })
     }.bind(this));
 
 }
