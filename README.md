@@ -29,7 +29,7 @@ Configuration sample:
             "outlets":[ "BidCos-RF.KEQXXXXXXX:4","BidCos-RF.IEQXXXXXXX:1"],
             "doors":[],
             "programs":[],
-            "subsection":""
+            "subsection":"Homekit"
         },   
     ]
 
