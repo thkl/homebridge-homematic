@@ -52,12 +52,13 @@ function HomeMaticPlatform(log, config) {
 
   this.foundAccessories = [];
   this.adressesToQuery = [];
-
+  this.config = config;
+   
   var port = config["local_port"];
   if (port==undefined) {
    port = 9090;
   }
-
+  
   this.xmlrpc = new HomeMaticRPC(this.log, this.ccuIP, port, 0, this);
   this.xmlrpc.init();
   
@@ -256,6 +257,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 
         });
 
+
         if (that.programs!=undefined) {
           that.programs.map(function(program){
             
@@ -282,7 +284,6 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                 channelLoader.loadChannelService(that.foundAccessories, "VARIABLE","VARIABLE",that.log , that, "1234", variable, variable , "" ,undefined, Service, Characteristic);
           });
       }
-
              
         callback(that.foundAccessories);
       } else {

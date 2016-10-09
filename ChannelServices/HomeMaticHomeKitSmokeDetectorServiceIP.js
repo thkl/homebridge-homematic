@@ -27,11 +27,6 @@ HomeMaticHomeKitSmokeDetectorServiceIP.prototype.createDeviceService = function(
     this.services.push(sensor);
     this.remoteGetValue("SMOKE_DETECTOR_ALARM_STATUS");
 
-
-    break;
-
-
-   
 }
 
 

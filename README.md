@@ -39,6 +39,15 @@ Configuration sample:
 Preselect all the Channels you want to import into Homekit by one Subsection at your CCU.
 Create a new Subsection (in the Sample named as Homekit) and put all the Channels in you want to import. Finally put the name of the subsection into your config.js 
 
+Ports: the plugin will use local Port 9090 to communicate with the ccu rfd daemon. Port 9091 for wired and 9092 for hmip (if they are in use).
+If these ports are in use by other applications, you can change them by the following key in your config.json
+
+```
+"local_port":8080
+```
+
+In this case , please make sure that 8081 and 8082 are also available. You got the point ....
+
 
 # Variables
 

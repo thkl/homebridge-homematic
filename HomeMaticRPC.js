@@ -21,6 +21,12 @@ var HomeMaticRPC = function (log, ccuip,port,system,platform) {
   this.watchDogTimer;
   
   
+  this.watchDogTimeout = 0;
+  
+  if (platform.config["watchdog"] != undefined) {
+    this.watchDogTimeout = platform.config["watchdog"];
+  }
+  
   switch (system) {
   
     case 0 : 
@@ -204,7 +210,9 @@ HomeMaticRPC.prototype.init = function() {
       that.lastMessage = Math.floor((new Date()).getTime() / 1000);
     });
     
-    this.ccuWatchDog();
+    if (this.watchDogTimeout > 0 ) {
+	    this.ccuWatchDog();
+    }
   }
 
 
@@ -214,10 +222,10 @@ HomeMaticRPC.prototype.init = function() {
 	if (this.lastMessage != undefined) {
 	    var now = Math.floor((new Date()).getTime() / 1000);
     	var timeDiff = now - this.lastMessage;
-    	if (timeDiff > 600) {
+    	if (timeDiff > that.watchDogTimeout) {
      		that.log("Watchdog Trigger - Reinit Connection for " + this.interface + " after idle time of " + timeDiff + " seconds");
-		    this.lastMessage = now;
-		    this.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort, "homebridge_" + this.interface], function(error, value) {
+		    that.lastMessage = now;
+		    that.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort, "homebridge_" + this.interface], function(error, value) {
       			debug("CCU Response ...Value (%s) Error : (%s)",JSON.stringify(value) , error);
       			that.lastMessage = Math.floor((new Date()).getTime() / 1000);
    			 });
