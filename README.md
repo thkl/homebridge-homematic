@@ -29,15 +29,15 @@ Configuration sample:
             "outlets":[ "BidCos-RF.KEQXXXXXXX:4","BidCos-RF.IEQXXXXXXX:1"],
             "doors":[],
             "programs":[],
-            "subsection":""
+            "subsection":"Homekit"
         },   
     ]
 
 ```
 
 
-You may optional preselect all the Channels you want to import into Homekit by one Subsection at your CCU.
-Create a new Subsection and put all the Channels in you want to import. Finally put the name of the subsection into your config.js
+Preselect all the Channels you want to import into Homekit by one Subsection at your CCU.
+Create a new Subsection (in the Sample named as Homekit) and put all the Channels in you want to import. Finally put the name of the subsection into your config.js 
 
 
 # Variables
