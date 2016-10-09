@@ -44,7 +44,7 @@ var HomeMaticChannelLoader = function (log) {
 	  var accessory = new service(log,platform, id ,name, channelType ,adress,special, cfg, Service, Characteristic);
 	  list.push(accessory);	
     } else {
-      that.log("There is no service for " + deviceType+":"+channelType );
+      that.log.warn("There is no service for " + deviceType+":"+channelType );
    	}
   };
   
@@ -90,7 +90,7 @@ var HomeMaticChannelLoader = function (log) {
   }
   
   catch (err) {
-   this.log("Internal Channel config has errors, or was not found. You may ceck the file ChannelService/channel_config.json");
+   this.log.warn("Internal Channel config has errors, or was not found. You may ceck the file ChannelService/channel_config.json");
    throw err;
   }
   

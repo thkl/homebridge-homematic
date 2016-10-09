@@ -1,6 +1,11 @@
 Changelog
 =========
 
+Version 0.0.43 (not yet released)
+added warning if there is no definition of an subsection
+added warning if there are more than 100 devices
+
+
 Version 0.0.42
 Bugfixes and WinMatic
 

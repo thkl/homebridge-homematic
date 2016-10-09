@@ -43,8 +43,13 @@ function HomeMaticPlatform(log, config) {
   this.localCache = config["lcache"];
   this.vuc = config["variable_update_trigger_channel"];
   
-  if ((this.subsection!=undefined) && (this.subsection=="")) {
-    this.log("there is no value for the key subsection in config.json. There will be no devices fetched from your ccu.");
+  if ((this.subsection==undefined) || (this.subsection=="")) {
+    this.log.warn("Uuhhh. There is no value for the key subsection in config.json.");
+    this.log.warn("There will be no devices fetched from your ccu.");
+    this.log.warn("Please create a subsection and put in all the channels,");
+    this.log.warn("you want to import into homekit. Then add the name of that");
+    this.log.warn("section into your config.json as \"subsection\"=\"....\".");
+    return;
   }
   
   this.sendQueue = [];
@@ -112,27 +117,30 @@ function HomeMaticPlatform(log, config) {
 
 HomeMaticPlatform.prototype.accessories = function(callback) {
 
-    this.log("Fetching Homematic devices...");
+
     var that = this;
     that.foundAccessories = [];
+
+	if ((this.subsection==undefined) || (this.subsection=="")) {
+		callback(that.foundAccessories);
+		return;
+	}
+
+
+    this.log("Fetching Homematic devices...");
     var internalconfig = this.internalConfig();
-    
     var channelLoader = new HomeMaticChannelLoader(this.log);
     channelLoader.init();
     
     var script = "string sDeviceId;string sChannelId;boolean df = true;Write(\'{\"devices\":[\');foreach(sDeviceId, root.Devices().EnumIDs()){object oDevice = dom.GetObject(sDeviceId);if(oDevice){var oInterface = dom.GetObject(oDevice.Interface());if(df) {df = false;} else { Write(\',\');}Write(\'{\');Write(\'\"id\": \"\' # sDeviceId # \'\",\');Write(\'\"name\": \"\' # oDevice.Name() # \'\",\');Write(\'\"address\": \"\' # oDevice.Address() # \'\",\');Write(\'\"type\": \"\' # oDevice.HssType() # \'\",\');Write(\'\"channels\": [\');boolean bcf = true;foreach(sChannelId, oDevice.Channels().EnumIDs()){object oChannel = dom.GetObject(sChannelId);if(bcf) {bcf = false;} else {Write(\',\');}Write(\'{\');Write(\'\"cId\": \' # sChannelId # \',\');Write(\'\"name\": \"\' # oChannel.Name() # \'\",\');if(oInterface){Write(\'\"address\": \"\' # oInterface.Name() #\'.'\ # oChannel.Address() # \'\",\');}Write(\'\"type\": \"\' # oChannel.HssType() # \'\"\');Write(\'}\');}Write(\']}\');}}Write(\']\');";
 
     
-    if (this.subsection!=undefined) {
-   
      script = script + "var s = dom.GetObject(\"" ;
      script = script + this.subsection;
      script = script + "\");string cid;boolean sdf = true;if (s) {Write(\',\"subsection\":[\');foreach(cid, s.EnumUsedIDs()){ ";
      script = script +" if(sdf) {sdf = false;}";
      script = script +" else { Write(\',\');}Write(cid);}Write(\']\');}";
-    }
-    
-    
+
     script = script + "Write('\}'\);";
      
     var localcache = './.homebridge/ccu.json';
@@ -149,7 +157,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 			if (that.localCache != undefined) {
 				fs.writeFile(localcache, data, function (err) {
 				  if (err) {
-					  that.log('Cannot cache ccu data ',err);
+					  that.log.warn('Cannot cache ccu data ',err);
 				  }
 					  that.log('will cache ccu response ...');
     	      	});
@@ -157,7 +165,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
     	     
           }
 		 } catch (e) {
-  				that.log("Unable to parse live ccu data. Will try cache if there is one");
+  				that.log.warn("Unable to parse live ccu data. Will try cache if there is one");
 		 }
       }
       
@@ -174,11 +182,11 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 	       json = JSON.parse(data)
 		   that.log("loaded ccu data from local cache ... WARNING: your mileage may vary");
 		  } catch (e) {
-  				that.log("Unable to parse cached ccu data. giving up");
+  				that.log.warn("Unable to parse cached ccu data. giving up");
 		  }
   	    }
        } catch (e) {
-  				that.log("Unable to load cached ccu data. giving up");
+  				that.log.warn("Unable to load cached ccu data. giving up");
        }
       }
 
@@ -289,7 +297,31 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
       } else {
         callback(that.foundAccessories);
       }
+
+
+		// check number of devices
+		var noD = that.foundAccessories.length;
+		that.log("Number of mapped devices : " + noD); 
+      	if (noD > 100) {
+      	    that.log.warn("********************************************");
+      	    that.log.warn("* You are using more than 100 HomeKit      *");
+      	    that.log.warn("* devices behind a bridge. At this time    *");
+      	    that.log.warn("* HomeKit only supports up to 100 devices. *");
+      	    that.log.warn("* This may end up that iOS is not able to  *");
+      	    that.log.warn("* connect to the bridge anymore.           *");
+      	    that.log.warn("********************************************");
+      	} else 
+      	
+      	if (noD > 90) {
+      	    that.log.warn("You are using more than 90 HomeKit");
+      	    that.log.warn("devices behind a bridge. At this time");
+      	    that.log.warn("HomeKit only supports up to 100 devices.");
+      	    that.log.warn("This is just a warning. Everything should");
+      	    that.log.warn("work fine until you are below that 100.");
+      	}
     });
+ 
+ 
  
     // Version Check 
     
