@@ -29,16 +29,17 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
       
     cwindow.on('get', function(callback) {
       that.query("LEVEL",function(value){
-       value = value * 100;
        if (callback) callback(null,value);
     })
     }.bind(this));
+   
+    that.currentStateCharacteristic["LEVEL"] = cwindow;
+    cwindow.eventEnabled = true;
 
 
     var swindow = window.getCharacteristic(Characteristic.TargetPosition);
       
-    swindow.on('set', function(callback) {
-     value = value / 100;
+    swindow.on('set', function(value,callback) {
      that.delayed("set","LEVEL" , value)
 	 callback();
     }.bind(this));
