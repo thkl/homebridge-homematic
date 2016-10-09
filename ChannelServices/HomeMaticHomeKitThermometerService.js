@@ -15,7 +15,7 @@ HomeMaticHomeKitThermometerService.prototype.createDeviceService = function(Serv
 
 	var that = this;
     this.usecache = false;
-    var thermo = new Service["Thermostat"](this.name);
+    var thermo = new Service.TemperatureSensor(this.name);
     this.services.push(thermo);
 
     var cctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
