@@ -27,11 +27,6 @@ HomeMaticHomeKitSmokeDetectorService.prototype.createDeviceService = function(Se
     this.services.push(sensor);
     this.remoteGetValue("STATE");
 
-
-    break;
-
-
-   
 }
 
 
