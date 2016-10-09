@@ -29,6 +29,9 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
       
     cwindow.on('get', function(callback) {
       that.query("LEVEL",function(value){
+       if (value < 0 )  {
+        value = 0;
+       }
        if (callback) callback(null,value);
     })
     }.bind(this));
@@ -40,6 +43,10 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
     var swindow = window.getCharacteristic(Characteristic.TargetPosition);
       
     swindow.on('set', function(value,callback) {
+     if (value==0) {
+     	// Lock Window on Close Event
+     	value = -0.005;
+     }
      that.delayed("set","LEVEL" , value)
 	 callback();
     }.bind(this));
