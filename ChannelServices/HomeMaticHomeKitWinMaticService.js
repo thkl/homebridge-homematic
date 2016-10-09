@@ -57,7 +57,7 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
       
     swindow.on('get', function(callback) {
       that.query("DIRECTION",function(value){
-       var hcalue = 0;
+       var hcvalue = 0;
        hcvalue = value;
        // may there are some mappings needed
        if (callback) callback(null,hcvalue);
