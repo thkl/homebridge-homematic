@@ -1,10 +1,14 @@
 Changelog
 =========
 
-Version 0.0.43 (not yet released)
+**** BEGINNING OF VERSION 0.0.41 the selection of channels to use with HomeKit via a CCU Subsection is mandatory
+
+
+Version 0.0.43 
+
 added warning if there is no definition of an subsection
 added warning if there are more than 100 devices
-
+fixed bug in Lux and Rain Sensor Service
 
 Version 0.0.42
 Bugfixes and WinMatic

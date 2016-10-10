@@ -36,8 +36,6 @@ HomeMaticHomeKitRaindetectorService.prototype.createDeviceService = function(Ser
 	 this.currentStateCharacteristic["RAINING"] = crain;
      crain.eventEnabled= true;  
 		
-	break;
-
 }
 
 

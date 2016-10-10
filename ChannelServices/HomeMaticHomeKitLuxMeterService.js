@@ -26,8 +26,6 @@ HomeMaticHomeKitLuxMeterService.prototype.createDeviceService = function(Service
      this.currentStateCharacteristic["LUX"] = cbright;
      cbright.eventEnabled= true;
 
-    break;
-
 }
 
 

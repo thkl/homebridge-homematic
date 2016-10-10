@@ -36,6 +36,9 @@ Configuration sample:
 ```
 
 
+**** BEGINNING OF VERSION 0.0.41 the selection of channels to use with HomeKit via a CCU Subsection is mandatory *****
+
+
 Preselect all the Channels you want to import into Homekit by one Subsection at your CCU.
 Create a new Subsection (in the Sample named as Homekit) and put all the Channels in you want to import. Finally put the name of the subsection into your config.js 
 
