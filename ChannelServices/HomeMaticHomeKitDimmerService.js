@@ -2,7 +2,8 @@
 
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService;
 var util = require("util");
-
+var curLevel;
+var lastLevel;
 
 function HomeMaticHomeKitDimmerService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
     HomeMaticHomeKitDimmerService.super_.apply(this, arguments);
@@ -25,12 +26,23 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
        if (value==undefined) {
         value = 0;
        }
+       that.curLevel = value;
        if (callback) callback(null,value>0);
       });
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.command("set","LEVEL" , (value==1)? "100": "0");
+//       that.log("Value " + value + " Cur " + that.curLevel + " Last " + that.lastLevel);
+       if ((value==1) && (that.curLevel==0)) {
+	      that.command("set","LEVEL" , that.lastLevel);
+       }
+       
+       if ((value==0) && ((that.curLevel>0) || (that.lastLevel > 0))) {
+          that.curLevel = 0;
+	      that.command("set","LEVEL" , 0);
+       }
+
+
       callback();
     }.bind(this));
 
@@ -39,12 +51,17 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
 
     .on('get', function(callback) {
       that.query("LEVEL",function(value){
+       that.curLevel = value;
+       that.lastLevel = value;
        if (callback) callback(null,value);
       });
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.delayed("set","LEVEL" , value,100);
+      that.curLevel = value;
+      that.lastLevel = value;
+      that.isWorking = true;
+      that.delayed("set","LEVEL" , value,200);
       callback();
     }.bind(this));
 

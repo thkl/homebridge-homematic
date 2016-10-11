@@ -5,6 +5,9 @@ Changelog
 
 Version 0.0.44 
 fixed HM-LC-RGBW-WM for the iOS Home App
+fixed flickering for Dimmer when change level with the iOS Home App
+
+
 
 Version 0.0.43 
 

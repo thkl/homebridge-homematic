@@ -18,7 +18,8 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.usecache = true;
   this.cadress = undefined;
   this.cfg = cfg;
-  
+  this.isWorking = false;
+
   this.i_characteristic = {};
   
   var that = this;
@@ -202,6 +203,7 @@ HomeKitGenericService.prototype = {
   event:function(dp,newValue) {
   
     var that = this;
+    
     var tp = this.transformDatapoint(dp);
     
     
@@ -224,6 +226,13 @@ HomeKitGenericService.prototype = {
 	    return;
     }
     
+    
+    if (dp=="WORKING") {
+     if ((that.isWorking == true) && (value==false)) {
+       // Resent last Events
+     }
+    	that.isWorking = value;
+    }
     
     this.eventupdate = true;
     if (this.cadress!=undefined) {
@@ -253,11 +262,11 @@ HomeKitGenericService.prototype = {
         value = map[value];
       }
     }
-    if (value!=undefined) {
+    if ((value!=undefined) && (that.isWorking==false)) {
 	  if (that.currentStateCharacteristic[dp]!=undefined) {
           that.currentStateCharacteristic[dp].setValue(value, null);
       }
-    
+      
     if (this.usecache) {
 	    this.state[dp] = value; 
     }
