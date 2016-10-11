@@ -82,6 +82,9 @@ So they will be mapped into an motorized Window Device. If you add the channel t
 "windows":["BidCos-RF.KEQXXXXXXX:4"]
 ```
 
+# HM-LC-RGBW-WM
+
+Please only add the channel with number 2 to HomeKit.
 
 # HMIP
 

@@ -80,7 +80,7 @@
 	},
 
 	{
-	   "type": "RGBW_COLOR",
+	   "type": "HM-LC-RGBW-WM:RGBW_COLOR",
 	   "service": "HomeMaticHomeKitRGBWService"
 	},
 
