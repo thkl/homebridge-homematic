@@ -18,8 +18,9 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function(Service, Ch
     var that = this;
     var lightbulb = new Service.Lightbulb(this.name);
     this.services.push(lightbulb);
-
-    .on('get', function(callback) {
+    
+    var cc = lightbulb.getCharacteristic(Characteristic.On)
+     .on('get', function(callback) {
       that.query("LEVEL",function(value) {
        
        if (value==undefined) {

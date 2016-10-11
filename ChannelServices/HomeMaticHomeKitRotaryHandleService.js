@@ -11,6 +11,7 @@ function HomeMaticHomeKitRotaryHandleService(log,platform, id ,name, type ,adres
 util.inherits(HomeMaticHomeKitRotaryHandleService, HomeKitGenericService);
 
 
+
 HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function(Service, Characteristic) {
 
      var that = this;
@@ -48,20 +49,28 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function(Ser
 
     if (this.special=="DOOR") {
 
-      var door = new Service["DoorStateService"](this.name);
-      var cdoor = door.getCharacteristic(Characteristic.CurrentDoorState);
+      var door = new Service["Door"](this.name);
+      var cdoor = door.getCharacteristic(Characteristic.CurrentPosition);
       cdoor.on('get', function(callback) {
       	that.query("STATE",function(value){
+      	var hkvalue = 0;
       	if (value==undefined) {
-          value = 0;
+          hkvalue = 0;
         }
-		if (callback) callback(null,value);
+        
+        if (value==0) {hkvalue=100;}
+        if (value==1) {hkvalue=0;}
+        if (value==2) {hkvalue=0;}
+        
+		if (callback) callback(null,hkvalue);
       	});
       }.bind(this));
 
       this.currentStateCharacteristic["STATE"] = cdoor;
       cdoor.eventEnabled = true;
-      this.addValueMapping("STATE",0,1);
+      
+      
+      this.addValueMapping("STATE",0,100);
       this.addValueMapping("STATE",1,0);
       this.addValueMapping("STATE",2,0);
       this.services.push(door);
