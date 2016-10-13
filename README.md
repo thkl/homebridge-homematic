@@ -109,3 +109,22 @@ If the Home app on your iOS device cannot connect to the Homebridge after enteri
 ```
 "filter_device":["BidCoS-Wir","BidCoS-RF"]
 ```
+
+
+# Custom Serviceclasses
+
+You own a device that is not currently working with the default implementation here? No problem. You can create custom service classes. With a little bit of knowledge from the existing classes in the ChannelServices folder, this should not be a big deal. Copy the HomeMaticHomeKitDummyService and create your own Serviceclass.
+
+All definitions for the existing classes are located in ChannelServices/channel_config.json. There is a key for each Homematic channeltype and the corresponding name of the service class as value. Be Aware: your personal changes in that file will be overridden by the next update. So you have to set them up in your config.json:
+
+
+As a sample: the device with the channel WEATHER of the device with type HM-WDS10-TH-O will use the service HomeMaticHomeKitCuxDThermostatService
+
+```
+"services": [
+	{ "type": "HM-WDS10-TH-O:WEATHER",
+          "service": "HomeMaticHomeKitCuxDThermostatService"
+	}]
+	
+```
+
