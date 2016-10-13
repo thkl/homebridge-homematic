@@ -2,8 +2,8 @@
 
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService;
 var util = require("util");
-var curLevel;
-var lastLevel;
+var curLevel=-1;
+var lastLevel=-1;
 
 function HomeMaticHomeKitDimmerService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
     HomeMaticHomeKitDimmerService.super_.apply(this, arguments);
@@ -33,6 +33,14 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
 
     .on('set', function(value, callback) {
 //       that.log("Value " + value + " Cur " + that.curLevel + " Last " + that.lastLevel);
+
+       if ((value==1) && (that.curLevel==-1)) {
+          that.curLevel = 1;
+          that.lastLevel = 1;
+	      that.command("set","LEVEL" , that.lastLevel);
+       }
+       
+       
        if ((value==1) && (that.curLevel==0)) {
 	      that.command("set","LEVEL" , that.lastLevel);
        }

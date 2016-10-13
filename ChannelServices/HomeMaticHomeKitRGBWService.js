@@ -3,8 +3,8 @@
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService;
 var util = require("util");
 var sat;
-var curLevel;
-var lastLevel;
+var curLevel=-1;
+var lastLevel=-1;
 
 function HomeMaticHomeKitRGBWService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
     HomeMaticHomeKitRGBWService.super_.apply(this, arguments);
@@ -33,6 +33,13 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function(Service, Ch
 
     .on('set', function(value, callback) {
 //       that.log("Value " + value + " Cur " + that.curLevel + " Last " + that.lastLevel);
+
+       if ((value==1) && (that.curLevel==-1)) {
+          that.curLevel = 1;
+          that.lastLevel = 1;
+	      that.command("set","LEVEL" , that.lastLevel);
+       }
+       
        if ((value==1) && (that.curLevel==0)) {
 	      that.command("set","LEVEL" , that.lastLevel);
        }
