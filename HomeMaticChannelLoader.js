@@ -7,9 +7,9 @@ var HomeMaticChannelLoader = function (log) {
 	this.log = log;
 }
   
-  HomeMaticChannelLoader.prototype.init = function() {
+  HomeMaticChannelLoader.prototype.init = function(customServices) {
   	  var that = this;
-	  this.config = this.internalConfig();
+	  this.config = this.internalConfig(customServices);
   }
   
   HomeMaticChannelLoader.prototype.loadChannelService = function(list,deviceType,channelType,log,platform, id ,name ,adress,special, cfg, Service, Characteristic) {
@@ -40,7 +40,6 @@ var HomeMaticChannelLoader = function (log) {
           	cfg = options;
         }
       }
-      
 	  var accessory = new service(log,platform, id ,name, channelType ,adress,special, cfg, Service, Characteristic);
 	  list.push(accessory);	
     } else {
@@ -81,11 +80,18 @@ var HomeMaticChannelLoader = function (log) {
   }
   
   
-  HomeMaticChannelLoader.prototype.internalConfig = function() {
+  HomeMaticChannelLoader.prototype.internalConfig = function(customServices) {
   
   try {
     var config_path = path.join(__dirname, './ChannelServices/channel_config.json');
     var config = JSON.parse(fs.readFileSync(config_path));
+    if (customServices != undefined) {
+      customServices.map(function(service) {
+     	 config["channelconfig"].push(service);
+      });
+    }
+    
+    
     return config;
   }
   
