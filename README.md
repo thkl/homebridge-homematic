@@ -127,7 +127,7 @@ As a sample: the device with the channel WEATHER of the device with type HM-WDS1
 	
 ```
 
-Issue #51
+# <a href="https://github.com/thkl/homebridge-homematic/issues/51">Issue #51</a>
 
 on 15.10.2016 an issue about a missing donation button was reported. So i fixed #51:
 
