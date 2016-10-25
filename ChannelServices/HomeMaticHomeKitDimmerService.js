@@ -32,9 +32,10 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
     }.bind(this))
 
     .on('set', function(value, callback) {
-//       that.log("Value " + value + " Cur " + that.curLevel + " Last " + that.lastLevel);
 
-       if ((value==1) && (that.curLevel==-1)) {
+       that.log("Value " + value + " Cur " + that.curLevel + " Last " + that.lastLevel);
+
+       if ((value==1) && (that.curLevel==0)) {
           that.curLevel = 1;
           that.lastLevel = 1;
 	      that.command("set","LEVEL" , that.lastLevel);
@@ -80,6 +81,10 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
 
 }
 
+
+HomeMaticHomeKitDimmerService.prototype.endWorking=function()  {
+ this.remoteGetValue("LEVEL");
+}
 
 
 module.exports = HomeMaticHomeKitDimmerService; 

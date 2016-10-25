@@ -123,6 +123,9 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function(Service, Ch
 
 }
 
+HomeMaticHomeKitRGBWService.prototype.endWorking=function()  {
+ this.remoteGetValue("1:LEVEL");
+}
 
 
 module.exports = HomeMaticHomeKitRGBWService; 

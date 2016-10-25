@@ -19,7 +19,7 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.cadress = undefined;
   this.cfg = cfg;
   this.isWorking = false;
-
+  this.myDataPointName;
   this.i_characteristic = {};
   
   var that = this;
@@ -171,7 +171,7 @@ HomeKitGenericService.prototype = {
 
       	if (tp[1] == 'LEVEL') {
       		newValue = newValue * 100;
-      	}
+       	}
 
       	if ((tp[1] == 'COLOR') && (that.type == "RGBW_COLOR")) {
       		newValue = Math.round((newValue/199)*360);
@@ -199,6 +199,9 @@ HomeKitGenericService.prototype = {
     });
   },
 
+  endWorking:function() {
+    
+  },
 
   event:function(dp,newValue) {
   
@@ -228,10 +231,10 @@ HomeKitGenericService.prototype = {
     
     
     if (dp=="WORKING") {
-     if ((that.isWorking == true) && (value==false)) {
-       // Resent last Events
+     if ((that.isWorking == true) && (newValue==false)) {
+       that.endWorking();
      }
-    	that.isWorking = value;
+       that.isWorking = value;
     }
     
     this.eventupdate = true;

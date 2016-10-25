@@ -78,6 +78,9 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function(Service, C
 
 }
 
+HomeMaticHomeKitBlindService.prototype.endWorking=function()  {
+ this.remoteGetValue("LEVEL");
+}
 
 
 module.exports = HomeMaticHomeKitBlindService; 

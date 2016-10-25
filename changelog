@@ -3,6 +3,9 @@ Changelog
 
 **** BEGINNING OF VERSION 0.0.41 the selection of channels to use with HomeKit via a CCU Subsection is mandatory
 
+Version 0.0.46
+fixed problem that dimmers will not send new values to homekit
+
 Version 0.0.45
 fixed start value for dimmer , siri will turn the light to 100% after the start of the bridge
 added ability to create custom services
