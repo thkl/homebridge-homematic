@@ -234,7 +234,7 @@ HomeKitGenericService.prototype = {
      if ((that.isWorking == true) && (newValue==false)) {
        that.endWorking();
      }
-       that.isWorking = value;
+       that.isWorking = newValue;
     }
     
     this.eventupdate = true;

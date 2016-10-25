@@ -16,8 +16,8 @@ util.inherits(HomeMaticHomeKitRaindetectorService, HomeKitGenericService);
 HomeMaticHomeKitRaindetectorService.prototype.propagateServices = function(homebridge, Service, Characteristic) {
   	
   	var uuid = homebridge.uuid;
-  
-  
+  	
+  	
     Characteristic.IsRainingCharacteristic = function() {
     var charUUID = uuid.generate('HomeMatic:customchar:IsRainingCharacteristic');
 	Characteristic.call(this, 'Regen', charUUID);
