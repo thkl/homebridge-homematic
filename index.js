@@ -22,7 +22,7 @@ module.exports = function(homebridge) {
 function HomeMaticPlatform(log, config) {
   
   this.log = log;
-  
+  this.uuid = uuid;
   this.log("Homematic Plugin Version " + this.getVersion());
   this.log("Plugin by thkl  https://github.com/thkl");
   this.log("Homematic is a registered trademark of the EQ-3 AG");
