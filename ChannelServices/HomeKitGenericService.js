@@ -47,8 +47,8 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   .setCharacteristic(Characteristic.SerialNumber, this.adress);
 
   this.services.push( informationService );
-  this.propagateServices(Service, Characteristic);
-  this.createDeviceService(platform, Service, Characteristic);
+  this.propagateServices(platform, Service, Characteristic);
+  this.createDeviceService(Service, Characteristic);
 }
 
 

@@ -109,7 +109,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
 
     } else {
 
-      var contact = new Service["ContactSensor"](this.name);
+      var contact = new Service.ContactSensor(this.name);
       var state = contact.getCharacteristic(Characteristic.ContactSensorState)
       .on('get', function(callback) {
       that.query("STATE",function(value){
