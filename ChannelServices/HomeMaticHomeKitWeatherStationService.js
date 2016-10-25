@@ -10,8 +10,9 @@ function HomeMaticHomeKitWeatherStationService(log,platform, id ,name, type ,adr
   
 }
 
-HomeMaticHomeKitWeatherStationService.prototype.propagateServices = function(Service, Characteristic) {
+HomeMaticHomeKitWeatherStationService.prototype.propagateServices = function(homebridge, Service, Characteristic) {
     
+    var uuid = homebridge.uuid;
   
   Characteristic.IsRainingCharacteristic = function() {
     var charUUID = uuid.generate('HomeMatic:customchar:IsRainingCharacteristic');

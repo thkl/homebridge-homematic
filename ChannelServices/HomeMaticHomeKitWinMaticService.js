@@ -11,7 +11,7 @@ function HomeMaticHomeKitWinMaticService(log,platform, id ,name, type ,adress,sp
 util.inherits(HomeMaticHomeKitWinMaticService, HomeKitGenericService);
 
 
-HomeMaticHomeKitWinMaticService.prototype.propagateServices = function(Service, Characteristic) {
+HomeMaticHomeKitWinMaticService.prototype.propagateServices = function(homebridge, Service, Characteristic) {
     
   // Register new Characteristic or Services here
   

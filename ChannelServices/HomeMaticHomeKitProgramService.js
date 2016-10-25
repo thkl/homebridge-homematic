@@ -12,7 +12,7 @@ function HomeMaticHomeKitProgramService(log,platform, id ,name, type ,adress,spe
 util.inherits(HomeMaticHomeKitProgramService, HomeKitGenericService);
 
 
-HomeMaticHomeKitProgramService.prototype.propagateServices = function(Service, Characteristic) {
+HomeMaticHomeKitProgramService.prototype.propagateServices = function(homebridge, Service, Characteristic) {
   Characteristic.ProgramLaunchCharacteristic = function() {
     Characteristic.call(this, 'Program', "5E0115D7-7594-4846-AFB7-F456389E81EC");
     this.setProps({

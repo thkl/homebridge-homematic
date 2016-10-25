@@ -48,7 +48,7 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
 
   this.services.push( informationService );
   this.propagateServices(Service, Characteristic);
-  this.createDeviceService(Service, Characteristic);
+  this.createDeviceService(platform, Service, Characteristic);
 }
 
 
@@ -56,7 +56,7 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
 
 HomeKitGenericService.prototype = {
 
-  propagateServices: function(Service, Characteristic) {},
+  propagateServices: function(homebridge, Service, Characteristic) {},
   
   
   addValueMapping: function(dp,value,mappedvalue) {

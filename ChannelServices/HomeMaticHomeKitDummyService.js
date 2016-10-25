@@ -11,7 +11,7 @@ function HomeMaticHomeKitDummyService(log,platform, id ,name, type ,adress,speci
 util.inherits(HomeMaticHomeKitDummyService, HomeKitGenericService);
 
 
-HomeMaticHomeKitDummyService.prototype.propagateServices = function(Service, Characteristic) {
+HomeMaticHomeKitDummyService.prototype.propagateServices = function(homebridge, Service, Characteristic) {
     
   // Register new Characteristic or Services here
   

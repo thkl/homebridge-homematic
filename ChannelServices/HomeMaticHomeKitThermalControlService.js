@@ -11,7 +11,7 @@ function HomeMaticHomeKitThermalControlService(log,platform, id ,name, type ,adr
 util.inherits(HomeMaticHomeKitThermalControlService, HomeKitGenericService);
 
 
-HomeMaticHomeKitThermalControlService.prototype.propagateServices = function(Service, Characteristic) {
+HomeMaticHomeKitThermalControlService.prototype.propagateServices = function(homebridge, Service, Characteristic) {
     
   // Register new Characteristic or Services here
   

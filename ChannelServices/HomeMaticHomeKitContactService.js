@@ -11,7 +11,7 @@ function HomeMaticHomeKitContactService(log,platform, id ,name, type ,adress,spe
 util.inherits(HomeMaticHomeKitContactService, HomeKitGenericService);
 
 
-HomeMaticHomeKitContactService.prototype.propagateServices = function(Service, Characteristic) {
+HomeMaticHomeKitContactService.prototype.propagateServices = function(homebridge, Service, Characteristic) {
     
   
   Service.DoorStateService = function(displayName, subtype) {
