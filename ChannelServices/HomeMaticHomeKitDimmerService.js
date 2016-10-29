@@ -2,8 +2,8 @@
 
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService;
 var util = require("util");
-var curLevel=-1;
-var lastLevel=-1;
+var curLevel=0;
+var lastLevel=0;
 
 function HomeMaticHomeKitDimmerService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
     HomeMaticHomeKitDimmerService.super_.apply(this, arguments);
@@ -26,29 +26,31 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
        if (value==undefined) {
         value = 0;
        }
-       that.curLevel = value;
+
+       that.state["LAST"] = value;
        if (callback) callback(null,value>0);
+
       });
     }.bind(this))
 
     .on('set', function(value, callback) {
 
-       that.log("Value " + value + " Cur " + that.curLevel + " Last " + that.lastLevel);
+       var lastLevel = that.state["LAST"];
+       if (lastLevel == undefined) {
+        lastLevel = -1;
+       }
 
-       if ((value==1) && (that.curLevel==0)) {
-          that.curLevel = 100;
-          that.lastLevel = 100;
-	      that.command("set","LEVEL" , that.lastLevel);
-       }
-       
-       
-       if ((value==1) && (that.curLevel==0)) {
-	      that.command("set","LEVEL" , that.lastLevel);
-       }
-       
-       if ((value==0) && ((that.curLevel>0) || (that.lastLevel > 0))) {
-          that.curLevel = 0;
+
+       if (((value==true) || ((value==1))) && ((lastLevel<1))) {
+          that.state["LAST"]=100;
+	      that.command("set","LEVEL" , 100);
+       } else 
+   
+       if ((value==0) || (value==false)) {
+          that.state["LAST"]=0;
 	      that.command("set","LEVEL" , 0);
+       } else {
+          that.command("set","LEVEL" , lastLevel);
        }
 
 
@@ -60,17 +62,15 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
 
     .on('get', function(callback) {
       that.query("LEVEL",function(value){
-       that.curLevel = value;
-       that.lastLevel = value;
+       that.state["LAST"] = (value*100);
        if (callback) callback(null,value);
       });
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.curLevel = value;
-      that.lastLevel = value;
+      that.state["LAST"] = (value*100);
       that.isWorking = true;
-      that.delayed("set","LEVEL" , value,200);
+      that.delayed("set","LEVEL" , value,1);
       callback();
     }.bind(this));
 
