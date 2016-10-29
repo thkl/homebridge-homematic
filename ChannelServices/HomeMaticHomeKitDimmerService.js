@@ -36,8 +36,8 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
        that.log("Value " + value + " Cur " + that.curLevel + " Last " + that.lastLevel);
 
        if ((value==1) && (that.curLevel==0)) {
-          that.curLevel = 1;
-          that.lastLevel = 1;
+          that.curLevel = 100;
+          that.lastLevel = 100;
 	      that.command("set","LEVEL" , that.lastLevel);
        }
        
