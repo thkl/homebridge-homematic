@@ -266,8 +266,9 @@ HomeKitGenericService.prototype = {
       }
     }
     if ((value!=undefined) && (that.isWorking==false)) {
+    
 	  if (that.currentStateCharacteristic[dp]!=undefined) {
-          that.currentStateCharacteristic[dp].setValue(value, null);
+	      that.currentStateCharacteristic[dp].setValue(value, null);
       }
       
     if (this.usecache) {

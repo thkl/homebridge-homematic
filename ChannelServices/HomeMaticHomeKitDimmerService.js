@@ -21,6 +21,7 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
     var cc = lightbulb.getCharacteristic(Characteristic.On)
 
     .on('get', function(callback) {
+     // that.log("Get On command.");
       that.query("LEVEL",function(value) {
        
        if (value==undefined) {
@@ -28,6 +29,7 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
        }
 
        that.state["LAST"] = value;
+       // that.log("Ret On command. "+ value );
        if (callback) callback(null,value>0);
 
       });
@@ -35,22 +37,34 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
 
     .on('set', function(value, callback) {
 
+     // that.log("Set On to " + value + " command.");
+
+
        var lastLevel = that.state["LAST"];
        if (lastLevel == undefined) {
         lastLevel = -1;
        }
-
-
-       if (((value==true) || ((value==1))) && ((lastLevel<1))) {
+	
+	   if (((value==true) || ((value==1))) && ((lastLevel<1))) {
+          //that.log("On Command send 100 to Level");
           that.state["LAST"]=100;
 	      that.command("set","LEVEL" , 100);
        } else 
    
        if ((value==0) || (value==false)) {
+          //that.log("Off Command send 0 to Level");
           that.state["LAST"]=0;
 	      that.command("set","LEVEL" , 0);
-       } else {
-          that.command("set","LEVEL" , lastLevel);
+       } else 
+       
+       if (((value==true) || ((value==1))) && ((lastLevel>0))) {
+         // that.log("Do Nothing on is on");
+         // Do Nothing just skip the ON Command cause the Dimmer is on
+       }
+       
+       else {
+          // that.log("Fallback set Lastlevel", lastLevel);
+          that.delayed("set","LEVEL" , lastLevel,2);
        }
 
 
@@ -65,13 +79,26 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
        that.state["LAST"] = (value*100);
        if (callback) callback(null,value);
       });
+      
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.state["LAST"] = (value*100);
-      that.isWorking = true;
-      that.delayed("set","LEVEL" , value,1);
-      callback();
+      var lastLevel = that.state["LAST"];
+      if (value!=lastLevel) {
+      
+        if (value==0) {
+       	  // set On State 
+	      cc.updateValue(false,null);
+	    } else {
+	      cc.updateValue(true,null);
+	    }
+       
+	    //that.log("Set Brightness of " + that.adress + " to " + value + " command. LastLevel is "+  lastLevel);
+    	that.state["LAST"] = value;
+        that.isWorking = true;
+     	that.delayed("set","LEVEL" , value,5);
+	  }
+      if (callback)  callback();
     }.bind(this));
 
     that.currentStateCharacteristic["LEVEL"] = brightness;
