@@ -143,7 +143,10 @@
 	   "type": "WEATHER_TRANSMIT",
 	   "service": "HomeMaticHomeKitThermostatWeatherService"
 	},
-
+	{
+	   "type": "HM-WDS100-C6-O:WEATHER",
+	   "service": "HomeMaticHomeKitWeatherStationService"
+	},
 	{
 	   "type": "HM-WDS100-C6-O-2:WEATHER",
 	   "service": "HomeMaticHomeKitWeatherStationService"

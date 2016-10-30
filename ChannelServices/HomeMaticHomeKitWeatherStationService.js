@@ -25,7 +25,13 @@ HomeMaticHomeKitWeatherStationService.prototype.propagateServices = function(hom
   };
   util.inherits(Characteristic.IsRainingCharacteristic, Characteristic);
   
+  Service.IsRainingService = function(displayName, subtype) {
+  	var servUUID = uuid.generate('HomeMatic:customchar:IsRainingService');
+  	Service.call(this, displayName, servUUID, subtype);
+	this.addCharacteristic(Characteristic.IsRainingCharacteristic);
+  };
   
+  util.inherits(Service.IsRainingService, Service);
   
   Characteristic.WindSpeedCharacteristic = function() {
     var charUUID = uuid.generate('HomeMatic:customchar:WindSpeedCharacteristic');
