@@ -208,6 +208,10 @@
 	{
 	   "type": "WINMATIC",
 	   "service": "HomeMaticHomeKitWinMaticService"
+	},
+	{
+	   "type": "HM-Sec-Sir-WM:ARMING",
+	   "service": "HomeMaticHomeKitSecuritySystem"
 	}
 	]
 }

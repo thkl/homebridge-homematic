@@ -4,6 +4,7 @@ var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGeneric
 var util = require("util");
 var curLevel=0;
 var lastLevel=0;
+var onc;
 
 function HomeMaticHomeKitDimmerService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
     HomeMaticHomeKitDimmerService.super_.apply(this, arguments);
@@ -18,7 +19,7 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
     var lightbulb = new Service["Lightbulb"](this.name);
     this.services.push(lightbulb);
 
-    var cc = lightbulb.getCharacteristic(Characteristic.On)
+    this.onc = lightbulb.getCharacteristic(Characteristic.On)
 
     .on('get', function(callback) {
      // that.log("Get On command.");
@@ -86,11 +87,11 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
       var lastLevel = that.state["LAST"];
       if (value!=lastLevel) {
       
-        if (value==0) {
+        if ((value==0) && (this.onc!=undefined)){
        	  // set On State 
-	      cc.updateValue(false,null);
+	      this.onc.updateValue(false,null);
 	    } else {
-	      cc.updateValue(true,null);
+	      this.onc.updateValue(true,null);
 	    }
        
 	    //that.log("Set Brightness of " + that.adress + " to " + value + " command. LastLevel is "+  lastLevel);
