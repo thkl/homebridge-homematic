@@ -53,6 +53,10 @@
 	   "type": "DIMMER",
 	   "service": "HomeMaticHomeKitDimmerService"
 	},
+	{
+	   "type": "VIRTUAL_DIMMER",
+	   "service": "HomeMaticHomeKitDimmerService"
+	},
 
 	{
 	   "type": "KEY",

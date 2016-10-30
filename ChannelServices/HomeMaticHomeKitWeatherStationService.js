@@ -10,11 +10,14 @@ function HomeMaticHomeKitWeatherStationService(log,platform, id ,name, type ,adr
   
 }
 
+util.inherits(HomeMaticHomeKitWeatherStationService, HomeKitGenericService);
+
+
 HomeMaticHomeKitWeatherStationService.prototype.propagateServices = function(homebridge, Service, Characteristic) {
-    
+
     var uuid = homebridge.uuid;
   
-  Characteristic.IsRainingCharacteristic = function() {
+    Characteristic.IsRainingCharacteristic = function() {
     var charUUID = uuid.generate('HomeMatic:customchar:IsRainingCharacteristic');
 	Characteristic.call(this, 'Regen', charUUID);
     this.setProps({
@@ -32,7 +35,7 @@ HomeMaticHomeKitWeatherStationService.prototype.propagateServices = function(hom
   };
   
   util.inherits(Service.IsRainingService, Service);
-  
+
   Characteristic.WindSpeedCharacteristic = function() {
     var charUUID = uuid.generate('HomeMatic:customchar:WindSpeedCharacteristic');
 	Characteristic.call(this, 'Wind Geschwindigkeit', charUUID);
@@ -98,10 +101,8 @@ HomeMaticHomeKitWeatherStationService.prototype.propagateServices = function(hom
   
   util.inherits(Service.WindRangeService, Service);
   
-
 }
 
-util.inherits(HomeMaticHomeKitWeatherStationService, HomeKitGenericService);
 
 
 HomeMaticHomeKitWeatherStationService.prototype.createDeviceService = function(Service, Characteristic) {

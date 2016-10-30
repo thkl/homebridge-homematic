@@ -47,7 +47,11 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   .setCharacteristic(Characteristic.SerialNumber, this.adress);
 
   this.services.push( informationService );
-  this.propagateServices(platform, Service, Characteristic);
+
+  if (this.propagateServices != undefined) {
+      this.propagateServices(platform, Service, Characteristic);
+  }
+  
   this.createDeviceService(Service, Characteristic);
 }
 
@@ -56,9 +60,6 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
 
 HomeKitGenericService.prototype = {
 
-  propagateServices: function(homebridge, Service, Characteristic) {},
-  
-  
   addValueMapping: function(dp,value,mappedvalue) {
     if (this.datapointMappings[dp]==undefined) {
       this.datapointMappings[dp] = [];

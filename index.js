@@ -292,7 +292,8 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                 channelLoader.loadChannelService(that.foundAccessories, "VARIABLE","VARIABLE",that.log , that, "1234", variable, variable , "" ,undefined, Service, Characteristic);
           });
       }
-             
+
+                	             
         callback(that.foundAccessories);
       } else {
         callback(that.foundAccessories);
