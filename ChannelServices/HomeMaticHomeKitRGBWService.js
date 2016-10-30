@@ -82,9 +82,9 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function(Service, Ch
       
         if (value==0){
        	  // set On State 
-	      if (this.onc!=undefined) {this.onc.updateValue(false,null);}
+	      if ((that.onc!=undefined) && (that.onc.updateValue!=undefined)) {this.onc.updateValue(false,null);}
 	    } else {
-	      if (this.onc!=undefined) {this.onc.updateValue(true,null);}
+	      if ((that.onc!=undefined) && (that.onc.updateValue!=undefined)) {this.onc.updateValue(true,null);}
 	    }
 
 
