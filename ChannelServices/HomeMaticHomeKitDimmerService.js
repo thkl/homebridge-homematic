@@ -87,11 +87,11 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
       var lastLevel = that.state["LAST"];
       if (value!=lastLevel) {
       
-        if ((value==0) && (this.onc!=undefined)){
+        if (value==0){
        	  // set On State 
-	      this.onc.updateValue(false,null);
+	      if (this.onc!=undefined) {this.onc.updateValue(false,null);}
 	    } else {
-	      this.onc.updateValue(true,null);
+	      if (this.onc!=undefined) {this.onc.updateValue(true,null);}
 	    }
        
 	    //that.log("Set Brightness of " + that.adress + " to " + value + " command. LastLevel is "+  lastLevel);

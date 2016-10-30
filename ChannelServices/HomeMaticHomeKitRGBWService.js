@@ -80,12 +80,13 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function(Service, Ch
       var lastLevel = that.state["LAST"];
       if (value!=lastLevel) {
       
-        if ((value==0) && (this.onc!=undefined)){
+        if (value==0){
        	  // set On State 
-	      this.onc.updateValue(false,null);
+	      if (this.onc!=undefined) {this.onc.updateValue(false,null);}
 	    } else {
-	      this.onc.updateValue(true,null);
+	      if (this.onc!=undefined) {this.onc.updateValue(true,null);}
 	    }
+
 
     	that.state["LAST"] = value;
         that.isWorking = true;
