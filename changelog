@@ -3,6 +3,9 @@ Changelog
 
 **** BEGINNING OF VERSION 0.0.41 the selection of channels to use with HomeKit via a CCU Subsection is mandatory
 
+Version 0.0.53
+correct State in HM-Sec-Sir-WM
+
 Version 0.0.52
 and once again Dimmer .... ;(  
 

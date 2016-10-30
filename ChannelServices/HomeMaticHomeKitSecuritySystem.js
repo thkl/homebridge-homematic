@@ -32,7 +32,8 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service,
 
     .on('get', function(callback) {
       that.query("4:ARMSTATE",function(value){
-        if (callback) callback(null,value);
+	    var hkValue = that.mappedValue("4:ARMSTATE",value);
+        if (callback) callback(null,hkValue);
       });
     }.bind(this));
 

@@ -256,6 +256,17 @@ HomeKitGenericService.prototype = {
     this.eventupdate = false;
   },
 
+  mappedValue:function(dp,value) {
+    var result = value;
+    var map = this.datapointMappings[dp];
+    if (map != undefined) {
+      if (map[value]!=undefined) {
+        result = map[value];
+      }
+    }
+    return result;
+  },
+
   cache:function(dp,value) {
     var that = this;
     

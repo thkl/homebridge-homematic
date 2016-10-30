@@ -292,8 +292,10 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                 channelLoader.loadChannelService(that.foundAccessories, "VARIABLE","VARIABLE",that.log , that, "1234", variable, variable , "" ,undefined, Service, Characteristic);
           });
       }
-
-                	             
+/*
+                	 channelLoader.loadChannelService(that.foundAccessories, "HM-Sec-Sir-WM","ARMING",that.log , that,"1234", "TestSierene", "1234", "" ,undefined, Service, Characteristic);
+*/
+             
         callback(that.foundAccessories);
       } else {
         callback(that.foundAccessories);
