@@ -67,12 +67,12 @@ function HomeMaticPlatform(log, config) {
   this.xmlrpc = new HomeMaticRPC(this.log, this.ccuIP, port, 0, this);
   this.xmlrpc.init();
   
-  if (config["enable_wired"]!=undefined) {
+  if ((config["enable_wired"]!=undefined) && (config["enable_wired"]=="true")) {
 	  this.xmlrpcwired = new HomeMaticRPC(this.log, this.ccuIP, port+1, 1, this);
   	  this.xmlrpcwired.init();
   }
   
-  if (config["enable_hmip"]!=undefined) {
+  if ((config["enable_hmip"]!=undefined) && (config["enable_wired"]=="true")) {
 	  this.xmlrpchmip = new HomeMaticRPC(this.log, this.ccuIP, port+2, 2, this);
   	  this.xmlrpchmip.init();
   }
@@ -154,7 +154,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 	      json = JSON.parse(data)
           if ((json != undefined) && (json["devices"] != undefined)) {
 			// seems to be valid json
-			if (that.localCache != undefined) {
+			if ((that.localCache != undefined) && (that.localCache == "true")){
 				fs.writeFile(localcache, data, function (err) {
 				  if (err) {
 					  that.log.warn('Cannot cache ccu data ',err);
@@ -191,7 +191,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
       }
 
       
-      if ((json != undefined) && (json["devices"] !== undefined)) {
+      if ((json != undefined) && (json["devices"] != undefined)) {
       
       
         json["devices"].map(function(device) {
@@ -200,14 +200,14 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 
           var isFiltered = false;
 
-          if ((that.filter_device !== undefined) && (that.filter_device.indexOf(device.address) > -1)) {
+          if ((that.filter_device != undefined) && (that.filter_device.indexOf(device.address) > -1)) {
             isFiltered = true;
           } else {
             isFiltered = false;
           }
           // that.log('device address:', device.address);
 
-          if ((device["channels"] !== undefined) && (!isFiltered)) {
+          if ((device["channels"] != undefined) && (!isFiltered)) {
 
             device["channels"].map(function(ch) {
               
@@ -226,13 +226,13 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 			  	isChannelFiltered = true;
 			  }
 
-              if ((that.filter_channel !== undefined) && (that.filter_channel.indexOf(ch.address) > -1)) {
+              if ((that.filter_channel != undefined) && (that.filter_channel.indexOf(ch.address) > -1)) {
                 isChannelFiltered = true;
               } 
               
               
               // that.log('name', ch.name, ' -> address:', ch.address);
-              if ((ch.address !== undefined) && (!isChannelFiltered)) {
+              if ((ch.address != undefined) && (!isChannelFiltered)) {
 
                
                   // Switch found
@@ -271,7 +271,6 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
             
             var prgtype = ""
             
-            if (that.iosworkaround==undefined) {
                 that.log('Program ' + program + ' added as Program_Launcher');
                 
                 channelLoader.loadChannelService(that.foundAccessories, "PROGRAM_LAUNCHER","PROGRAM_LAUNCHER",that.log , that, "1234", program, "1234", "" ,undefined, Service, Characteristic);
@@ -489,7 +488,7 @@ HomeMaticPlatform.prototype.sendPreparedRequests = function() {
 HomeMaticPlatform.prototype.sendRequest = function(accessory, script, callback) {
 
     var regarequest = new HomeMaticRegaRequest(this.log, this.ccuIP).script(script, function(data) {
-      if (data !== undefined) {
+      if (data != undefined) {
         try {
           var json = JSON.parse(data);
           callback(json);

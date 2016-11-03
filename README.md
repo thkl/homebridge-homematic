@@ -23,12 +23,18 @@ Configuration sample:
             "platform": "HomeMatic",
             "name": "HomeMatic CCU",
             "ccu_ip": "192.168.0.100",
+			"enable_wired": "false",
+			"enable_hmip": "false",
             "filter_device":[],
             "filter_channel":["BidCos-RF.KEQXXXXXXX:4", "BidCos-RF.LEQXXXXXXX:2"],
             "outlets":[ "BidCos-RF.KEQXXXXXXX:4","BidCos-RF.IEQXXXXXXX:1"],
-            "doors":[],
+            "ios10": "false",
+			"doors":[],
+			"windows": [],
             "programs":[],
-            "subsection":"Homekit"
+            "subsection":"Homekit",
+			"lcache": "false",
+			"variable_update_trigger_channel": []
         },   
     ]
 
