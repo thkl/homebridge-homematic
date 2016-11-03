@@ -170,7 +170,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
       }
       
       // check if we got valid json from ccu
-      if ((json == undefined) && (that.localCache != undefined)) {
+      if ((json == undefined) && (that.localCache != undefined) && (that.localCache == "true")) {
       // try to load Data
       
       try {
