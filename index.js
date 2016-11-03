@@ -271,6 +271,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
             
             var prgtype = ""
             
+            if ((that.iosworkaround==undefined) || (that.iosworkaround!="true")) {
                 that.log('Program ' + program + ' added as Program_Launcher');
                 
                 channelLoader.loadChannelService(that.foundAccessories, "PROGRAM_LAUNCHER","PROGRAM_LAUNCHER",that.log , that, "1234", program, "1234", "" ,undefined, Service, Characteristic);
