@@ -216,6 +216,10 @@
 	{
 	   "type": "HM-Sec-Sir-WM:ARMING",
 	   "service": "HomeMaticHomeKitSecuritySystem"
+	},
+	{
+	   "type": "HM-Sen-DB-PCB:KEY",
+	   "service": "HomeMaticHomeKitDoorBellSensorService"
 	}
 	]
 }
