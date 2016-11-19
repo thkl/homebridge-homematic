@@ -22,6 +22,11 @@ HomeMaticHomeKitLeakSensorService.prototype.createDeviceService = function(Servi
       });
     }.bind(this));
 
+
+	this.addValueMapping("STATE",0,0);
+    this.addValueMapping("STATE",1,1);
+    this.addValueMapping("STATE",2,1);
+
     this.currentStateCharacteristic["STATE"] = state;
     state.eventEnabled = true;
     this.services.push(leak_sensor);
