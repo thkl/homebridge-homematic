@@ -69,7 +69,7 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function(Service, Ch
     var brightness = lightbulb.getCharacteristic(Characteristic.Brightness)
 
     .on('get', function(callback) {
-      that.query("!.LEVEL",function(value){
+      that.query("1.LEVEL",function(value){
        that.state["LAST"] = (value*100);
        if (callback) callback(null,value);
       });

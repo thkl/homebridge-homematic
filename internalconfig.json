@@ -23,6 +23,13 @@
 		     	"target": ":1"
 		     }
 		},
+		{
+		     "type" : "HM-CC-TC",
+		     "combine": { 
+		     	"source": ":1",
+		     	"target": ":2"
+		     }
+		},
 		
 		{
 			"type"  : "HM-WDS100-C6-O-2",
