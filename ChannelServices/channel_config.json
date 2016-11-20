@@ -220,6 +220,11 @@
 	{
 	   "type": "HM-Sen-DB-PCB:KEY",
 	   "service": "HomeMaticHomeKitDoorBellSensorService"
+	},
+	,
+	{
+	   "type": "WATERDETECTIONSENSOR",
+	   "service": "HomeMaticHomeKitLeakSensorService"
 	}
 	]
 }
