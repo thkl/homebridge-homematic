@@ -3,6 +3,10 @@ Changelog
 
 **** BEGINNING OF VERSION 0.0.41 the selection of channels to use with HomeKit via a CCU Subsection is mandatory
 
+Version 0.0.55
+fixed broken channelconfig ( https://github.com/thkl/homebridge-homematic/issues/68 )
+
+
 Version 0.0.54
 added HM-Sec-WDS*
 added HM-Sen-DB-PCB
