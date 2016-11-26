@@ -29,7 +29,7 @@ Configuration sample:
             "doors":[],
             "programs":[],
             "subsection":"Homekit"
-        },   
+        }   
     ]
 
 ```
