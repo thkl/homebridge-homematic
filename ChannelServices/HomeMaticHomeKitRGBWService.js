@@ -8,6 +8,7 @@ var lastLevel=0;
 var onc;
 
 function HomeMaticHomeKitRGBWService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
+	
     HomeMaticHomeKitRGBWService.super_.apply(this, arguments);
 }
 

@@ -22,7 +22,8 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.myDataPointName;
   this.i_characteristic = {};
   this.intf = cfg["interface"];
-  
+  this.datapointvaluefactors = {};
+    
   var that = this;
   var services = [];
 
@@ -67,6 +68,11 @@ HomeKitGenericService.prototype = {
     }
     this.datapointMappings[dp][value] = mappedvalue;
   } ,
+
+  addValueFactor: function(dp,factor) {
+    this.datapointvaluefactors[dp] = factor;
+  } ,
+
 
   // Return current States
   query: function(dp,callback) {
@@ -211,8 +217,6 @@ HomeKitGenericService.prototype = {
     var that = this;
     
     var tp = this.transformDatapoint(dp);
-    
-    
     if (tp[1] == 'LEVEL') {
     	newValue = newValue * 100;
     }
@@ -231,8 +235,13 @@ HomeKitGenericService.prototype = {
         }
 	    return;
     }
+
+    var factor = this.datapointvaluefactors[tp[1]];
     
-    
+    if (factor != undefined) {
+	    newValue = newValue * factor;
+    }
+
     if (dp=="WORKING") {
      if ((that.isWorking == true) && (newValue==false)) {
        that.endWorking();
@@ -246,7 +255,6 @@ HomeKitGenericService.prototype = {
     // if there is an rpc event at this channel the event will be forward here.
     // now fetch the real adress of that channel and get the channelnumber
     // datapoints from such channels named  as channelnumber:datapoint ... (no better approach yet) 
-
        var pos = this.adress.indexOf(":");
  	   if (pos !=-1 ) {
 	     var chnl = this.adress.substr(pos+1,this.adress.length);
@@ -279,12 +287,12 @@ HomeKitGenericService.prototype = {
         value = map[value];
       }
     }
-    if ((value!=undefined) && (that.isWorking==false)) {
     
+    if ((value!=undefined) && (that.isWorking==false)) {
+
 	  if (that.currentStateCharacteristic[dp]!=undefined) {
-	      that.currentStateCharacteristic[dp].setValue(value, null);
-      }
-      
+		  that.currentStateCharacteristic[dp].setValue(value, null);
+      } 
     if (this.usecache) {
 	    this.state[dp] = value; 
     }

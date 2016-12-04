@@ -3,6 +3,14 @@ Changelog
 
 **** BEGINNING OF VERSION 0.0.41 the selection of channels to use with HomeKit via a CCU Subsection is mandatory
 
+Version 0.0.57
+implemented Powermeter 
+
+
+Version 0.0.56
+Fix for RGBW (!.Level)
+Some Changes to support multiple (and also unknown) CCU Interfaces
+
 Version 0.0.55
 fixed broken channelconfig ( https://github.com/thkl/homebridge-homematic/issues/68 )
 
