@@ -115,7 +115,7 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
 
     this.services.push(sensor);
 	
-	this.addValueFactor("2:CURRENT",0.001);
+	this.addValueFactor("CURRENT",0.001);
 
 	var outlet = new Service["Outlet"](this.name);
     outlet.getCharacteristic(Characteristic.OutletInUse)
