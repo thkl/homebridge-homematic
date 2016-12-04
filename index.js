@@ -274,10 +274,11 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                 that.log('Program ' + program + ' added as Program_Launcher');
                 
                 var ch = {};
+                var cfg = {};
                 ch.type = "PROGRAM_LAUNCHER";
                 ch.address = "1234";
                 ch.name = program;
-                channelLoader.loadChannelService(that.foundAccessories, "PROGRAM_LAUNCHER",ch,that, "PROGRAM",undefined, Service, Characteristic);
+                channelLoader.loadChannelService(that.foundAccessories, "PROGRAM_LAUNCHER",ch,that, "PROGRAM",cfg, Service, Characteristic);
 
             } else {
 	            var cfg = that.deviceInfo(internalconfig,"");
@@ -286,7 +287,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                 ch.type = "SWITCH";
                 ch.address = "1234";
                 ch.name = program;
-                channelLoader.loadChannelService(that.foundAccessories, "SWITCH","SWITCH",ch,that,"1234", "PROGRAM" ,undefined, Service, Characteristic);
+                channelLoader.loadChannelService(that.foundAccessories, "SWITCH"		,ch		,that, "PROGRAM" ,cfg, Service, Characteristic);
             }
           
           });
@@ -295,7 +296,13 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 // Add Optional Variables
       if (that.variables!=undefined) {
           that.variables.map(function(variable) {
-                channelLoader.loadChannelService(that.foundAccessories, "VARIABLE","VARIABLE",that.log , that, "1234", variable, variable , "" ,undefined, Service, Characteristic);
+                var ch = {};
+                var cfg = {};
+                ch.type = "VARIABLE";
+                ch.address = "1234";
+                ch.name = variable;
+                ch.intf = "Variable";
+                channelLoader.loadChannelService(that.foundAccessories, "VARIABLE"		,ch		,that,	"VARIABLE" ,cfg, Service, Characteristic);
           });
       }
             
@@ -378,6 +385,13 @@ HomeMaticPlatform.prototype.setValue = function(intf,channel, datapoint, value) 
 					return;
 				}
 
+				if (intf == "Variable") {
+					var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+					rega.setVariable(channel, value);
+					rpc = true;
+					return;
+				}
+
 
 				// Rega Fallback
 				if (rpc == false) {
@@ -429,6 +443,7 @@ HomeMaticPlatform.prototype.getValue = function(intf,channel, datapoint, callbac
 	
 	
     if (channel != undefined) {
+	    
 	if (intf != undefined) {
 		var rpc = false;
 		if (intf == "BidCos-RF") {
@@ -460,6 +475,14 @@ HomeMaticPlatform.prototype.getValue = function(intf,channel, datapoint, callbac
 		return;
     	}
 		
+		
+		if (intf == "Variable") {
+			var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+			rega.getVariable(channel, callback);
+			rpc = true;
+			return;
+		}
+		
 		// Fallback to Rega
 		if (rpc == false) {
 		 	var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
@@ -469,18 +492,11 @@ HomeMaticPlatform.prototype.getValue = function(intf,channel, datapoint, callbac
 	} else {
 		
 		// Undefined Interface -> Rega should know how to deal with it
-					var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-					rega.setValue(channel, datapoint, value);
-					return;
+		var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+		rega.getValue(channel, datapoint, callback);
+		return;
 
 	} 
-    
-    
-    // Variable fallback
-    
-    var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-    rega.getVariable(channel, callback);
-    return;
     
    }
 }

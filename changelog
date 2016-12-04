@@ -3,6 +3,9 @@ Changelog
 
 **** BEGINNING OF VERSION 0.0.41 the selection of channels to use with HomeKit via a CCU Subsection is mandatory
 
+Version 0.0.58
+fix for Variables
+
 Version 0.0.57
 implemented Powermeter 
 

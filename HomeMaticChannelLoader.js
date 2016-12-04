@@ -28,13 +28,19 @@ var HomeMaticChannelLoader = function (log) {
     var serviceclass;
     var options;
     
-    serviceclass = this.getServiceClass(deviceType+":"+channelType);
-    options = this.getOptions(deviceType+":"+channelType);
+    serviceclass = this.getServiceClass(deviceType+":" + channelType);
+    options = this.getOptions(deviceType+":" + channelType);
     
     if (serviceclass == undefined) {
       // not found try to find channeltype
       serviceclass = this.getServiceClass(channelType);
       options = this.getOptions(channelType);
+    }
+
+    if (serviceclass == undefined) {
+      // not found try to find devicetype
+      serviceclass = this.getServiceClass(deviceType);
+      options = this.getOptions(deviceType);
     }
   
   
@@ -51,11 +57,12 @@ var HomeMaticChannelLoader = function (log) {
       if (cfg==undefined) {
 	      cfg = {};
       }
+      
       cfg["interface"] = channel.intf;
 	  var accessory = new service(log,platform, id ,name, channelType ,adress,special, cfg, Service, Characteristic);
 	  list.push(accessory);	
     } else {
-      that.log.warn("There is no service for " + deviceType+":"+channelType );
+      that.log.warn("There is no service for " + deviceType+":" + channelType );
    	}
   };
   
