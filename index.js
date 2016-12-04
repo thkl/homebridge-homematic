@@ -132,7 +132,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
     var channelLoader = new HomeMaticChannelLoader(this.log);
     channelLoader.init(this.config["services"]);
     
-    var script = "string sDeviceId;string sChannelId;boolean df = true;Write(\'{\"devices\":[\');foreach(sDeviceId, root.Devices().EnumIDs()){object oDevice = dom.GetObject(sDeviceId);if(oDevice){var oInterface = dom.GetObject(oDevice.Interface());if(df) {df = false;} else { Write(\',\');}Write(\'{\');Write(\'\"id\": \"\' # sDeviceId # \'\",\');Write(\'\"name\": \"\' # oDevice.Name() # \'\",\');Write(\'\"address\": \"\' # oDevice.Address() # \'\",\');Write(\'\"type\": \"\' # oDevice.HssType() # \'\",\');Write(\'\"channels\": [\');boolean bcf = true;foreach(sChannelId, oDevice.Channels().EnumIDs()){object oChannel = dom.GetObject(sChannelId);if(bcf) {bcf = false;} else {Write(\',\');}Write(\'{\');Write(\'\"cId\": \' # sChannelId # \',\');Write(\'\"name\": \"\' # oChannel.Name() # \'\",\');if(oInterface){Write(\'\"address\": \"\' # oInterface.Name() #\'.'\ # oChannel.Address() # \'\",\');}Write(\'\"type\": \"\' # oChannel.HssType() # \'\"\');Write(\'}\');}Write(\']}\');}}Write(\']\');";
+    var script = "string sDeviceId;string sChannelId;boolean df = true;Write(\'{\"devices\":[\');foreach(sDeviceId, root.Devices().EnumIDs()){object oDevice = dom.GetObject(sDeviceId);if(oDevice){var oInterface = dom.GetObject(oDevice.Interface());if(df) {df = false;} else { Write(\',\');}Write(\'{\');Write(\'\"id\": \"\' # sDeviceId # \'\",\');Write(\'\"name\": \"\' # oDevice.Name() # \'\",\');Write(\'\"address\": \"\' # oDevice.Address() # \'\",\');Write(\'\"type\": \"\' # oDevice.HssType() # \'\",\');Write(\'\"channels\": [\');boolean bcf = true;foreach(sChannelId, oDevice.Channels().EnumIDs()){object oChannel = dom.GetObject(sChannelId);if(bcf) {bcf = false;} else {Write(\',\');}Write(\'{\');Write(\'\"cId\": \' # sChannelId # \',\');Write(\'\"name\": \"\' # oChannel.Name() # \'\",\');if(oInterface){Write(\'\"intf\": \"\' # oInterface.Name() 	# \'\",\');Write(\'\"address\": \"\' # oInterface.Name() #\'.'\ # oChannel.Address() # \'\",\');}Write(\'\"type\": \"\' # oChannel.HssType() # \'\"\');Write(\'}\');}Write(\']}\');}}Write(\']\');";
 
     
      script = script + "var s = dom.GetObject(\"" ;
@@ -245,12 +245,11 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                   // Check if VIRTUAL KEY is Set as Variable Trigger
                   if ((that.vuc != undefined) && (ch.type=="VIRTUAL_KEY") && (ch.name == that.vuc)) {
                      that.log('Channel ' + that.vuc + ' added as Variable Update Trigger');
-	    			 
-                	 channelLoader.loadChannelService(that.foundAccessories,"VARIABLE_UPDATE_TRIGGER","VARIABLE_UPDATE_TRIGGER",that.log , that, ch.id, ch.name, ch.address, that.variables ,cfg, Service, Characteristic);
-
+	    			 ch.type = "VARIABLE_UPDATE_TRIGGER";
+                	 channelLoader.loadChannelService(that.foundAccessories,"VARIABLE_UPDATE_TRIGGER",ch ,that, that.variables ,cfg, Service, Characteristic);
 
                   } else {
-                	 channelLoader.loadChannelService(that.foundAccessories, device["type"],ch.type,that.log , that, ch.id, ch.name, ch.address, special ,cfg, Service, Characteristic);
+                	 channelLoader.loadChannelService(that.foundAccessories, device["type"],ch ,that, special ,cfg, Service, Characteristic);
                   }
                   
 
@@ -274,13 +273,20 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
             if (that.iosworkaround==undefined) {
                 that.log('Program ' + program + ' added as Program_Launcher');
                 
-                channelLoader.loadChannelService(that.foundAccessories, "PROGRAM_LAUNCHER","PROGRAM_LAUNCHER",that.log , that, "1234", program, "1234", "" ,undefined, Service, Characteristic);
+                var ch = {};
+                ch.type = "PROGRAM_LAUNCHER";
+                ch.address = "1234";
+                ch.name = program;
+                channelLoader.loadChannelService(that.foundAccessories, "PROGRAM_LAUNCHER",ch,that, "PROGRAM",undefined, Service, Characteristic);
 
             } else {
 	            var cfg = that.deviceInfo(internalconfig,"");
                 that.log('Program ' + program + ' added as SWITCH cause of IOS 10');
-                channelLoader.loadChannelService(that.foundAccessories, "SWITCH","SWITCH",that.log , that, "1234", program, "1234", "PROGRAM" ,undefined, Service, Characteristic);
-
+                var ch = {};
+                ch.type = "SWITCH";
+                ch.address = "1234";
+                ch.name = program;
+                channelLoader.loadChannelService(that.foundAccessories, "SWITCH","SWITCH",ch,that,"1234", "PROGRAM" ,undefined, Service, Characteristic);
             }
           
           });
@@ -292,10 +298,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                 channelLoader.loadChannelService(that.foundAccessories, "VARIABLE","VARIABLE",that.log , that, "1234", variable, variable , "" ,undefined, Service, Characteristic);
           });
       }
-/*
-                	 channelLoader.loadChannelService(that.foundAccessories, "HM-Sec-Sir-WM","ARMING",that.log , that,"1234", "TestSierene", "1234", "" ,undefined, Service, Characteristic);
-*/
-             
+            
         callback(that.foundAccessories);
       } else {
         callback(that.foundAccessories);
@@ -337,52 +340,60 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
     });
 }
 
-HomeMaticPlatform.prototype.setValue = function(channel, datapoint, value) {
+HomeMaticPlatform.prototype.setValue = function(intf,channel, datapoint, value) {
     
-    if (channel.indexOf("BidCos-RF.") > -1)  {
-      this.xmlrpc.setValue(channel, datapoint, value);
-      return;
-    }
-
-    if (channel.indexOf("VirtualDevices.") > -1)  {
-      var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-      rega.setValue(channel, datapoint, value);
-      return;
-    }
-
-
-    if (channel.indexOf("CUxD.") > -1)  {
-      var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-      rega.setValue(channel, datapoint, value);
-      return;
-    }
-
-    if (channel.indexOf("BidCos-Wired.") > -1) {
-     
-     if (this.xmlrpcwired!=undefined) {
-      this.xmlrpcwired.setValue(channel, datapoint, value);
-     } else {
-      // Send over Rega
-      var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-      rega.setValue(channel, datapoint, value);
-     }
-      return;
-    }
-    
-    
-    if (channel.indexOf("HmIP-RF.") > -1) {
-     
-     if (this.xmlrpchmip!=undefined) {
-      this.xmlrpchmip.setValue(channel, datapoint, value);
-     } else {
-      // Send over Rega
-      var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-      rega.setValue(channel, datapoint, value);
-     }
-      return;
-    }
+    if (channel != undefined) {
+		if (intf != undefined) {
+			var rpc = false;
+			
+				if (intf == "BidCos-RF") {
+					rpc = true;
+					this.xmlrpc.setValue(channel, datapoint, value);
+					return;
+    			}
 
 
+				if (intf == "BidCos-Wired") {
+					rpc = true;
+					if (this.xmlrpcwired!=undefined) {
+						this.xmlrpcwired.setValue(channel, datapoint, value);
+					} else {
+					// Send over Rega
+						var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+						rega.setValue(channel, datapoint, value);
+					}
+					return;
+    			}
+    			
+
+				if (intf == "HmIP-RF") {
+					rpc = true;
+					if (this.xmlrpchmip!=undefined) {
+						this.xmlrpchmip.setValue(channel, datapoint, value);
+					} else {
+					// Send over Rega
+						var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+						rega.setValue(channel, datapoint, value);
+					}
+					return;
+				}
+
+
+				// Rega Fallback
+				if (rpc == false) {
+					var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+					rega.setValue(channel, datapoint, value);
+					return;
+				}
+
+		} else {
+			// Undefined Interface -> Rega should know how to deal with it
+					var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+					rega.setValue(channel, datapoint, value);
+					return;
+			
+		}
+	}
 }
 
 HomeMaticPlatform.prototype.remoteSetValue = function(channel,datapoint,value) {
@@ -414,51 +425,55 @@ HomeMaticPlatform.prototype.sendRegaCommand = function(command,callback) {
 	 return;
 }
 
-HomeMaticPlatform.prototype.getValue = function(channel, datapoint, callback) {
-
+HomeMaticPlatform.prototype.getValue = function(intf,channel, datapoint, callback) {
+	
+	
     if (channel != undefined) {
+	if (intf != undefined) {
+		var rpc = false;
+		if (intf == "BidCos-RF") {
+			this.xmlrpc.getValue(channel, datapoint, callback);
+			rpc = true;
+			return;
+		}
+		
+		 if (intf == "BidCos-Wired") {
+			 rpc = true;
+		 	if (this.xmlrpcwired!=undefined) {
+		 	this.xmlrpcwired.getValue(channel, datapoint, callback);
+		 } else {
+		 // Send over Rega
+		 var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+		 rega.getValue(channel, datapoint, callback);
+     	 }
+	 	 return;
+    	}
+		
+		if (intf == "HmIP-RF") {
+			if (this.xmlrpchmip!=undefined) {
+			this.xmlrpchmip.getValue(channel, datapoint, callback);
+		} else {
+			// Send over Rega
+			var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+			rega.getValue(channel, datapoint, callback);
+		}
+		return;
+    	}
+		
+		// Fallback to Rega
+		if (rpc == false) {
+		 	var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+			rega.getValue(channel, datapoint, callback);
+			return;
+		}
+	} else {
+		
+		// Undefined Interface -> Rega should know how to deal with it
+					var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+					rega.setValue(channel, datapoint, value);
+					return;
 
-    if (channel.indexOf("BidCos-RF.") > -1)  {
-      this.xmlrpc.getValue(channel, datapoint, callback);
-      return;
-    }
-
-
-    if (channel.indexOf("VirtualDevices.") > -1)  {
-      var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-      rega.getValue(channel, datapoint, callback);
-      return;
-    }
-
-    if (channel.indexOf("CUxD.") > -1)  {
-      var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-      rega.getValue(channel, datapoint, callback);
-      return;
-    }
-    
-    if (channel.indexOf("BidCos-Wired.") > -1) {
-     if (this.xmlrpcwired!=undefined) {
-       this.xmlrpcwired.getValue(channel, datapoint, callback);
-     } else {
-      // Send over Rega
-      var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-       rega.getValue(channel, datapoint, callback);
-     }
-      return;
-    }
-    
-    if (channel.indexOf("HmIP-RF.") > -1) {
-     if (this.xmlrpchmip!=undefined) {
-       this.xmlrpchmip.getValue(channel, datapoint, callback);
-     } else {
-      // Send over Rega
-      var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-       rega.getValue(channel, datapoint, callback);
-     }
-      return;
-    }
-    
-
+	} 
     
     
     // Variable fallback

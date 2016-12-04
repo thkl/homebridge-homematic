@@ -21,6 +21,7 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.isWorking = false;
   this.myDataPointName;
   this.i_characteristic = {};
+  this.intf = cfg["interface"];
   
   var that = this;
   var services = [];
@@ -165,9 +166,10 @@ HomeKitGenericService.prototype = {
   remoteGetValue:function(dp,callback) {
     var that = this;
     var tp = this.transformDatapoint(dp);
+    var interf = this.intf; 
     //that.platform.getValue(that.adress,dp,function(newValue) {
-    
-    that.platform.getValue(tp[0],tp[1],function(newValue) {
+
+    that.platform.getValue(interf,tp[0],tp[1],function(newValue) {
       if ((newValue != undefined) && (newValue != null)) {
 
       	if (tp[1] == 'LEVEL') {
@@ -330,8 +332,10 @@ HomeKitGenericService.prototype = {
     var that = this;
 
     if (mode == "set") {
+	  var interf = this.intf; 
+	  
       this.log("(Rpc) Send " + newValue + " to Datapoint " + tp[1] + " at " + tp[0]);
-      that.platform.setValue(tp[0], tp[1], newValue);
+      that.platform.setValue(interf,tp[0], tp[1], newValue);
     }
 
     if (mode == "setrega") {

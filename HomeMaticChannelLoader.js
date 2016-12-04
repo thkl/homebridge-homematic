@@ -12,11 +12,19 @@ var HomeMaticChannelLoader = function (log) {
 	  this.config = this.internalConfig(customServices);
   }
   
-  HomeMaticChannelLoader.prototype.loadChannelService = function(list,deviceType,channelType,log,platform, id ,name ,adress,special, cfg, Service, Characteristic) {
+  
+  
+  HomeMaticChannelLoader.prototype.loadChannelService = function(list,deviceType,channel,platform, special, cfg, Service, Characteristic) {
 
     var that = this;
-
-    // try to load device:type
+	var channelType = channel.type;
+	var log = platform.log;
+	var id = channel.id;
+	var name = channel.name;
+	var adress = channel.address;
+	var intf = channel.intf;
+	
+	// try to load device:type
     var serviceclass;
     var options;
     
@@ -40,6 +48,10 @@ var HomeMaticChannelLoader = function (log) {
           	cfg = options;
         }
       }
+      if (cfg==undefined) {
+	      cfg = {};
+      }
+      cfg["interface"] = channel.intf;
 	  var accessory = new service(log,platform, id ,name, channelType ,adress,special, cfg, Service, Characteristic);
 	  list.push(accessory);	
     } else {
