@@ -174,7 +174,7 @@ HomeKitGenericService.prototype = {
     var tp = this.transformDatapoint(dp);
     var interf = this.intf; 
     //that.platform.getValue(that.adress,dp,function(newValue) {
-
+	
     that.platform.getValue(interf,tp[0],tp[1],function(newValue) {
       if ((newValue != undefined) && (newValue != null)) {
 

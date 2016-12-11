@@ -94,6 +94,7 @@ HomeMaticRegaRequest.prototype = {
     //this.log("RegaScript %s",script);
     this.script(script, function(data) {
       if (data !== undefined) {
+       // that.log.debug("Result is %s",data);
         callback(data);
       } 
     });

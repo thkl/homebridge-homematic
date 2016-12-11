@@ -276,7 +276,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                 var ch = {};
                 var cfg = {};
                 ch.type = "PROGRAM_LAUNCHER";
-                ch.address = "1234";
+                ch.address = program;
                 ch.name = program;
                 channelLoader.loadChannelService(that.foundAccessories, "PROGRAM_LAUNCHER",ch,that, "PROGRAM",cfg, Service, Characteristic);
 
@@ -285,7 +285,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                 that.log('Program ' + program + ' added as SWITCH cause of IOS 10');
                 var ch = {};
                 ch.type = "SWITCH";
-                ch.address = "1234";
+                ch.address = program;
                 ch.name = program;
                 channelLoader.loadChannelService(that.foundAccessories, "SWITCH"		,ch		,that, "PROGRAM" ,cfg, Service, Characteristic);
             }
@@ -299,7 +299,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
                 var ch = {};
                 var cfg = {};
                 ch.type = "VARIABLE";
-                ch.address = "1234";
+                ch.address = variable;
                 ch.name = variable;
                 ch.intf = "Variable";
                 channelLoader.loadChannelService(that.foundAccessories, "VARIABLE"		,ch		,that,	"VARIABLE" ,cfg, Service, Characteristic);

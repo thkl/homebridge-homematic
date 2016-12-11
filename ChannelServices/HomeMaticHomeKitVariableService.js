@@ -22,7 +22,7 @@ HomeMaticHomeKitVariableService.prototype.createDeviceService = function(Service
       
       .on('get', function(callback) {
          that.remoteGetValue("STATE",function(value){
-           if (callback) callback(null,value);
+	       if (callback) callback(null,value);
          });
       }.bind(this))
 
