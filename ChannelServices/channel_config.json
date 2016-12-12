@@ -229,6 +229,11 @@
 	{
 	   "type": "POWERMETER",
 	   "service": "HomeMaticHomeKitPowerMeterService"
+	},
+	{
+	   "type": "HEATING_CLIMATECONTROL_TRANSCEIVER",
+	   "service": "HomeMaticHomeKitIPThermostatService"
 	}
+	
 	]
 }
