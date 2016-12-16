@@ -122,9 +122,16 @@ HomeMaticRPC.prototype.init = function() {
           	  debug("RPC event for %s %s with value %s",channel,datapoint,value);
 			 
               that.platform.foundAccessories.map(function(accessory) {
-                if ((accessory.adress == channel) || ((accessory.cadress != undefined) && (accessory.cadress == channel))) {
-                  accessory.event(datapoint, value);
-                } 
+	             var deviceAdress = channel.slice(0,channel.indexOf(":"));
+	             
+                if ((accessory.adress == channel) || 
+                ((accessory.cadress != undefined) && (accessory.cadress == channel)) || 
+                ((accessory.deviceAdress != undefined) && (accessory.deviceAdress == deviceAdress))) {
+
+                  accessory.event(channel,datapoint, value);
+                
+                }
+                 
               });
             }
           });

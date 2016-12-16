@@ -231,6 +231,11 @@
 	   "service": "HomeMaticHomeKitPowerMeterService"
 	},
 	{
+	   "type": "ENERGIE_METER_TRANSMITTER",
+	   "service": "HomeMaticHomeKitPowerMeterServiceIP"
+	},
+	
+	{
 	   "type": "HEATING_CLIMATECONTROL_TRANSCEIVER",
 	   "service": "HomeMaticHomeKitIPThermostatService"
 	}

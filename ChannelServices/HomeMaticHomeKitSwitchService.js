@@ -7,7 +7,7 @@ var util = require("util");
 function HomeMaticHomeKitSwitchService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
     
     HomeMaticHomeKitSwitchService.super_.apply(this, arguments);
-   
+    
 }
 
 util.inherits(HomeMaticHomeKitSwitchService, HomeKitGenericService);
@@ -17,6 +17,7 @@ HomeMaticHomeKitSwitchService.prototype.createDeviceService = function(Service, 
 
     var that = this;
 	var lightbulb = null;
+	this.ignoreWorking = true;
 	
     if (this.special=="PROGRAM") {
     

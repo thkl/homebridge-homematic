@@ -6,6 +6,7 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.name     = name;
   this.type     = type;
   this.adress   = adress;
+  this.deviceAdress = undefined;
   this.log      = log;
   this.platform = platform;
   this.state  	= [];
@@ -19,11 +20,11 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.cadress = undefined;
   this.cfg = cfg;
   this.isWorking = false;
+  this.ignoreWorking = false; // ignores the working=true flag and sets the value every time an event happends
   this.myDataPointName;
   this.i_characteristic = {};
   this.intf = cfg["interface"];
   this.datapointvaluefactors = {};
-    
   var that = this;
   var services = [];
 
@@ -212,10 +213,15 @@ HomeKitGenericService.prototype = {
     
   },
 
-  event:function(dp,newValue) {
+
+  datapointEvent:function(dp,newValue) {
+	  // just a stub
+  },
+
+  event:function(channel,dp,newValue) {
   
     var that = this;
-    
+
     var tp = this.transformDatapoint(dp);
     if (tp[1] == 'LEVEL') {
     	newValue = newValue * 100;
@@ -249,18 +255,21 @@ HomeKitGenericService.prototype = {
        that.isWorking = newValue;
     }
     
+    
     this.eventupdate = true;
-    if (this.cadress!=undefined) {
+    if ((this.cadress!=undefined) || (this.deviceAdress!=undefined)){
     // this is dirty shit. ok there is a config that will set the cadress to a defined channel
     // if there is an rpc event at this channel the event will be forward here.
     // now fetch the real adress of that channel and get the channelnumber
     // datapoints from such channels named  as channelnumber:datapoint ... (no better approach yet) 
-       var pos = this.adress.indexOf(":");
- 	   if (pos !=-1 ) {
-	     var chnl = this.adress.substr(pos+1,this.adress.length);
-  	     this.cache(chnl + ":" + dp,newValue);
-	   }
+       
+       
+       var chnl = channel.slice(channel.indexOf(":")+1);
+       this.datapointEvent(chnl + ":" + dp,newValue);
+       this.cache(chnl + ":" + dp,newValue);
+   
     } else {
+	    this.datapointEvent(dp,newValue);
         this.cache(dp,newValue);
     }
     this.eventupdate = false;
@@ -277,6 +286,15 @@ HomeKitGenericService.prototype = {
     return result;
   },
 
+  stateCharacteristicWillChange: function(characteristic,newValue) {
+	  // just a stub
+  },
+  
+  stateCharacteristicDidChange: function(characteristic,newValue) {
+	  // just a stub
+  },
+
+  
   cache:function(dp,value) {
     var that = this;
     
@@ -287,11 +305,12 @@ HomeKitGenericService.prototype = {
         value = map[value];
       }
     }
-    
-    if ((value!=undefined) && (that.isWorking==false)) {
-
+    if ((value!=undefined) && ((that.isWorking==false) || (that.ignoreWorking==true))) {
+	  
 	  if (that.currentStateCharacteristic[dp]!=undefined) {
+		  that.stateCharacteristicWillChange(that.currentStateCharacteristic[dp],value);
 		  that.currentStateCharacteristic[dp].setValue(value, null);
+		  that.stateCharacteristicDidChange(that.currentStateCharacteristic[dp],value);
       } 
     if (this.usecache) {
 	    this.state[dp] = value; 
