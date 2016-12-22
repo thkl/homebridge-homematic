@@ -206,7 +206,7 @@ HomeMaticRPC.prototype.init = function() {
 	
 	
 	this.client.methodCall("setValue", [channel, datapoint, value], function(error, value) {
-	 this.log.debug("RPC setValue (%s %s) Response %s Errors: %s",channel, datapoint, JSON.stringify(value),error);
+	 that.log.debug("RPC setValue (%s %s) Response %s Errors: %s",channel, datapoint, JSON.stringify(value),error);
     });
   }
 
