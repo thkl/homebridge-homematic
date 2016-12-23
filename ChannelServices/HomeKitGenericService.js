@@ -222,7 +222,10 @@ HomeKitGenericService.prototype = {
   
     var that = this;
 
+	if ((channel!=undefined) && (dp!=undefined)) {
+	
     var tp = this.transformDatapoint(dp);
+    
     if (tp[1] == 'LEVEL') {
     	newValue = newValue * 100;
     }
@@ -273,6 +276,7 @@ HomeKitGenericService.prototype = {
         this.cache(dp,newValue);
     }
     this.eventupdate = false;
+    }
   },
 
   mappedValue:function(dp,value) {
@@ -378,15 +382,19 @@ HomeKitGenericService.prototype = {
 
 
   transformDatapoint : function(dp) {
-    var pos = dp.indexOf(":");
-    if (pos==-1) {
-      return [this.adress,dp];
+    if (dp) {
+    	var pos = dp.indexOf(":");
+   	 	if (pos==-1) {
+      		return [this.adress,dp];
+    	}
+    	var ndp = dp.substr(pos+1,dp.length);
+    	var nadr = this.adress.substr(0,this.adress.indexOf(":"));
+    	var chnl = dp.substr(0,pos);
+    	nadr = nadr + ":" + chnl;
+	    return [nadr,ndp];
+    } else {
+    	return -1;
     }
-    var ndp = dp.substr(pos+1,dp.length);
-    var nadr = this.adress.substr(0,this.adress.indexOf(":"));
-    var chnl = dp.substr(0,pos);
-    nadr = nadr + ":" + chnl;
-    return [nadr,ndp];
   },
 
   getServices: function() {

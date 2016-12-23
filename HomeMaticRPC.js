@@ -102,7 +102,7 @@ HomeMaticRPC.prototype.init = function() {
 			 
       that.platform.foundAccessories.map(function(accessory) {
        if ((accessory.adress == channel) || ((accessory.cadress != undefined) && (accessory.cadress == channel))) {
-         accessory.event(datapoint, value);
+         accessory.event(channel, datapoint, value);
        }
       });
       callback(null,[]);
@@ -129,9 +129,7 @@ HomeMaticRPC.prototype.init = function() {
                 if ((accessory.adress == channel) || 
                 ((accessory.cadress != undefined) && (accessory.cadress == channel)) || 
                 ((accessory.deviceAdress != undefined) && (accessory.deviceAdress == deviceAdress))) {
-
                   accessory.event(channel,datapoint, value);
-                
                 }
                  
               });
