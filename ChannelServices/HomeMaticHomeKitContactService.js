@@ -47,10 +47,24 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
        }
       });
       }.bind(this));
-      
-      
+
       this.currentStateCharacteristic["STATE"] = cwindow;
       cwindow.eventEnabled = true;
+
+      
+      var twindow = window.getCharacteristic(Characteristic.TargetPosition);
+      twindow.on('get', function(callback) {
+      that.query("STATE",function(value){
+       if (callback) {
+         var cbvalue = 0;
+         if (value>0) {cbvalue = 100;}
+         callback(null,cbvalue);
+       }
+      });
+      }.bind(this));
+      
+      this.currentStateCharacteristic["STATE"] = twindow;
+      twindow.eventEnabled = true;
       
       if (reverse == true ) {
 	    this.addValueMapping("STATE",1,0);
@@ -68,11 +82,6 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
       var swindow = window.getCharacteristic(Characteristic.PositionState);
       swindow.on('get', function(callback) {
 	     if (callback) callback(null, Characteristic.PositionState.STOPPED);
-      }.bind(this));
-      
-      var owindow = window.getCharacteristic(Characteristic.ObstructionDetected);
-      owindow.on('get', function(callback) {
-	     if (callback) callback(null, 1);
       }.bind(this));
       
       this.services.push(window);
