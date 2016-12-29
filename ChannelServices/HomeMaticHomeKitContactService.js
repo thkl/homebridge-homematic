@@ -13,14 +13,6 @@ util.inherits(HomeMaticHomeKitContactService, HomeKitGenericService);
 
 HomeMaticHomeKitContactService.prototype.propagateServices = function(homebridge, Service, Characteristic) {
     
-  
-  Service.DoorStateService = function(displayName, subtype) {
-  	Service.call(this, displayName, '5243F2EA-006C-4D68-83A0-4AF6F606136C', subtype);
-    this.addCharacteristic(Characteristic.CurrentDoorState);
-    this.addOptionalCharacteristic(Characteristic.Name);
-  };
-
-  util.inherits(Service.DoorStateService, Service);
 }
 
 HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service, Characteristic) {
@@ -33,6 +25,8 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
      }
     
     }
+        
+   
         
     if (this.special=="WINDOW") {
 
@@ -63,22 +57,13 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
       });
       }.bind(this));
       
-      this.currentStateCharacteristic["STATE"] = twindow;
-      twindow.eventEnabled = true;
-      
-      if (reverse == true ) {
-	    this.addValueMapping("STATE",1,0);
-    	this.addValueMapping("STATE",0,100);
-      	this.addValueMapping("STATE",true,0);
-      	this.addValueMapping("STATE",false,100);
-      } else {
-      	this.addValueMapping("STATE",0,0);
-     	this.addValueMapping("STATE",1,100);
-      	this.addValueMapping("STATE",false,0);
-      	this.addValueMapping("STATE",true,100);
-      }
-      
+	  this.targetCharacteristic = twindow;
 
+      this.addValueMapping("STATE",0,0);
+   	  this.addValueMapping("STATE",1,100);
+   	  this.addValueMapping("STATE",false,0);
+      this.addValueMapping("STATE",true,100);
+      
       var swindow = window.getCharacteristic(Characteristic.PositionState);
       swindow.on('get', function(callback) {
 	     if (callback) callback(null, Characteristic.PositionState.STOPPED);
@@ -90,8 +75,8 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
 
   if (this.special=="DOOR") {
 
-      var door = new Service["DoorStateService"](this.name);
-      var cdoor = door.getCharacteristic(Characteristic.CurrentDoorState);
+      var door = new Service["Door"](this.name);
+      var cdoor = door.getCharacteristic(Characteristic.CurrentPosition);
       cdoor.on('get', function(callback) {
       that.query("STATE",function(value){
        if (callback) callback(null,value);
@@ -102,20 +87,22 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
       this.currentStateCharacteristic["STATE"] = cdoor;
       cdoor.eventEnabled = true;
       
-      if (reverse == true) {
-	     this.addValueMapping("STATE",1,1);
-   		 this.addValueMapping("STATE",0,0);
-   	  	 this.addValueMapping("STATE",true,1);
-     	 this.addValueMapping("STATE",false,0);
-      } else {
-	     this.addValueMapping("STATE",0,1);
-   		 this.addValueMapping("STATE",1,0);
-   	  	 this.addValueMapping("STATE",false,1);
-     	 this.addValueMapping("STATE",true,0);
-      }
+      var tdoor = door.getCharacteristic(Characteristic.TargetPosition);
+      tdoor.on('get', function(callback) {
+      that.query("STATE",function(value){
+       if (callback) callback(null,value);
+      });
+      }.bind(this));
+      
+      this.targetCharacteristic = tdoor;
 
+ 	  
+ 	  this.addValueMapping("STATE",0,0);
+   	  this.addValueMapping("STATE",1,100);
+   	  this.addValueMapping("STATE",false,0);
+      this.addValueMapping("STATE",true,100);
+      
       this.services.push(door);
-
     } else {
 
       var contact = new Service.ContactSensor(this.name);
@@ -149,6 +136,17 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
 
 }
 
+HomeMaticHomeKitContactService.prototype.stateCharacteristicDidChange = function(characteristic,newValue) {
+	this.log.debug("Char %s",JSON.stringify(characteristic));
+	
+	if (characteristic.displayName=="Current Position") {
+		// Set Target
+		if (this.targetCharacteristic) {
+			this.log.debug("We have a Target Position -> Sync Values");
+			this.targetCharacteristic.setValue(newValue, null);
+		}
+	}
+}
 
 
 module.exports = HomeMaticHomeKitContactService; 
