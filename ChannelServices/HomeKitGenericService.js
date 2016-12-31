@@ -2,7 +2,7 @@
 
 
 function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
-  
+
   this.name     = name;
   this.type     = type;
   this.adress   = adress;
