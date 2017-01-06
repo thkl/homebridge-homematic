@@ -336,13 +336,46 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
  
  
  
-    // Version Check 
+    // Version Check and autoupdate
     
     this.fetch_npmVersion("homebridge-homematic",function(npmVersion){
       npmVersion = npmVersion.replace('\n','');
       that.log("NPM %s vs Local %s",npmVersion,that.getVersion());
       if (npmVersion > that.getVersion()) {
-       that.log("There is a new Version available. Please update with sudo npm -g update homebridge-homematic");
+       var autoupdate = that.config["autoupdate"];
+       var instpath = that.config["updatepath"];
+       if (autoupdate) {
+	        var cmd = undefined;
+	        if (autoupdate=="global") {
+		       cmd = "sudo npm -g update homebridge-homematic";
+	        }
+	        
+	        if ((autoupdate=="local") && (instpath)){
+		       cmd = "cd " + instpath + ";npm update homebridge-homematic";
+	        }
+	        
+	        if ((autoupdate=="github") && (instpath)){
+		       cmd = "cd " + instpath + ";git pull";
+	        }
+
+	        if (cmd) {
+			    var exec = require('child_process').exec;
+				that.log.info("There is a new version. Autoupdate is set to %s, so we are updating ourself now .. this may take some seconds.",autoupdate);
+				exec(cmd, function(error, stdout, stderr) {
+					if (!error) {
+						that.log.warn("A new version was installed recently. Please restart the homebridge process to complete the update");
+						that.log.warn("Message from updater %s",stdout);
+					} else {
+						that.log.error("Error while updating.");
+					}
+			});
+	        } else {
+				that.log.error("Some autoupdate settings missed.");
+	        }
+	        
+       } else {
+    	   that.log.warn("There is a new Version available. Please update with sudo npm -g update homebridge-homematic");
+       }
       }
     });
 }

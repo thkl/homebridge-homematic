@@ -137,12 +137,9 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
 }
 
 HomeMaticHomeKitContactService.prototype.stateCharacteristicDidChange = function(characteristic,newValue) {
-	this.log.debug("Char %s",JSON.stringify(characteristic));
-	
 	if (characteristic.displayName=="Current Position") {
 		// Set Target
 		if (this.targetCharacteristic) {
-			this.log.debug("We have a Target Position -> Sync Values");
 			this.targetCharacteristic.setValue(newValue, null);
 		}
 	}

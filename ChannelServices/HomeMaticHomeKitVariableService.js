@@ -27,7 +27,8 @@ HomeMaticHomeKitVariableService.prototype.createDeviceService = function(Service
       }.bind(this))
 
       .on('set', function(value, callback) {
-         that.command("sendregacommand","","var x=dom.GetObject(\""+that.name+"\");if (x) {x.State("+value+");}",function() {
+	     that.log.debug("Variable %s set to %s",that.adress,value);
+         that.command("sendregacommand","","var x=dom.GetObject(\""+that.adress+"\");if (x) {x.State("+value+");}",function() {
 		   setTimeout(function() {
        			that.remoteGetValue("STATE");
       		},500);
