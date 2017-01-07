@@ -27,7 +27,29 @@
 		{
 			"type"  : "HM-WDS100-C6-O-2",
 			"isWeatherStation": "true"
-		}		
+		},
+		{
+			"type"  : "HmIP-BSM",
+			"meterChannel": "7",
+			"switchChannel": "4"
+		},
+		{
+			"type"  : "HmIP-FSM",
+			"meterChannel": "2",
+			"switchChannel": "5"
+		},
+		{
+			"type"  : "HmIP-FSM",
+			"meterChannel": "2",
+			"switchChannel": "5"
+		}
+		,
+		{
+			"type"  : "HMIP-PSM",
+			"meterChannel": "6",
+			"switchChannel": "3"
+		}
+				
 	],
 	
 	

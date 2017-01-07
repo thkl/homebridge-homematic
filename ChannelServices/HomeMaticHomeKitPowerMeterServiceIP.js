@@ -17,6 +17,9 @@ HomeMaticHomeKitPowerMeterService.prototype.propagateServices = function(homebri
   
   	var uuid = homebridge.uuid;
   	
+  	this.meterChannel = this.cfg["meterChannel"] || "6";
+  	this.switchChannel = this.cfg["switchChannel"] || "3";
+ 
   	
     Characteristic.VoltageCharacteristic = function() {
     var charUUID = uuid.generate('E863F10A-079E-48FF-8F27-9C2605A29F52');
@@ -80,17 +83,17 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
     var sensor = new Service["PowerMeterService"](this.name);
     var voltage = sensor.getCharacteristic(Characteristic.VoltageCharacteristic)
 	.on('get', function(callback) {
-      that.query("6:VOLTAGE",function(value){
+      that.query(that.meterChannel + ":VOLTAGE",function(value){
        if (callback) callback(null,value);
       });
     }.bind(this));
 
-    this.currentStateCharacteristic["6:VOLTAGE"] = voltage;
+    this.currentStateCharacteristic[that.meterChannel + ":VOLTAGE"] = voltage;
     voltage.eventEnabled = true;
 
     var current = sensor.getCharacteristic(Characteristic.CurrentCharacteristic)
 	.on('get', function(callback) {
-      that.query("6:CURRENT",function(value){
+      that.query(that.meterChannel + ":CURRENT",function(value){
 	    if (value!=undefined) {
 			if (callback) callback(null,value);
 		} else {
@@ -99,17 +102,17 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
       });
     }.bind(this));
 
-    this.currentStateCharacteristic["6:CURRENT"] = current;
+    this.currentStateCharacteristic[that.meterChannel + ":CURRENT"] = current;
     current.eventEnabled = true;
 
     var power = sensor.getCharacteristic(Characteristic.PowerCharacteristic)
 	.on('get', function(callback) {
-      that.query("6:POWER",function(value){
+      that.query(that.meterChannel + ":POWER",function(value){
        if (callback) callback(null,value);
       });
     }.bind(this));
 
-    this.currentStateCharacteristic["6:POWER"] = power;
+    this.currentStateCharacteristic[that.meterChannel + ":POWER"] = power;
     power.eventEnabled = true;
 
 
@@ -126,7 +129,7 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
 
 	var cc = outlet.getCharacteristic(Characteristic.On)    
     .on('get', function(callback) {
-      that.query("3:STATE",function(value){
+      that.query(that.switchChannel + ":STATE",function(value){
 	      that.log.debug("State is %s",value);
 	       if (callback) callback(null,value);
       });
@@ -134,20 +137,20 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
 
     .on('set', function(value, callback) {
 	  if (value==0) {
-		  that.delayed("set","3:STATE" , false)
+		  that.delayed("set",that.switchChannel + ":STATE" , false)
 	  } else {
-		  that.delayed("set","3:STATE" , true)
+		  that.delayed("set",that.switchChannel + ":STATE" , true)
 	  }
       callback();
     }.bind(this));
     
-    this.currentStateCharacteristic["3:STATE"] = cc;
+    this.currentStateCharacteristic[that.switchChannel + ":STATE"] = cc;
     cc.eventEnabled = true;
     
-    this.addValueMapping("3:STATE",true,1);
-    this.addValueMapping("3:STATE",false,0);
+    this.addValueMapping(that.switchChannel + ":STATE",true,1);
+    this.addValueMapping(that.switchChannel + ":STATE",false,0);
     
-    this.remoteGetValue("3:STATE");
+    this.remoteGetValue(that.switchChannel + ":STATE");
     
     this.services.push(outlet);
     this.deviceAdress = this.adress.slice(0, this.adress.indexOf(":"));
