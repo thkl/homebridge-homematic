@@ -165,7 +165,8 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
     	     
           }
 		 } catch (e) {
-  				that.log.warn("Unable to parse live ccu data. Will try cache if there is one");
+  				that.log.warn("Unable to parse live ccu data. Will try cache if there is one. If you want to know what, start homebridge in debug mode -> DEBUG=* homebridge -D");
+  				that.log.debug("JSON Error %s for Data %s",e,data);
 		 }
       }
       

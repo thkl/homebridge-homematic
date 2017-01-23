@@ -8,7 +8,7 @@ var HomeMaticRPC = function (log, ccuip,port,system,platform) {
   
   this.log = log;
   
-  this.log.info("init RPC for %",system);
+  this.log.info("init RPC for %s",system);
   this.system = system;
   this.ccuip = ccuip;
   this.platform = platform;
@@ -129,6 +129,7 @@ HomeMaticRPC.prototype.init = function() {
                 if ((accessory.adress == channel) || 
                 ((accessory.cadress != undefined) && (accessory.cadress == channel)) || 
                 ((accessory.deviceAdress != undefined) && (accessory.deviceAdress == deviceAdress))) {
+				  that.log.debug("Accessory %s found -> Send Event",accessory.name);
                   accessory.event(channel,datapoint, value);
                 }
                  

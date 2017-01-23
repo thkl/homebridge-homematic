@@ -61,9 +61,9 @@ var HomeMaticChannelLoader = function (log) {
       cfg["interface"] = channel.intf;
       
       // Replace Chars in name https://github.com/thkl/homebridge-homematic/issues/56
-  
+  		
       name = name.replace(/[.:#_()-]/g,' ');
-
+	  
 	  var accessory = new service(log,platform, id ,name, channelType ,adress,special, cfg, Service, Characteristic);
 	  list.push(accessory);	
     } else {

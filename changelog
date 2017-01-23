@@ -3,6 +3,10 @@ Changelog
 
 **** BEGINNING OF VERSION 0.0.41 the selection of channels to use with HomeKit via a CCU Subsection is mandatory
 
+Version 0.0.66
+some error logging
+Fix for Programs with _ etc
+
 Version 0.0.65
 fix for Programs 
  
