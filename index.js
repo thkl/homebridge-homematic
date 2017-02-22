@@ -9,6 +9,7 @@ var inherits = require('util').inherits;
 var path = require('path');
 var fs = require('fs');
 var uuid;
+var localCache;
 
 var Service, Characteristic;
 
@@ -17,6 +18,7 @@ module.exports = function(homebridge) {
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
   homebridge.registerPlatform("homebridge-homematic", "HomeMatic", HomeMaticPlatform);
+  localCache = path.join(homebridge.user.storagePath() , 'ccu.json');
 }
 
 function HomeMaticPlatform(log, config) {
@@ -77,6 +79,8 @@ function HomeMaticPlatform(log, config) {
   	  this.xmlrpchmip.init();
   }
 
+
+  
   
   var that = this;
   
@@ -143,7 +147,7 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 
     script = script + "Write('\}'\);";
      
-    var localcache = './.homebridge/ccu.json';
+  
 
     var regarequest = new HomeMaticRegaRequest(this.log, this.ccuIP).script(script, function(data) {
 	  var json;
@@ -154,8 +158,8 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
 	      json = JSON.parse(data)
           if ((json != undefined) && (json["devices"] != undefined)) {
 			// seems to be valid json
-			if (that.localCache != undefined) {
-				fs.writeFile(localcache, data, function (err) {
+			if (localCache != undefined) {
+				fs.writeFile(localCache, data, function (err) {
 				  if (err) {
 					  that.log.warn('Cannot cache ccu data ',err);
 				  }
@@ -171,13 +175,13 @@ HomeMaticPlatform.prototype.accessories = function(callback) {
       }
       
       // check if we got valid json from ccu
-      if ((json == undefined) && (that.localCache != undefined)) {
+      if ((json == undefined) && (localCache != undefined)) {
       // try to load Data
       
       try {
-	    fs.accessSync(localcache, fs.F_OK);
+	    fs.accessSync(localCache, fs.F_OK);
     	  // try to load Data
-        data = fs.readFileSync(localcache).toString();
+        data = fs.readFileSync(localCache).toString();
 	    if (data != undefined) {
 	      try {
 	       json = JSON.parse(data)

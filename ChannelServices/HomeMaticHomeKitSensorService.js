@@ -1,4 +1,4 @@
-'use strict';
+	'use strict';
 
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService;
 var util = require("util");
@@ -16,7 +16,7 @@ HomeMaticHomeKitSensorService.prototype.createDeviceService = function(Service, 
     var that=this
     if (this.special=="DOOR") {
 
-      var door = new Service["DoorStateService"](this.name);
+      var door = new Service["Door"](this.name);
       var cdoor = door.getCharacteristic(Characteristic.CurrentDoorState);
       
       cdoor.on('get', function(callback) {
