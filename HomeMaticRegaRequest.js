@@ -4,7 +4,7 @@ var http = require("http");
 function HomeMaticRegaRequest(log, ccuip) {
   this.log = log;
   this.ccuIP = ccuip;
-  this.timeout = 60;
+  this.timeout = 120;
 }
 
 HomeMaticRegaRequest.prototype = {

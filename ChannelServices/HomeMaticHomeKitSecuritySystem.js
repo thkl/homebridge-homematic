@@ -33,7 +33,7 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service,
     .on('get', function(callback) {
       that.query("4:ARMSTATE",function(value){
 	    var hkValue = that.mappedValue("4:ARMSTATE",value);
-        if (callback) callback(null,hkValue);
+	    if (callback) callback(null,hkValue);
       });
     }.bind(this));
 
@@ -53,6 +53,14 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service,
     
        if (hmvalue != -1) {
 	       that.command("set","4:ARMSTATE" , hmvalue)
+	       setTimeout(function () {
+		       that.remoteGetValue("4:ARMSTATE",function(value) {
+			        if (value==0){ts.updateValue(Characteristic.SecuritySystemTargetState.DISARM,null);}
+			        if (value==1){ts.updateValue(Characteristic.SecuritySystemTargetState.NIGHT_ARM,null);}
+			        if (value==2){ts.updateValue(Characteristic.SecuritySystemTargetState.AWAY_ARM,null);}
+			        if (value==3){ts.updateValue(Characteristic.SecuritySystemTargetState.STAY_ARM,null);}
+		       });
+	       }, 1000);
        }
        if (callback) callback();
     }.bind(this));
