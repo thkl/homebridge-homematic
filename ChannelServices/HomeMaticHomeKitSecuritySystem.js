@@ -25,7 +25,8 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service,
     // Fill Servicelogic here
     var secsys = new Service["SecuritySystem"](this.name);
     this.services.push(secsys);
-    
+    this.ignoreWorking = true;
+    	
     // Characteristic.SecuritySystemCurrentState and Characteristic.SecuritySystemTargetState 
     
     var cs = secsys.getCharacteristic(Characteristic.SecuritySystemCurrentState)
@@ -65,7 +66,6 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service,
        if (callback) callback();
     }.bind(this));
 
-
 	this.remoteGetValue("4:ARMSTATE");
 
 	this.addValueMapping("4:ARMSTATE",0,Characteristic.SecuritySystemTargetState.DISARM);
@@ -85,10 +85,12 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service,
 	that.currentStateCharacteristic["1:STATE"] = horn;
     horn.eventEnabled = true;
 
+
+	this.deviceAdress = this.adress.slice(0, this.adress.indexOf(":"));
 }
 
 HomeMaticHomeKitSecuritySystem.prototype.endWorking=function()  {
- this.remoteGetValue("4:ARMSTATE");
+   this.remoteGetValue("4:ARMSTATE");
 }
 
 module.exports = HomeMaticHomeKitSecuritySystem; 
