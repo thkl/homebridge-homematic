@@ -258,7 +258,6 @@ HomeKitGenericService.prototype = {
        that.isWorking = newValue;
     }
     
-    
     this.eventupdate = true;
     if ((this.cadress!=undefined) || (this.deviceAdress!=undefined)){
     // this is dirty shit. ok there is a config that will set the cadress to a defined channel
@@ -275,7 +274,10 @@ HomeKitGenericService.prototype = {
 	    this.datapointEvent(dp,newValue);
         this.cache(dp,newValue);
     }
+    
     this.eventupdate = false;
+    } else {
+	    this.log.debug("channel %s or dp %s is undefined",channel,dp);
     }
   },
 
