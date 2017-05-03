@@ -3,6 +3,11 @@ Changelog
 
 **** BEGINNING OF VERSION 0.0.41 the selection of channels to use with HomeKit via a CCU Subsection is mandatory
 
+Version 0.0.71
+(min node version is 4.5)
+changed rpc connection to ccu  to binrpc - big thanks to https://github.com/hobbyquaker for the binrpc module
+fixed VariableUpdate Event trigger ..
+
 Version 0.0.67 + 68
 Worked on SecuritySensors
 

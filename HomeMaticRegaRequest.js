@@ -56,6 +56,8 @@ HomeMaticRegaRequest.prototype = {
     });
     
 	post_req.setTimeout(this.timeout * 1000);
+	//this.log.debug("RegaScript %s",script);
+
     post_req.write(script);
     post_req.end();
   },
@@ -91,10 +93,8 @@ HomeMaticRegaRequest.prototype = {
   getVariable: function(channel, callback) {
     var that = this;
     var script = "var d = dom.GetObject(\"" + channel + "\");if (d){Write(d.State());}";
-    //this.log("RegaScript %s",script);
-    this.script(script, function(data) {
+      this.script(script, function(data) {
       if (data !== undefined) {
-       // that.log.debug("Result is %s",data);
         callback(data);
       } 
     });

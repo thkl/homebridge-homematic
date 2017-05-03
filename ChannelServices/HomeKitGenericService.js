@@ -265,7 +265,6 @@ HomeKitGenericService.prototype = {
     // now fetch the real adress of that channel and get the channelnumber
     // datapoints from such channels named  as channelnumber:datapoint ... (no better approach yet) 
        
-       
        var chnl = channel.slice(channel.indexOf(":")+1);
        this.datapointEvent(chnl + ":" + dp,newValue);
        this.cache(chnl + ":" + dp,newValue);
@@ -303,7 +302,6 @@ HomeKitGenericService.prototype = {
   
   cache:function(dp,value) {
     var that = this;
-    
     // Check custom Mapping from HM to HomeKit
     var map = that.datapointMappings[dp];
     if (map != undefined) {
@@ -321,6 +319,8 @@ HomeKitGenericService.prototype = {
     if (this.usecache) {
 	    this.state[dp] = value; 
     }
+    } else {
+	    that.log.debug("Skip update because of working flag (%s) or IsNull(%s)",that.isWorking,value);
     }
   },
 

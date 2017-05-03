@@ -8,7 +8,7 @@ Switches , Dimmer , RotaryHandles, WindowContacts, MotionSensor, Blinds, Keymati
 ProgramStarter, SmokeDetector, Thermostats ....
 
 # Installation
-
+0. Make sure that you use a node version >= 4.5
 1. Install homebridge using: npm install -g homebridge
 2. Install this plugin using: npm install -g homebridge-homematic
 3. Update your configuration file. See the sample below. 

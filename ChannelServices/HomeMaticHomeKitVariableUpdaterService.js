@@ -32,7 +32,7 @@ HomeMaticHomeKitVariableUpdaterService.prototype.createDeviceService = function(
 	    		 var vn = tmpvar.split("(---)")[0];
 	    		 var vv = tmpvar.split("(---)")[1];
 	    		 if ((vn!=undefined) && (vv!=undefined)) {
-					that.platform.remoteSetValue(vn,"STATE",vv);
+				 	that.platform.remoteSetValue(vn,"STATE",vv);
 	    		 }
 	    		 
     		   });

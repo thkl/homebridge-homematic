@@ -1,6 +1,7 @@
 'use strict';
 
-var binrpc = require("homematic-xmlrpc");
+//var binrpc = require("homematic-xmlrpc");
+var binrpc = require("binrpc");
 var request = require("request");
 var debug = require('debug')('HomeMaticRPC');
 
@@ -8,7 +9,6 @@ var HomeMaticRPC = function (log, ccuip,port,system,platform) {
   
   this.log = log;
   
-  this.log.info("init RPC for %s",system);
   this.system = system;
   this.ccuip = ccuip;
   this.platform = platform;
@@ -47,6 +47,8 @@ var HomeMaticRPC = function (log, ccuip,port,system,platform) {
 
   }
   
+    this.log.info("init RPC for %s",this.interface);
+
   
 }
 
@@ -217,10 +219,11 @@ HomeMaticRPC.prototype.init = function() {
     this.client = binrpc.createClient({
       host: this.ccuip,
       port: port,
-      path: "/"
+      path: "/",
+      queueMaxLength:100
     });
     this.log.debug("CCU RPC Init Call on port %s for interface %s", port , this.interface);
-    this.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort, "homebridge_" + this.interface], function(error, value) {
+    this.client.methodCall("init", ["xmlrpc_bin://" + this.localIP + ":" + this.listeningPort, "homebridge_" + this.interface], function(error, value) {
       that.log.debug("CCU Response ...Value (%s) Error : (%s)",JSON.stringify(value) , error);
       that.lastMessage = Math.floor((new Date()).getTime() / 1000);
     });
@@ -240,7 +243,7 @@ HomeMaticRPC.prototype.init = function() {
     	if (timeDiff > that.watchDogTimeout) {
      		that.log.debug("Watchdog Trigger - Reinit Connection for %s after idle time of %s seconds",this.interface,timeDiff);
 		    that.lastMessage = now;
-		    that.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort, "homebridge_" + this.interface], function(error, value) {
+		    that.client.methodCall("init", ["xmlrpc_bin://" + this.localIP + ":" + this.listeningPort, "homebridge_" + this.interface], function(error, value) {
       			that.log.debug("CCU Response ...Value (%s) Error : (%s)",JSON.stringify(value) , error);
       			that.lastMessage = Math.floor((new Date()).getTime() / 1000);
    			 });
@@ -256,7 +259,7 @@ HomeMaticRPC.prototype.init = function() {
 
   HomeMaticRPC.prototype.stop = function() {
     this.log.info("Removing Event Server for Interface %s",this.interface);
-    this.client.methodCall("init", ["http://" + this.localIP + ":" + this.listeningPort], function(error, value) {
+    this.client.methodCall("init", ["xmlrpc_bin://" + this.localIP + ":" + this.listeningPort], function(error, value) {
 
     });
    }

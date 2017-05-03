@@ -15,10 +15,12 @@ HomeMaticHomeKitVariableService.prototype.createDeviceService = function(Service
 
 	var that = this;
     this.usecache = false;
-      var vservice = new Service["Switch"](this.name);
-      this.services.push(vservice);
+    this.ignoreWorking = true;
+      
+    var vservice = new Service["Switch"](this.name);
+    this.services.push(vservice);
 
-      var cc = vservice.getCharacteristic(Characteristic.On)
+    var cc = vservice.getCharacteristic(Characteristic.On)
       
       .on('get', function(callback) {
          that.remoteGetValue("STATE",function(value){
