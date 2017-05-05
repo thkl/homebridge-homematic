@@ -79,7 +79,7 @@
 	   "type": "VIRTUAL_DIMMER",
 	   "service": "HomeMaticHomeKitDimmerService"
 	},
-
+	
 	{
 	   "type": "KEY",
 	   "service": "HomeMaticHomeKitKeyService"
@@ -239,11 +239,14 @@
 	   "type": "HM-Sec-Sir-WM:ARMING",
 	   "service": "HomeMaticHomeKitSecuritySystem"
 	},
+
 	{
 	   "type": "HM-Sen-DB-PCB:KEY",
+	   "-service": "HomeMaticHomeKitDoorBellMotionService",
 	   "service": "HomeMaticHomeKitDoorBellSensorService"
-	}
-	,
+	},
+
+	
 	{
 	   "type": "WATERDETECTIONSENSOR",
 	   "service": "HomeMaticHomeKitLeakSensorService"

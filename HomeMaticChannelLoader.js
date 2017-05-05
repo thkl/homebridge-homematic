@@ -43,7 +43,6 @@ var HomeMaticChannelLoader = function (log) {
       options = this.getOptions(deviceType);
     }
   
-  
     if (serviceclass != undefined) {
       var service = require ('./ChannelServices/' + serviceclass);
       // add Options 

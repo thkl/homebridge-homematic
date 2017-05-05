@@ -242,6 +242,8 @@ HomeKitGenericService.prototype = {
 			targetChar.setValue(1);
     	    setTimeout(function(){targetChar.setValue(0);}, 1000);
         }
+        var chnl = channel.slice(channel.indexOf(":")+1);
+		this.datapointEvent(chnl + ":" + dp,newValue);
 	    return;
     }
 

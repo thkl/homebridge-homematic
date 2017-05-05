@@ -23,7 +23,6 @@ HomeMaticHomeKitDoorBellSensorService.prototype.createDeviceService = function(S
     this.currentStateCharacteristic["PRESS_SHORT"] = state;
     state.eventEnabled = true;
     this.services.push(doorbell_sensor);
-
 }
 
 
