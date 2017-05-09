@@ -1,6 +1,12 @@
 # homebridge-homematic
 
+
+
+[![Donate some coins if you want](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=DZ5CW7XC9LXMN)
+
+
 Supports the Homematic System on HomeBridge Platform
+
 
 Devices currently supported:
 
@@ -126,9 +132,3 @@ As a sample: the device with the channel WEATHER of the device with type HM-WDS1
 	}]
 	
 ```
-
-# <a href="https://github.com/thkl/homebridge-homematic/issues/51">Issue #51</a>
-
-on 15.10.2016 an issue about a missing donation button was reported. So i fixed #51:
-
-<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=DZ5CW7XC9LXMN"><img style="padding:0;" width=74 height=21  src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" alt="Donate!" / border="0"></a>
