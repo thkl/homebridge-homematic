@@ -2,6 +2,7 @@
 
 //var binrpc = require("homematic-xmlrpc");
 var binrpc = require("binrpc");
+var xmlrpc = require("homematic-xmlrpc");
 var request = require("request");
 var debug = require('debug')('HomeMaticRPC');
 
@@ -19,7 +20,8 @@ var HomeMaticRPC = function (log, ccuip,port,system,platform) {
   this.listeningPort = port;
   this.lastMessage = 0;
   this.watchDogTimer;
-  
+  this.rpc;
+  this.rpcInit;
   
   this.watchDogTimeout = 0;
   
@@ -32,17 +34,23 @@ var HomeMaticRPC = function (log, ccuip,port,system,platform) {
     case 0 : 
     this.interface = "BidCos-RF.";
 	this.ccuport = 2001;
+	this.rpc = binrpc;
+	this.rpcInit = "xmlrpc_bin://";
     break;
     
     case 1 : 
     this.interface = "BidCos-Wired.";
+	this.rpc = binrpc;
   	this.ccuport = 2000;
+	this.rpcInit = "xmlrpc_bin://";
 	break;
 
 
     case 2 : 
     this.interface = "HmIP-RF.";
+	this.rpc = xmlrpc;
     this.ccuport = 2010;
+	this.rpcInit = "http://";
 	break;
 
   }
@@ -66,7 +74,7 @@ HomeMaticRPC.prototype.init = function() {
     this.isPortTaken(this.listeningPort,function(error,inUse){
 
      if (inUse == false) {
-         that.server = binrpc.createServer({
+         that.server = that.rpc.createServer({
 	      host: that.localIP,
     	  port: that.listeningPort
          });
@@ -216,15 +224,16 @@ HomeMaticRPC.prototype.init = function() {
     this.lastMessage = Math.floor((new Date()).getTime() / 1000);
     var port = this.ccuport;
     this.log.info("Creating Local HTTP Client for CCU RPC Events");
-    this.client = binrpc.createClient({
+    this.client = that.rpc.createClient({
       host: this.ccuip,
       port: port,
       path: "/",
       queueMaxLength:100
     });
     this.log.debug("CCU RPC Init Call on port %s for interface %s", port , this.interface);
-    this.client.methodCall("init", ["xmlrpc_bin://" + this.localIP + ":" + this.listeningPort, "homebridge_" + this.interface], function(error, value) {
-      that.log.debug("CCU Response ...Value (%s) Error : (%s)",JSON.stringify(value) , error);
+    var command = this.rpcInit + this.localIP + ":" + this.listeningPort;
+    this.client.methodCall("init", [command, "homebridge_" + this.interface], function(error, value) {
+      that.log.debug("CCU Response for init at %s with %s...Value (%s) Error : (%s)",that.interface,command,JSON.stringify(value) , error);
       that.lastMessage = Math.floor((new Date()).getTime() / 1000);
     });
     
@@ -243,7 +252,7 @@ HomeMaticRPC.prototype.init = function() {
     	if (timeDiff > that.watchDogTimeout) {
      		that.log.debug("Watchdog Trigger - Reinit Connection for %s after idle time of %s seconds",this.interface,timeDiff);
 		    that.lastMessage = now;
-		    that.client.methodCall("init", ["xmlrpc_bin://" + this.localIP + ":" + this.listeningPort, "homebridge_" + this.interface], function(error, value) {
+		    that.client.methodCall("init", [this.rpcInit + this.localIP + ":" + this.listeningPort, "homebridge_" + this.interface], function(error, value) {
       			that.log.debug("CCU Response ...Value (%s) Error : (%s)",JSON.stringify(value) , error);
       			that.lastMessage = Math.floor((new Date()).getTime() / 1000);
    			 });

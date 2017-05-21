@@ -1,6 +1,6 @@
 {
   "name": "homebridge-homematic",
-  "version": "0.0.72",
+  "version": "0.0.73",
   "description": "Homematic plugin for homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
   "keywords": [
@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "binrpc": "latest",
+    "homematic-xmlrpc": ">=1.0.1",
     "debug": "^2.2.0",
     "request": "^2.65.0"
   }
