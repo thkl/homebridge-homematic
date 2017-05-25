@@ -37,6 +37,7 @@ HomeMaticHomeKitSwitchService.prototype.createDeviceService = function(Service, 
      }.bind(this))
 
     .on('set', function(value, callback) {
+      
       if (value==1) {
       
         that.log("Launch Program " + that.adress);
@@ -82,6 +83,7 @@ HomeMaticHomeKitSwitchService.prototype.createDeviceService = function(Service, 
 
     .on('set', function(value, callback) {
 
+     if (that.readOnly==false) {
       var onTime = that.state['ON_TIME'];
 	  if ((onTime!=undefined) && (onTime>0) && (value==1)) {
 		  that.command("set","ON_TIME" , onTime)
@@ -91,9 +93,10 @@ HomeMaticHomeKitSwitchService.prototype.createDeviceService = function(Service, 
 	  } else {
 		  that.delayed("set","STATE" , true)
 	  }
+	  }
+	  
       callback();
     }.bind(this));
-
 
     var onTimeProperties = {
            format: Characteristic.Formats.FLOAT,

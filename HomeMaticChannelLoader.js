@@ -14,7 +14,7 @@ var HomeMaticChannelLoader = function (log) {
   
   
   
-  HomeMaticChannelLoader.prototype.loadChannelService = function(list,deviceType,channel,platform, special, cfg, Service, Characteristic) {
+  HomeMaticChannelLoader.prototype.loadChannelService = function(list,deviceType,channel,platform, special, cfg, access, Service, Characteristic) {
 
     var that = this;
 	var channelType = channel.type;
@@ -62,8 +62,9 @@ var HomeMaticChannelLoader = function (log) {
       // Replace Chars in name https://github.com/thkl/homebridge-homematic/issues/56
   		
       name = name.replace(/[.:#_()-]/g,' ');
-	  
+      that.log.debug("service for %s:%s is %s" , deviceType, channelType, serviceclass);
 	  var accessory = new service(log,platform, id ,name, channelType ,adress,special, cfg, Service, Characteristic);
+	  accessory.setReadOnly(access != 255)
 	  list.push(accessory);	
     } else {
       that.log.warn("There is no service for " + deviceType+":" + channelType );

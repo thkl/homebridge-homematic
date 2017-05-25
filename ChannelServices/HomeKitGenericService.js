@@ -25,6 +25,7 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.i_characteristic = {};
   this.intf = cfg["interface"];
   this.datapointvaluefactors = {};
+  this.readOnly = false;
   var that = this;
   var services = [];
 
@@ -62,6 +63,14 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
 
 
 HomeKitGenericService.prototype = {
+
+  setReadOnly:function(readOnly) {
+	this.readOnly = readOnly
+	if (readOnly==true) {
+	  this.log.info("set %s to read only",this.name)	
+	}  
+  },
+
 
   addValueMapping: function(dp,value,mappedvalue) {
     if (this.datapointMappings[dp]==undefined) {

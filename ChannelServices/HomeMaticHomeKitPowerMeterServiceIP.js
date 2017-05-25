@@ -136,10 +136,12 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
     }.bind(this))
 
     .on('set', function(value, callback) {
-	  if (value==0) {
+      if (that.readOnly==false) {
+	  	if (value==0) {
 		  that.delayed("set",that.switchChannel + ":STATE" , false)
-	  } else {
+	  	} else {
 		  that.delayed("set",that.switchChannel + ":STATE" , true)
+	  	}
 	  }
       callback();
     }.bind(this));

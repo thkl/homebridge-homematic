@@ -133,7 +133,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 	const channelLoader = new HomeMaticChannelLoader(this.log);
 	channelLoader.init(this.config.services);
 
-	let script = 'string sDeviceId;string sChannelId;boolean df = true;Write(\'{"devices":[\');foreach(sDeviceId, root.Devices().EnumIDs()){object oDevice = dom.GetObject(sDeviceId);if(oDevice){var oInterface = dom.GetObject(oDevice.Interface());if(df) {df = false;} else { Write(\',\');}Write(\'{\');Write(\'"id": "\' # sDeviceId # \'",\');Write(\'"name": "\' # oDevice.Name() # \'",\');Write(\'"address": "\' # oDevice.Address() # \'",\');Write(\'"type": "\' # oDevice.HssType() # \'",\');Write(\'"channels": [\');boolean bcf = true;foreach(sChannelId, oDevice.Channels().EnumIDs()){object oChannel = dom.GetObject(sChannelId);if(bcf) {bcf = false;} else {Write(\',\');}Write(\'{\');Write(\'"cId": \' # sChannelId # \',\');Write(\'"name": "\' # oChannel.Name() # \'",\');if(oInterface){Write(\'"intf": "\' # oInterface.Name() 	# \'",\');Write(\'"address": "\' # oInterface.Name() #\'.\'\ # oChannel.Address() # \'",\');}Write(\'"type": "\' # oChannel.HssType() # \'"\');Write(\'}\');}Write(\']}\');}}Write(\']\');';
+	let script = 'string sDeviceId;string sChannelId;boolean df = true;Write(\'{"devices":[\');foreach(sDeviceId, root.Devices().EnumIDs()){object oDevice = dom.GetObject(sDeviceId);if(oDevice){var oInterface = dom.GetObject(oDevice.Interface());if(df) {df = false;} else { Write(\',\');}Write(\'{\');Write(\'"id": "\' # sDeviceId # \'",\');Write(\'"name": "\' # oDevice.Name() # \'",\');Write(\'"address": "\' # oDevice.Address() # \'",\');Write(\'"type": "\' # oDevice.HssType() # \'",\');Write(\'"channels": [\');boolean bcf = true;foreach(sChannelId, oDevice.Channels().EnumIDs()){object oChannel = dom.GetObject(sChannelId);if(bcf) {bcf = false;} else {Write(\',\');}Write(\'{\');Write(\'"cId": \' # sChannelId # \',\');Write(\'"name": "\' # oChannel.Name() # \'",\');if(oInterface){Write(\'"intf": "\' # oInterface.Name() 	# \'",\');Write(\'"address": "\' # oInterface.Name() #\'.\'\ # oChannel.Address() # \'",\');}Write(\'"type": "\' # oChannel.HssType() # \'",\');Write(\'"access": "\' # oChannel.UserAccessRights(iulOtherThanAdmin)# \'"\');Write(\'}\');}Write(\']}\');}}Write(\']\');';
 
 	script += 'var s = dom.GetObject("';
 	script += this.subsection;
@@ -241,9 +241,9 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 							if ((that.vuc != undefined) && (ch.type == 'VIRTUAL_KEY') && (ch.name == that.vuc)) {
 								that.log('Channel ' + that.vuc + ' added as Variable Update Trigger');
 	    			 ch.type = 'VARIABLE_UPDATE_TRIGGER';
-                	 channelLoader.loadChannelService(that.foundAccessories, 'VARIABLE_UPDATE_TRIGGER', ch, that, that.variables, cfg, Service, Characteristic);
+                	 channelLoader.loadChannelService(that.foundAccessories, 'VARIABLE_UPDATE_TRIGGER', ch, that, that.variables,  cfg, 255 ,Service, Characteristic);
 							} else {
-                	 channelLoader.loadChannelService(that.foundAccessories, device.type, ch, that, special, cfg, Service, Characteristic);
+                	 channelLoader.loadChannelService(that.foundAccessories, device.type, ch, that, special, cfg, ch.access, Service, Characteristic);
 							}
 						} else {
                 // Channel is in the filter
@@ -266,7 +266,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 						ch.type = 'PROGRAM_LAUNCHER';
 						ch.address = program;
 						ch.name = program;
-						channelLoader.loadChannelService(that.foundAccessories, 'PROGRAM_LAUNCHER', ch, that, 'PROGRAM', cfg, Service, Characteristic);
+						channelLoader.loadChannelService(that.foundAccessories, 'PROGRAM_LAUNCHER', ch, that, 'PROGRAM', cfg, 255, Service, Characteristic);
 					} else {
 	            var cfg = that.deviceInfo(internalconfig, '');
 						that.log('Program ' + program + ' added as SWITCH cause of IOS 10');
@@ -274,7 +274,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 						ch.type = 'SWITCH';
 						ch.address = program;
 						ch.name = program;
-						channelLoader.loadChannelService(that.foundAccessories, 'SWITCH', ch, that, 'PROGRAM', cfg, Service, Characteristic);
+						channelLoader.loadChannelService(that.foundAccessories, 'SWITCH', ch, that, 'PROGRAM', cfg, 255, Service, Characteristic);
 					}
 				});
 			}
@@ -288,7 +288,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 					ch.address = variable;
 					ch.name = variable;
 					ch.intf = 'Variable';
-					channelLoader.loadChannelService(that.foundAccessories, 'VARIABLE', ch, that,	'VARIABLE', cfg, Service, Characteristic);
+					channelLoader.loadChannelService(that.foundAccessories, 'VARIABLE', ch, that,	'VARIABLE', cfg, 255, Service, Characteristic);
 				});
 			}
 
