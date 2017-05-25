@@ -3,6 +3,10 @@ Changelog
 
 **** BEGINNING OF VERSION 0.0.41 the selection of channels to use with HomeKit via a CCU Subsection is mandatory
 
+Version 0.0.74
+autoswith back to xmlrpc if node version lt 4.5.0
+
+
 Version 0.0.73
 HMiP is back
 

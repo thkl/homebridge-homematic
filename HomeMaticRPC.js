@@ -1,10 +1,10 @@
 'use strict';
 
-//var binrpc = require("homematic-xmlrpc");
-var binrpc = require("binrpc");
-var xmlrpc = require("homematic-xmlrpc");
-var request = require("request");
-var debug = require('debug')('HomeMaticRPC');
+const binrpc = require('binrpc');
+const xmlrpc = require('homematic-xmlrpc');
+const request = require('request');
+const debug = require('debug')('HomeMaticRPC');
+const semver = require('semver')
 
 var HomeMaticRPC = function (log, ccuip,port,system,platform) {
   
@@ -29,20 +29,38 @@ var HomeMaticRPC = function (log, ccuip,port,system,platform) {
     this.watchDogTimeout = platform.config["watchdog"];
   }
   
+  if (semver.lt(process.version, '4.5.0')) {
+		this.log.warn('you are running an outdated node version. for now it may work but please update.')
+  }  
+  
   switch (system) {
   
     case 0 : 
     this.interface = "BidCos-RF.";
 	this.ccuport = 2001;
-	this.rpc = binrpc;
-	this.rpcInit = "xmlrpc_bin://";
+	
+	if (semver.lt(process.version, '4.5.0')) {
+		this.log.info('using xmprpc for communication with BidCos-RF')
+		this.rpc = xmlrpc;
+		this.rpcInit = "http://";
+	} else {
+		this.log.info('using binrpc for communication with BidCos-RF')
+		this.rpc = binrpc;		
+		this.rpcInit = "xmlrpc_bin://";
+	}
+	
     break;
     
     case 1 : 
     this.interface = "BidCos-Wired.";
-	this.rpc = binrpc;
+	if (semver.lt(process.version, '4.5.0')) {
+		this.rpc = xmlrpc;
+		this.rpcInit = "http://";
+	} else {
+		this.rpc = binrpc;		
+		this.rpcInit = "xmlrpc_bin://";
+	}
   	this.ccuport = 2000;
-	this.rpcInit = "xmlrpc_bin://";
 	break;
 
 
@@ -151,7 +169,7 @@ HomeMaticRPC.prototype.init = function() {
       callback(null);
     });
 
-    that.log.info("XML-RPC server for interface %s is listening on port %s.",that.interface, that.listeningPort);
+    that.log.info("RPC server for interface %s is listening on port %s.",that.interface, that.listeningPort);
     that.connect();
          
      } else {
