@@ -1,19 +1,26 @@
 'use strict';
 
-var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService;
-var util = require("util");
+const path = require('path');
+const util = require("util");
+const fs = require('fs');
+
 
 
 function HomeMaticHomeKitSwitchService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
-    
-    HomeMaticHomeKitSwitchService.super_.apply(this, arguments);
-    
+   HomeMaticHomeKitSwitchService.super_.apply(this, arguments);
 }
 
-util.inherits(HomeMaticHomeKitSwitchService, HomeKitGenericService);
+// Attention : If you move the clazz outside the buildin channelservice you have to make sure the superclass HomeKitGenericService
+// is reachable 
 
+var parentPath = path.dirname(module.parent.filename);
+var rootClazzPath = path.join(parentPath,'ChannelServices','HomeKitGenericService.js');
+var rootClazz = require(rootClazzPath).HomeKitGenericService
+
+util.inherits(HomeMaticHomeKitSwitchService, rootClazz);
 
 HomeMaticHomeKitSwitchService.prototype.createDeviceService = function(Service, Characteristic) {
+
 
     var that = this;
 	var lightbulb = null;
@@ -123,9 +130,8 @@ HomeMaticHomeKitSwitchService.prototype.createDeviceService = function(Service, 
     
     that.currentStateCharacteristic["STATE"] = cc;
     cc.eventEnabled = true;
-
 }
 
 
 
-module.exports = HomeMaticHomeKitSwitchService; 
+module.exports = HomeMaticHomeKitSwitchService

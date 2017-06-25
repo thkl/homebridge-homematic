@@ -1,7 +1,8 @@
 'use strict';
-var path = require('path');
-var fs = require('fs');
-var HomeKitGenericService = require('./ChannelServices/HomeKitGenericService.js').HomeKitGenericService;
+const path = require('path');
+const fs = require('fs');
+const rootClazzPath = path.join(__dirname,'ChannelServices','HomeKitGenericService');
+var HomeKitGenericService = require(rootClazzPath);
 
 var HomeMaticChannelLoader = function (log) {
 	this.log = log;
@@ -23,7 +24,6 @@ var HomeMaticChannelLoader = function (log) {
 	var name = channel.name;
 	var adress = channel.address;
 	var intf = channel.intf;
-	
 	// try to load device:type
     var serviceclass;
     var options;
@@ -44,7 +44,9 @@ var HomeMaticChannelLoader = function (log) {
     }
   
     if (serviceclass != undefined) {
-      var service = require ('./ChannelServices/' + serviceclass);
+      
+      var service = this.loadClass(serviceclass);
+      if (service) { // require ('./ChannelServices/' + serviceclass);
       // add Options 
       if (options != undefined) {
         if (cfg != undefined) {
@@ -63,14 +65,34 @@ var HomeMaticChannelLoader = function (log) {
   		
       name = name.replace(/[.:#_()-]/g,' ');
       that.log.debug("service for %s:%s is %s" , deviceType, channelType, serviceclass);
+      
 	  var accessory = new service(log,platform, id ,name, channelType ,adress,special, cfg, Service, Characteristic);
 	  accessory.setReadOnly(access != 255)
 	  list.push(accessory);	
+	 }
     } else {
       that.log.warn("There is no service for " + deviceType+":" + channelType );
    	}
   };
   
+  
+  HomeMaticChannelLoader.prototype.loadClass = function(serviceclass) {
+  
+    if (fs.existsSync(path.join(__dirname,'ChannelServices',serviceclass+'.js'))) {
+	    this.log.debug("Load BuildIn Service Class %s",serviceclass)
+	    return require(path.join(__dirname,'ChannelServices',serviceclass))
+    }
+    
+    if (fs.existsSync(path.join(this.localPath,serviceclass+'.js'))) {
+	    this.log.debug("Load Custom Service Class %s",serviceclass)
+	    return require(path.join(this.localPath,serviceclass))
+    }
+	
+	this.log.warn("No class found in %s or %s",path.join(__dirname,'ChannelServices',serviceclass+'.js'),path.join(this.localPath,serviceclass+'.js'))
+	
+	return undefined;    
+  }
+
 
   HomeMaticChannelLoader.prototype.getOptions = function(type) {
    var that = this;

@@ -10,7 +10,7 @@ const path = require('path');
 const fs = require('fs');
 let uuid;
 let localCache;
-
+let localPath;
 let Service, Characteristic;
 
 module.exports = function (homebridge) {
@@ -19,6 +19,7 @@ module.exports = function (homebridge) {
 	Characteristic = homebridge.hap.Characteristic;
 	homebridge.registerPlatform('homebridge-homematic', 'HomeMatic', HomeMaticPlatform);
 	localCache = path.join(homebridge.user.storagePath(), 'ccu.json');
+	localPath = homebridge.user.storagePath()
 };
 
 function HomeMaticPlatform(log, config) {
@@ -131,6 +132,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 	this.log('Fetching Homematic devices...');
 	const internalconfig = this.internalConfig();
 	const channelLoader = new HomeMaticChannelLoader(this.log);
+	channelLoader.localPath = localPath
 	channelLoader.init(this.config.services);
 
 	let script = 'string sDeviceId;string sChannelId;boolean df = true;Write(\'{"devices":[\');foreach(sDeviceId, root.Devices().EnumIDs()){object oDevice = dom.GetObject(sDeviceId);if(oDevice){var oInterface = dom.GetObject(oDevice.Interface());if(df) {df = false;} else { Write(\',\');}Write(\'{\');Write(\'"id": "\' # sDeviceId # \'",\');Write(\'"name": "\' # oDevice.Name() # \'",\');Write(\'"address": "\' # oDevice.Address() # \'",\');Write(\'"type": "\' # oDevice.HssType() # \'",\');Write(\'"channels": [\');boolean bcf = true;foreach(sChannelId, oDevice.Channels().EnumIDs()){object oChannel = dom.GetObject(sChannelId);if(bcf) {bcf = false;} else {Write(\',\');}Write(\'{\');Write(\'"cId": \' # sChannelId # \',\');Write(\'"name": "\' # oChannel.Name() # \'",\');if(oInterface){Write(\'"intf": "\' # oInterface.Name() 	# \'",\');Write(\'"address": "\' # oInterface.Name() #\'.\'\ # oChannel.Address() # \'",\');}Write(\'"type": "\' # oChannel.HssType() # \'",\');Write(\'"access": "\' # oChannel.UserAccessRights(iulOtherThanAdmin)# \'"\');Write(\'}\');}Write(\']}\');}}Write(\']\');';
