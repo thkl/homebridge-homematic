@@ -14,9 +14,12 @@ util.inherits(HomeMaticHomeKitThermostatService, HomeKitGenericService);
 HomeMaticHomeKitThermostatService.prototype.createDeviceService = function(Service, Characteristic) {
 
 	var that = this;
-       this.usecache = false;
+    this.usecache = false;
     var thermo = new Service["Thermostat"](this.name);
     this.services.push(thermo);
+
+
+	this.addLowBatCharacteristic(thermo,Characteristic);
 
     var mode = thermo.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
     .on('get', function(callback) {
@@ -124,8 +127,7 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function(Servi
     .on('get', function(callback) {
       if (callback) callback(null, Characteristic.TemperatureDisplayUnits.CELSIUS);
     }.bind(this));
-
-
+	
    this.remoteGetValue("TEMPERATURE");
    this.remoteGetValue("HUMIDITY");
    this.remoteGetValue("SETPOINT");

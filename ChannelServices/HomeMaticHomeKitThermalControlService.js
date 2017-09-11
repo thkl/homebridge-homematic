@@ -22,8 +22,10 @@ HomeMaticHomeKitThermalControlService.prototype.propagateServices = function(hom
 HomeMaticHomeKitThermalControlService.prototype.createDeviceService = function(Service, Characteristic) {
 
 	var that = this;
-        var thermo = new Service["Thermostat"](this.name);
+    var thermo = new Service["Thermostat"](this.name);
     this.services.push(thermo);
+
+	this.addLowBatCharacteristic(thermo,Characteristic);
 
     var mode = thermo.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
     .on('get', function(callback) {

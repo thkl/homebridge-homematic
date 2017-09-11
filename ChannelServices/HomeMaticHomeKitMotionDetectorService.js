@@ -31,14 +31,26 @@ HomeMaticHomeKitMotionDetectorService.prototype.createDeviceService = function(S
  	var cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
       .on('get', function(callback) {
          that.query("BRIGHTNESS",function(value){
-            if (callback) callback(null,value);
-         });
+	         var fvalue = value.toFixed(2)
+	         that.log.info("Brightness %s",fvalue)
+	         if ((fvalue>0.0001) && (fvalue<100000) && (callback))
+	         {
+	         	that.log.info("Brightness %s",fvalue)
+		        callback(null,fvalue)
+	         } else {
+		         // Send min
+		         that.log.error("Out of Range send 0")
+		        if (callback) callback(null,0.0001)
+		         
+	         }
+          
+          });
      }.bind(this));
  
      this.currentStateCharacteristic["BRIGHTNESS"] = cbright;
      cbright.eventEnabled= true;
 	 this.services.push(brightness);
-
+	 this.remoteGetValue("BRIGHTNESS");
 }
 
 

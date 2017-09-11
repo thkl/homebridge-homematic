@@ -26,8 +26,11 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.intf = cfg["interface"];
   this.datapointvaluefactors = {};
   this.readOnly = false;
+  this.lowBat = false;
+  this.lowBatCharacteristic = undefined;
   var that = this;
   var services = [];
+  
 
   if (that.adress.indexOf("CUxD.") > -1) {
     this.usecache = false;
@@ -57,12 +60,30 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   }
   
   this.createDeviceService(Service, Characteristic);
+  
 }
 
 
 
 
 HomeKitGenericService.prototype = {
+
+  addLowBatCharacteristic:function(rootService,Characteristic) {
+	  var bat = rootService.getCharacteristic(Characteristic.StatusLowBattery);
+	  
+	  this.log.info("result for %s is %s",this.name, bat)
+	  
+	  if (bat != undefined) {
+		  this.lowBatCharacteristic = bat
+	  } else {
+		  // not added by default -> create it
+		  this.log.info("added LowBat to %s",this.name)
+		  rootService.addOptionalCharacteristic(Characteristic.StatusLowBattery);
+		  this.lowBatCharacteristic = rootService.getCharacteristic(Characteristic.StatusLowBattery)
+	  }
+	  
+  },
+
 
   setReadOnly:function(readOnly) {
 	this.readOnly = readOnly
@@ -199,6 +220,7 @@ HomeKitGenericService.prototype = {
 		if (tp[1] == 'BRIGHTNESS') {
 			newValue = Math.pow(10,(newValue/51));
 		}
+		
       that.eventupdate = true;
       //var ow = newValue;
       newValue = that.convertValue(dp,newValue);
@@ -234,6 +256,15 @@ HomeKitGenericService.prototype = {
 	if ((channel!=undefined) && (dp!=undefined)) {
 	
     var tp = this.transformDatapoint(dp);
+    
+    
+    if (tp[1] == 'LOWBAT') {
+		that.lowBat = newValue
+		if (that.lowBatCharacteristic != undefined) {
+			that.lowBatCharacteristic.setValue(newValue)
+		}
+	}
+		
     
     if (tp[1] == 'LEVEL') {
     	newValue = newValue * 100;
@@ -412,11 +443,7 @@ HomeKitGenericService.prototype = {
 
   getServices: function() {
     return this.services;
-  } ,
-
-
-
-
+  } 
 };
 
 module.exports = {

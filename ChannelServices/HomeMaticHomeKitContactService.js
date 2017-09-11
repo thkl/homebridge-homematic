@@ -128,12 +128,12 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
       	this.addValueMapping("STATE",false,100);
       }
       
+      
+	  this.addLowBatCharacteristic(contact,Characteristic);
       this.services.push(contact);
     }
 
     this.remoteGetValue("STATE");
-
-
 }
 
 HomeMaticHomeKitContactService.prototype.stateCharacteristicDidChange = function(characteristic,newValue) {
