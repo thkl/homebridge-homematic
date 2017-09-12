@@ -103,6 +103,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
       this.addValueMapping("STATE",true,100);
       
       this.services.push(door);
+    
     } else {
 
       var contact = new Service.ContactSensor(this.name);
@@ -126,6 +127,9 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     	this.addValueMapping("STATE",0,100);
       	this.addValueMapping("STATE",true,0);
       	this.addValueMapping("STATE",false,100);
+      } else {
+      	this.addValueMapping("STATE",true,1);
+      	this.addValueMapping("STATE",false,0);
       }
       
       
