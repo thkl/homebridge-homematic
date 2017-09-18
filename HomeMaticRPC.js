@@ -81,11 +81,14 @@ var HomeMaticRPC = function (log, ccuip,port,system,platform) {
 HomeMaticRPC.prototype.init = function() {
     var that = this;
 
-    var ip = this.getIPAddress();
-    if (ip == "0.0.0.0") {
-      that.log("Can not fetch IP");
-      return;
-    }
+    var ip = this.platform.config.local_ip;
+	if (ip == undefined) {
+	    ip = this.getIPAddress();
+		if (ip == "0.0.0.0") {
+		that.log("Can not fetch IP");
+		return;
+    	}
+	}
 
     this.localIP = ip;
     
