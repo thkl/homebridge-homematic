@@ -19,7 +19,7 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function(Servi
     this.services.push(thermo);
 
 
-	this.addLowBatCharacteristic(thermo,Characteristic);
+	// this.addLowBatCharacteristic(thermo,Characteristic);
 
     var mode = thermo.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
     .on('get', function(callback) {

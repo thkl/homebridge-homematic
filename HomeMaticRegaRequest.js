@@ -5,6 +5,7 @@ function HomeMaticRegaRequest(log, ccuip) {
   this.log = log;
   this.ccuIP = ccuip;
   this.timeout = 120;
+  
 }
 
 HomeMaticRegaRequest.prototype = {
@@ -12,6 +13,8 @@ HomeMaticRegaRequest.prototype = {
   script: function(script, callback) {
     var that = this;
     
+    //this.log.debug("RegaScript %s",script);
+
     var ls = script;
     
     var post_options = {
@@ -28,7 +31,6 @@ HomeMaticRegaRequest.prototype = {
     var post_req = http.request(post_options, function(res) {
       var data = "";
       var that = this;
-      
       res.setEncoding("binary");
       
       res.on("data", function(chunk) {
@@ -40,8 +42,6 @@ HomeMaticRegaRequest.prototype = {
         var response = (data.substring(0, pos));
         callback(response);
       });
-
-      
     });
 
 
@@ -52,12 +52,11 @@ HomeMaticRegaRequest.prototype = {
 
     post_req.on("timeout", function(e) {
 	    that.log("timeout while executing rega script");
-        callback(undefined);
+	    post_req.destroy();
     });
     
 	post_req.setTimeout(this.timeout * 1000);
-	//this.log.debug("RegaScript %s",script);
-
+	
     post_req.write(script);
     post_req.end();
   },

@@ -126,6 +126,11 @@
 	},
 
 	{
+	   "type": "ROTARY_HANDLE_TRANSCEIVER",
+	   "service": "HomeMaticHomeKitRotaryHandleService"
+	},
+
+	{
 	   "type": "MOTION_DETECTOR",
 	   "service": "HomeMaticHomeKitMotionDetectorService"
 	},

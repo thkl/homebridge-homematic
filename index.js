@@ -145,7 +145,9 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 
 	script += 'Write(\'\}\'\);';
 
-	const regarequest = new HomeMaticRegaRequest(this.log, this.ccuIP).script(script, data => {
+	var regarequest = new HomeMaticRegaRequest(this.log, this.ccuIP);
+	regarequest.timeout = this.config.ccufetchtimeout || 120;
+	regarequest.script(script, data => {
 	  let json;
 	  that.log.info('Fetch Response');
 	  //that.log.debug(data);
@@ -178,18 +180,20 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 	    fs.accessSync(localCache, fs.F_OK);
     	  // Try to load Data
 				data = fs.readFileSync(localCache).toString();
-	    if (data != undefined) {
-	      try {
-	       json = JSON.parse(data);
-		   that.log('loaded ccu data from local cache ... WARNING: your mileage may vary');
-		  } catch (e) {
-  				that.log.warn('Unable to parse cached ccu data. giving up');
-		  }
-  	    }
+				if (data != undefined) {
+					try {
+						json = JSON.parse(data);
+						that.log('loaded ccu data from local cache ... WARNING: your mileage may vary');
+					} catch (e) {
+  					that.log.warn('Unable to parse cached ccu data. giving up');
+		  			}
+  	    		}
+  	    
 			} catch (e) {
   				that.log.warn('Unable to load cached ccu data. giving up');
 			}
-		}
+		
+		} // End json is not here but try local cache
 
 		if ((json != undefined) && (json.devices !== undefined)) {
 			json.devices.map(device => {
@@ -202,7 +206,6 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 				} else {
 					isFiltered = false;
 				}
-          // That.log('device address:', device.address);
 
 				if ((device.channels !== undefined) && (!isFiltered)) {
 					device.channels.map(ch => {
@@ -254,7 +257,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 				} else {
 					that.log(device.name + ' has no channels or is filtered');
 				}
-			});
+			}); // End Mapping all JSON Data
 
 			if (that.programs != undefined) {
 				that.programs.map(program => {
@@ -279,9 +282,9 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 						channelLoader.loadChannelService(that.foundAccessories, 'SWITCH', ch, that, 'PROGRAM', cfg, 255, Service, Characteristic);
 					}
 				});
-			}
+			} // End Mapping Programs
 
-// Add Optional Variables
+			// Add Optional Variables
 			if (that.variables != undefined) {
 				that.variables.map(variable => {
 					const ch = {};
@@ -292,7 +295,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 					ch.intf = 'Variable';
 					channelLoader.loadChannelService(that.foundAccessories, 'VARIABLE', ch, that,	'VARIABLE', cfg, 255, Service, Characteristic);
 				});
-			}
+			} // End Variables
 
 			callback(that.foundAccessories);
 		} else {
@@ -319,6 +322,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
       	    that.log.warn('This is just a warning. Everything should');
       	    that.log.warn('work fine until you are below that 100.');
       	}
+      	
 	});
 
     // Version Check and autoupdate
@@ -362,6 +366,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 			}
 		}
 	});
+	
 };
 
 HomeMaticPlatform.prototype.setValue = function (intf, channel, datapoint, value) {

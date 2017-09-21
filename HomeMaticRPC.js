@@ -92,6 +92,8 @@ HomeMaticRPC.prototype.init = function() {
 
     this.localIP = ip;
     
+    this.log.info("local ip used : %s. you may change that with local_ip parameter in config",ip);
+    
     this.isPortTaken(this.listeningPort,function(error,inUse){
 
      if (inUse == false) {
@@ -192,7 +194,7 @@ HomeMaticRPC.prototype.init = function() {
       var iface = interfaces[devName];
       for (var i = 0; i < iface.length; i++) {
         var alias = iface[i];
-        if (alias.family === "IPv4" && alias.address !== "127.0.0.1" && !alias.internal)
+        if (alias.family === "IPv4" && alias.address !== "127.0.0.1" && !alias.internal && (alias.address.indexOf("169.254.") === -1))
           return alias.address;
       }
     }

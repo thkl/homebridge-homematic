@@ -2,6 +2,18 @@ Changelog
 =========
 
 **** BEGINNING OF VERSION 0.0.41 the selection of channels to use with HomeKit via a CCU Subsection is mandatory
+Version 0.0.80
+local_ip parameter for config. to use if auto ip discovery fails
+
+
+Version 0.0.79
+new config parameter ccufetchtimeout to setup the timeout the plugin is waiting for ccu response 
+
+
+Version 0.0.78
+changed timeout behaviour in rega request module
+removed lowbat from thermostat (homekit does not know that)
+
 
 Version 0.0.77
 changed contact sensor values from true/false to 1/0 to work with homebridge core > 0.4.26
@@ -14,7 +26,7 @@ Version 0.0.75
 if a switch channel is set to readonly in ccu the setOn event will be ignored
 
 Version 0.0.74
-autoswith back to xmlrpc if node version lt 4.5.0
+autoswitch back to xmlrpc if node version lt 4.5.0
 
 
 Version 0.0.73

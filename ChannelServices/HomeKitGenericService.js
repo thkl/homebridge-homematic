@@ -29,7 +29,6 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.lowBat = false;
   this.lowBatCharacteristic = undefined;
   var that = this;
-  var services = [];
   
 
   if (that.adress.indexOf("CUxD.") > -1) {
@@ -70,9 +69,7 @@ HomeKitGenericService.prototype = {
 
   addLowBatCharacteristic:function(rootService,Characteristic) {
 	  var bat = rootService.getCharacteristic(Characteristic.StatusLowBattery);
-	  
-	  this.log.info("result for %s is %s",this.name, bat)
-	  
+	    
 	  if (bat != undefined) {
 		  this.lowBatCharacteristic = bat
 	  } else {
@@ -444,6 +441,9 @@ HomeKitGenericService.prototype = {
   getServices: function() {
     return this.services;
   } 
+  
+
+  }
 };
 
 module.exports = {
