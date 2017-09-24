@@ -14,7 +14,7 @@ util.inherits(HomeMaticHomeKitMotionDetectorService, HomeKitGenericService);
 HomeMaticHomeKitMotionDetectorService.prototype.createDeviceService = function(Service, Characteristic) {
 
     var that = this;
-    var sensor = new Service["MotionSensor"](this.name);
+    var sensor = new Service["MotionSensor"](this.name + _"Motion");
     var state = sensor.getCharacteristic(Characteristic.MotionDetected)
 	.on('get', function(callback) {
       that.query("MOTION",function(value){
@@ -27,23 +27,11 @@ HomeMaticHomeKitMotionDetectorService.prototype.createDeviceService = function(S
     this.services.push(sensor);
     this.remoteGetValue("MOTION");
     
-	var brightness = new Service["LightSensor"](this.name);
+	var brightness = new Service["LightSensor"](this.name +  "_Light");
  	var cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
       .on('get', function(callback) {
          that.query("BRIGHTNESS",function(value){
-	         var fvalue = value.toFixed(2)
-	         that.log.info("Brightness %s",fvalue)
-	         if ((fvalue>0.0001) && (fvalue<100000) && (callback))
-	         {
-	         	that.log.info("Brightness %s",fvalue)
-		        callback(null,fvalue)
-	         } else {
-		         // Send min
-		         that.log.error("Out of Range send 0")
-		        if (callback) callback(null,0.0001)
-		         
-	         }
-          
+	         if (callback) {callback(null,value/10)} //dont know how to calculate lux from HM Values ...
           });
      }.bind(this));
  

@@ -2,6 +2,11 @@ Changelog
 =========
 
 **** BEGINNING OF VERSION 0.0.41 the selection of channels to use with HomeKit via a CCU Subsection is mandatory
+
+Version 0.0.81
+#146 fixed Lightsensor
+
+
 Version 0.0.80
 local_ip parameter for config. to use if auto ip discovery fails
 
