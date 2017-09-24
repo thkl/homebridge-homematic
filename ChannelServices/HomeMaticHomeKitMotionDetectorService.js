@@ -14,7 +14,7 @@ util.inherits(HomeMaticHomeKitMotionDetectorService, HomeKitGenericService);
 HomeMaticHomeKitMotionDetectorService.prototype.createDeviceService = function(Service, Characteristic) {
 
     var that = this;
-    var sensor = new Service["MotionSensor"](this.name + _"Motion");
+    var sensor = new Service["MotionSensor"](this.name);
     var state = sensor.getCharacteristic(Characteristic.MotionDetected)
 	.on('get', function(callback) {
       that.query("MOTION",function(value){
@@ -27,7 +27,7 @@ HomeMaticHomeKitMotionDetectorService.prototype.createDeviceService = function(S
     this.services.push(sensor);
     this.remoteGetValue("MOTION");
     
-	var brightness = new Service["LightSensor"](this.name +  "_Light");
+	var brightness = new Service["LightSensor"](this.name);
  	var cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
       .on('get', function(callback) {
          that.query("BRIGHTNESS",function(value){

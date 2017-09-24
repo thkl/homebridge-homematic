@@ -442,8 +442,6 @@ HomeKitGenericService.prototype = {
     return this.services;
   } 
   
-
-  }
 };
 
 module.exports = {
