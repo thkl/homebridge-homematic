@@ -30,9 +30,13 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service,
     
     var currentState = secsys.getCharacteristic(Characteristic.SecuritySystemCurrentState)
 
+	.on('set', function(value,callback) {
+		// nothing to do
+	   if (callback) {callback();}
+	}.bind(this))
+
     .on('get', function(callback) {
       that.query("4:ARMSTATE",function(value){
-	      that.log.debug("get Events %s",value)
 		  var hkValue = 0
 		  // have to set target state also
 		  that.internalsirupdate = true;
@@ -63,13 +67,19 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service,
 			}
 		  
 		  that.internalsirupdate = false;
-		  if (callback) callback(null,hkValue);
+		  if (callback) {
+			  callback(null,hkValue);
+		  }
       });
     }.bind(this));
 
 	that.currentStateCharacteristic["4:ARMSTATE"] = currentState;
     
 	var ts = secsys.getCharacteristic(Characteristic.SecuritySystemTargetState)
+
+	.on('get',function(callback){
+	   if (callback) {callback();}
+	}.bind(this))
 
     .on('set', function(value,callback) {
        if (that.internalsirupdate==false) {
@@ -92,6 +102,7 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service,
 	       });
        }
        }
+       
        if (callback) callback();
     }.bind(this));
 
@@ -104,6 +115,8 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service,
     this.addValueMapping("4:ARMSTATE",1,2);
     this.addValueMapping("4:ARMSTATE",2,1);
     this.addValueMapping("4:ARMSTATE",3,3);
+	
+	this.addLowBatCharacteristic(secsys,Characteristic);
 
 	this.deviceAdress = this.adress.slice(0, this.adress.indexOf(":"));
 }
