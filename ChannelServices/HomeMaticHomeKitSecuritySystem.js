@@ -16,6 +16,23 @@ HomeMaticHomeKitSecuritySystem.prototype.propagateServices = function(homebridge
   
 }
 
+HomeMaticHomeKitSecuritySystem.prototype.mapState = function(newState) {
+	switch (newState) {
+			
+			case 0: 
+				this.currentStateValue = 0
+				break;
+			case 1:
+				this.currentStateValue = 2
+				break;
+			case 2:
+				this.currentStateValue = 1
+				break;
+			case 3:
+				this.currentStateValue = 3
+				break;
+	}	
+}
 
 
 HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service, Characteristic) {
@@ -26,103 +43,91 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service,
     this.services.push(secsys);
     this.internalsirupdate = false
     
+    this.currentStateValue = 0
+    
     // Characteristic.SecuritySystemCurrentState and Characteristic.SecuritySystemTargetState 
     
     var currentState = secsys.getCharacteristic(Characteristic.SecuritySystemCurrentState)
 
 	.on('set', function(value,callback) {
-		// nothing to do
-	   if (callback) {callback();}
-	}.bind(this))
+		if (callback) callback();
+		
+    }.bind(this))
 
     .on('get', function(callback) {
       that.query("4:ARMSTATE",function(value){
-		  var hkValue = 0
-		  // have to set target state also
-		  that.internalsirupdate = true;
-		  var ts = that.currentStateCharacteristic["TARGET"];
-		  
-		  switch (value) {
-			
-			case 0: 
-				currentState.setValue(0,null);
-				ts.updateValue(0,null);
-				hkValue = 0
-				break;
-			case 1:
-				currentState.setValue(2,null);
-				ts.updateValue(2,null);
-				hkValue = 2
-				break;
-			case 2:
-				currentState.setValue(1,null);
-				ts.updateValue(1,null);
-				hkValue = 1
-				break;
-			case 3:
-				currentState.setValue(3,null);
-				ts.updateValue(3,null);
-				hkValue = 3
-				break;
-			}
-		  
-		  that.internalsirupdate = false;
+	      that.log.debug("ssc call ccu returns %s",value);
+		  that.mapState(value)
 		  if (callback) {
-			  callback(null,hkValue);
+			  callback(null,that.currentStateValue);
 		  }
       });
     }.bind(this));
 
-	that.currentStateCharacteristic["4:ARMSTATE"] = currentState;
+	this.currentStateCharacteristic["4:ARMSTATE"] = currentState;
     
 	var ts = secsys.getCharacteristic(Characteristic.SecuritySystemTargetState)
 
 	.on('get',function(callback){
-	   if (callback) {callback();}
+		   that.internalsirupdate = true;
+		   that.remoteGetValue("4:ARMSTATE",function(value) {
+		   		that.mapState(value)
+		   		if (callback) {
+			   	 	callback(null,that.currentStateValue);
+			   	}
+			that.internalsirupdate = false;
+		   })
 	}.bind(this))
 
     .on('set', function(value,callback) {
-       if (that.internalsirupdate==false) {
-	       
-       var hmvalue = -1;
-       if (value==3) {hmvalue = 3;}
-       if (value==2) {hmvalue = 1;}
-       if (value==1) {hmvalue = 2;}
-       if (value==0) {hmvalue = 0;}
+	   	var hmvalue = -1;
+	   	if (value==3) {hmvalue = 3;}
+	   	if (value==2) {hmvalue = 1;}
+	   	if (value==1) {hmvalue = 2;}
+	   	if (value==0) {hmvalue = 0;}
     
-       if (hmvalue != -1) {
-	       that.log.info("Set %s",hmvalue)
+	   	if (hmvalue != -1) {
 	       that.command("set","4:ARMSTATE" , hmvalue,function() {
-		       that.remoteGetValue("4:ARMSTATE",function(value) {
-			        if (value==1){currentState.setValue(Characteristic.SecuritySystemCurrentState.DISARMED,null);}
-			        if (value==1){currentState.setValue(Characteristic.SecuritySystemCurrentState.NIGHT_ARM,null);}
-			        if (value==2){currentState.setValue(Characteristic.SecuritySystemCurrentState.AWAY_ARM,null);}
-			        if (value==0){currentState.setValue(Characteristic.SecuritySystemCurrentState.STAY_ARM,null);}
-		       });
-	       });
-       }
-       }
-       
+		   		that.remoteGetValue("4:ARMSTATE",function(rvalue) {
+			   		that.mapState(rvalue)	
+			   		var ts = that.currentStateCharacteristic["TARGET"];
+			   		var cs = that.currentStateCharacteristic["4:ARMSTATE"];
+			   		cs.updateValue(that.currentStateValue,null);
+			   		ts.updateValue(that.currentStateValue,null);
+		        });
+		   });
+        }
        if (callback) callback();
     }.bind(this));
 
 	this.currentStateCharacteristic["TARGET"] = ts;
+	this.currentStateCharacteristic["CURRENT"] = currentState;
 
-
-	this.remoteGetValue("4:ARMSTATE");
-
-	this.addValueMapping("4:ARMSTATE",0,0);
-    this.addValueMapping("4:ARMSTATE",1,2);
-    this.addValueMapping("4:ARMSTATE",2,1);
-    this.addValueMapping("4:ARMSTATE",3,3);
-	
+//	this.addTamperedCharacteristic(secsys,Characteristic);
 	this.addLowBatCharacteristic(secsys,Characteristic);
 
 	this.deviceAdress = this.adress.slice(0, this.adress.indexOf(":"));
+
+// Get Initial Value
+	this.remoteGetValue("4:ARMSTATE",function(value) {
+		that.mapState(value)	
+		var ts = that.currentStateCharacteristic["TARGET"];
+		var cs = that.currentStateCharacteristic["4:ARMSTATE"];
+		cs.updateValue(that.currentStateValue,null);
+		ts.updateValue(that.currentStateValue,null);
+	});
+
 }
 
 HomeMaticHomeKitSecuritySystem.prototype.endWorking=function()  {
-   this.remoteGetValue("4:ARMSTATE");
+   var this = that;
+   this.remoteGetValue("4:ARMSTATE",function(value) {
+		that.mapState(value)	
+		var ts = that.currentStateCharacteristic["TARGET"];
+		var cs = that.currentStateCharacteristic["4:ARMSTATE"];
+		cs.updateValue(that.currentStateValue,null);
+		ts.updateValue(that.currentStateValue,null);
+	});
 }
 
 
@@ -130,39 +135,21 @@ HomeMaticHomeKitSecuritySystem.prototype.datapointEvent= function(dp,newValue) {
 	if ((dp=='1:STATE') || (dp=='2:STATE') || (dp=='3:STATE')) {
 	   if (newValue==true) {
 		   var cs = this.currentStateCharacteristic["4:ARMSTATE"];
-		   this.log.info("set alarm %s",cs);
-		   cs.setValue(4, null);
+		   cs.updateValue(4, null);
 	   } 
 	}
 	
 	if (dp=="4:ARMSTATE") {
-		this.log.debug("Send Armstate %s",newValue)
-		var ts = this.currentStateCharacteristic["TARGET"];
-		var cs = this.currentStateCharacteristic["4:ARMSTATE"];
-		this.internalsirupdate = true;
-
-		switch (newValue) {
-			
-			case 0: 
-				cs.updateValue(0,null);
-				ts.updateValue(0,null);
-				break;
-			case 1:
-				cs.updateValue(2,null);
-				ts.updateValue(2,null);
-				break;
-			case 2:
-				cs.updateValue(1,null);
-				ts.updateValue(1,null);
-				break;
-			case 3:
-				cs.updateValue(3,null);
-				ts.updateValue(3,null);
-				break;
-			
-			
-		}
-		this.internalsirupdate = false
+		var that = this
+		setTimeout(function () {
+			that.remoteGetValue("4:ARMSTATE",function(value) {
+			that.mapState(value)	
+				var ts = that.currentStateCharacteristic["TARGET"];
+				var cs = that.currentStateCharacteristic["4:ARMSTATE"];
+				cs.updateValue(that.currentStateValue,null);
+				ts.updateValue(that.currentStateValue,null);
+			});
+		}, 1000)
 	}
 	
  }
