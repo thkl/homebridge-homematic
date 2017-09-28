@@ -42,7 +42,7 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service,
     var secsys = new Service["SecuritySystem"](this.name);
     this.services.push(secsys);
     this.internalsirupdate = false
-    
+    this.lastSendValue;
     this.currentStateValue = 0
     
     // Characteristic.SecuritySystemCurrentState and Characteristic.SecuritySystemTargetState 
@@ -59,7 +59,9 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service,
 	      that.log.debug("ssc call ccu returns %s",value);
 		  that.mapState(value)
 		  if (callback) {
+			  that.log.debug("ssc call homekit return %s",that.currentStateValue);
 			  callback(null,that.currentStateValue);
+			  that.lastSendValue = that.currentStateValue;
 		  }
       });
     }.bind(this));
@@ -71,9 +73,12 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service,
 	.on('get',function(callback){
 		   that.internalsirupdate = true;
 		   that.remoteGetValue("4:ARMSTATE",function(value) {
+			   	that.log.debug("sst call ccu returns %s",value);
 		   		that.mapState(value)
 		   		if (callback) {
+			   		that.log.debug("sst call homekit return %s",that.currentStateValue);
 			   	 	callback(null,that.currentStateValue);
+			   	 	that.lastSendValue = that.currentStateValue;
 			   	}
 			that.internalsirupdate = false;
 		   })
@@ -89,11 +94,14 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service,
 	   	if (hmvalue != -1) {
 	       that.command("set","4:ARMSTATE" , hmvalue,function() {
 		   		that.remoteGetValue("4:ARMSTATE",function(rvalue) {
-			   		that.mapState(rvalue)	
-			   		var ts = that.currentStateCharacteristic["TARGET"];
-			   		var cs = that.currentStateCharacteristic["4:ARMSTATE"];
-			   		cs.updateValue(that.currentStateValue,null);
-			   		ts.updateValue(that.currentStateValue,null);
+			   		that.mapState(rvalue)
+			   		if (that.lastSendValue != that.currentStateValue) {
+			   			var ts = that.currentStateCharacteristic["TARGET"];
+			   			var cs = that.currentStateCharacteristic["4:ARMSTATE"];
+			   			cs.updateValue(that.currentStateValue,null);
+			   			ts.updateValue(that.currentStateValue,null);
+			   			that.lastSendValue = that.currentStateValue;
+			   		}
 		        });
 		   });
         }
@@ -110,24 +118,30 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function(Service,
 
 // Get Initial Value
 	this.remoteGetValue("4:ARMSTATE",function(value) {
-		that.mapState(value)	
-		var ts = that.currentStateCharacteristic["TARGET"];
-		var cs = that.currentStateCharacteristic["4:ARMSTATE"];
-		cs.updateValue(that.currentStateValue,null);
-		ts.updateValue(that.currentStateValue,null);
+		that.mapState(value)
+			if (that.lastSendValue != that.currentStateValue) {
+				var ts = that.currentStateCharacteristic["TARGET"];
+				var cs = that.currentStateCharacteristic["4:ARMSTATE"];
+				cs.updateValue(that.currentStateValue,null);
+				ts.updateValue(that.currentStateValue,null);
+				that.lastSendValue = that.currentStateValue;
+		}
 	});
 
 }
 
 HomeMaticHomeKitSecuritySystem.prototype.endWorking=function()  {
-   var this = that;
+   var that = this;
    this.remoteGetValue("4:ARMSTATE",function(value) {
-		that.mapState(value)	
-		var ts = that.currentStateCharacteristic["TARGET"];
-		var cs = that.currentStateCharacteristic["4:ARMSTATE"];
-		cs.updateValue(that.currentStateValue,null);
-		ts.updateValue(that.currentStateValue,null);
-	});
+		that.mapState(value)
+			if (that.lastSendValue != that.currentStateValue) {
+				var ts = that.currentStateCharacteristic["TARGET"];
+				var cs = that.currentStateCharacteristic["4:ARMSTATE"];
+				cs.updateValue(that.currentStateValue,null);
+				ts.updateValue(that.currentStateValue,null);
+				that.lastSendValue = that.currentStateValue;
+			}	
+		});
 }
 
 
@@ -144,10 +158,13 @@ HomeMaticHomeKitSecuritySystem.prototype.datapointEvent= function(dp,newValue) {
 		setTimeout(function () {
 			that.remoteGetValue("4:ARMSTATE",function(value) {
 			that.mapState(value)	
+			if (that.lastSendValue != that.currentStateValue) {
 				var ts = that.currentStateCharacteristic["TARGET"];
 				var cs = that.currentStateCharacteristic["4:ARMSTATE"];
 				cs.updateValue(that.currentStateValue,null);
 				ts.updateValue(that.currentStateValue,null);
+				that.lastSendValue = that.currentStateValue;
+			}
 			});
 		}, 1000)
 	}
