@@ -45,47 +45,46 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function(Service, C
       callback();
     }.bind(this));
 
-    var pstate = blind.getCharacteristic(Characteristic.PositionState)
+    this.pstate = blind.getCharacteristic(Characteristic.PositionState)
+	
+	
+/**
+	Parameter DIRECTION
+ 0 = NONE (Standard) 
+ 1 = UP
+ 2 = DOWN
+ 3 = UNDEFINED
+*/
 	
 	.on('get', function(callback) {
       that.query("DIRECTION",function(value){
        if (callback) {
+	      var result = 2;
           if (value!=undefined) {
-            callback(null,value);
+	      	switch (value) {   
+	         case 0:
+			 	result = 2 // Characteristic.PositionState.STOPPED
+			 	break
+			 case 1:
+			 	result = 0 // Characteristic.PositionState.DECREASING
+			 	break;
+			 case 2:
+			 	result = 1 // Characteristic.PositionState.INCREASING
+			 	break;
+			 case 3:
+			 	result = 2 // Characteristic.PositionState.STOPPED
+			 	break;
+			}
+            callback(null,result);
           } else {
             callback(null,"0");
           }
-                
        }
       });
     }.bind(this));
-    
-    this.currentStateCharacteristic["DIRECTION"] = pstate;
-    pstate.eventEnabled = true;
-
-/**
-	Parameter DIRECTION
- 0 = NONE (Standard) 
- 1=UP
- 2=DOWN
- 3=UNDEFINED
-*/
-
-/*
-	Characteristic.PositionState.DECREASING = 0;
-Characteristic.PositionState.INCREASING = 1;
-Characteristic.PositionState.STOPPED = 2;
-*/
-
-    this.addValueMapping("DIRECTION",0,2);
-    this.addValueMapping("DIRECTION",1,0);
-    this.addValueMapping("DIRECTION",2,1);
-    this.addValueMapping("DIRECTION",3,2);
 
     this.remoteGetValue("LEVEL");
     this.remoteGetValue("DIRECTION");
-
-
 	this.deviceAdress = this.adress.slice(0, this.adress.indexOf(":"));
 }
 
@@ -97,5 +96,24 @@ HomeMaticHomeKitBlindService.prototype.endWorking=function()  {
  })
 }
 
+HomeMaticHomeKitBlindService.prototype.datapointEvent=function(dp,newValue)  {
+  let that = this
+  if (dp == "DIRECTION") {
+	 switch (newValue) {
+		 case 0:
+		 	this.pstate.updateValue(2,null);
+		 	break;
+		 case 1:
+		 	this.pstate.updateValue(0,null);
+		 	break;
+		 case 2:
+		 	this.pstate.updateValue(1,null);
+		 	break;
+		 case 3:
+		 	this.pstate.updateValue(2,null);
+		 	break;
+	 } 
+  }
+}
 
 module.exports = HomeMaticHomeKitBlindService; 
