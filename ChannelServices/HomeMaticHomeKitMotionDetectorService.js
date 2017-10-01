@@ -39,6 +39,9 @@ HomeMaticHomeKitMotionDetectorService.prototype.createDeviceService = function(S
      cbright.eventEnabled= true;
 	 this.services.push(brightness);
 	 this.remoteGetValue("BRIGHTNESS");
+	 
+	this.addTamperedCharacteristic(sensor,Characteristic);
+	this.addLowBatCharacteristic(sensor,Characteristic);
 }
 
 

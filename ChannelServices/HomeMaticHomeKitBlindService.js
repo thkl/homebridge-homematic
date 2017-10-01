@@ -66,9 +66,23 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function(Service, C
     this.currentStateCharacteristic["DIRECTION"] = pstate;
     pstate.eventEnabled = true;
 
+/**
+	Parameter DIRECTION
+ 0 = NONE (Standard) 
+ 1=UP
+ 2=DOWN
+ 3=UNDEFINED
+*/
+
+/*
+	Characteristic.PositionState.DECREASING = 0;
+Characteristic.PositionState.INCREASING = 1;
+Characteristic.PositionState.STOPPED = 2;
+*/
+
     this.addValueMapping("DIRECTION",0,2);
-    this.addValueMapping("DIRECTION",1,1);
-    this.addValueMapping("DIRECTION",2,0);
+    this.addValueMapping("DIRECTION",1,0);
+    this.addValueMapping("DIRECTION",2,1);
     this.addValueMapping("DIRECTION",3,2);
 
     this.remoteGetValue("LEVEL");

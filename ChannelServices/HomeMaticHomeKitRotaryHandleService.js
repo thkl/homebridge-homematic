@@ -89,11 +89,12 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function(Ser
       this.addValueMapping("STATE",0,0);
       this.addValueMapping("STATE",1,1);
       this.addValueMapping("STATE",2,1);
+      this.addTamperedCharacteristic(contact,Characteristic);
+	  this.addLowBatCharacteristic(contact,Characteristic);
       this.services.push(contact);
     }
 
     this.remoteGetValue("STATE");
-
 
 }
 

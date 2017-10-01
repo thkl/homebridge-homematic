@@ -28,6 +28,10 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.readOnly = false;
   this.lowBat = false;
   this.lowBatCharacteristic = undefined;
+
+  this.tampered = false;
+  this.tamperedCharacteristic = undefined;
+
   var that = this;
   
 
@@ -77,6 +81,20 @@ HomeKitGenericService.prototype = {
 		  this.log.info("added LowBat to %s",this.name)
 		  rootService.addOptionalCharacteristic(Characteristic.StatusLowBattery);
 		  this.lowBatCharacteristic = rootService.getCharacteristic(Characteristic.StatusLowBattery)
+	  }
+	  
+  },
+  
+  addTamperedCharacteristic:function(rootService,Characteristic) {
+	  var tampered = rootService.getCharacteristic(Characteristic.StatusTampered);
+	    
+	  if (tampered != undefined) {
+		  this.tamperedCharacteristic = tampered
+	  } else {
+		  // not added by default -> create it
+		  this.log.info("added Tampered to %s",this.name)
+		  rootService.addOptionalCharacteristic(Characteristic.StatusTampered);
+		  this.tamperedCharacteristic = rootService.getCharacteristic(Characteristic.StatusTampered)
 	  }
 	  
   },
@@ -262,6 +280,21 @@ HomeKitGenericService.prototype = {
 		}
 	}
 		
+	
+    if (tp[1] == 'ERROR_SABOTAGE') {
+		that.tampered = (newValue === 1)
+		if (that.tamperedCharacteristic != undefined) {
+			that.tamperedCharacteristic.setValue(newValue)
+		}
+	}
+
+    if (tp[1] == 'ERROR') {
+		that.tampered = (newValue === 7)
+		if (that.tamperedCharacteristic != undefined) {
+			that.tamperedCharacteristic.setValue(newValue)
+		}	
+	}
+		
     
     if (tp[1] == 'LEVEL') {
     	newValue = newValue * 100;
@@ -406,12 +439,12 @@ HomeKitGenericService.prototype = {
     if (mode == "set") {
 	  var interf = this.intf; 
 	  
-      this.log("(Rpc) Send " + newValue + " to Datapoint " + tp[1] + " at " + tp[0]);
+      that.log.debug("(Rpc) Send " + newValue + " to Datapoint " + tp[1] + " at " + tp[0]);
       that.platform.setValue(interf,tp[0], tp[1], newValue);
     }
 
     if (mode == "setrega") {
-	  this.log("(Rega) Send " + newValue + " to Datapoint " + tp[1] + " at " + tp[0]);
+	  that.log.debug("(Rega) Send " + newValue + " to Datapoint " + tp[1] + " at " + tp[0]);
       that.platform.setRegaValue(tp[0], tp[1], newValue);
     }
 

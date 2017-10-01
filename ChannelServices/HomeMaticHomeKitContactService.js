@@ -133,6 +133,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
       }
       
       
+   	  this.addTamperedCharacteristic(contact,Characteristic);
 	  this.addLowBatCharacteristic(contact,Characteristic);
       this.services.push(contact);
     }
