@@ -4,14 +4,14 @@ var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGeneric
 var util = require("util");
 
 
-function HomeMaticHomeKitBlindService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
-    HomeMaticHomeKitBlindService.super_.apply(this, arguments);
+function HomeMaticHomeKitBlindServiceIP(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
+    HomeMaticHomeKitBlindServiceIP.super_.apply(this, arguments);
 }
 
-util.inherits(HomeMaticHomeKitBlindService, HomeKitGenericService);
+util.inherits(HomeMaticHomeKitBlindServiceIP, HomeKitGenericService);
 
 
-HomeMaticHomeKitBlindService.prototype.createDeviceService = function(Service, Characteristic) {
+HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function(Service, Characteristic) {
 
     var that = this;
     var blind = new Service["WindowCovering"](this.name);
@@ -94,13 +94,19 @@ Characteristic.PositionState.STOPPED = 2;
 	this.deviceAdress = this.adress.slice(0, this.adress.indexOf(":"));
 }
 
-HomeMaticHomeKitBlindService.prototype.endWorking=function()  {
- let that = this
- this.remoteGetValue("4:LEVEL",function(value) {
- 	that.currentPos.updateValue(value,null);
- 	that.targetPos.updateValue(value,null);
- })
+HomeMaticHomeKitBlindServiceIP.prototype.endWorking=function()  {
+ this.remoteGetValue("LEVEL");
+}
+
+HomeMaticHomeKitBlindServiceIP.prototype.datapointEvent=function(dp,newValue)  {
+  let that = this
+  if ((dp == "4:PROCESS") && (newValue == 0)) {
+	  this.remoteGetValue("4:LEVEL",function(value) {
+	  	that.currentPos.updateValue(value,null);
+	  	that.targetPos.updateValue(value,null);
+	  })
+  }
 }
 
 
-module.exports = HomeMaticHomeKitBlindService; 
+module.exports = HomeMaticHomeKitBlindServiceIP; 
