@@ -21,7 +21,7 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function(Service,
 
     .on('get', function(callback) {
 	  that.log.info("get CurrentPosition")
-      that.query("LEVEL",function(value){
+      that.query("4:LEVEL",function(value){
   	   that.log.info("get CurrentPosition return %s",value)
        if (callback) callback(null,value);
       });
@@ -36,7 +36,7 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function(Service,
     .on('get', function(callback) {
  	   that.log.info("get TargetPosition ")
 
-		that.query("LEVEL",function(value){
+		that.query("4:LEVEL",function(value){
 			that.log.info("get TargetPosition return %s",value)
 			if (callback) {
 				callback(null,value);
@@ -46,7 +46,7 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function(Service,
     
         
     .on('set', function(value, callback) {
-      that.delayed("set", "LEVEL", value, 750);
+      that.delayed("set", "4:LEVEL", value, 750);
       callback();
     }.bind(this));
 
@@ -87,7 +87,7 @@ Characteristic.PositionState.STOPPED = 2;
     this.addValueMapping("DIRECTION",2,1);
     this.addValueMapping("DIRECTION",3,2);
 
-    this.remoteGetValue("LEVEL");
+    this.remoteGetValue("4:LEVEL");
     this.remoteGetValue("DIRECTION");
 
 
@@ -95,7 +95,7 @@ Characteristic.PositionState.STOPPED = 2;
 }
 
 HomeMaticHomeKitBlindServiceIP.prototype.endWorking=function()  {
- this.remoteGetValue("LEVEL");
+ this.remoteGetValue("4:LEVEL");
 }
 
 HomeMaticHomeKitBlindServiceIP.prototype.datapointEvent=function(dp,newValue)  {
