@@ -98,7 +98,7 @@ HomeMaticHomeKitBlindService.prototype.endWorking=function()  {
 
 HomeMaticHomeKitBlindService.prototype.datapointEvent=function(dp,newValue)  {
   let that = this
-  if (dp == "DIRECTION") {
+  if (dp == "1:DIRECTION") {
 	 switch (newValue) {
 		 case 0:
 		 	this.pstate.updateValue(2,null);
