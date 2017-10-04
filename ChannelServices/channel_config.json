@@ -252,8 +252,7 @@
 
 	{
 	   "type": "HM-Sen-DB-PCB:KEY",
-	   "-service": "HomeMaticHomeKitDoorBellMotionService",
-	   "service": "HomeMaticHomeKitDoorBellSensorService"
+	   "service": "HomeMaticHomeKitDoorBellMotionService"
 	},
 
 	
