@@ -32,8 +32,8 @@ HomeMaticHomeKitKeymaticService.prototype.createDeviceService = function(Service
       });
     }.bind(this));
 
-    //this.currentStateCharacteristic["STATE"] = cstate;
-    //cstate.eventEnabled = true;
+    this.currentStateCharacteristic["STATE"] = cstate;
+    cstate.eventEnabled = true;
 
     this.addValueMapping("STATE",1,0);
     this.addValueMapping("STATE",0,1);
