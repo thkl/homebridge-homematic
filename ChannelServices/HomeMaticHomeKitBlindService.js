@@ -114,6 +114,15 @@ HomeMaticHomeKitBlindService.prototype.datapointEvent=function(dp,newValue)  {
 		 	break;
 	 } 
   }
+  
+  if (dp == "1:WORKING_SLATS") {
+	  if (newValue == false) {
+	  	this.remoteGetValue("LEVEL",function(value) {
+	  		that.currentPos.updateValue(value,null);
+	  		that.targetPos.updateValue(value,null);
+ 		})
+	  }
+  }
 }
 
 module.exports = HomeMaticHomeKitBlindService; 
