@@ -27,7 +27,7 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
     
     this.cwindow = window.getCharacteristic(Characteristic.CurrentPosition);
       
-    cwindow.on('get', function(callback) {
+    this.cwindow.on('get', function(callback) {
       that.query("LEVEL",function(value){
        if (value < 0 )  {
         value = 0;
@@ -37,12 +37,12 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
     }.bind(this));
    
     that.currentStateCharacteristic["LEVEL"] = this.cwindow;
-    cwindow.eventEnabled = true;
+    this.cwindow.eventEnabled = true;
 
 
-    tihs.swindow = window.getCharacteristic(Characteristic.TargetPosition);
+    this.swindow = window.getCharacteristic(Characteristic.TargetPosition);
       
-    swindow.on('set', function(value,callback) {
+    this.swindow.on('set', function(value,callback) {
      if (value==0) {
      	// Lock Window on Close Event
      	value = -0.005;
@@ -53,9 +53,9 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
 
 
 
-    var swindow = window.getCharacteristic(Characteristic.PositionState);
+    this.wpos = window.getCharacteristic(Characteristic.PositionState);
       
-    swindow.on('get', function(callback) {
+    this.wpos.on('get', function(callback) {
       that.query("DIRECTION",function(value){
        var hcvalue = 0;
        hcvalue = value;
@@ -71,7 +71,6 @@ HomeMaticHomeKitWinMaticService.prototype.datapointEvent=function(dp,newValue)  
   if (dp == "1:WORKING") {
 	 if (newValue == false) {
 	  	this.remoteGetValue("LEVEL",function(value) {
-		  	if (value==)
 	  		that.cwindow.updateValue(value,null);
 	  		that.swindow.updateValue(value,null);
  		})
