@@ -25,7 +25,7 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
     var window = new Service.Window(this.name);
     this.services.push(window);
     
-    var cwindow = window.getCharacteristic(Characteristic.CurrentPosition);
+    this.cwindow = window.getCharacteristic(Characteristic.CurrentPosition);
       
     cwindow.on('get', function(callback) {
       that.query("LEVEL",function(value){
@@ -36,11 +36,11 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
     })
     }.bind(this));
    
-    that.currentStateCharacteristic["LEVEL"] = cwindow;
+    that.currentStateCharacteristic["LEVEL"] = this.cwindow;
     cwindow.eventEnabled = true;
 
 
-    var swindow = window.getCharacteristic(Characteristic.TargetPosition);
+    tihs.swindow = window.getCharacteristic(Characteristic.TargetPosition);
       
     swindow.on('set', function(value,callback) {
      if (value==0) {
@@ -66,6 +66,18 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
 
 }
 
+HomeMaticHomeKitWinMaticService.prototype.datapointEvent=function(dp,newValue)  {
+  let that = this
+  if (dp == "1:WORKING") {
+	 if (newValue == false) {
+	  	this.remoteGetValue("LEVEL",function(value) {
+		  	if (value==)
+	  		that.cwindow.updateValue(value,null);
+	  		that.swindow.updateValue(value,null);
+ 		})
+	  }
+  }
+}
 
 
 module.exports = HomeMaticHomeKitWinMaticService; 
