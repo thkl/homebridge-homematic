@@ -81,12 +81,17 @@ HomeMaticHomeKitWinMaticService.prototype.endWorking=function()  {
 
  if (this.shouldLock == true) {
    	this.log.debug('WinMatic ShouldLock is set -> send -0.005')
+   	this.command("setrega","SPEED" ,1)
 	this.delayed("set","LEVEL" , -0.5) // The core is dividing by 100 so to set -0.005 we have to set -0.5 ...
  }
  
  this.shouldLock = false
  
  this.remoteGetValue("LEVEL",function(value) {
+	 // -0.005 is locked -> ignore and set to closed
+	if (value == -0.005) {
+		value = 0
+	}
  	that.cwindow.updateValue(value,null);
  	that.swindow.updateValue(value,null);
  	that.wpos.updateValue(2,null);
