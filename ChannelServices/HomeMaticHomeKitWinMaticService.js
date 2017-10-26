@@ -47,7 +47,8 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
      var svalue = value
      if (value == 0) {
      	// Lock Window on Close Event
-     	this.shouldLock = true;
+     	that.log.info('WinMatic set to 0 -> should lock')
+     	that.shouldLock = true;
      } 
      that.command("setrega","SPEED" ,1)
      that.delayed("set","LEVEL" , value)
@@ -76,9 +77,11 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
 
 HomeMaticHomeKitWinMaticService.prototype.endWorking=function()  {
  let that = this
- 
+    this.log.info('WinMatic End Working')
+
  if (this.shouldLock == true) {
-	that.delayed("set","LEVEL" , -0.005)
+   	this.log.debug('WinMatic ShouldLock is set -> send -0.005')
+	this.delayed("set","LEVEL" , -0.5) // The core is dividing by 100 so to set -0.005 we have to set -0.5 ...
  }
  
  this.shouldLock = false
