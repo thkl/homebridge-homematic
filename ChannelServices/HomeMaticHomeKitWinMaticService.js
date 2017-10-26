@@ -43,13 +43,13 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
     this.swindow = window.getCharacteristic(Characteristic.TargetPosition);
       
     this.swindow.on('set', function(value,callback) {
-     var svalue = value
+     that.command("setrega","SPEED" ,1)
      if (value == 0) {
      	// Lock Window on Close Event
-     	svalue = -0.005;
-     } 
-     that.command("setrega","SPEED" ,1)
-     that.delayed("set","LEVEL" , svalue)
+	 	that.command("setrega","LEVEL" , -0.005)
+     } else {
+	 	that.command("setrega","LEVEL" , value)
+     }
 	 callback();
     }.bind(this));
 
