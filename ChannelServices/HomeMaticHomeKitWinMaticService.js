@@ -22,6 +22,7 @@ HomeMaticHomeKitWinMaticService.prototype.propagateServices = function(homebridg
 HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service, Characteristic) {
 
 	var that = this;
+	this.shouldLock = false;
     var window = new Service.Window(this.name);
     this.services.push(window);
     
@@ -43,13 +44,13 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
     this.swindow = window.getCharacteristic(Characteristic.TargetPosition);
       
     this.swindow.on('set', function(value,callback) {
-     that.command("setrega","SPEED" ,1)
+     var svalue = value
      if (value == 0) {
      	// Lock Window on Close Event
-	 	that.command("setrega","LEVEL" , -0.005)
-     } else {
-	 	that.command("setrega","LEVEL" , value)
-     }
+     	this.shouldLock = true;
+     } 
+     that.command("setrega","SPEED" ,1)
+     that.delayed("set","LEVEL" , value)
 	 callback();
     }.bind(this));
 
@@ -75,6 +76,13 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
 
 HomeMaticHomeKitWinMaticService.prototype.endWorking=function()  {
  let that = this
+ 
+ if (this.shouldLock == true) {
+	that.delayed("set","LEVEL" , -0.005)
+ }
+ 
+ this.shouldLock = false
+ 
  this.remoteGetValue("LEVEL",function(value) {
  	that.cwindow.updateValue(value,null);
  	that.swindow.updateValue(value,null);
