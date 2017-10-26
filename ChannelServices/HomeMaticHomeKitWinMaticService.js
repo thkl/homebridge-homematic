@@ -60,23 +60,26 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function(Service
        var hcvalue = 0;
        hcvalue = value;
        // may there are some mappings needed
+       
+       // D = 0
+       // i = 1
+       // s = 2
+       
        if (callback) callback(null,hcvalue);
     })
     }.bind(this));
 
 }
 
-HomeMaticHomeKitWinMaticService.prototype.datapointEvent=function(dp,newValue)  {
-  let that = this
-  if (dp == "1:WORKING") {
-	 if (newValue == false) {
-	  	this.remoteGetValue("LEVEL",function(value) {
-	  		that.cwindow.updateValue(value,null);
-	  		that.swindow.updateValue(value,null);
- 		})
-	  }
-  }
+HomeMaticHomeKitWinMaticService.prototype.endWorking=function()  {
+ let that = this
+ this.remoteGetValue("LEVEL",function(value) {
+ 	that.cwindow.updateValue(value,null);
+ 	that.swindow.updateValue(value,null);
+ 	that.wpos.updateValue(2,null);
+ })
 }
+
 
 
 module.exports = HomeMaticHomeKitWinMaticService; 
