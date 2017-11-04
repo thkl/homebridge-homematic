@@ -124,7 +124,11 @@
 	   "type": "HmIP-FROLL:SHUTTER_VIRTUAL_RECEIVER",
 	   "service": "HomeMaticHomeKitBlindServiceIP"
 	},
-
+	
+	{
+	   "type": "HmIP-BDT:DIMMER_VIRTUAL_RECEIVER",
+	   "service": "HomeMaticHomeKitDimmerService"
+	},
 
 	{
 	   "type": "SENSOR",
