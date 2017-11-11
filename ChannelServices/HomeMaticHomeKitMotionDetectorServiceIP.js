@@ -31,7 +31,7 @@ HomeMaticHomeKitMotionDetectorServiceIP.prototype.createDeviceService = function
  	var cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
       .on('get', function(callback) {
          that.query("ILLUMINATION",function(value){
-		         callback(null,fvalue/10)
+		         callback(null,value/10)
          });
      }.bind(this));
  
