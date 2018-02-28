@@ -282,6 +282,10 @@
 	{
 	   "type": "HEATING_CLIMATECONTROL_TRANSCEIVER",
 	   "service": "HomeMaticHomeKitIPThermostatService"
+	},
+	{
+		 "type": "HmIP-SWO-B:WEATHER_TRANSMIT",
+		 "service": "HomeMaticHomeKitIPWeatherStationService"
 	}
 	
 	]
