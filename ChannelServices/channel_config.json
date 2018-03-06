@@ -284,8 +284,16 @@
 	   "service": "HomeMaticHomeKitIPThermostatService"
 	},
 	{
-		 "type": "HmIP-SWO-B:WEATHER_TRANSMIT",
-		 "service": "HomeMaticHomeKitIPWeatherStationService"
+	   "type": "HmIP-SWO-B:WEATHER_TRANSMIT",
+	   "service": "HomeMaticHomeKitIPWeatherStationService"
+	},
+	{
+	   "type": "HmIP-SWO-PL:WEATHER_TRANSMIT",
+	   "service": "HomeMaticHomeKitIPWeatherStationService"
+	},
+	{
+	   "type": "HmIP-SWO-PR:WEATHER_TRANSMIT",
+	   "service": "HomeMaticHomeKitIPWeatherStationService"
 	}
 	
 	]
