@@ -2,7 +2,7 @@
 
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService;
 var util = require("util");
-
+var moment = require('moment');
 
 function HomeMaticHomeKitIPThermostatService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
     HomeMaticHomeKitIPThermostatService.super_.apply(this, arguments);
@@ -14,9 +14,16 @@ util.inherits(HomeMaticHomeKitIPThermostatService, HomeKitGenericService);
 HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function(Service, Characteristic) {
 
 	var that = this;
-       this.usecache = false;
-    var thermo = new Service["Thermostat"](this.name);
+    this.usecache = false;
+ 	var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge);
+ 	var thermo = new Service["Thermostat"](this.name);
     this.services.push(thermo);
+	this.log.debug("Adding Log Service for %s",this.displayName);
+	this.loggingService = new FakeGatoHistoryService("thermo", this, {storage: 'fs', path: this.platform.localCache,disableTimer:true});
+	this.loggingService.adress = this.adress;
+	this.services.push(this.loggingService);
+
+
 
     var mode = thermo.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
     .on('get', function(callback) {
@@ -131,6 +138,20 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function(Ser
 
 }
 
+HomeMaticHomeKitIPThermostatService.prototype.datapointEvent= function(dp,newValue) {
 
+	if (dp=='ACTUAL_TEMPERATURE') {
+		this.loggingService.addEntry({time: moment().unix(), currentTemp:parseFloat(newValue)});
+	}
+
+	if (dp=='HUMIDITY') {
+		this.loggingService.addEntry({time: moment().unix(), humidity:parseFloat(newValue)});
+	}
+
+	if (dp=='SET_POINT_TEMPERATURE') {
+		this.loggingService.addEntry({time: moment().unix(), setTemp:parseFloat(newValue)});
+	}
+	
+}	
 
 module.exports = HomeMaticHomeKitIPThermostatService; 

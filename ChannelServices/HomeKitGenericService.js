@@ -4,6 +4,7 @@
 function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
 
   this.name     = name;
+  this.displayName = name;
   this.type     = type;
   this.adress   = adress;
   this.deviceAdress = undefined;
@@ -28,7 +29,7 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.readOnly = false;
   this.lowBat = false;
   this.lowBatCharacteristic = undefined;
-
+  this.accessoryName = this.name;
   this.tampered = false;
   this.tamperedCharacteristic = undefined;
 
@@ -55,7 +56,6 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   .setCharacteristic(Characteristic.Model, this.type)
   .setCharacteristic(Characteristic.Name, this.name)
   .setCharacteristic(Characteristic.SerialNumber, this.adress);
-
   this.services.push( informationService );
 
   if (this.propagateServices != undefined) {

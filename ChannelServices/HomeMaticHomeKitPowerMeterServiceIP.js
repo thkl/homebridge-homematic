@@ -1,22 +1,28 @@
 'use strict';
 
+
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService;
 var util = require("util");
+var moment = require('moment');
 
-
-function HomeMaticHomeKitPowerMeterService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
-    HomeMaticHomeKitPowerMeterService.super_.apply(this, arguments);
+function HomeMaticHomeKitPowerMeterServiceIP(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
+    HomeMaticHomeKitPowerMeterServiceIP.super_.apply(this, arguments);
 }
 
-util.inherits(HomeMaticHomeKitPowerMeterService, HomeKitGenericService);
+util.inherits(HomeMaticHomeKitPowerMeterServiceIP, HomeKitGenericService);
 
 
-HomeMaticHomeKitPowerMeterService.prototype.propagateServices = function(homebridge, Service, Characteristic) {
+HomeMaticHomeKitPowerMeterServiceIP.prototype.propagateServices = function(homebridge, Service, Characteristic) {
     
   // Register new Characteristic or Services here
   
   	var uuid = homebridge.uuid;
-  	
+	var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge);
+	this.log.debug("Adding Log Service for %s",this.displayName);
+	this.loggingService = new FakeGatoHistoryService("energy", this, {storage: 'fs', path: this.platform.localCache, disableTimer:true});
+	this.services.push(this.loggingService);
+
+
   	this.meterChannel = this.cfg["meterChannel"] || "6";
   	this.switchChannel = this.cfg["switchChannel"] || "3";
  
@@ -76,7 +82,7 @@ HomeMaticHomeKitPowerMeterService.prototype.propagateServices = function(homebri
 
 
 
-HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Service, Characteristic) {
+HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function(Service, Characteristic) {
 
 	var that = this;
 	
@@ -108,7 +114,8 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
     var power = sensor.getCharacteristic(Characteristic.PowerCharacteristic)
 	.on('get', function(callback) {
       that.query(that.meterChannel + ":POWER",function(value){
-       if (callback) callback(null,value);
+	   that.loggingService.addEntry({time: new Date().getTime(), power:parseFloat(value)});
+	   if (callback) callback(null,value);
       });
     }.bind(this));
 
@@ -156,7 +163,21 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
     
     this.services.push(outlet);
     this.deviceAdress = this.adress.slice(0, this.adress.indexOf(":"));
+    this.queryData();
 }
 
 
-module.exports = HomeMaticHomeKitPowerMeterService; 
+HomeMaticHomeKitPowerMeterServiceIP.prototype.queryData = function() {
+	var that = this;
+	this.query(this.meterChannel + ":POWER",function(value){that.loggingService.addEntry({time: moment().unix(), power:parseFloat(value)})});
+	//create timer to query device every 10 minutes
+	setTimeout(function(){that.queryData()}, 10 * 60 * 1000);
+}
+
+HomeMaticHomeKitPowerMeterServiceIP.prototype.datapointEvent= function(dp,newValue) {
+	if (dp==this.meterChannel + ":POWER") {
+		this.loggingService.addEntry({time: moment().unix(), power:parseInt(newValue)});
+	}
+}	
+
+module.exports = HomeMaticHomeKitPowerMeterServiceIP; 

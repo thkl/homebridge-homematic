@@ -2,7 +2,7 @@
 
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService;
 var util = require("util");
-
+var moment = require('moment');
 
 function HomeMaticHomeKitThermostatService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
     HomeMaticHomeKitThermostatService.super_.apply(this, arguments);
@@ -12,13 +12,17 @@ util.inherits(HomeMaticHomeKitThermostatService, HomeKitGenericService);
 
 
 HomeMaticHomeKitThermostatService.prototype.createDeviceService = function(Service, Characteristic) {
-
 	var that = this;
     this.usecache = false;
     var thermo = new Service["Thermostat"](this.name);
     this.services.push(thermo);
 
+	var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge);
+	this.log.debug("Adding Log Service for %s",this.displayName);
+	this.loggingService = new FakeGatoHistoryService("thermo", this, {storage: 'fs', path: this.platform.localCache,disableTimer:true});
+	this.services.push(this.loggingService);
 
+		
 	// this.addLowBatCharacteristic(thermo,Characteristic);
 
     var mode = thermo.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
@@ -74,6 +78,8 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function(Servi
    .setProps({ minValue: -100 })
     .on('get', function(callback) {
       this.remoteGetValue("1:TEMPERATURE",function(value){
+	      		that.loggingService.addEntry({time: moment().unix(), currentTemp:parseFloat(value)});
+
        if (callback) callback(null,value);
       });
     }.bind(this));
@@ -106,6 +112,7 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function(Servi
 	  if (value>30) {
          value=30.5;
       }
+	     that.loggingService.addEntry({time: moment().unix(), setTemp:parseFloat(value)});
          if (callback) callback(null,value);
       });
       
@@ -131,10 +138,28 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function(Servi
    this.remoteGetValue("TEMPERATURE");
    this.remoteGetValue("HUMIDITY");
    this.remoteGetValue("SETPOINT");
-   
-
-
+   this.queryData();
 }
+
+HomeMaticHomeKitThermostatService.prototype.queryData = function() {
+	var that = this;
+	this.query("HUMIDITY",function(value){that.loggingService.addEntry({time: moment().unix(), humidity:parseFloat(value)})});
+	this.query("TEMPERATURE",function(value){that.loggingService.addEntry({time: moment().unix(), currentTemp:parseFloat(value)})});
+	//create timer to query device every 10 minutes
+	setTimeout(function(){that.queryData()}, 10 * 60 * 1000);
+}
+
+HomeMaticHomeKitThermostatService.prototype.datapointEvent= function(dp,newValue) {
+	if (dp=='TEMPERATURE') {
+		this.loggingService.addEntry({time: moment().unix(), currentTemp:parseFloat(newValue)});
+	}
+	
+	if (dp=='SETPOINT') {
+		this.loggingService.addEntry({time: moment().unix(), setTemp:parseFloat(newValue)});
+	}
+}	
+
+					
 
 
 

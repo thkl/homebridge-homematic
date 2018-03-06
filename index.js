@@ -12,8 +12,10 @@ let uuid;
 let localCache;
 let localPath;
 let Service, Characteristic;
+let _homebridge;
 
 module.exports = function (homebridge) {
+	_homebridge = homebridge;
 	uuid = homebridge.hap.uuid;
 	Service = homebridge.hap.Service;
 	Characteristic = homebridge.hap.Characteristic;
@@ -25,6 +27,8 @@ module.exports = function (homebridge) {
 function HomeMaticPlatform(log, config) {
 	this.log = log;
 	this.uuid = uuid;
+	this.homebridge = _homebridge;
+	
 	this.log('Homematic Plugin Version ' + this.getVersion());
 	this.log('Plugin by thkl  https://github.com/thkl');
 	this.log('Homematic is a registered trademark of the EQ-3 AG');

@@ -294,7 +294,13 @@
 	{
 	   "type": "HmIP-SWO-PR:WEATHER_TRANSMIT",
 	   "service": "HomeMaticHomeKitIPWeatherStationService"
+	},
+	{
+	   "type": "SENSOR_FOR_CARBON_DIOXIDE",
+	   "service": "HomeMaticHomeKitAirQualitySensorService"
 	}
+	
+	
 	
 	]
 }
