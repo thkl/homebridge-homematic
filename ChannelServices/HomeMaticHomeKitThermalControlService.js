@@ -29,7 +29,7 @@ HomeMaticHomeKitThermalControlService.prototype.createDeviceService = function(S
     this.services.push(this.thermostat);
 	// init some outside values
 	this.currentTemperature = -255;
-	this.currentHumidity = -255;
+	this.currentHumidity = 0;
 	this.targetTemperature = -255;
 	this.usecache = false; // cause of virtual devices
 	// this.addLowBatCharacteristic(thermo,Characteristic);
@@ -176,7 +176,7 @@ HomeMaticHomeKitThermalControlService.prototype.queryData = function() {
 		that.remoteGetValue("ACTUAL_HUMIDITY",function(value){
 			that.currentHumidity = parseFloat(value);
 
-			if ((that.currentTemperature > -255) && (that.currentHumidity > -255)) {
+			if (that.currentTemperature > -255) {
 				that.loggingService.addEntry({time: moment().unix(), temp:that.currentTemperature, pressure:0, humidity:that.currentHumidity});
 			}
 			
