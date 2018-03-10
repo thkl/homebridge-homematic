@@ -87,10 +87,9 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function(Serv
 
 	this.tslat = blind.getCharacteristic(Characteristic.TargetHorizontalTiltAngle)
 	.on('set', function(value,callback){
-		let nlv = (value+90/100)/1,8
+		let nlv = (value+90/100)/1.8
 		that.delayed("set", "LEVEL_2", nlv, 750);      
-    })
-	}.bind(this));
+    }.bind(this));
 
 /**
 	Parameter DIRECTION
