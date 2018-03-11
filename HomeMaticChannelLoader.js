@@ -28,19 +28,35 @@ var HomeMaticChannelLoader = function (log) {
     var serviceclass;
     var options;
     
-    serviceclass = this.getServiceClass(deviceType+":" + channelType);
-    options = this.getOptions(deviceType+":" + channelType);
+    var sv = this.getServiceClass(deviceType+":" + channelType);
+	serviceclass = sv['class']
+    if (sv['options'] == undefined) {
+	    options = this.getOptions(deviceType+":" + channelType);
+	} else {
+		options = sv['options']
+	}
+    
     
     if (serviceclass == undefined) {
       // not found try to find channeltype
-      serviceclass = this.getServiceClass(channelType);
-      options = this.getOptions(channelType);
+      sv = this.getServiceClass(channelType);
+      serviceclass = sv['class']
+	  if (sv['options'] == undefined) {
+	  	options = this.getOptions(channelType);
+	  } else {
+		options = sv['options']
+	  }
     }
 
     if (serviceclass == undefined) {
       // not found try to find devicetype
-      serviceclass = this.getServiceClass(deviceType);
-      options = this.getOptions(deviceType);
+      sv = this.getServiceClass(deviceType);
+      serviceclass = sv['class']
+	  if (sv['options'] == undefined) {
+	  	options = this.getOptions(deviceType);
+	  } else {
+		options = sv['options']
+	  }
     }
   
     if (serviceclass != undefined) {
@@ -113,16 +129,18 @@ var HomeMaticChannelLoader = function (log) {
   HomeMaticChannelLoader.prototype.getServiceClass = function(type) {
    var that = this;
    var serviceclass = undefined;
+   var serviceoptions = undefined;
    
    if (this.config != undefined) {
   		var ci = this.config["channelconfig"];
    			ci.map(function(service) {
    			  	if (service["type"]==type) {
-   			  	  serviceclass = service["service"];
+   			  	  serviceclass = service["service"]
+   			  	  serviceoptions = service["options"]
 				}
 			});
    }
-   return serviceclass;
+   return {'class':serviceclass,'options':serviceoptions};
   }
   
   

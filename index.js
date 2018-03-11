@@ -49,6 +49,7 @@ function HomeMaticPlatform(log, config) {
 	this.doors = config.doors;
 	this.windows = config.windows;
 	this.variables = config.variables;
+	this.specialdevices = config.special;
 	this.programs = config.programs;
 	this.subsection = config.subsection;
 	this.localCache = config.lcache;
@@ -180,7 +181,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 		if ((json == undefined) && (localCache != undefined)) {
       // Try to load Data
 
-			try {
+		try {
 	    fs.accessSync(localCache, fs.F_OK);
     	  // Try to load Data
 				data = fs.readFileSync(localCache).toString();
@@ -287,6 +288,21 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 					}
 				});
 			} // End Mapping Programs
+
+			if (that.specialdevices != undefined) {
+				that.specialdevices.map(specialdevice => {
+					let name = specialdevice.name
+					let type = specialdevice.type 
+					if ((name != undefined) && (type != undefined)) {
+						var ch = {}
+						ch.type = type
+						ch.address = ""
+						ch.name = name
+						channelLoader.loadChannelService(that.foundAccessories, ch.type , ch , that, "", specialdevice.parameter || {} , 255, Service, Characteristic);
+					}
+					
+				})
+			}
 
 			// Add Optional Variables
 			if (that.variables != undefined) {

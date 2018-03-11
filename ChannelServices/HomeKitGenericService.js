@@ -1,5 +1,7 @@
 'use strict';
 
+const fs = require('fs')
+const path = require('path')
 
 function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
 
@@ -71,6 +73,17 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
 
 HomeKitGenericService.prototype = {
 
+
+  getClazzConfigValue:function(key,defaultValue) {
+	var result = defaultValue
+	if (this.cfg!=undefined) {
+		if (this.cfg[key]!=undefined) {
+			result = this.cfg[key]
+		}
+	}
+	return result
+  },
+
   addLowBatCharacteristic:function(rootService,Characteristic) {
 	  var bat = rootService.getCharacteristic(Characteristic.StatusLowBattery);
 	    
@@ -98,7 +111,6 @@ HomeKitGenericService.prototype = {
 	  }
 	  
   },
-
 
   setReadOnly:function(readOnly) {
 	this.readOnly = readOnly
@@ -214,6 +226,30 @@ HomeKitGenericService.prototype = {
     return value;
   },
 
+  remoteGetDeviceValue:function(address,dp,callback) {
+	var that = this;
+    var interf = this.intf; 
+    that.platform.getValue(interf,address,dp,function(newValue) {
+
+      if ((newValue != undefined) && (newValue != null)) {
+
+      that.eventupdate = true;
+      //var ow = newValue;
+      newValue = that.convertValue(dp,newValue);
+      that.cache(dp,newValue);
+      that.eventupdate = false;
+     } else {
+      //newValue = 0;
+      newValue = that.convertValue(dp,0)
+     }
+
+
+      if (callback!=undefined) {
+        callback(newValue);
+      } 
+     
+    });
+  },
 
   remoteGetValue:function(dp,callback) {
     var that = this;
@@ -419,6 +455,11 @@ HomeKitGenericService.prototype = {
     }, delay?delay:100 );
   },
 
+  remoteSetDeviceValue: function(address,dp,value,callback) {
+  	  this.log.debug("(Rpc) Send " + value + " to Datapoint " + dp + " at " + address);
+      this.platform.setValue(undefined,address, dp, value);
+  },
+  
   command: function(mode,dp,value,callback) {
     var newValue = value;
     var tp = this.transformDatapoint(dp);
