@@ -27,8 +27,8 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function(Servi
 	this.adress_close = this.getClazzConfigValue('adress_device_close',undefined)
 	this.adress_open = this.getClazzConfigValue('adress_device_open',undefined)
 	
-	this.state_close = this.getClazzConfigValue('adress_state_close',true)
-	this.state_open = this.getClazzConfigValue('adress_state_open',true)
+	this.state_close = this.getClazzConfigValue('state_close',true)
+	this.state_open = this.getClazzConfigValue('state_open',true)
 	
 	this.adress_actor_open = this.getClazzConfigValue('adress_actor_open',undefined)
 	this.adress_actor_close = this.getClazzConfigValue('adress_actor_close',undefined)
