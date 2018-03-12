@@ -133,7 +133,7 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function(Servi
 				},1000*that.delay_actor_close)
 			}
 		}
-
+		if (callback) callback();
 	}.bind(this))
 	
 	
