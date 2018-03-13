@@ -64,12 +64,13 @@ function HomeMaticPlatform(log, config) {
 		return;
 	}
 
-	this.sendQueue = [];
-	this.timer = 0;
+	this.sendQueue = []
+	this.timer = 0
 
-	this.foundAccessories = [];
-	this.adressesToQuery = [];
-	this.config = config;
+	this.foundAccessories = []
+	this.eventAdresses=[]
+	this.adressesToQuery = []
+	this.config = config
 
 	let port = config.local_port;
 	if (port == undefined) {
@@ -578,6 +579,15 @@ HomeMaticPlatform.prototype.deviceInfo = function (config, devicetype) {
 
 	return cfg;
 };
+
+
+HomeMaticPlatform.prototype.registerAdressForEventProcessingAtAccessory = function (address, accessory) {
+	if (address != undefined) {
+		this.log.debug('adding new address %s for processing events at %s',address,accessory.name)
+		this.eventAdresses.push({address:address,accessory:accessory})
+	}
+}
+
 
 HomeMaticPlatform.prototype.internalConfig = function () {
 	try {

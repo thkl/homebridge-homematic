@@ -226,6 +226,50 @@ HomeKitGenericService.prototype = {
     return value;
   },
 
+
+  remoteSetDatapointValue: function(addressdatapoint,value,callback) {
+	  let parts = addressdatapoint.split('.')
+	  if (parts.length != 3) {
+		this.log.error('%s : Syntax error in device address',addressdatapoint)
+		callback(undefined);
+		return;
+	  }
+  	  this.log.debug("(Rpc) Send %s to Datapoint at %s.%s.%s" + value, parts[0],parts[1],parts[2]);
+      this.platform.setValue(parts[0],parts[1],parts[2], value);
+  },
+
+  remoteGetDataPointValue:function(addressdatapoint,callback) {
+	var that = this;
+	let parts = addressdatapoint.split('.')
+	if (parts.length != 3) {
+		this.log.error('%s : Syntax error in device address',addressdatapoint)
+		callback(undefined);
+		return;
+	}
+	
+    that.platform.getValue(parts[0],parts[1],parts[2],function(newValue) {
+
+      if ((newValue != undefined) && (newValue != null)) {
+
+      that.eventupdate = true;
+      //var ow = newValue;
+      newValue = that.convertValue(dp,newValue);
+      that.cache(dp,newValue);
+      that.eventupdate = false;
+     } else {
+      //newValue = 0;
+      newValue = that.convertValue(dp,0)
+     }
+
+
+      if (callback!=undefined) {
+        callback(newValue);
+      } 
+     
+    });
+  },
+
+
   remoteGetDeviceValue:function(address,dp,callback) {
 	var that = this;
     var interf = this.intf; 
@@ -289,6 +333,31 @@ HomeKitGenericService.prototype = {
       } 
      
     });
+  },
+
+  isDatapointAddressValid:function(datapointAddress,acceptNull) {
+	this.log.debug('validate datapoint %s we %s accept nul',datapointAddress,acceptNull ? 'do':'do not')
+	if (datapointAddress!=undefined) {
+		
+  	let parts = datapointAddress.split('.')
+  	// check we have 3 parts interface.address.name
+  	if (parts.length!=3) {
+	  	this.log.error('%s is invalid not 3 parts',datapointAddress)
+	  	return false
+  	}  
+  	// check the address has a :
+  	if (parts[1].indexOf(':')==-1) {
+	  	this.log.error('%s is invalid %s does not contain a :',datapointAddress,parts[1])
+	  	return false
+  	}
+  		return true
+  	} else {
+	  	// dp is undefined .. check if this is valid
+	  if (acceptNull == false) {
+		  this.log.error('null is not a valid datapoint')
+	  }
+	  return acceptNull
+  	}
   },
 
   endWorking:function() {

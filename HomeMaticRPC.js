@@ -129,15 +129,27 @@ HomeMaticRPC.prototype.init = function() {
  	  that.lastMessage = Math.floor((new Date()).getTime() / 1000);
       var channel = that.interface + params[1];
       var datapoint = params[2];
-      var value = params[3];
+      var value = params[3]; 
+      let address = that.interface + params[1] + '.' + params[2]
+
       that.log.debug("Ok here is the Event" + JSON.stringify(params));
       that.log.debug("RPC single event for %s %s with value %s",channel,datapoint,value);
 			 
       that.platform.foundAccessories.map(function(accessory) {
        if ((accessory.adress == channel) || ((accessory.cadress != undefined) && (accessory.cadress == channel))) {
+	   	 that.log.debug("found accessory %s",accessory.adress );
          accessory.event(channel, datapoint, value);
        }
       });
+      
+      that.platform.eventAdresses.map(function(tuple){
+	                that.log.debug('check %s vs %s',address,tuple.address)
+	                if (address == tuple.address) {
+		                that.log.debug('found jump into')
+		                tuple.accessory.event(channel,datapoint, value)
+	                }
+      })
+                
       callback(null,[]);
 	});
     
@@ -154,6 +166,8 @@ HomeMaticRPC.prototype.init = function() {
               var channel = that.interface + params[1];
               var datapoint = params[2];
               var value = params[3];
+              let address = that.interface + params[1] + '.' + params[2]
+
           	  that.log.debug("RPC event for %s %s with value %s",channel,datapoint,value);
 			 
               that.platform.foundAccessories.map(function(accessory) {
@@ -167,6 +181,12 @@ HomeMaticRPC.prototype.init = function() {
                 }
                  
               });
+   
+			  that.platform.eventAdresses.map(function(tuple){
+	            if (address == tuple.address) {
+					tuple.accessory.event(channel,datapoint, value)
+	            }
+              })
             }
           });
         } catch (err) {}
