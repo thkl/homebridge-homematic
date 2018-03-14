@@ -39,12 +39,6 @@
 			"switchChannel": "5"
 		},
 		{
-			"type"  : "HmIP-FSM",
-			"meterChannel": "2",
-			"switchChannel": "5"
-		}
-		,
-		{
 			"type"  : "HMIP-PSM",
 			"meterChannel": "6",
 			"switchChannel": "3"
