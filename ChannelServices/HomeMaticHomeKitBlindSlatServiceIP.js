@@ -91,20 +91,6 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function(Serv
 		that.delayed("set", "LEVEL_2", nlv, 750);      
     }.bind(this));
 
-/**
-	Parameter DIRECTION
- 0 = NONE (Standard) 
- 1=UP
- 2=DOWN
- 3=UNDEFINED
-*/
-
-/*
-	Characteristic.PositionState.DECREASING = 0;
-Characteristic.PositionState.INCREASING = 1;
-Characteristic.PositionState.STOPPED = 2;
-*/
-
     this.addValueMapping("DIRECTION",0,2);
     this.addValueMapping("DIRECTION",1,0);
     this.addValueMapping("DIRECTION",2,1);

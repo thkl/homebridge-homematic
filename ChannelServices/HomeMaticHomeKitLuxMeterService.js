@@ -16,7 +16,7 @@ HomeMaticHomeKitLuxMeterService.prototype.createDeviceService = function(Service
 	var that = this;
     var brightness = new Service["LightSensor"](this.name);
 	this.services.push(brightness); 
-	var cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
+	this.cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
       .on('get', function(callback) {
          that.query("LUX",function(value){
 	         var fvalue = value.toFixed(2)
@@ -27,11 +27,20 @@ HomeMaticHomeKitLuxMeterService.prototype.createDeviceService = function(Service
          });
      }.bind(this));
  
-     this.currentStateCharacteristic["LUX"] = cbright;
+     this.currentStateCharacteristic["LUX"] = this.cbright;
      cbright.eventEnabled= true;
 
 }
 
+HomeMaticHomeKitLuxMeterService.prototype.datapointEvent=function(dp,newValue)  {
+  let that = this
+  if (dp == "LUX") {
+	var fvalue = newValue.toFixed(2)
+	if ((fvalue>0.0001) && (fvalue<100000)) {
+	  	this.cbright.updateValue(fvalue,null);
+	} 
+  }
+}
 
 
 module.exports = HomeMaticHomeKitLuxMeterService; 

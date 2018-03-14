@@ -237,6 +237,7 @@ HomeMaticRPC.prototype.init = function() {
         callback(value);
       });
       return;
+    } else {
     }
   }
 

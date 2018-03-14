@@ -34,7 +34,7 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function(Service, C
     .on('get', function(callback) {
 		that.query("LEVEL",function(value){
 			if (callback) {
-				callback(null,value);
+			callback(null,value);
 			}
 		})
     }.bind(this))
@@ -47,15 +47,7 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function(Service, C
 
     this.pstate = blind.getCharacteristic(Characteristic.PositionState)
 	
-	
-/**
-	Parameter DIRECTION
- 0 = NONE (Standard) 
- 1 = UP
- 2 = DOWN
- 3 = UNDEFINED
-*/
-	
+		
 	.on('get', function(callback) {
       that.query("DIRECTION",function(value){
        if (callback) {
@@ -91,8 +83,8 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function(Service, C
 HomeMaticHomeKitBlindService.prototype.endWorking=function()  {
  let that = this
  this.remoteGetValue("LEVEL",function(value) {
- 	that.currentPos.updateValue(value,null);
- 	that.targetPos.updateValue(value,null);
+	that.currentPos.updateValue(value,null);
+	that.targetPos.updateValue(value,null);
  })
 }
 
