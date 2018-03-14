@@ -73,7 +73,7 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
     }.bind(this));
 
 
-    var brightness = lightbulb.getCharacteristic(Characteristic.Brightness)
+    this.brightness = lightbulb.getCharacteristic(Characteristic.Brightness)
 
     .on('get', function(callback) {
       that.query("LEVEL",function(value){
@@ -102,8 +102,8 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
       if (callback)  callback();
     }.bind(this));
 
-    that.currentStateCharacteristic["LEVEL"] = brightness;
-    brightness.eventEnabled = true;
+    that.currentStateCharacteristic["LEVEL"] = this.brightness;
+    this.brightness.eventEnabled = true;
 
     this.remoteGetValue("LEVEL");
 
@@ -114,5 +114,12 @@ HomeMaticHomeKitDimmerService.prototype.endWorking=function()  {
  this.remoteGetValue("LEVEL");
 }
 
+HomeMaticHomeKitDimmerService.prototype.event = function(channel,dp,newValue){
+	let that = this
+	if (dp=='LEVEL') {
+		this.onc.updateValue((newValue>0)?true:false,null)
+		this.brightness.updateValue((newValue*100),null)
+	}
+}
 
 module.exports = HomeMaticHomeKitDimmerService; 
