@@ -98,14 +98,33 @@ The following HMIP Devices should work:
 * HMIP-PSM (Switch - Part)
 * HMIP-PS
 * HMIP-SWDO
-* HMIP Smoke and Motion Sesors
-
+* HMIP-SRH
+* HmIP-SMI
+* HMIP-SWSD
+* HMIP-eTRV
+* HMIP-WTH
+* HmIP-WTH-2
+* HmIP-STH
+* HmIP-BWTH
+* HmIP-FSM
+* HmIP-BSM
+* HmIP-BDT
+* HmIP-BROLL
+* HmIP-FROLL
+* HmIP-SWO-B
+* HmIP-SWO-PL
+* HmIP-SWO-PR
 
 Please setup HMIP by adding the following key to your config.json
 
 ```
 "enable_hmip":"true"
 ```
+
+# Garagedoor
+
+Find further information [here](https://github.com/thkl/homebridge-homematic/wiki/Garagentor).
+
 
 # Troubleshooting
 
