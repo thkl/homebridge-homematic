@@ -246,25 +246,17 @@ HomeKitGenericService.prototype = {
 		callback(undefined);
 		return;
 	}
-	
-    that.platform.getValue(parts[0],parts[1],parts[2],function(newValue) {
-
+    that.platform.getValue(parts[0],parts[0] + "." + parts[1],parts[2],function(newValue) {
       if ((newValue != undefined) && (newValue != null)) {
-
-      that.eventupdate = true;
-      //var ow = newValue;
-      newValue = that.convertValue(dp,newValue);
-      that.cache(dp,newValue);
-      that.eventupdate = false;
-     } else {
+	 } else {
       //newValue = 0;
       newValue = that.convertValue(dp,0)
-     }
+    }
 
 
-      if (callback!=undefined) {
-        callback(newValue);
-      } 
+    if (callback!=undefined) {
+       callback(newValue);
+    } 
      
     });
   },
