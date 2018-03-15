@@ -35,7 +35,16 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function(Ser
       
       this.twindow = window.getCharacteristic(Characteristic.TargetPosition);
       this.twindow.on('set',  function(value,callback) {
-      	if (callback) {callback()}
+      	  	// This is just a sensor so reset homekit data to ccu value after 1 second playtime
+	      	setTimeout(function () {
+		      	that.query("STATE",function(value){
+		      		that.processWindowSensorData(value)
+		      	})
+	      	}, 1000)
+	      	
+	    if (callback) {
+	      	callback()
+	    }
       }.bind(this));
       
       this.swindow = window.getCharacteristic(Characteristic.PositionState);
@@ -99,12 +108,8 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function(Ser
 
 }
 
-HomeMaticHomeKitRotaryHandleService.prototype.event = function(channel,dp,newValue){
-	// Chech sensors
-	let that = this
-    let event_address = channel + '.' + dp
-    if ((this.cwindow != undefined) && (this.swindow != undefined)) {
-	    switch (newValue) {
+HomeMaticHomeKitRotaryHandleService.prototype.processWindowSensorData = function(newValue){
+	switch (newValue) {
 			case 0 : 
 			  this.cwindow.updateValue(0,null)		    
 			  this.swindow.updateValue(2,null)	
@@ -121,7 +126,15 @@ HomeMaticHomeKitRotaryHandleService.prototype.event = function(channel,dp,newVal
 			  this.twindow.updateValue(100,null)
 			  break;
 
-	    }
+	}
+}
+
+HomeMaticHomeKitRotaryHandleService.prototype.event = function(channel,dp,newValue){
+	// Chech sensors
+	let that = this
+    let event_address = channel + '.' + dp
+    if ((this.cwindow != undefined) && (this.swindow != undefined)) {
+	    this.processWindowSensorData(newValue)
     }
 }
 
