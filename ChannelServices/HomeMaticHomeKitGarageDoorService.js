@@ -238,7 +238,9 @@ HomeMaticHomeKitGarageDoorService.prototype.event = function(channel,dp,newValue
 	let that = this
     this.log.debug('garage event %s,%s,%s Target Command State %s',channel,dp,newValue,this.targetCommand)
     let event_address = channel + '.' + dp
-    
+	// Kill requery timer
+    clearTimeout(this.requeryTimer)
+
 	if ((this.address_sensor_close != undefined) && (this.address_sensor_open != undefined)) {
 	   // we have two sensors
 	   if ((event_address == this.address_sensor_close) && (newValue == this.state_sensor_close)) {
