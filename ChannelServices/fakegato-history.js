@@ -612,7 +612,7 @@ module.exports = function (pHomebridge) {
 					if(!err) {
 						if(data) {
 							try {
-								this.log.debug("read data from",this.accessoryName,":",data);
+								//this.log.debug("read data from",this.accessoryName,":",data);
 								let jsonFile = typeof(data) === "object" ? data : JSON.parse(data);
 								
 								this.firstEntry = jsonFile.firstEntry;
