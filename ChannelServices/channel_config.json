@@ -291,9 +291,13 @@
 	},
 	{
 	   "type": "SENSOR_FOR_CARBON_DIOXIDE",
-	   "service": "HomeMaticHomeKitAirQualitySensorService"
+	   "service": "HomeMaticHomeKitCarbonDioxideSensorService"
+	},
+	{
+	   "type" : "HmIP-BBL:BLIND_TRANSMITTER",
+	   "service": "HomeMaticHomeKitBlindSlatServiceIP"
 	}
-	
+
 	
 	
 	]
