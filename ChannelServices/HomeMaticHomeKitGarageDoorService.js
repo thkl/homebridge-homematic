@@ -40,6 +40,8 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function(Servi
 	this.message_actor_open = this.getClazzConfigValue('message_actor_open',{'on':1,'off':0})
 	this.message_actor_close = this.getClazzConfigValue('message_actor_close',{'on':1,'off':0})
 	
+	this.sensor_requery_time = this.getClazzConfigValue('sensor_requery_time',30)
+	
 	this.targetCommand = false
 	
 	// validate stuff
@@ -124,6 +126,9 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function(Servi
     this.targetDoorState = garagedoorService.getCharacteristic(Characteristic.TargetDoorState)
 	.on('set', function(value,callback) {
 		that.targetCommand = true
+		
+		clearTimeout(this.requeryTimer)
+		
 		if ((that.address_actor_open != undefined) && (that.address_actor_close == undefined)) {
 			// there is only one actor
 			if (value == Characteristic.TargetDoorState.OPEN) {
@@ -134,6 +139,7 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function(Servi
 			
 			var msg = that.message_actor_open['on']
 			that.remoteSetDatapointValue(that.address_actor_open,msg)
+
 			msg = that.message_actor_open['off']
 			if (msg!=undefined) {
 				setTimeout(function() {
@@ -141,6 +147,13 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function(Servi
 				},1000*that.delay_actor_open)
 				
 			}
+			
+			that.requeryTimer = setTimeout(function(){
+			// reset Command Switch to override target 
+			that.targetCommand = false
+			that.log.debug('garage door requery sensors ...')
+			that.querySensors()
+			}, 1000 * that.sensor_requery_time)
 			
 		} else {
 			// there is a actor for every direction so 
@@ -153,6 +166,14 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function(Servi
 					setTimeout(function() {
 						that.remoteSetDeviceValue(that.address_actor_open,msg)
 					},1000*that.delay_actor_open)
+						
+						// reset Command Switch to override target 
+						that.targetCommand = false
+						that.requeryTimer = setTimeout(function(){
+						that.log.debug('garage door requery sensors ...')
+						that.querySensors()
+					}, 1000 * that.sensor_requery_time)
+
 				}
 			} else {
 				var msg = that.message_actor_close['on']
@@ -160,8 +181,15 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function(Servi
 				that.currentDoorState.updateValue(that.characteristic.CurrentDoorState.CLOSING,null)
 				msg = that.message_actor_close['off']
 				if (msg!=undefined) {
+					
 					setTimeout(function() {
 						that.remoteSetDatapointValue(that.address_actor_close,msg)
+						// reset Command Switch to override target 
+							that.targetCommand = false
+							that.requeryTimer = setTimeout(function(){
+								that.log.debug('garage door requery sensors ...')
+								that.querySensors()
+							}, 1000 * that.sensor_requery_time)
 					},1000*that.delay_actor_close)
 				}
 			}
@@ -176,31 +204,39 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function(Servi
 	this.platform.registerAdressForEventProcessingAtAccessory(this.address_sensor_close,this)
 	this.platform.registerAdressForEventProcessingAtAccessory(this.address_sensor_open,this)
 	// this is dirty shit .. ¯\_(ツ)_/¯  it works so we do not change that ... 
-	// query sensors at launch
-	this.log.debug("inital query ...")
+	// query sensors at launch delayed by 60 seconds
+	setTimeout(function(){
+		that.log.debug('garage door inital query ...')
+		that.querySensors()
+	}, 60000)
+	
+
+}
+
+HomeMaticHomeKitGarageDoorService.prototype.querySensors = function(){
+	let that = this
+	
 	if (this.address_sensor_close != undefined) {
-		this.remoteGetDataPointValue(that.address_sensor_close,function(newValue){
-			that.log.debug("result for close sensor %s",newValue)
+			that.remoteGetDataPointValue(that.address_sensor_close,function(newValue){
+			that.log.debug('result for close sensor %s',newValue)
 			let parts = that.address_sensor_close.split('.')
-			that.event(parts[1],parts[2],newValue)
+			that.event(parts[0]+'.' +parts[1],parts[2],newValue)
 		})
 	}
 	
 	if (this.address_sensor_open != undefined) {
 		this.remoteGetDataPointValue(that.address_sensor_open,function(newValue){
-			that.log.debug("result for open sensor %s",newValue)
+			that.log.debug('result for open sensor %s',newValue)
 			let parts = that.address_sensor_close.split('.')
-			that.event(parts[1],parts[2],newValue)
+			that.event(parts[0]+'.' +parts[1],parts[2],newValue)
 		})
 	}
-
 }
-
 
 HomeMaticHomeKitGarageDoorService.prototype.event = function(channel,dp,newValue){
 	// Chech sensors
 	let that = this
-    this.log.debug('garage event %s,%s,%s',channel,dp,newValue)
+    this.log.debug('garage event %s,%s,%s Target Command State %s',channel,dp,newValue,this.targetCommand)
     let event_address = channel + '.' + dp
     
 	if ((this.address_sensor_close != undefined) && (this.address_sensor_open != undefined)) {
