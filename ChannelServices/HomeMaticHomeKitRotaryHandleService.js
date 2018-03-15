@@ -16,10 +16,10 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function(Ser
 
      var that = this;
      if (this.special=="WINDOW") {
-
-      var window = new Service["Window"](this.name);
-      var cwindow = window.getCharacteristic(Characteristic.CurrentPosition);
-      cwindow.on('get', function(callback) {
+		
+      var window = new Service.Window(this.name);
+      this.cwindow = window.getCharacteristic(Characteristic.CurrentPosition);
+      this.cwindow.on('get', function(callback) {
       that.query("STATE",function(value){
        if (callback) {
          var cbvalue = 0;
@@ -30,15 +30,16 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function(Ser
       }.bind(this));
       
       
-      this.currentStateCharacteristic["STATE"] = cwindow;
-      cwindow.eventEnabled = true;
+      this.currentStateCharacteristic["STATE"] = this.cwindow;
+      this.cwindow.eventEnabled = true;
       
-      this.addValueMapping("STATE",0,0);
-      this.addValueMapping("STATE",1,50);
-      this.addValueMapping("STATE",2,100);
-
-      var swindow = window.getCharacteristic(Characteristic.PositionState);
-      swindow.on('get', function(callback) {
+      this.twindow = window.getCharacteristic(Characteristic.TargetPosition);
+      this.twindow.on('set',  function(value,callback) {
+      	if (callback) {callback()}
+      }.bind(this));
+      
+      this.swindow = window.getCharacteristic(Characteristic.PositionState);
+      this.swindow.on('get', function(callback) {
 	     if (callback) callback(null, Characteristic.PositionState.STOPPED);
       }.bind(this));
       
@@ -98,6 +99,31 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function(Ser
 
 }
 
+HomeMaticHomeKitRotaryHandleService.prototype.event = function(channel,dp,newValue){
+	// Chech sensors
+	let that = this
+    let event_address = channel + '.' + dp
+    if ((this.cwindow != undefined) && (this.swindow != undefined)) {
+	    switch (newValue) {
+			case 0 : 
+			  this.cwindow.updateValue(0,null)		    
+			  this.swindow.updateValue(2,null)	
+			  this.twindow.updateValue(0,null)
+			  break;
+			case 1: 
+			  this.cwindow.updateValue(50,null)		    
+			  this.swindow.updateValue(2,null)		    
+			  this.twindow.updateValue(50,null)
+			  break;
+			case 2:
+			  this.cwindow.updateValue(100,null)		    
+			  this.swindow.updateValue(2,null)		    
+			  this.twindow.updateValue(100,null)
+			  break;
+
+	    }
+    }
+}
 
 
 module.exports = HomeMaticHomeKitRotaryHandleService; 
