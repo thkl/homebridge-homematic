@@ -3,11 +3,12 @@
 const fs = require('fs')
 const path = require('path')
 
-function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
+function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic, deviceType) {
 
   this.name     = name;
   this.displayName = name;
   this.type     = type;
+  this.deviceType = deviceType;
   this.adress   = adress;
   this.deviceAdress = undefined;
   this.log      = log;

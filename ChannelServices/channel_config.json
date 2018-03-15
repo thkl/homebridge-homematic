@@ -275,19 +275,19 @@
 	
 	{
 	   "type": "HEATING_CLIMATECONTROL_TRANSCEIVER",
-	   "service": "HomeMaticHomeKitIPThermostatService"
+	   "service": "HomeMaticHomeKitThermostatServiceIP"
 	},
 	{
 	   "type": "HmIP-SWO-B:WEATHER_TRANSMIT",
-	   "service": "HomeMaticHomeKitIPWeatherStationService"
+	   "service": "HomeMaticHomeKitWeatherStationServiceIP"
 	},
 	{
 	   "type": "HmIP-SWO-PL:WEATHER_TRANSMIT",
-	   "service": "HomeMaticHomeKitIPWeatherStationService"
+	   "service": "HomeMaticHomeKitWeatherStationServiceIP"
 	},
 	{
 	   "type": "HmIP-SWO-PR:WEATHER_TRANSMIT",
-	   "service": "HomeMaticHomeKitIPWeatherStationService"
+	   "service": "HomeMaticHomeKitWeatherStationServiceIP"
 	},
 	{
 	   "type": "SENSOR_FOR_CARBON_DIOXIDE",
