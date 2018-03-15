@@ -482,7 +482,7 @@ HomeMaticPlatform.prototype.getValue = function (intf, channel, datapoint, callb
 		 if (intf == 'BidCos-Wired') {
 			 rpc = true;
 		 	if (this.xmlrpcwired != undefined) {
-		 	this.xmlrpcwired.getValue(channel, datapoint, callback);
+				this.xmlrpcwired.getValue(channel, datapoint, callback);
 		 } else {
 		 // Send over Rega
 		 var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
@@ -511,13 +511,18 @@ HomeMaticPlatform.prototype.getValue = function (intf, channel, datapoint, callb
 
 		// Fallback to Rega
 			if (rpc == false) {
-		 	var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
+				var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
 				rega.getValue(channel, datapoint, callback);
 			}
 		} else {
 		// Undefined Interface -> Rega should know how to deal with it
 			var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
 			rega.getValue(channel, datapoint, callback);
+		}
+	} else {
+		this.log.warn("unknow channel skipping ...");
+		if (callback) {
+			callback(undefined);
 		}
 	}
 };
