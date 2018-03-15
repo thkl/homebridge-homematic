@@ -235,7 +235,7 @@ HomeKitGenericService.prototype = {
 		callback(undefined);
 		return;
 	  }
-  	  this.log.debug("(Rpc) Send %s to Datapoint at %s.%s.%s" + value, parts[0],parts[1],parts[2]);
+  	  this.log.debug("(Rpc) Send %s to Datapoint at %s.%s.%s" , value, parts[0],parts[1],parts[2]);
       this.platform.setValue(parts[0],parts[1],parts[2], value);
   },
 
