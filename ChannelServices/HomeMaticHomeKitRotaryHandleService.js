@@ -34,7 +34,7 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function(Ser
       cwindow.eventEnabled = true;
       
       this.addValueMapping("STATE",0,0);
-      this.addValueMapping("STATE",1,100);
+      this.addValueMapping("STATE",1,50);
       this.addValueMapping("STATE",2,100);
 
       var swindow = window.getCharacteristic(Characteristic.PositionState);
