@@ -37,7 +37,8 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function(Ser
       this.twindow.on('set',  function(value,callback) {
       	  	// This is just a sensor so reset homekit data to ccu value after 1 second playtime
 	      	setTimeout(function () {
-		      	that.query("STATE",function(value){
+		      	that.remoteGetValue("STATE",function(value){
+			      	
 		      		that.processWindowSensorData(value)
 		      	})
 	      	}, 1000)
