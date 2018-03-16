@@ -299,4 +299,19 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.queryData = function() {
 }
 
 
+HomeMaticHomeKitWeatherStationServiceIP.prototype.datapointEvent= function(dp,newValue) {
+  if (dp=='ACTUAL_TEMPERATURE') {
+    this.currentTemperature = parseFloat(newValue);
+  }
+  
+  if (dp=='HUMIDITY') {
+    this.currentHumidity = parseFloat(newValue);
+  }
+  
+  if ((this.currentTemperature > -255) && (this.currentHumidity > -255)) {
+    this.loggingService.addEntry({time: moment().unix(), temp:this.currentTemperature, pressure:0, humidity:this.currentHumidity});
+  }
+}
+
+
 module.exports = HomeMaticHomeKitWeatherStationServiceIP;
