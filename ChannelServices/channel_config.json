@@ -5,25 +5,25 @@
 			  "filter": [
 				"WEATHER"
 			]
-                       
+
 		},
-		
+
 		{
 			  "type" : "HM-CC-VG-1",
 			  "filter": [
 				"SHUTTER_CONTACT"
 			]
-                       
+
 		},
-		
+
 		{
 		     "type" : "HM-LC-RGBW-WM",
-		     "combine": { 
+		     "combine": {
 		     	"source": ":2",
 		     	"target": ":1"
 		     }
 		},
-		
+
 		{
 			"type"  : "HM-WDS100-C6-O-2",
 			"isWeatherStation": "true"
@@ -43,12 +43,12 @@
 			"meterChannel": "6",
 			"switchChannel": "3"
 		}
-				
+
 	],
-	
-	
+
+
 	"channelconfig": [
-	
+
 	{
 	   "type": "SWITCH",
 	   "service": "HomeMaticHomeKitSwitchService"
@@ -58,13 +58,13 @@
 	{
 	   "type": "SWITCH_VIRTUAL_RECEIVER",
 	   "service": "HomeMaticHomeKitSwitchService"
-	},	
-	
+	},
+
 	{
 	   "type": "HM-LC-Sw1-FM:SWITCH",
 	   "service": "HomeMaticHomeKitSwitchService"
 	},
-	
+
 	{
 	   "type": "DIMMER",
 	   "service": "HomeMaticHomeKitDimmerService"
@@ -73,22 +73,22 @@
 	   "type": "VIRTUAL_DIMMER",
 	   "service": "HomeMaticHomeKitDimmerService"
 	},
-	
+
 	{
 	   "type": "KEY",
 	   "service": "HomeMaticHomeKitKeyService"
 	},
-	
+
 	{
 	   "type": "VIRTUAL_KEY",
 	   "service": "HomeMaticHomeKitKeyService"
 	},
-	
+
 	{
 	   "type": "TILT_SENSOR",
 	   "service": "HomeMaticHomeKitContactService"
 	},
-	
+
 	{
 	   "type": "SHUTTER_CONTACT",
 	   "service": "HomeMaticHomeKitContactService"
@@ -118,7 +118,7 @@
 	   "type": "HmIP-FROLL:SHUTTER_VIRTUAL_RECEIVER",
 	   "service": "HomeMaticHomeKitBlindServiceIP"
 	},
-	
+
 	{
 	   "type": "HmIP-BDT:DIMMER_VIRTUAL_RECEIVER",
 	   "service": "HomeMaticHomeKitDimmerService"
@@ -223,7 +223,7 @@
 	   "service": "HomeMaticHomeKitThermalControlService"
 	},
 
-	
+
 	{
 	   "type": "VARIABLE",
 	   "service": "HomeMaticHomeKitVariableService"
@@ -259,7 +259,7 @@
 	   "service": "HomeMaticHomeKitDoorBellMotionService"
 	},
 
-	
+
 	{
 	   "type": "WATERDETECTIONSENSOR",
 	   "service": "HomeMaticHomeKitLeakSensorService"
@@ -272,7 +272,7 @@
 	   "type": "ENERGIE_METER_TRANSMITTER",
 	   "service": "HomeMaticHomeKitPowerMeterServiceIP"
 	},
-	
+
 	{
 	   "type": "HEATING_CLIMATECONTROL_TRANSCEIVER",
 	   "service": "HomeMaticHomeKitThermostatServiceIP"
@@ -296,9 +296,13 @@
 	{
 	   "type" : "HmIP-BBL:BLIND_TRANSMITTER",
 	   "service": "HomeMaticHomeKitBlindSlatServiceIP"
+	},
+	{
+		"type" : "HmIP-SPI:PRESENCEDETECTOR_TRANSCEIVER",
+		"service" : "HomeMaticHomeKitPresenceDetectorServiceIP"
 	}
 
-	
-	
+
+
 	]
 }
