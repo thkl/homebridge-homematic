@@ -535,14 +535,15 @@ HomeKitGenericService.prototype = {
 
     if (mode == "set") {
       var interf = this.intf;
-
       that.log.debug("(Rpc) Send " + newValue + " to Datapoint " + tp[1] + " at " + tp[0]);
       that.platform.setValue(interf,tp[0], tp[1], newValue);
+      if (callback != undefined) {callback()}
     }
 
     if (mode == "setrega") {
       that.log.debug("(Rega) Send " + newValue + " to Datapoint " + tp[1] + " at " + tp[0]);
       that.platform.setRegaValue(tp[0], tp[1], newValue);
+      if (callback != undefined) {callback()}
     }
 
     if (mode == "sendregacommand") {

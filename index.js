@@ -22,8 +22,6 @@ module.exports = function (homebridge) {
 	Service = homebridge.hap.Service
 	Characteristic = homebridge.hap.Characteristic
 	homebridge.registerPlatform('homebridge-homematic', 'HomeMatic', HomeMaticPlatform)
-	localCache = path.join(homebridge.user.storagePath(), 'ccu.json')
-	localPath = homebridge.user.storagePath()
 }
 
 function HomeMaticPlatform(log, config) {
@@ -32,7 +30,8 @@ function HomeMaticPlatform(log, config) {
 	this.uuid = uuid
 	this.homebridge = _homebridge
 	this.config = config
-
+  this.localCache = path.join(_homebridge.user.storagePath(), 'ccu.json')
+	this.localPath = _homebridge.user.storagePath()
 	this.log.info('Homematic Plugin Version ' + this.getVersion())
 	this.log.info('Plugin by thkl  https://github.com/thkl')
 	this.log.info('Homematic is a registered trademark of the EQ-3 AG')
@@ -59,6 +58,7 @@ function HomeMaticPlatform(log, config) {
 	this.iosworkaround = config.ios10
 	this.doors = config.doors
 	this.windows = config.windows
+	this.valves = config.valves
 	this.variables = config.variables
 	this.specialdevices = config.special
 	this.programs = config.programs
@@ -319,6 +319,10 @@ HomeMaticPlatform.prototype.buildaccesories = function (json,callback,internalco
 						}
 						if ((that.windows != undefined) && (that.windows.indexOf(ch.address) > -1)) {
 							special = 'WINDOW'
+						}
+
+						if ((that.valves != undefined) && (that.valves.indexOf(ch.address) > -1)) {
+							special = 'VALVE'
 						}
 
 						// Check if VIRTUAL KEY is Set as Variable Trigger
