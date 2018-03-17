@@ -1,0 +1,10 @@
+{"devices":[
+	{"id": "10001","name": "TA1","address": "ABC1234560","type": "HM-LC-Dim1PWM-CV",
+	"channels": [
+		{"cId": 10002,"name": "TA1_C1","intf": "BidCos-RF","address": "BidCos-RF.ABC1234560:1","type": "DIMMER","access": "255"},
+		{"cId": 10003,"name": "TA1_C2","intf": "BidCos-RF","address": "BidCos-RF.ABC1234560:2","type": "VIRTUAL_DIMMER","access": "255"},
+		{"cId": 10004,"name": "TA1_C3","intf": "BidCos-RF","address": "BidCos-RF.ABC1234560:3","type": "VIRTUAL_DIMMER","access": "255"}
+	]}
+],
+	"subsection":[10002,10003,10004]
+}
