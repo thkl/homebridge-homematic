@@ -1,3 +1,5 @@
+'use strict'
+
 var assert = require('assert');
 var log = require("./logger")._system;
 const path = require('path');
