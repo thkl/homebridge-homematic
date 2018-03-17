@@ -2,6 +2,7 @@
 
 const request = require('request')
 const HomeMaticRPC = require('./HomeMaticRPC.js').HomeMaticRPC
+const HomeMaticRPCTestDriver = require('./HomeMaticRPCTestDriver.js').HomeMaticRPCTestDriver
 const HomeMaticChannelLoader = require('./HomeMaticChannelLoader.js').HomeMaticChannelLoader
 const HomeMaticRegaRequest = require('./HomeMaticRegaRequest.js').HomeMaticRegaRequest
 const HomeMaticRegaRequestTestDriver = require('./HomeMaticRegaRequestTestDriver.js').HomeMaticRegaRequestTestDriver
@@ -38,11 +39,12 @@ function HomeMaticPlatform(log, config) {
 	this.log.info('Please report any issues to https://github.com/thkl/homebridge-homematic/issues')
 
 	this.ccuIP = config.ccu_ip
-	this.log.info('will connect to your ccu at %s', this.ccuIP)
+
 	if (this.config.testapi) {
-			this.log.warn('running in test mode. If you see this at a production system, something went wrong')
+		this.log.warn('running in test mode. If you see this at a production system, something went wrong')
 	} else {
 		this.log.info('running in production mode')
+		this.log.info('will connect to your ccu at %s', this.ccuIP)
 	}
 
 	const test = this.createRegaRequest("PONG")
@@ -102,7 +104,6 @@ function HomeMaticPlatform(log, config) {
 		}
 
 		const that = this
-
 		process.on('SIGINT', () => {
 			if (that.xmlrpc.stopping) {
 				return
@@ -112,11 +113,9 @@ function HomeMaticPlatform(log, config) {
 			if (that.xmlrpcwired != undefined) {
 				that.xmlrpcwired.stop()
 			}
-
 			if (that.xmlrpchmip != undefined) {
 				that.xmlrpchmip.stop()
 			}
-
 			setTimeout(process.exit(0), 2000)
 		})
 
@@ -132,10 +131,13 @@ function HomeMaticPlatform(log, config) {
 			if (that.xmlrpchmip != undefined) {
 				that.xmlrpchmip.stop()
 			}
-
 			setTimeout(process.exit(0), 2000)
 		})
 
+	} else {
+		// init the testdriver rpcInit
+		this.xmlrpc = new HomeMaticRPCTestDriver(this.log,'127.0.0.1', 0, 0, this)
+		this.xmlrpc.init()
 	} // End init rpc stuff
 }
 

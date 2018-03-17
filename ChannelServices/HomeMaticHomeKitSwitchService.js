@@ -68,14 +68,14 @@ HomeMaticHomeKitSwitchService.prototype.createDeviceService = function(Service, 
 
     if (this.special=="OUTLET") {
 
-      lightbulb = new Service["Outlet"](this.name);
+      lightbulb = new Service.Outlet(this.name);
       lightbulb.getCharacteristic(Characteristic.OutletInUse)
       .on('get', function(callback) {
         if (callback) callback(null,1);
       }.bind(this));
 
     } else {
-      lightbulb = new Service["Lightbulb"](this.name);
+      lightbulb = new Service.Lightbulb(this.name);
     }
 
     this.services.push(lightbulb);

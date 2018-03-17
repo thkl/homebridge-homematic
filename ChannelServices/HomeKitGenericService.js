@@ -362,7 +362,6 @@ HomeKitGenericService.prototype = {
   },
 
   event:function(channel,dp,newValue) {
-
     var that = this;
 
     if ((channel!=undefined) && (dp!=undefined)) {
@@ -426,7 +425,6 @@ HomeKitGenericService.prototype = {
         }
         that.isWorking = newValue;
       }
-
       this.eventupdate = true;
       if ((this.cadress!=undefined) || (this.deviceAdress!=undefined)){
         // this is dirty shit. ok there is a config that will set the cadress to a defined channel
@@ -437,15 +435,13 @@ HomeKitGenericService.prototype = {
         var chnl = channel.slice(channel.indexOf(":")+1);
         this.datapointEvent(chnl + ":" + dp,newValue);
         this.cache(chnl + ":" + dp,newValue);
-
       } else {
         this.datapointEvent(dp,newValue);
         this.cache(dp,newValue);
       }
-
       this.eventupdate = false;
     } else {
-      this.log.debug("channel %s or dp %s is undefined",channel,dp);
+      this.log.warn("channel %s or dp %s is undefined",channel,dp);
     }
   },
 
@@ -479,7 +475,6 @@ HomeKitGenericService.prototype = {
       }
     }
     if ((value!=undefined) && ((that.isWorking==false) || (that.ignoreWorking==true))) {
-
       if (that.currentStateCharacteristic[dp]!=undefined) {
         that.stateCharacteristicWillChange(that.currentStateCharacteristic[dp],value);
         that.currentStateCharacteristic[dp].setValue(value, null);
@@ -577,7 +572,20 @@ HomeKitGenericService.prototype = {
     return this.services;
   },
 
-  shutdown: function() {}
+  shutdown: function() {
+
+  },
+
+  get_Service:function(name) {
+    for (var index in this.services) {
+      var service = this.services[index];
+
+      if (typeof name === 'string' && (service.displayName === name || service.name === name || service.subtype === name))
+      return service;
+      else if (typeof name === 'function' && ((service instanceof name) || (name.UUID === service.UUID)))
+      return service;
+    }
+  }
 };
 
 module.exports = {

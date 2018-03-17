@@ -6,7 +6,7 @@ function HomeMaticRegaRequestTestDriver(log, ccuip) {
   this.ccuIP = ccuip;
   this.timeout = 120;
   this.data = 0;
-  this.log.warn('Dummy Class for Tests only')
+  this.log.warn('Rega Dummy Class for Tests only')
 }
 
 HomeMaticRegaRequestTestDriver.prototype = {
