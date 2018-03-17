@@ -7,11 +7,11 @@ const fs = require('fs');
 
 
 function HomeMaticHomeKitSwitchService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
-   HomeMaticHomeKitSwitchService.super_.apply(this, arguments);
+  HomeMaticHomeKitSwitchService.super_.apply(this, arguments);
 }
 
 // Attention : If you move the clazz outside the buildin channelservice you have to make sure the superclass HomeKitGenericService
-// is reachable 
+// is reachable
 
 var parentPath = path.dirname(module.parent.filename);
 var rootClazzPath = path.join(parentPath,'ChannelServices','HomeKitGenericService.js');
@@ -22,18 +22,18 @@ util.inherits(HomeMaticHomeKitSwitchService, rootClazz);
 HomeMaticHomeKitSwitchService.prototype.createDeviceService = function(Service, Characteristic) {
 
 
-    var that = this;
-	var lightbulb = null;
-	this.ignoreWorking = true;
-	
-    if (this.special=="PROGRAM") {
-    
-      lightbulb = new Service["Outlet"](this.name);
-      lightbulb.getCharacteristic(Characteristic.OutletInUse)
-		.on('get', function(callback) {
-        	if (callback) callback(null,1);
-      	}.bind(this));
-    
+  var that = this;
+  var lightbulb = null;
+  this.ignoreWorking = true;
+
+  if (this.special=="PROGRAM") {
+
+    lightbulb = new Service["Outlet"](this.name);
+    lightbulb.getCharacteristic(Characteristic.OutletInUse)
+    .on('get', function(callback) {
+      if (callback) callback(null,1);
+    }.bind(this));
+
 
 
     this.services.push(lightbulb);
@@ -41,31 +41,31 @@ HomeMaticHomeKitSwitchService.prototype.createDeviceService = function(Service, 
 
     .on('get', function(callback) {
       if (callback) callback(null,0);
-     }.bind(this))
+    }.bind(this))
 
     .on('set', function(value, callback) {
-      
+
       if (value==1) {
-      
+
         that.log("Launch Program " + that.adress);
         that.command("sendregacommand","","var x=dom.GetObject(\""+that.adress+"\");if (x) {x.ProgramExecute();}",function() {
-    		
-    	});
-    	
-    	setTimeout(function() {
-    		cc.setValue(0, null);
-    
-    	},1000);
-    	
+
+        });
+
+        setTimeout(function() {
+          cc.setValue(0, null);
+
+        },1000);
+
       }
       callback(0);
 
     }.bind(this));
 
 
-    
-    } else {
-    
+
+  } else {
+
     if (this.special=="OUTLET") {
 
       lightbulb = new Service["Outlet"](this.name);
@@ -75,7 +75,7 @@ HomeMaticHomeKitSwitchService.prototype.createDeviceService = function(Service, 
       }.bind(this));
 
     } else {
-    	lightbulb = new Service["Lightbulb"](this.name);
+      lightbulb = new Service["Lightbulb"](this.name);
     }
 
     this.services.push(lightbulb);
@@ -84,52 +84,52 @@ HomeMaticHomeKitSwitchService.prototype.createDeviceService = function(Service, 
 
     .on('get', function(callback) {
       that.query("STATE",function(value){
-	       if (callback) callback(null,value);
+        if (callback) callback(null,value);
       });
     }.bind(this))
 
     .on('set', function(value, callback) {
 
-     if (that.readOnly==false) {
-      var onTime = that.state['ON_TIME'];
-	  if ((onTime!=undefined) && (onTime>0) && (value==1)) {
-		  that.command("set","ON_TIME" , onTime)
-	  }
-	  if (value==0) {
-		  that.delayed("set","STATE" , false)
-	  } else {
-		  that.delayed("set","STATE" , true)
-	  }
-	  }
-	  
+      if (that.readOnly==false) {
+        var onTime = that.state['ON_TIME'];
+        if ((onTime!=undefined) && (onTime>0) && (value==1)) {
+          that.command("set","ON_TIME" , onTime)
+        }
+        if (value==0) {
+          that.delayed("set","STATE" , false)
+        } else {
+          that.delayed("set","STATE" , true)
+        }
+      }
+
       callback();
     }.bind(this));
 
     var onTimeProperties = {
-           format: Characteristic.Formats.FLOAT,
-           unit: Characteristic.Units.SECONDS,
-           minValue: 0,
-           maxValue: 3600.0, // normally defined as 85825945.6 but that`s in Hesperus inconvenient and unusable
-           minStep: 1,
-           perms: [Characteristic.Perms.WRITE]
-         };
- 
-       var on_time = new Characteristic("OnTime","CEA288AC-EAC5-447A-A2DD-D684E4517440", onTimeProperties)
-           .on('set', function(value, callback) {
-             that.state['ON_TIME']=value;
-             callback();
-           }.bind(this));
- 
-         on_time.eventEnabled = true;
- 
-         lightbulb.addCharacteristic(on_time);
-    
-	this.remoteGetValue("STATE");
+      format: Characteristic.Formats.FLOAT,
+      unit: Characteristic.Units.SECONDS,
+      minValue: 0,
+      maxValue: 3600.0, // normally defined as 85825945.6 but that`s in Hesperus inconvenient and unusable
+      minStep: 1,
+      perms: [Characteristic.Perms.WRITE]
+    };
 
-    }
-    
-    that.currentStateCharacteristic["STATE"] = cc;
-    cc.eventEnabled = true;
+    var on_time = new Characteristic("OnTime","CEA288AC-EAC5-447A-A2DD-D684E4517440", onTimeProperties)
+    .on('set', function(value, callback) {
+      that.state['ON_TIME']=value;
+      callback();
+    }.bind(this));
+
+    on_time.eventEnabled = true;
+
+    lightbulb.addCharacteristic(on_time);
+
+    this.remoteGetValue("STATE");
+
+  }
+
+  that.currentStateCharacteristic["STATE"] = cc;
+  cc.eventEnabled = true;
 }
 
 

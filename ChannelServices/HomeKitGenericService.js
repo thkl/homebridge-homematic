@@ -575,8 +575,9 @@ HomeKitGenericService.prototype = {
 
   getServices: function() {
     return this.services;
-  }
+  },
 
+  shutdown: function() {}
 };
 
 module.exports = {

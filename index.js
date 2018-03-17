@@ -1,70 +1,76 @@
-'use strict';
+'use strict'
 
-const request = require('request');
-const HomeMaticRPC = require('./HomeMaticRPC.js').HomeMaticRPC;
-const HomeMaticRegaRequest = require('./HomeMaticRegaRequest.js').HomeMaticRegaRequest;
-const HomeMaticChannelLoader = require('./HomeMaticChannelLoader.js').HomeMaticChannelLoader;
+const request = require('request')
+const HomeMaticRPC = require('./HomeMaticRPC.js').HomeMaticRPC
+const HomeMaticChannelLoader = require('./HomeMaticChannelLoader.js').HomeMaticChannelLoader
+const HomeMaticRegaRequest = require('./HomeMaticRegaRequest.js').HomeMaticRegaRequest
+const HomeMaticRegaRequestTestDriver = require('./HomeMaticRegaRequestTestDriver.js').HomeMaticRegaRequestTestDriver
 
-const inherits = require('util').inherits;
-const path = require('path');
-const fs = require('fs');
-let uuid;
-let localCache;
-let localPath;
-let Service, Characteristic;
-let _homebridge;
+const inherits = require('util').inherits
+const path = require('path')
+const fs = require('fs')
+let uuid
+let localCache
+let localPath
+let Service, Characteristic
+let _homebridge
 
 module.exports = function (homebridge) {
-	_homebridge = homebridge;
-	uuid = homebridge.hap.uuid;
-	Service = homebridge.hap.Service;
-	Characteristic = homebridge.hap.Characteristic;
-	homebridge.registerPlatform('homebridge-homematic', 'HomeMatic', HomeMaticPlatform);
-	localCache = path.join(homebridge.user.storagePath(), 'ccu.json');
+	_homebridge = homebridge
+	uuid = homebridge.hap.uuid
+	Service = homebridge.hap.Service
+	Characteristic = homebridge.hap.Characteristic
+	homebridge.registerPlatform('homebridge-homematic', 'HomeMatic', HomeMaticPlatform)
+	localCache = path.join(homebridge.user.storagePath(), 'ccu.json')
 	localPath = homebridge.user.storagePath()
-};
+}
 
 function HomeMaticPlatform(log, config) {
 	let that = this
-	this.log = log;
-	this.uuid = uuid;
-	this.homebridge = _homebridge;
+	this.log = log
+	this.uuid = uuid
+	this.homebridge = _homebridge
+	this.config = config
 
-	this.log.info('Homematic Plugin Version ' + this.getVersion());
-	this.log.info('Plugin by thkl  https://github.com/thkl');
-	this.log.info('Homematic is a registered trademark of the EQ-3 AG');
-	this.log.info('Please report any issues to https://github.com/thkl/homebridge-homematic/issues');
+	this.log.info('Homematic Plugin Version ' + this.getVersion())
+	this.log.info('Plugin by thkl  https://github.com/thkl')
+	this.log.info('Homematic is a registered trademark of the EQ-3 AG')
+	this.log.info('Please report any issues to https://github.com/thkl/homebridge-homematic/issues')
 
-	this.ccuIP = config.ccu_ip;
-	this.log.info('will connect to your ccu at %s', this.ccuIP);
-
-	if (!config.testapi) {
-		const test = new HomeMaticRegaRequest(this.log, this.ccuIP).script('Write(\'PONG\');', data => {
-			that.log.info('if %s is PONG CCU is alive', data);
-		});
+	this.ccuIP = config.ccu_ip
+	this.log.info('will connect to your ccu at %s', this.ccuIP)
+	if (this.config.testapi) {
+			this.log.warn('running in test mode. If you see this at a production system, something went wrong')
+	} else {
+		this.log.info('running in production mode')
 	}
 
-	this.filter_device = config.filter_device;
-	this.filter_channel = config.filter_channel;
+	const test = this.createRegaRequest("PONG")
+	test.script('Write(\'PONG\')', data => {
+		that.log.info('if %s is PONG CCU is alive', data)
+	})
 
-	this.outlets = config.outlets;
-	this.iosworkaround = config.ios10;
-	this.doors = config.doors;
-	this.windows = config.windows;
-	this.variables = config.variables;
-	this.specialdevices = config.special;
-	this.programs = config.programs;
-	this.subsection = config.subsection;
-	this.localCache = config.lcache;
-	this.vuc = config.variable_update_trigger_channel;
+	this.filter_device = config.filter_device
+	this.filter_channel = config.filter_channel
+
+	this.outlets = config.outlets
+	this.iosworkaround = config.ios10
+	this.doors = config.doors
+	this.windows = config.windows
+	this.variables = config.variables
+	this.specialdevices = config.special
+	this.programs = config.programs
+	this.subsection = config.subsection
+	this.localCache = config.lcache
+	this.vuc = config.variable_update_trigger_channel
 
 	if ((this.subsection == undefined) || (this.subsection == '')) {
-		this.log.warn('Uuhhh. There is no value for the key subsection in config.json.');
-		this.log.warn('There will be no devices fetched from your ccu.');
-		this.log.warn('Please create a subsection and put in all the channels,');
-		this.log.warn('you want to import into homekit. Then add the name of that');
-		this.log.warn('section into your config.json as "subsection"="....".');
-		return;
+		this.log.warn('Uuhhh. There is no value for the key subsection in config.json.')
+		this.log.warn('There will be no devices fetched from your ccu.')
+		this.log.warn('Please create a subsection and put in all the channels,')
+		this.log.warn('you want to import into homekit. Then add the name of that')
+		this.log.warn('section into your config.json as "subsection"="....".')
+		return
 	}
 
 	this.sendQueue = []
@@ -73,87 +79,86 @@ function HomeMaticPlatform(log, config) {
 	this.foundAccessories = []
 	this.eventAdresses=[]
 	this.adressesToQuery = []
-	this.config = config
 
 	// only init stuff if there is no test api running
 	if (!config.testapi) {
 
-		let port = config.local_port;
+		let port = config.local_port
 		if (port == undefined) {
-			port = 9090;
+			port = 9090
 		}
 
-		this.xmlrpc = new HomeMaticRPC(this.log, this.ccuIP, port, 0, this);
-		this.xmlrpc.init();
+		this.xmlrpc = new HomeMaticRPC(this.log, this.ccuIP, port, 0, this)
+		this.xmlrpc.init()
 
 		if (config.enable_wired != undefined) {
-			this.xmlrpcwired = new HomeMaticRPC(this.log, this.ccuIP, port + 1, 1, this);
-			this.xmlrpcwired.init();
+			this.xmlrpcwired = new HomeMaticRPC(this.log, this.ccuIP, port + 1, 1, this)
+			this.xmlrpcwired.init()
 		}
 
 		if (config.enable_hmip != undefined) {
-			this.xmlrpchmip = new HomeMaticRPC(this.log, this.ccuIP, port + 2, 2, this);
-			this.xmlrpchmip.init();
+			this.xmlrpchmip = new HomeMaticRPC(this.log, this.ccuIP, port + 2, 2, this)
+			this.xmlrpchmip.init()
 		}
 
-		const that = this;
+		const that = this
 
 		process.on('SIGINT', () => {
 			if (that.xmlrpc.stopping) {
-				return;
+				return
 			}
-			that.xmlrpc.stopping = true;
-			that.xmlrpc.stop();
+			that.xmlrpc.stopping = true
+			that.xmlrpc.stop()
 			if (that.xmlrpcwired != undefined) {
-				that.xmlrpcwired.stop();
+				that.xmlrpcwired.stop()
 			}
 
 			if (that.xmlrpchmip != undefined) {
-				that.xmlrpchmip.stop();
+				that.xmlrpchmip.stop()
 			}
 
-			setTimeout(process.exit(0), 2000);
-		});
+			setTimeout(process.exit(0), 2000)
+		})
 
 		process.on('SIGTERM', () => {
 			if (that.xmlrpc.stopping) {
-				return;
+				return
 			}
-			that.xmlrpc.stopping = true;
-			that.xmlrpc.stop();
+			that.xmlrpc.stopping = true
+			that.xmlrpc.stop()
 			if (that.xmlrpcwired != undefined) {
-				that.xmlrpcwired.stop();
+				that.xmlrpcwired.stop()
 			}
 			if (that.xmlrpchmip != undefined) {
-				that.xmlrpchmip.stop();
+				that.xmlrpchmip.stop()
 			}
 
-			setTimeout(process.exit(0), 2000);
-		});
+			setTimeout(process.exit(0), 2000)
+		})
 
 	} // End init rpc stuff
 }
 
 HomeMaticPlatform.prototype.accessories = function (callback) {
-	const that = this;
-	that.foundAccessories = [];
+	let that = this
+	this.foundAccessories = []
 
 	if ((this.subsection == undefined) || (this.subsection == '')) {
-		callback(that.foundAccessories);
-		return;
+		callback(this.foundAccessories)
+		return
 	}
 
-	this.log.info('Fetching Homematic devices...');
-	const internalconfig = this.internalConfig();
-	const channelLoader = new HomeMaticChannelLoader(this.log);
+	this.log.info('Fetching Homematic devices...')
+	const internalconfig = this.internalConfig()
+	const channelLoader = new HomeMaticChannelLoader(this.log)
 	channelLoader.localPath = localPath
-	channelLoader.init(this.config.services);
+	channelLoader.init(this.config.services)
 
-	var json;
+	var json
 	if (this.config.testapi) {
-		json = JSON.parse(this.config.testdata);
-		this.buildaccesories(json,callback,internalconfig,channelLoader);
-		this.checkUpdate();
+		json = JSON.parse(this.config.testdata)
+		this.buildaccesories(json,callback,internalconfig,channelLoader)
+    return
 	} else {
 		let script = 'string sDeviceId;string sChannelId;boolean df = true;Write(\'{"devices":[\');foreach(sDeviceId, root.Devices().EnumIDs()){object oDevice = dom.GetObject(sDeviceId);if(oDevice){var oInterface = dom.GetObject(oDevice.Interface());if(df) {df = false;} else { Write(\',\');}Write(\'{\');Write(\'"id": "\' # sDeviceId # \'",\');Write(\'"name": "\' # oDevice.Name() # \'",\');Write(\'"address": "\' # oDevice.Address() # \'",\');Write(\'"type": "\' # oDevice.HssType() # \'",\');Write(\'"channels": [\');boolean bcf = true;foreach(sChannelId, oDevice.Channels().EnumIDs()){object oChannel = dom.GetObject(sChannelId);if(bcf) {bcf = false;} else {Write(\',\');}Write(\'{\');Write(\'"cId": \' # sChannelId # \',\');Write(\'"name": "\' # oChannel.Name() # \'",\');if(oInterface){Write(\'"intf": "\' # oInterface.Name() 	# \'",\');Write(\'"address": "\' # oInterface.Name() #\'.\'\ # oChannel.Address() # \'",\');}Write(\'"type": "\' # oChannel.HssType() # \'",\');Write(\'"access": "\' # oChannel.UserAccessRights(iulOtherThanAdmin)# \'"\');Write(\'}\');}Write(\']}\');}}Write(\']\');';
 
@@ -165,29 +170,29 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 
 		script += 'Write(\'\}\'\);';
 
-		var regarequest = new HomeMaticRegaRequest(this.log, this.ccuIP);
-		regarequest.timeout = this.config.ccufetchtimeout || 120;
+		var regarequest = this.createRegaRequest()
+		regarequest.timeout = this.config.ccufetchtimeout || 120
 		regarequest.script(script, data => {
-			that.log.info('Fetch Response');
-			//that.log.debug(data);
+			that.log.info('Fetch Response')
+			//that.log.debug(data)
 			if (data != undefined) {
 				try {
 					// Read Json
-					json = JSON.parse(data);
+					json = JSON.parse(data)
 					if ((json != undefined) && (json.devices != undefined)) {
 						// Seems to be valid json
 						if (localCache != undefined) {
 							fs.writeFile(localCache, data, err => {
 								if (err) {
-									that.log.warn('Cannot cache ccu data ', err);
+									that.log.warn('Cannot cache ccu data ', err)
 								}
-								that.log('will cache ccu response ...');
-							});
+								that.log('will cache ccu response ...')
+							})
 						}
 					}
 				} catch (e) {
-					that.log.warn('Unable to parse live ccu data. Will try cache if there is one. If you want to know what, start homebridge in debug mode -> DEBUG=* homebridge -D');
-					that.log.debug('JSON Error %s for Data %s', e, data);
+					that.log.warn('Unable to parse live ccu data. Will try cache if there is one. If you want to know what, start homebridge in debug mode -> DEBUG=* homebridge -D')
+					that.log.debug('JSON Error %s for Data %s', e, data)
 				}
 			}
 
@@ -196,163 +201,164 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 				// Try to load Data
 
 				try {
-					fs.accessSync(localCache, fs.F_OK);
+					fs.accessSync(localCache, fs.F_OK)
 					// Try to load Data
-					data = fs.readFileSync(localCache).toString();
+					data = fs.readFileSync(localCache).toString()
 					if (data != undefined) {
 						try {
-							json = JSON.parse(data);
-							that.log.info('loaded ccu data from local cache ... WARNING: your mileage may vary');
+							json = JSON.parse(data)
+							that.log.info('loaded ccu data from local cache ... WARNING: your mileage may vary')
 						} catch (e) {
-							that.log.warn('Unable to parse cached ccu data. giving up');
+							that.log.warn('Unable to parse cached ccu data. giving up')
 						}
 					}
 
 				} catch (e) {
-					that.log.warn('Unable to load cached ccu data. giving up');
+					that.log.warn('Unable to load cached ccu data. giving up')
 				}
 
 			} // End json is not here but try local cache
-			this.buildaccesories(json,callback,internalconfig,channelLoader);
-			this.checkUpdate();
-		});
+			this.buildaccesories(json,callback,internalconfig,channelLoader)
+			this.checkUpdate()
+		})
 	}
-};
+	this.log.info('end')
+}
 
 
 HomeMaticPlatform.prototype.checkUpdate = function() {
 	// Version Check and autoupdate
 	let that = this
 	this.fetch_npmVersion('homebridge-homematic', npmVersion => {
-		npmVersion = npmVersion.replace('\n', '');
-		that.log.info('NPM %s vs Local %s', npmVersion, that.getVersion());
+		npmVersion = npmVersion.replace('\n', '')
+		that.log.info('NPM %s vs Local %s', npmVersion, that.getVersion())
 		if (npmVersion > that.getVersion()) {
-			const autoupdate = that.config.autoupdate;
-			const instpath = that.config.updatepath;
+			const autoupdate = that.config.autoupdate
+			const instpath = that.config.updatepath
 			if (autoupdate) {
-				let cmd;
+				let cmd
 				if (autoupdate == 'global') {
-					cmd = 'sudo npm -g update homebridge-homematic';
+					cmd = 'sudo npm -g update homebridge-homematic'
 				}
 
 				if ((autoupdate == 'local') && (instpath)) {
-					cmd = 'cd ' + instpath + ';npm update homebridge-homematic';
+					cmd = 'cd ' + instpath + 'npm update homebridge-homematic'
 				}
 
 				if ((autoupdate == 'github') && (instpath)) {
-					cmd = 'cd ' + instpath + ';git pull';
+					cmd = 'cd ' + instpath + 'git pull'
 				}
 
 				if (cmd) {
-					const exec = require('child_process').exec;
-					that.log.info('There is a new version. Autoupdate is set to %s, so we are updating ourself now .. this may take some seconds.', autoupdate);
+					const exec = require('child_process').exec
+					that.log.info('There is a new version. Autoupdate is set to %s, so we are updating ourself now .. this may take some seconds.', autoupdate)
 					exec(cmd, (error, stdout, stderr) => {
 						if (!error) {
-							that.log.warn('A new version was installed recently. Please restart the homebridge process to complete the update');
-							that.log.warn('Message from updater %s', stdout);
+							that.log.warn('A new version was installed recently. Please restart the homebridge process to complete the update')
+							that.log.warn('Message from updater %s', stdout)
 						} else {
-							that.log.error('Error while updating.');
+							that.log.error('Error while updating.')
 						}
-					});
+					})
 				} else {
-					that.log.error('Some autoupdate settings missed.');
+					that.log.error('Some autoupdate settings missed.')
 				}
 			} else {
-				that.log.warn('There is a new Version available. Please update with sudo npm -g update homebridge-homematic');
+				that.log.warn('There is a new Version available. Please update with sudo npm -g update homebridge-homematic')
 			}
 		}
-	});
+	})
 }
 
 HomeMaticPlatform.prototype.buildaccesories = function (json,callback,internalconfig,channelLoader) {
 	let that = this
 	if ((json != undefined) && (json.devices !== undefined)) {
 		json.devices.map(device => {
-			const cfg = that.deviceInfo(internalconfig, device.type);
+			const cfg = that.deviceInfo(internalconfig, device.type)
 
-			let isFiltered = false;
+			let isFiltered = false
 
 			if ((that.filter_device !== undefined) && (that.filter_device.indexOf(device.address) > -1)) {
-				isFiltered = true;
+				isFiltered = true
 			} else {
-				isFiltered = false;
+				isFiltered = false
 			}
 
 			if ((device.channels !== undefined) && (!isFiltered)) {
 				device.channels.map(ch => {
-					let isChannelFiltered = false;
-					let isSubsectionSelected = false;
+					let isChannelFiltered = false
+					let isSubsectionSelected = false
 					// If we have a subsection list check if the channel is here
 					if (json.subsection != undefined) {
-						const cin = (json.subsection.indexOf(ch.cId) > -1);
+						const cin = (json.subsection.indexOf(ch.cId) > -1)
 						// If not .. set filter flag
-						isChannelFiltered = !cin;
-						isSubsectionSelected = cin;
+						isChannelFiltered = !cin
+						isSubsectionSelected = cin
 					}
 
 					if ((cfg != undefined) && (cfg.filter != undefined) && (cfg.filter.indexOf(ch.type) > -1)) {
-						isChannelFiltered = true;
+						isChannelFiltered = true
 					}
 
 					if ((that.filter_channel !== undefined) && (that.filter_channel.indexOf(ch.address) > -1)) {
-						isChannelFiltered = true;
+						isChannelFiltered = true
 					}
 
-					// That.log('name', ch.name, ' -> address:', ch.address);
+					// That.log('name', ch.name, ' -> address:', ch.address)
 					if ((ch.address !== undefined) && (!isChannelFiltered)) {
 						// Switch found
 						// Check if marked as Outlet or Door
-						let special;
+						let special
 						if ((that.outlets != undefined) && (that.outlets.indexOf(ch.address) > -1)) {
-							special = 'OUTLET';
+							special = 'OUTLET'
 						}
 						if ((that.doors != undefined) && (that.doors.indexOf(ch.address) > -1)) {
-							special = 'DOOR';
+							special = 'DOOR'
 						}
 						if ((that.windows != undefined) && (that.windows.indexOf(ch.address) > -1)) {
-							special = 'WINDOW';
+							special = 'WINDOW'
 						}
 
 						// Check if VIRTUAL KEY is Set as Variable Trigger
 						if ((that.vuc != undefined) && (ch.type == 'VIRTUAL_KEY') && (ch.name == that.vuc)) {
-							that.log('Channel ' + that.vuc + ' added as Variable Update Trigger');
-							ch.type = 'VARIABLE_UPDATE_TRIGGER';
-							channelLoader.loadChannelService(that.foundAccessories, 'VARIABLE_UPDATE_TRIGGER', ch, that, that.variables,  cfg, 255 ,Service, Characteristic);
+							that.log('Channel ' + that.vuc + ' added as Variable Update Trigger')
+							ch.type = 'VARIABLE_UPDATE_TRIGGER'
+							channelLoader.loadChannelService(that.foundAccessories, 'VARIABLE_UPDATE_TRIGGER', ch, that, that.variables,  cfg, 255 ,Service, Characteristic)
 						} else {
-							channelLoader.loadChannelService(that.foundAccessories, device.type, ch, that, special, cfg, ch.access, Service, Characteristic);
+							channelLoader.loadChannelService(that.foundAccessories, device.type, ch, that, special, cfg, ch.access, Service, Characteristic)
 						}
 					} else {
 						// Channel is in the filter
 					}
-				});
+				})
 			} else {
-				that.log(device.name + ' has no channels or is filtered');
+				that.log(device.name + ' has no channels or is filtered')
 			}
-		}); // End Mapping all JSON Data
+		}) // End Mapping all JSON Data
 
 		if (that.programs != undefined) {
 			that.programs.map(program => {
-				const prgtype = '';
+				const prgtype = ''
 
 				if (that.iosworkaround == undefined) {
-					that.log('Program ' + program + ' added as Program_Launcher');
+					that.log('Program ' + program + ' added as Program_Launcher')
 
-					var ch = {};
-					var cfg = {};
-					ch.type = 'PROGRAM_LAUNCHER';
-					ch.address = program;
-					ch.name = program;
-					channelLoader.loadChannelService(that.foundAccessories, 'PROGRAM_LAUNCHER', ch, that, 'PROGRAM', cfg, 255, Service, Characteristic);
+					var ch = {}
+					var cfg = {}
+					ch.type = 'PROGRAM_LAUNCHER'
+					ch.address = program
+					ch.name = program
+					channelLoader.loadChannelService(that.foundAccessories, 'PROGRAM_LAUNCHER', ch, that, 'PROGRAM', cfg, 255, Service, Characteristic)
 				} else {
-					var cfg = that.deviceInfo(internalconfig, '');
-					that.log('Program ' + program + ' added as SWITCH cause of IOS 10');
-					var ch = {};
-					ch.type = 'SWITCH';
-					ch.address = program;
-					ch.name = program;
-					channelLoader.loadChannelService(that.foundAccessories, 'SWITCH', ch, that, 'PROGRAM', cfg, 255, Service, Characteristic);
+					var cfg = that.deviceInfo(internalconfig, '')
+					that.log('Program ' + program + ' added as SWITCH cause of IOS 10')
+					var ch = {}
+					ch.type = 'SWITCH'
+					ch.address = program
+					ch.name = program
+					channelLoader.loadChannelService(that.foundAccessories, 'SWITCH', ch, that, 'PROGRAM', cfg, 255, Service, Characteristic)
 				}
-			});
+			})
 		} // End Mapping Programs
 
 		if (that.specialdevices != undefined) {
@@ -364,7 +370,7 @@ HomeMaticPlatform.prototype.buildaccesories = function (json,callback,internalco
 					ch.type = type
 					ch.address = ""
 					ch.name = name
-					channelLoader.loadChannelService(that.foundAccessories, ch.type , ch , that, "", specialdevice.parameter || {} , 255, Service, Characteristic);
+					channelLoader.loadChannelService(that.foundAccessories, ch.type , ch , that, "", specialdevice.parameter || {} , 255, Service, Characteristic)
 				}
 
 			})
@@ -373,244 +379,256 @@ HomeMaticPlatform.prototype.buildaccesories = function (json,callback,internalco
 		// Add Optional Variables
 		if (that.variables != undefined) {
 			that.variables.map(variable => {
-				const ch = {};
-				const cfg = {};
-				ch.type = 'VARIABLE';
-				ch.address = variable;
-				ch.name = variable;
-				ch.intf = 'Variable';
-				channelLoader.loadChannelService(that.foundAccessories, 'VARIABLE', ch, that,	'VARIABLE', cfg, 255, Service, Characteristic);
-			});
+				const ch = {}
+				const cfg = {}
+				ch.type = 'VARIABLE'
+				ch.address = variable
+				ch.name = variable
+				ch.intf = 'Variable'
+				channelLoader.loadChannelService(that.foundAccessories, 'VARIABLE', ch, that,	'VARIABLE', cfg, 255, Service, Characteristic)
+			})
 		} // End Variables
-
-		callback(that.foundAccessories);
-	} else {
-		callback(that.foundAccessories);
 	}
 
 	// Check number of devices
-	const noD = that.foundAccessories.length;
-	that.log('Number of mapped devices : ' + noD);
+	const noD = that.foundAccessories.length
+	that.log.info('Number of mapped devices : ' + noD)
 	if (noD > 100) {
-		that.log.warn('********************************************');
-		that.log.warn('* You are using more than 100 HomeKit      *');
-		that.log.warn('* devices behind a bridge. At this time    *');
-		that.log.warn('* HomeKit only supports up to 100 devices. *');
-		that.log.warn('* This may end up that iOS is not able to  *');
-		that.log.warn('* connect to the bridge anymore.           *');
-		that.log.warn('********************************************');
+		that.log.warn('********************************************')
+		that.log.warn('* You are using more than 100 HomeKit      *')
+		that.log.warn('* devices behind a bridge. At this time    *')
+		that.log.warn('* HomeKit only supports up to 100 devices. *')
+		that.log.warn('* This may end up that iOS is not able to  *')
+		that.log.warn('* connect to the bridge anymore.           *')
+		that.log.warn('********************************************')
 	} else
 
 	if (noD > 90) {
-		that.log.warn('You are using more than 90 HomeKit');
-		that.log.warn('devices behind a bridge. At this time');
-		that.log.warn('HomeKit only supports up to 100 devices.');
-		that.log.warn('This is just a warning. Everything should');
-		that.log.warn('work fine until you are below that 100.');
+		that.log.warn('You are using more than 90 HomeKit')
+		that.log.warn('devices behind a bridge. At this time')
+		that.log.warn('HomeKit only supports up to 100 devices.')
+		that.log.warn('This is just a warning. Everything should')
+		that.log.warn('work fine until you are below that 100.')
 	}
-
-};
+	callback(that.foundAccessories)
+}
 
 HomeMaticPlatform.prototype.setValue = function (intf, channel, datapoint, value) {
 	if (channel != undefined) {
 		if (intf != undefined) {
-			let rpc = false;
+			let rpc = false
 			if (intf.toLowerCase() === 'bidcos-rf') {
-				rpc = true;
-				this.log.debug('routing via rf xmlrpc');
-				this.xmlrpc.setValue(channel, datapoint, value);
-				return;
+				rpc = true
+				this.log.debug('routing via rf xmlrpc')
+				this.xmlrpc.setValue(channel, datapoint, value)
+				return
 			}
 
 			if (intf.toLowerCase() === 'bidcos-wired') {
-				rpc = true;
+				rpc = true
 				if (this.xmlrpcwired != undefined) {
-					this.log.debug('routing via wired xmlrpc');
-					this.xmlrpcwired.setValue(channel, datapoint, value);
+					this.log.debug('routing via wired xmlrpc')
+					this.xmlrpcwired.setValue(channel, datapoint, value)
 				} else {
 					// Send over Rega
-					this.log.debug('routing via rega');
-					var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-					rega.setValue(channel, datapoint, value);
+					this.log.debug('routing via rega')
+					var rega = this.createRegaRequest()
+					rega.setValue(channel, datapoint, value)
 				}
-				return;
+				return
 			}
 
 			if (intf.toLowerCase() === 'hmip-rf') {
-				rpc = true;
+				rpc = true
 				if (this.xmlrpchmip != undefined) {
-					this.log.debug('routing via ip xmlrpc');
-					this.xmlrpchmip.setValue(channel, datapoint, value);
+					this.log.debug('routing via ip xmlrpc')
+					this.xmlrpchmip.setValue(channel, datapoint, value)
 				} else {
 					// Send over Rega
-					this.log.debug('routing via rega xmlrpc');
-					var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-					rega.setValue(channel, datapoint, value);
+					this.log.debug('routing via rega')
+					let rega = this.createRegaRequest()
+					rega.setValue(channel, datapoint, value)
 				}
-				return;
+				return
 			}
 
 			if (intf == 'Variable') {
-				var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-				rega.setVariable(channel, value);
-				rpc = true;
-				return;
+				let rega = this.createRegaRequest()
+				rega.setVariable(channel, value)
+				rpc = true
+				return
 			}
 
 			// Rega Fallback
 			if (rpc == false) {
-				this.log.debug('routing via fallback rega');
-				var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-				rega.setValue(channel, datapoint, value);
+				this.log.debug('routing via fallback rega')
+				let rega = this.createRegaRequest()
+				rega.setValue(channel, datapoint, value)
 			}
 		} else {
 			// Undefined Interface -> Rega should know how to deal with it
-			this.log.debug('routing via rega');
-			var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-			rega.setValue(channel, datapoint, value);
+			this.log.debug('routing via rega')
+			let rega = this.createRegaRequest()
+			rega.setValue(channel, datapoint, value)
 		}
 	}
-};
+}
+
+// this is just for simplifiyng the test cases ...
+HomeMaticPlatform.prototype.createRegaRequest = function (testreturn) {
+	var rega
+	if (this.config.testapi) {
+		rega = new HomeMaticRegaRequestTestDriver(this.log, this.ccuIP)
+		if (testreturn != undefined) {
+			rega.data = testreturn
+		}
+	} else {
+		rega = new HomeMaticRegaRequest(this.log, this.ccuIP)
+	}
+	return rega
+}
 
 HomeMaticPlatform.prototype.remoteSetValue = function (channel, datapoint, value) {
-	const that = this;
+	const that = this
 	this.foundAccessories.map(accessory => {
 		if ((accessory.adress == channel) || ((accessory.cadress != undefined) && (accessory.cadress == channel))) {
-			accessory.event(channel,datapoint, value);
+			accessory.event(channel,datapoint, value)
 		}
-	});
-};
+	})
+}
 
 HomeMaticPlatform.prototype.setRegaValue = function (channel, datapoint, value) {
-	const rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-	rega.setValue(channel, datapoint, value);
-};
+	const rega = this.createRegaRequest()
+	rega.setValue(channel, datapoint, value)
+}
 
 HomeMaticPlatform.prototype.sendRegaCommand = function (command, callback) {
-	const rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-	const that = this;
+	const rega = this.createRegaRequest()
+	const that = this
 	rega.script(command, data => {
 		if (callback != undefined) {
-			callback(data);
+			callback(data)
 		}
-	});
-};
+	})
+}
 
 HomeMaticPlatform.prototype.getValue = function (intf, channel, datapoint, callback) {
 	if (channel != undefined) {
 		if (intf != undefined) {
-			let rpc = false;
-			if (intf == 'BidCos-RF') {
-				this.xmlrpc.getValue(channel, datapoint, callback);
-				rpc = true;
-				return;
+			let rpc = false
+			if ((intf.toLowerCase() === 'bidcos-rf') && (this.xmlrpc != undefined)) {
+				this.xmlrpc.getValue(channel, datapoint, callback)
+				rpc = true
+				return
 			}
 
-			if (intf == 'BidCos-Wired') {
-				rpc = true;
+			if (intf.toLowerCase() === 'bidcos-wired') {
+				rpc = true
 				if (this.xmlrpcwired != undefined) {
-					this.xmlrpcwired.getValue(channel, datapoint, callback);
+					this.xmlrpcwired.getValue(channel, datapoint, callback)
 				} else {
 					// Send over Rega
-					var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-					rega.getValue(channel, datapoint, callback);
+					var rega = this.createRegaRequest()
+					rega.getValue(channel, datapoint, callback)
 				}
-				return;
+				return
 			}
 
-			if (intf == 'HmIP-RF') {
+			if (intf.toLowerCase() === 'hmip-rf') {
 				if (this.xmlrpchmip != undefined) {
-					this.xmlrpchmip.getValue(channel, datapoint, callback);
+					this.xmlrpchmip.getValue(channel, datapoint, callback)
 				} else {
 					// Send over Rega
-					var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-					rega.getValue(channel, datapoint, callback);
+					var rega = this.createRegaRequest()
+					rega.getValue(channel, datapoint, callback)
 				}
-				return;
+				return
 			}
 
 			if (intf == 'Variable') {
-				var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-				rega.getVariable(channel, callback);
-				rpc = true;
-				return;
+				var rega = this.createRegaRequest()
+				rega.getVariable(channel, callback)
+				rpc = true
+				return
 			}
 
 			// Fallback to Rega
 			if (rpc == false) {
-				var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-				rega.getValue(channel, datapoint, callback);
+				var rega = this.createRegaRequest()
+				rega.getValue(channel, datapoint, callback)
 			}
 		} else {
 			// Undefined Interface -> Rega should know how to deal with it
-			var rega = new HomeMaticRegaRequest(this.log, this.ccuIP);
-			rega.getValue(channel, datapoint, callback);
+			var rega = this.createRegaRequest()
+			rega.getValue(channel, datapoint, callback)
 		}
 	} else {
-		this.log.warn("unknow channel skipping ...");
+		this.log.warn("unknow channel skipping ...")
 		if (callback) {
-			callback(undefined);
+			callback(undefined)
 		}
 	}
-};
+}
 
 HomeMaticPlatform.prototype.prepareRequest = function (accessory, script) {
-	const that = this;
-	this.sendQueue.push(script);
-	that.delayed(100);
-};
+	const that = this
+	this.sendQueue.push(script)
+	that.delayed(100)
+}
 
 HomeMaticPlatform.prototype.sendPreparedRequests = function () {
-	const that = this;
-	let script = 'var d;';
+	const that = this
+	let script = 'var d'
 	this.sendQueue.map(command => {
-		script += command;
-	});
-	this.sendQueue = [];
-	const regarequest = new HomeMaticRegaRequest(this.log, this.ccuIP).script(script, data => {});
-};
+		script += command
+	})
+	this.sendQueue = []
+	const regarequest = this.createRegaRequest()
+	regarequest.script(script, data => {})
+}
 
 HomeMaticPlatform.prototype.sendRequest = function (accessory, script, callback) {
-	const regarequest = new HomeMaticRegaRequest(this.log, this.ccuIP).script(script, data => {
+	const regarequest = this.createRegaRequest()
+	regarequest.script(script, data => {
 		if (data !== undefined) {
 			try {
-				const json = JSON.parse(data);
-				callback(json);
+				const json = JSON.parse(data)
+				callback(json)
 			} catch (err) {
-				callback(undefined);
+				callback(undefined)
 			}
 		}
-	});
-};
+	})
+}
 
 HomeMaticPlatform.prototype.delayed = function (delay) {
-	const timer = this.delayed[delay];
+	const timer = this.delayed[delay]
 	if (timer) {
-		this.log('removing old command');
-		clearTimeout(timer);
+		this.log('removing old command')
+		clearTimeout(timer)
 	}
 
-	const that = this;
+	const that = this
 	this.delayed[delay] = setTimeout(() => {
-		clearTimeout(that.delayed[delay]);
-		that.sendPreparedRequests();
-	}, delay ? delay : 100);
-	this.log('New Timer was set');
-};
+		clearTimeout(that.delayed[delay])
+		that.sendPreparedRequests()
+	}, delay ? delay : 100)
+	this.log('New Timer was set')
+}
 
 HomeMaticPlatform.prototype.deviceInfo = function (config, devicetype) {
-	let cfg;
+	let cfg
 	if (config != undefined) {
-		const di = config.deviceinfo;
+		const di = config.deviceinfo
 		di.map(device => {
 			if (device.type == devicetype) {
-				cfg = device;
+				cfg = device
 			}
-		});
+		})
 	}
 
-	return cfg;
-};
+	return cfg
+}
 
 
 HomeMaticPlatform.prototype.registerAdressForEventProcessingAtAccessory = function (address, accessory) {
@@ -623,28 +641,28 @@ HomeMaticPlatform.prototype.registerAdressForEventProcessingAtAccessory = functi
 
 HomeMaticPlatform.prototype.internalConfig = function () {
 	try {
-		const config_path = path.join(__dirname, './internalconfig.json');
-		const config = JSON.parse(fs.readFileSync(config_path));
-		return config;
+		const config_path = path.join(__dirname, './internalconfig.json')
+		const config = JSON.parse(fs.readFileSync(config_path))
+		return config
 	} catch (err) {
-		throw err;
+		throw err
 	}
 
-	return undefined;
-};
+	return undefined
+}
 
 HomeMaticPlatform.prototype.getVersion = function () {
-	const pjPath = path.join(__dirname, './package.json');
-	const pj = JSON.parse(fs.readFileSync(pjPath));
-	return pj.version;
-};
+	const pjPath = path.join(__dirname, './package.json')
+	const pj = JSON.parse(fs.readFileSync(pjPath))
+	return pj.version
+}
 
 HomeMaticPlatform.prototype.fetch_npmVersion = function (pck, callback) {
-	const exec = require('child_process').exec;
-	const cmd = 'npm view ' + pck + ' version';
+	const exec = require('child_process').exec
+	const cmd = 'npm view ' + pck + ' version'
 	exec(cmd, (error, stdout, stderr) => {
-		let npm_version = stdout;
-		npm_version = npm_version.replace('\n', '');
-		callback(npm_version);
-	});
-};
+		let npm_version = stdout
+		npm_version = npm_version.replace('\n', '')
+		callback(npm_version)
+	})
+}

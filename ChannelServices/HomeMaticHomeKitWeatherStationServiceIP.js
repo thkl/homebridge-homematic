@@ -154,7 +154,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
     this.currentStateCharacteristic["ACTUAL_TEMPERATURE"] = ctemp;
     ctemp.eventEnabled = true;
 
-  
+
   var humidity = new Service["HumiditySensor"](this.name);
     this.services.push(humidity);
 
@@ -168,7 +168,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
     this.currentStateCharacteristic["HUMIDITY"] = chum;
     chum.eventEnabled = true;
 
-   
+
   var brightness = new Service["LightSensor"](this.name);
     this.services.push(brightness);
 
@@ -199,7 +199,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
 
   var windspeed = new Service["WindSpeedService"](this.name);
     this.services.push(windspeed);
-    
+
     var cwindspeed = windspeed.getCharacteristic(Characteristic.WindSpeedCharacteristic)
       .on('get', function(callback) {
          this.query("WIND_SPEED",function(value){
@@ -230,7 +230,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
 
     var raincount = new Service["RainCountService"](this.name);
       this.services.push(raincount);
-    
+
       var craincount = raincount.getCharacteristic(Characteristic.RainCountCharacteristic)
         .on('get', function(callback) {
            this.query("RAIN_COUNTER",function(value){
@@ -248,7 +248,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
 
     var winddirection = new Service["WindDirectionService"](this.name);
       this.services.push(winddirection);
-    
+
       var cwinddirection = winddirection.getCharacteristic(Characteristic.WindDirectionCharacteristic)
         .on('get', function(callback) {
            this.query("WIND_DIR",function(value){
@@ -259,10 +259,10 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
       this.currentStateCharacteristic["WIND_DIR"] = cwinddirection;
       cwinddirection.eventEnabled = true;
 
-    
+
     var windrange = new Service["WindRangeService"](this.name);
       this.services.push(windrange);
-    
+
       var cwindrange = windrange.getCharacteristic(Characteristic.WindRangeCharacteristic)
         .on('get', function(callback) {
            this.query("WIND_DIR_RANGE",function(value){
@@ -283,12 +283,12 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
 HomeMaticHomeKitWeatherStationServiceIP.prototype.queryData = function() {
 
   var that = this;
-  
+
   this.query("ACTUAL_TEMPERATURE",function(value){
     that.currentTemperature = parseFloat(value);
     that.query("HUMIDITY",function(value){
       that.currentHumidity = parseFloat(value);
-      if ((that.currentTemperature > -255) && (that.currentHumidity > -255)) {        
+      if ((that.currentTemperature > -255) && (that.currentHumidity > -255)) {
         that.loggingService.addEntry({time: moment().unix(), temp:that.currentTemperature, pressure:0, humidity:that.currentHumidity})
       }
     });
@@ -303,11 +303,11 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.datapointEvent= function(dp,ne
   if (dp=='ACTUAL_TEMPERATURE') {
     this.currentTemperature = parseFloat(newValue);
   }
-  
+
   if (dp=='HUMIDITY') {
     this.currentHumidity = parseFloat(newValue);
   }
-  
+
   if ((this.currentTemperature > -255) && (this.currentHumidity > -255)) {
     this.loggingService.addEntry({time: moment().unix(), temp:this.currentTemperature, pressure:0, humidity:this.currentHumidity});
   }
