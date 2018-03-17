@@ -36,7 +36,7 @@ describe("Homematic Plugin (index)", function() {
         // load some devices
         let datapath = path.join(__dirname,'data','data_test_common.json')
         let data = fs.readFileSync(datapath).toString();
-        var config = { ccu_ip: '127.0.0.1',subsection :'HomeKit',testapi:'default' , testdata:data};
+        var config = { ccu_ip: '127.0.0.1',subsection :'HomeKit', testdata:data};
         var platform = new homebridgeMock.PlatformType(log, config);
         platform.accessories(function(acc) {
           assert.ok(acc, "Did not find any accessories!");

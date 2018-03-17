@@ -1,5 +1,6 @@
 'use strict';
 
+var isInTest = typeof global.it === 'function';
 
 var HomeMaticRPCTestDriver = function (log, ccuip,port,system,platform) {
   this.log = log;
@@ -11,7 +12,9 @@ var HomeMaticRPCTestDriver = function (log, ccuip,port,system,platform) {
 }
 
 HomeMaticRPCTestDriver.prototype.init = function() {
-  this.log.warn('RPC Driver - Dummy Class for Tests only')
+  if (!isInTest) {
+    this.log.warn('Rega Dummy Class for Tests only it looks like i am running in production mode.')
+  }
 }
 
 HomeMaticRPCTestDriver.prototype.getIPAddress = function() {
@@ -41,19 +44,19 @@ HomeMaticRPCTestDriver.prototype.stop = function() {
 
 HomeMaticRPCTestDriver.prototype.event = function(params,callback) {
   let that = this
-  this.log.info('rpc <- event on %s'  , this.interface );
+  this.log.debug('rpc <- event on %s'  , this.interface );
   this.lastMessage = Math.floor((new Date()).getTime() / 1000);
   var channel = this.interface + params[1];
   var datapoint = params[2];
   var value = params[3];
   let address = this.interface + params[1] + '.' + params[2]
 
-  this.log.info("Ok here is the Event" + JSON.stringify(params));
-  this.log.info("RPC single event for %s.%s with value %s",channel,datapoint,value);
+  this.log.debug("Ok here is the Event" + JSON.stringify(params));
+  this.log.debug("RPC single event for %s.%s with value %s",channel,datapoint,value);
 
   this.platform.foundAccessories.map(function(accessory) {
     if ((accessory.adress == channel) || ((accessory.cadress != undefined) && (accessory.cadress == channel))) {
-      that.log.info("found accessory %s",accessory.adress );
+      that.log.debug("found accessory %s",accessory.adress );
       accessory.event(channel, datapoint, value);
     }
   });

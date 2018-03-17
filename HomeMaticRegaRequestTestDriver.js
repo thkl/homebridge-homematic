@@ -1,12 +1,15 @@
 var http = require("http");
 
+var isInTest = typeof global.it === 'function';
 
 function HomeMaticRegaRequestTestDriver(log, ccuip) {
   this.log = log;
   this.ccuIP = ccuip;
   this.timeout = 120;
   this.data = 0;
-  this.log.warn('Rega Dummy Class for Tests only')
+  if (!isInTest) {
+    this.log.warn('Rega Dummy Class for Tests only it looks like i am running in production mode.')
+  }
 }
 
 HomeMaticRegaRequestTestDriver.prototype = {

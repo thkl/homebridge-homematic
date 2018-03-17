@@ -15,6 +15,7 @@ let localCache
 let localPath
 let Service, Characteristic
 let _homebridge
+var isInTest = typeof global.it === 'function';
 
 module.exports = function (homebridge) {
 	_homebridge = homebridge
@@ -32,23 +33,28 @@ function HomeMaticPlatform(log, config) {
 	this.config = config
   this.localCache = path.join(_homebridge.user.storagePath(), 'ccu.json')
 	this.localPath = _homebridge.user.storagePath()
-	this.log.info('Homematic Plugin Version ' + this.getVersion())
-	this.log.info('Plugin by thkl  https://github.com/thkl')
-	this.log.info('Homematic is a registered trademark of the EQ-3 AG')
-	this.log.info('Please report any issues to https://github.com/thkl/homebridge-homematic/issues')
 
 	this.ccuIP = config.ccu_ip
 
-	if (this.config.testapi) {
-		this.log.warn('running in test mode. If you see this at a production system, something went wrong')
+	if (isInTest) {
+
 	} else {
+		// Silence the hello stuff in tests
+		this.log.info('Homematic Plugin Version ' + this.getVersion())
+		this.log.info('Plugin by thkl  https://github.com/thkl')
+		this.log.info('Homematic is a registered trademark of the EQ-3 AG')
+		this.log.info('Please report any issues to https://github.com/thkl/homebridge-homematic/issues')
 		this.log.info('running in production mode')
 		this.log.info('will connect to your ccu at %s', this.ccuIP)
 	}
 
 	const test = this.createRegaRequest("PONG")
 	test.script('Write(\'PONG\')', data => {
-		that.log.info('if %s is PONG CCU is alive', data)
+		if (!isInTest) {
+			that.log.info('if %s is PONG CCU is alive', data)
+		} else {
+
+		}
 	})
 
 	this.filter_device = config.filter_device
@@ -82,8 +88,8 @@ function HomeMaticPlatform(log, config) {
 	this.eventAdresses=[]
 	this.adressesToQuery = []
 
-	// only init stuff if there is no test api running
-	if (!config.testapi) {
+	// only init stuff if there is no test running
+	if (!isInTest) {
 
 		let port = config.local_port
 		if (port == undefined) {
@@ -150,14 +156,14 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 		return
 	}
 
-	this.log.info('Fetching Homematic devices...')
+	this.log.debug('Fetching Homematic devices...')
 	const internalconfig = this.internalConfig()
 	const channelLoader = new HomeMaticChannelLoader(this.log)
 	channelLoader.localPath = localPath
 	channelLoader.init(this.config.services)
 
 	var json
-	if (this.config.testapi) {
+	if (isInTest) {
 		json = JSON.parse(this.config.testdata)
 		this.buildaccesories(json,callback,internalconfig,channelLoader)
     return
@@ -175,7 +181,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 		var regarequest = this.createRegaRequest()
 		regarequest.timeout = this.config.ccufetchtimeout || 120
 		regarequest.script(script, data => {
-			that.log.info('Fetch Response')
+			that.log.debug('CCU response on device query are %s bytes',data.length)
 			//that.log.debug(data)
 			if (data != undefined) {
 				try {
@@ -188,7 +194,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 								if (err) {
 									that.log.warn('Cannot cache ccu data ', err)
 								}
-								that.log('will cache ccu response ...')
+								that.log.info('will cache ccu response ...')
 							})
 						}
 					}
@@ -224,7 +230,6 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 			this.checkUpdate()
 		})
 	}
-	this.log.info('end')
 }
 
 
@@ -327,7 +332,7 @@ HomeMaticPlatform.prototype.buildaccesories = function (json,callback,internalco
 
 						// Check if VIRTUAL KEY is Set as Variable Trigger
 						if ((that.vuc != undefined) && (ch.type == 'VIRTUAL_KEY') && (ch.name == that.vuc)) {
-							that.log('Channel ' + that.vuc + ' added as Variable Update Trigger')
+							that.log.debug('Channel ' + that.vuc + ' added as Variable Update Trigger')
 							ch.type = 'VARIABLE_UPDATE_TRIGGER'
 							channelLoader.loadChannelService(that.foundAccessories, 'VARIABLE_UPDATE_TRIGGER', ch, that, that.variables,  cfg, 255 ,Service, Characteristic)
 						} else {
@@ -338,7 +343,7 @@ HomeMaticPlatform.prototype.buildaccesories = function (json,callback,internalco
 					}
 				})
 			} else {
-				that.log(device.name + ' has no channels or is filtered')
+				that.log.debug(device.name + ' has no channels or is filtered')
 			}
 		}) // End Mapping all JSON Data
 
@@ -347,7 +352,7 @@ HomeMaticPlatform.prototype.buildaccesories = function (json,callback,internalco
 				const prgtype = ''
 
 				if (that.iosworkaround == undefined) {
-					that.log('Program ' + program + ' added as Program_Launcher')
+					that.log.debug('Program ' + program + ' added as Program_Launcher')
 
 					var ch = {}
 					var cfg = {}
@@ -357,7 +362,7 @@ HomeMaticPlatform.prototype.buildaccesories = function (json,callback,internalco
 					channelLoader.loadChannelService(that.foundAccessories, 'PROGRAM_LAUNCHER', ch, that, 'PROGRAM', cfg, 255, Service, Characteristic)
 				} else {
 					var cfg = that.deviceInfo(internalconfig, '')
-					that.log('Program ' + program + ' added as SWITCH cause of IOS 10')
+					that.log.debug('Program ' + program + ' added as SWITCH cause of IOS 10')
 					var ch = {}
 					ch.type = 'SWITCH'
 					ch.address = program
@@ -398,7 +403,7 @@ HomeMaticPlatform.prototype.buildaccesories = function (json,callback,internalco
 
 	// Check number of devices
 	const noD = that.foundAccessories.length
-	that.log.info('Number of mapped devices : ' + noD)
+	that.log.debug('Number of mapped devices : ' + noD)
 	if (noD > 100) {
 		that.log.warn('********************************************')
 		that.log.warn('* You are using more than 100 HomeKit      *')
@@ -483,7 +488,7 @@ HomeMaticPlatform.prototype.setValue = function (intf, channel, datapoint, value
 // this is just for simplifiyng the test cases ...
 HomeMaticPlatform.prototype.createRegaRequest = function (testreturn) {
 	var rega
-	if (this.config.testapi) {
+	if (isInTest) {
 		rega = new HomeMaticRegaRequestTestDriver(this.log, this.ccuIP)
 		if (testreturn != undefined) {
 			rega.data = testreturn

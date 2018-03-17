@@ -16,18 +16,18 @@ describe("Homematic Plugin (index)", function() {
   let datapath = path.join(__dirname,'data','data_test_switch.json')
   let data = fs.readFileSync(datapath).toString();
   let that = this
-  var config = { ccu_ip: '127.0.0.1',subsection :'HomeKit',testapi:'default' , testdata:data};
+  var config = { ccu_ip: '127.0.0.1',subsection :'HomeKit', testdata:data};
   var platform = new homebridgeMock.PlatformType(log, config);
 
   before(function() {
-    log.info('Init Platform with Switch');
+    log.debug('Init Platform with Switch');
     platform.accessories(function(acc) {
       that.accessories = acc;
     })
   });
 
   after(function() {
-    log.info('Shutdown Platform');
+    log.debug('Shutdown Platform');
     that.accessories.map(ac => {
       ac.shutdown()
     });

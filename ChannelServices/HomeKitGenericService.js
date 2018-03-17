@@ -92,7 +92,7 @@ HomeKitGenericService.prototype = {
       this.lowBatCharacteristic = bat
     } else {
       // not added by default -> create it
-      this.log.info("added LowBat to %s",this.name)
+      this.log.debug("added LowBat to %s",this.name)
       rootService.addOptionalCharacteristic(Characteristic.StatusLowBattery);
       this.lowBatCharacteristic = rootService.getCharacteristic(Characteristic.StatusLowBattery)
     }
@@ -106,7 +106,7 @@ HomeKitGenericService.prototype = {
       this.tamperedCharacteristic = tampered
     } else {
       // not added by default -> create it
-      this.log.info("added Tampered to %s",this.name)
+      this.log.debug("added Tampered to %s",this.name)
       rootService.addOptionalCharacteristic(Characteristic.StatusTampered);
       this.tamperedCharacteristic = rootService.getCharacteristic(Characteristic.StatusTampered)
     }
@@ -116,7 +116,7 @@ HomeKitGenericService.prototype = {
   setReadOnly:function(readOnly) {
     this.readOnly = readOnly
     if (readOnly==true) {
-      this.log.info("set %s to read only",this.name)
+      this.log.debug("set %s to read only",this.name)
     }
   },
 
