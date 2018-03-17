@@ -87,7 +87,7 @@ HomeMaticHomeKitKeymaticService.prototype.queryState = function(){
   })
 }
 
-HomeMaticHomeKitKeymaticService.prototype.event = function(channel,dp,newValue){
+HomeMaticHomeKitKeymaticService.prototype.datapointEvent = function(dp,newValue){
   if (dp =='STATE') {
     let hmState = ((newValue=='true') || (newValue==true)) ? 0 : 1;
     this.current_state.updateValue(hmState,null)

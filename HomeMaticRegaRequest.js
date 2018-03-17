@@ -5,18 +5,18 @@ function HomeMaticRegaRequest(log, ccuip) {
   this.log = log;
   this.ccuIP = ccuip;
   this.timeout = 120;
-  
+
 }
 
 HomeMaticRegaRequest.prototype = {
 
   script: function(script, callback) {
     var that = this;
-    
+
     //this.log.debug("RegaScript %s",script);
 
     var ls = script;
-    
+
     var post_options = {
       host: this.ccuIP,
       port: "8181",
@@ -32,11 +32,11 @@ HomeMaticRegaRequest.prototype = {
       var data = "";
       var that = this;
       res.setEncoding("binary");
-      
+
       res.on("data", function(chunk) {
         data += chunk.toString();
       });
-      
+
       res.on("end", function() {
         var pos = data.lastIndexOf("<xml><exec>");
         var response = (data.substring(0, pos));
@@ -46,17 +46,17 @@ HomeMaticRegaRequest.prototype = {
 
 
     post_req.on("error", function(e) {
-	    that.log("Error " + e + "while executing rega script " + ls);
+	    that.log.error("Error " + e + "while executing rega script " + ls);
         callback(undefined);
     });
 
     post_req.on("timeout", function(e) {
-	    that.log("timeout while executing rega script");
+	    that.log.error("timeout while executing rega script");
 	    post_req.destroy();
     });
-    
+
 	post_req.setTimeout(this.timeout * 1000);
-	
+
     post_req.write(script);
     post_req.end();
   },
@@ -68,7 +68,7 @@ HomeMaticRegaRequest.prototype = {
     this.script(script, function(data) {
       if (data !== undefined) {
         callback(data);
-      } 
+      }
     });
   },
 
@@ -95,10 +95,10 @@ HomeMaticRegaRequest.prototype = {
       this.script(script, function(data) {
       if (data !== undefined) {
         callback(data);
-      } 
+      }
     });
   },
-    
+
   isInt: function(n){
     return Number(n) === n && n % 1 === 0;
   },
@@ -112,4 +112,3 @@ HomeMaticRegaRequest.prototype = {
 module.exports = {
   HomeMaticRegaRequest: HomeMaticRegaRequest
 }
-
