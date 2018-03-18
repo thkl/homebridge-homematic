@@ -28,6 +28,10 @@ HomeMaticRegaRequestTestDriver.prototype = {
 
   setValue: function(channel, datapoint, value) {
     if (this.platform.homebridge != undefined) {
+      if (typeof value == 'object') {
+        value = value['explicitDouble'];
+      }
+
       this.platform.homebridge.values[channel + '.' + datapoint] = value;
     }
   },

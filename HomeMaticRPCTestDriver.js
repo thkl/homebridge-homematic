@@ -29,6 +29,9 @@ HomeMaticRPCTestDriver.prototype.getValue = function(channel, datapoint, callbac
 }
 
 HomeMaticRPCTestDriver.prototype.setValue = function(channel, datapoint, value) {
+  if (typeof value == 'object') {
+    value = value['explicitDouble'];
+  }
   this.platform.homebridge.values[channel + '.' + datapoint] = value;
 }
 
