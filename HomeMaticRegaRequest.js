@@ -73,6 +73,13 @@ HomeMaticRegaRequest.prototype = {
   },
 
   setValue: function(channel, datapoint, value) {
+    // check explicitDouble
+    if (typeof value == 'object') {
+      let v = value['explicitDouble'];
+      if (v!=undefined) {
+        value = v;
+      }
+    }
     this.log.debug('Rega SetValue %s of %s.%s',value,channel,datapoint)
     var script = "var d = dom.GetObject(\"" + channel + "." + datapoint + "\");if (d){d.State(\"" + value + "\");}";
     this.script(script, function(data) {

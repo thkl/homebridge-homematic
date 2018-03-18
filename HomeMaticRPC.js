@@ -259,10 +259,10 @@ HomeMaticRPC.prototype.setValue = function(channel, datapoint, value,callback) {
 
 
   this.log.debug("RPC setValue Call for %s %s Value %s Type %s",channel,datapoint,value, typeof value);
-  
+
   this.client.methodCall("setValue", [channel, datapoint, value], function(error, value) {
     that.log.debug("RPC setValue (%s %s) Response %s Errors: %s",channel, datapoint, JSON.stringify(value),error);
-    if ((value['faultCode'] != undefined) && (callback != undefined)) {
+    if ((value!=undefined) && (value['faultCode'] != undefined) && (callback != undefined)) {
       callback(value['faultCode'],value);
     } else
     if (callback != undefined) {
