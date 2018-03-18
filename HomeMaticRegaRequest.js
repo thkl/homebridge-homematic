@@ -1,11 +1,11 @@
-var http = require("http");
+'use strict'
 
+var http = require("http");
 
 function HomeMaticRegaRequest(log, ccuip) {
   this.log = log;
   this.ccuIP = ccuip;
   this.timeout = 120;
-
 }
 
 HomeMaticRegaRequest.prototype = {
