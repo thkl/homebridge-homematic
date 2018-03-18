@@ -134,6 +134,12 @@ HomeMaticHomeKitSwitchService.prototype.addCoreSwitchFunctions = function(Servic
   this.c_isOn.eventEnabled = true;
 }
 
+
+HomeMaticHomeKitSwitchService.prototype.shutdown = function() {
+  clearTimeout(this.valveTimer)
+}
+
+
 HomeMaticHomeKitSwitchService.prototype.createLightBulbService = function(Service, Characteristic) {
   this.service_item = new Service.Lightbulb(this.name);
 }
@@ -149,6 +155,7 @@ HomeMaticHomeKitSwitchService.prototype.createOutletService = function(Service, 
 HomeMaticHomeKitSwitchService.prototype.createValveService = function(Service, Characteristic) {
   let that = this
   this.service_item = new Service.Valve(this.name);
+  this.remainTime = -99;
 
   var configured = this.service_item.getCharacteristic(Characteristic.IsConfigured)
   .on('get', function(callback) {
@@ -195,15 +202,21 @@ HomeMaticHomeKitSwitchService.prototype.createValveService = function(Service, C
       that.command("setrega","STATE" , 0)
       that.remainTime = 0
       clearTimeout(that.valveTimer)
+      callback();
     } else {
-      that.remainTime = that.setDuration
-      that.command("setrega","ON_TIME" , that.remainTime,function(){
-        that.command("setrega","STATE" , 1)
-        that.updateValveTimer()
-      })
+      that.remainTime = (that.setDuration) ? that.setDuration : 0;
       that.isInUse = 1
+      if (that.remainTime > 0) {
+        that.command("setrega","ON_TIME" , that.remainTime,function(){
+          that.command("setrega","STATE" , 1)
+          that.updateValveTimer()
+          callback();
+        })
+      } else {
+        that.command("setrega","STATE" , 1)
+        callback();
+      }
     }
-    callback();
   }.bind(this));
 
   this.c_isActive.updateValue(Characteristic.Active.ACTIVE,null)
@@ -233,6 +246,10 @@ HomeMaticHomeKitSwitchService.prototype.createValveService = function(Service, C
 
 HomeMaticHomeKitSwitchService.prototype.updateValveTimer = function(){
     let that = this
+    if (this.remainTime == 0) {
+      return
+    }
+
     this.remainTime = this.remainTime - 1;
     // SET OFF
     if (this.remainTime == 0) {

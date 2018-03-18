@@ -75,5 +75,23 @@ describe("Homematic Plugin (index)", function() {
       })
       done();
     });
+
+    it('set switch to on via HK', function (done) {
+      // check
+      that.accessories.map(ac => {
+        let s = ac.get_Service(Service.Lightbulb)
+        assert.ok(s, "Service.Lightbulb not found in testswitch %s",ac.name);
+        let co = s.getCharacteristic(Characteristic.On)
+        assert.ok(co, "Characteristic.On not found in testswitch %s",ac.name);
+        // Set Delay to 0 sec for use with tests
+        ac.delayOnSet = 0;
+        co.emit('set', false ,function(){
+        let res = platform.homebridge.values[ac.adress + '.STATE'];
+        assert.equal(res,0);
+        });
+      });
+      done();
+    });
+
   });
 });

@@ -35,6 +35,7 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.accessoryName = this.name;
   this.tampered = false;
   this.tamperedCharacteristic = undefined;
+  this.delayOnSet = 0;
 
   var that = this;
 
@@ -489,26 +490,23 @@ HomeKitGenericService.prototype = {
   },
 
   delayed: function(mode, dp,value,delay) {
-
+    let that = this;
     if (this.eventupdate==true) {
       return;
     }
-
-    if ( this.timer[dp]!=undefined ) {
-      clearTimeout(this.timer[dp]);
-      this.timer[dp] = undefined;
-    }
-
-
-    //this.log(this.name + " delaying command "+mode + " " + dp +" with value " + value);
-    var that = this;
-
-    this.timer[dp] = setTimeout( function(){
-      clearTimeout(that.timer[dp]);
-      that.timer[dp] = undefined;
-
+    if (delay>0) {
+      if ( this.timer[dp]!=undefined ) {
+        clearTimeout(this.timer[dp]);
+        this.timer[dp] = undefined;
+      }
+      this.timer[dp] = setTimeout( function(){
+        clearTimeout(that.timer[dp]);
+        that.timer[dp] = undefined;
+        that.command(mode,dp,value)
+      }, delay?delay:100 );
+    } else {
       that.command(mode,dp,value)
-    }, delay?delay:100 );
+    }
   },
 
   remoteSetDeviceValue: function(address,dp,value,callback) {

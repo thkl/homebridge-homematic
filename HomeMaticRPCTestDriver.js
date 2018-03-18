@@ -7,7 +7,6 @@ var HomeMaticRPCTestDriver = function (log, ccuip,port,system,platform) {
   this.system = system;
   this.ccuip = ccuip;
   this.platform = platform;
-  this.data = 0
   this.interface = 'BidCos-RF.'
 }
 
@@ -22,11 +21,15 @@ HomeMaticRPCTestDriver.prototype.getIPAddress = function() {
 }
 
 HomeMaticRPCTestDriver.prototype.getValue = function(channel, datapoint, callback) {
-  callback(this.data)
+  if (this.platform.homebridge != undefined) {
+    callback(this.platform.homebridge.values[channel + '.' + datapoint]);
+  } else {
+    callback(0)
+  }
 }
 
 HomeMaticRPCTestDriver.prototype.setValue = function(channel, datapoint, value) {
-
+  this.platform.homebridge.values[channel + '.' + datapoint] = value;
 }
 
 HomeMaticRPCTestDriver.prototype.connect = function() {
@@ -62,9 +65,9 @@ HomeMaticRPCTestDriver.prototype.event = function(params,callback) {
   });
 
   this.platform.eventAdresses.map(function(tuple){
-    this.log.debug('check %s vs %s',address,tuple.address)
+    that.log.debug('check %s vs %s',address,tuple.address)
     if (address == tuple.address) {
-      this.log.debug('found jump into')
+      that.log.debug('found jump into')
       tuple.accessory.event(channel,datapoint, value)
     }
   })

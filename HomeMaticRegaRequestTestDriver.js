@@ -19,11 +19,17 @@ HomeMaticRegaRequestTestDriver.prototype = {
   },
 
   getValue: function(channel, datapoint, callback) {
-    this.log.warn('getback %s',this.data)
-    callback(this.data);
+    if (this.platform.homebridge != undefined) {
+      callback(this.platform.homebridge.values[channel + '.' + datapoint]);
+    } else {
+      callback(0);
+    }
   },
 
   setValue: function(channel, datapoint, value) {
+    if (this.platform.homebridge != undefined) {
+      this.platform.homebridge.values[channel + '.' + datapoint] = value;
+    }
   },
 
   setVariable: function(channel, value) {

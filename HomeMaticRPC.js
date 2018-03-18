@@ -143,9 +143,8 @@ HomeMaticRPC.prototype.init = function() {
         });
 
         that.platform.eventAdresses.map(function(tuple){
-          that.log.debug('check %s vs %s',address,tuple.address)
           if (address == tuple.address) {
-            that.log.debug('found jump into')
+            that.log.debug("found accessory %s",tuple.adress );
             tuple.accessory.event(channel,datapoint, value)
           }
         })

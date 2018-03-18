@@ -182,7 +182,6 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 		regarequest.timeout = this.config.ccufetchtimeout || 120
 		regarequest.script(script, data => {
 			that.log.debug('CCU response on device query are %s bytes',data.length)
-			//that.log.debug(data)
 			if (data != undefined) {
 				try {
 					// Read Json
@@ -490,9 +489,7 @@ HomeMaticPlatform.prototype.createRegaRequest = function (testreturn) {
 	var rega
 	if (isInTest) {
 		rega = new HomeMaticRegaRequestTestDriver(this.log, this.ccuIP)
-		if (testreturn != undefined) {
-			rega.data = testreturn
-		}
+		rega.platform = this;
 	} else {
 		rega = new HomeMaticRegaRequest(this.log, this.ccuIP)
 	}

@@ -19,6 +19,7 @@ function HombridgeMock(context) {
     uuid: uuidMock
   };
   this.user = User;
+  this.values = {};
 }
 
 HombridgeMock.prototype.registerPlatform = function (name, title, Platform) {

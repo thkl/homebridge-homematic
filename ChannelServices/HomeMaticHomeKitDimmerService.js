@@ -16,7 +16,8 @@ util.inherits(HomeMaticHomeKitDimmerService, HomeKitGenericService);
 HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, Characteristic) {
 
   var that = this;
-  var lightbulb = new Service["Lightbulb"](this.name);
+  var lightbulb = new Service.Lightbulb(this.name);
+  this.delayOnSet = 5;
   this.services.push(lightbulb);
 
   this.onc = lightbulb.getCharacteristic(Characteristic.On)
@@ -86,18 +87,16 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
   .on('set', function(value, callback) {
     var lastLevel = that.state["LAST"];
     if (value!=lastLevel) {
-
       if (value==0){
         // set On State
         if ((that.onc!=undefined) && (that.onc.updateValue!=undefined)) {that.onc.updateValue(false,null);}
       } else {
         if ((that.onc!=undefined) && (that.onc.updateValue!=undefined)) {that.onc.updateValue(true,null);}
       }
-
-      //that.log("Set Brightness of " + that.adress + " to " + value + " command. LastLevel is "+  lastLevel);
+      //that.log.info("Set Brightness of " + that.adress + " to " + value + " command. LastLevel is "+  lastLevel);
       that.state["LAST"] = value;
       that.isWorking = true;
-      that.delayed("set","LEVEL" , value,5);
+      that.delayed("set","LEVEL" , value,that.delayOnSet);
     }
     if (callback)  callback();
   }.bind(this));

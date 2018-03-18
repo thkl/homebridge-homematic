@@ -51,15 +51,15 @@ describe("Homematic Plugin (index)", function() {
           // check
           that.accessories.map(ac => {
             let s = ac.get_Service(Service.Lightbulb)
-            assert.ok(s, "Service.Lightbulb not found in testswitch %s",ac.name);
+            assert.ok(s, "Service.Lightbulb not found in testdimmer %s",ac.name);
             let cc = s.getCharacteristic(Characteristic.On)
-            assert.ok(cc, "Characteristic.On not found in testswitch %s",ac.name);
+            assert.ok(cc, "Characteristic.On not found in testdimmer %s",ac.name);
             cc.getValue(function(context,value){
               assert.equal(value, true);
             });
 
             let cl = s.getCharacteristic(Characteristic.Brightness)
-            assert.ok(cl, "Characteristic.Brightness not found in testswitch %s",ac.name);
+            assert.ok(cl, "Characteristic.Brightness not found in testdimmer %s",ac.name);
             cl.getValue(function(context,value){
               assert.equal(value, 100);
             });
@@ -75,20 +75,37 @@ describe("Homematic Plugin (index)", function() {
           // check
           that.accessories.map(ac => {
             let s = ac.get_Service(Service.Lightbulb)
-            assert.ok(s, "Service.Lightbulb not found in testswitch %s",ac.name);
+            assert.ok(s, "Service.Lightbulb not found in testdimmer %s",ac.name);
             let cc = s.getCharacteristic(Characteristic.On)
-            assert.ok(cc, "Characteristic.On not found in testswitch %s",ac.name);
+            assert.ok(cc, "Characteristic.On not found in testdimmer %s",ac.name);
             cc.getValue(function(context,value){
               assert.equal(value, false);
             });
 
             let cl = s.getCharacteristic(Characteristic.Brightness)
-            assert.ok(cl, "Characteristic.Brightness not found in testswitch %s",ac.name);
+            assert.ok(cl, "Characteristic.Brightness not found in testdimmer %s",ac.name);
             cl.getValue(function(context,value){
               assert.equal(value, 0);
             });
           })
           done();
+      });
+
+      it('set test dimmer via HK to  50%', function (done) {
+        // check
+        that.accessories.map(ac => {
+          let s = ac.get_Service(Service.Lightbulb)
+          assert.ok(s, "Service.Lightbulb not found in testdimmer %s",ac.name);
+          let cb = s.getCharacteristic(Characteristic.Brightness)
+          assert.ok(cb, "Characteristic.Brightness not found in testdimmer %s",ac.name);
+          // Set Delay to 0 sec for use with tests
+          ac.delayOnSet = 0;
+          cb.emit('set', 50,function(){
+          let res = platform.homebridge.values[ac.adress + '.LEVEL'];
+          assert.equal(res,0.5);
+          });
+        });
+        done();
       });
 
  });
