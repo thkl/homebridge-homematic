@@ -3,7 +3,6 @@
 
 
 [![Donate some coins if you want](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=DZ5CW7XC9LXMN)
-
 [![Build Status](https://travis-ci.org/thkl/homebridge-homematic.svg?branch=master)](https://travis-ci.org/thkl/homebridge-homematic)
 
 Supports the Homematic System on HomeBridge Platform
@@ -18,7 +17,7 @@ ProgramStarter, SmokeDetector, Thermostats ....
 0. Make sure that you use a node version >= 4.5
 1. Install homebridge using: npm install -g homebridge
 2. Install this plugin using: npm install -g homebridge-homematic
-3. Update your configuration file. See the sample below. 
+3. Update your configuration file. See the sample below.
 
 # Configuration
 
@@ -46,7 +45,7 @@ Configuration sample:
 
 
 Preselect all the Channels you want to import into Homekit by one Subsection at your CCU.
-Create a new Subsection (in the Sample named as Homekit) and put all the Channels in you want to import. Finally put the name of the subsection into your config.js 
+Create a new Subsection (in the Sample named as Homekit) and put all the Channels in you want to import. Finally put the name of the subsection into your config.js
 
 Ports: the plugin will use local Port 9090 to communicate with the ccu rfd daemon. Port 9091 for wired and 9092 for hmip (if they are in use).
 If these ports are in use by other applications, you can change them by the following key in your config.json
@@ -68,7 +67,7 @@ You may add binaray variables to Homekit by adding them into your config.json. T
 
 # Programs
 
-If you want to launch Homematic Programs you can also add them to config.json. 
+If you want to launch Homematic Programs you can also add them to config.json.
 There is a issue with ios10. The build in Home App doesnt handle custom Services so you have to add the ios10 flag in your config.json
 
 ```
@@ -150,5 +149,5 @@ As a sample: the device with the channel WEATHER of the device with type HM-WDS1
 	{ "type": "HM-WDS10-TH-O:WEATHER",
           "service": "HomeMaticHomeKitCuxDThermostatService"
 	}]
-	
+
 ```

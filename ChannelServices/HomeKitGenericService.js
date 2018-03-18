@@ -249,9 +249,10 @@ HomeKitGenericService.prototype = {
     }
     that.platform.getValue(parts[0],parts[0] + "." + parts[1],parts[2],function(newValue) {
       if ((newValue != undefined) && (newValue != null)) {
+
       } else {
         //newValue = 0;
-        newValue = that.convertValue(dp,0)
+        newValue = that.convertValue(parts[2],0)
       }
 
 

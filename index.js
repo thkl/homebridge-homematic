@@ -181,9 +181,9 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 		var regarequest = this.createRegaRequest()
 		regarequest.timeout = this.config.ccufetchtimeout || 120
 		regarequest.script(script, data => {
-			that.log.debug('CCU response on device query are %s bytes',data.length)
 			if (data != undefined) {
 				try {
+					that.log.debug('CCU response on device query are %s bytes',data.length)
 					// Read Json
 					json = JSON.parse(data)
 					if ((json != undefined) && (json.devices != undefined)) {
