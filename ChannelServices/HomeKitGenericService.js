@@ -518,13 +518,13 @@ HomeKitGenericService.prototype = {
     var newValue = value;
     var tp = this.transformDatapoint(dp);
     if (tp[1] == 'LEVEL') {
-      newValue = newValue / 100;
+      newValue = parseFloat(newValue / 100).toFixed(2);
     }
     if ((tp[1] == 'COLOR') && (this.type == "RGBW_COLOR")) {
       newValue = Math.round((value / 360) * 199);
     }
 
-    //newValue = String(newValue);
+
 
     if (this.eventupdate==true) {
       return;

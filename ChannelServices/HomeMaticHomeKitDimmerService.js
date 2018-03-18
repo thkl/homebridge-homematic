@@ -93,7 +93,7 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
       } else {
         if ((that.onc!=undefined) && (that.onc.updateValue!=undefined)) {that.onc.updateValue(true,null);}
       }
-      //that.log.info("Set Brightness of " + that.adress + " to " + value + " command. LastLevel is "+  lastLevel);
+      // that.log.info("Set Brightness of " + that.adress + " to " + value + " command. LastLevel is "+  lastLevel);
       that.state["LAST"] = value;
       that.isWorking = true;
       that.delayed("set","LEVEL" , value,that.delayOnSet);
@@ -111,14 +111,17 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
 
 HomeMaticHomeKitDimmerService.prototype.endWorking=function()  {
   this.remoteGetValue("LEVEL");
+  this.isWorking = false;
 }
 
 HomeMaticHomeKitDimmerService.prototype.event = function(channel,dp,newValue){
   let that = this
   if (dp=='LEVEL') {
-    let isOn = (newValue>0)
-    this.onc.updateValue(isOn,null)
-    this.brightness.updateValue((newValue*100),null)
+    if (!this.isWorking) {
+      let isOn = (newValue>0)
+      this.onc.updateValue(isOn,null)
+      this.brightness.updateValue((newValue*100),null)
+    }
   }
 }
 
