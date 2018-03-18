@@ -2,6 +2,11 @@ Changelog
 =========
 
 **** BEGINNING OF VERSION 0.0.41 the selection of channels to use with HomeKit via a CCU Subsection is mandatory
+Version 0.0.98
+* Support for Garage Doors with multiple actor and sensor devices
+* Support for FakeHue Data Logging Service at Thermostats and Contacts
+* added some other devies .... see https://github.com/thkl/homebridge-homematic/projects/1
+
 Version 0.0.97
 fix for HomeMaticHomeKitMotionDetectorServiceIP.js
 
@@ -25,7 +30,7 @@ local_ip parameter for config. to use if auto ip discovery fails
 
 
 Version 0.0.79
-new config parameter ccufetchtimeout to setup the timeout the plugin is waiting for ccu response 
+new config parameter ccufetchtimeout to setup the timeout the plugin is waiting for ccu response
 
 
 Version 0.0.78
@@ -63,8 +68,8 @@ some error logging
 Fix for Programs with _ etc
 
 Version 0.0.65
-fix for Programs 
- 
+fix for Programs
+
 Version 0.0.64
 fix for https://github.com/thkl/homebridge-homematic/issues/85
 optional autoupdate
@@ -73,7 +78,7 @@ Version 0.0.63
 fixed Door and Window Devices
 
 Version 0.0.62
-fixed Crash in Device Event Handling 
+fixed Crash in Device Event Handling
 
 Version 0.0.61
 fixed Crash in RPC
@@ -88,7 +93,7 @@ Version 0.0.58
 fix for Variables
 
 Version 0.0.57
-implemented Powermeter 
+implemented Powermeter
 
 
 Version 0.0.56
@@ -108,7 +113,7 @@ Version 0.0.53
 correct State in HM-Sec-Sir-WM
 
 Version 0.0.52
-and once again Dimmer .... ;(  
+and once again Dimmer .... ;(
 
 Version 0.0.51
 Fixed Weather Service
@@ -135,13 +140,13 @@ fixed start value for dimmer , siri will turn the light to 100% after the start 
 added ability to create custom services
 
 
-Version 0.0.44 
+Version 0.0.44
 fixed HM-LC-RGBW-WM for the iOS Home App
 fixed flickering for Dimmer when change level with the iOS Home App
 fixed Door Option for Rotary Handles
 
 
-Version 0.0.43 
+Version 0.0.43
 
 added warning if there is no definition of an subsection
 added warning if there are more than 100 devices
@@ -169,10 +174,10 @@ config -> "variable_update_trigger_channel":"NameOfVirtualKey"
 
 
 Version 0.0.36
--BugFix 
+-BugFix
 
 Version 0.0.35
-- added optional Window Config 
+- added optional Window Config
 
 Version 0.0.34
 -implemented virtual keys
@@ -187,8 +192,8 @@ Version 0.0.32
 Version 0.0.31
 - Changes for CLIMATECONTROL_REGULATOR (tnx to BPoHVoodoo)
 - implemented CCU response caching
-- prepared for use with IOS10 Beta Home App - 
-- 
+- prepared for use with IOS10 Beta Home App -
+-
 
 Version 0.0.30
 - implemented HMW-Sen-SC-12-*
@@ -230,7 +235,7 @@ Version: 0.0.20
 Version: 0.0.19
 - fixed Door/Window Contact State (open vs close)
 
-Version: 0.0.18  
+Version: 0.0.18
 - fixed the update message
 - removed LockStatus Event
 
