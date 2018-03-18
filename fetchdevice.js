@@ -5,9 +5,9 @@
 var isInTest = typeof global.it === 'function';
 if (!isInTest) {
 
-const HomeMaticRegaRequest = require('../../HomeMaticRegaRequest.js').HomeMaticRegaRequest
+const HomeMaticRegaRequest = require('HomeMaticRegaRequest.js').HomeMaticRegaRequest
 const program = require('commander');
-const log = require("./logger")._system;
+const log = require("./test/lib/logger")._system;
 const fs = require('fs')
 const path = require('path')
 
@@ -67,7 +67,7 @@ request.script(script, data => {
   device.channels.map(function (channel){
     channel.address = channel.address.replace(adr,"ADR1234567890");
   })
-  let fileName = path.join(__dirname,'data','data_test_') + dtype + ".json";
+  let fileName = path.join(__dirname,'test','lib','data','data_test_') + dtype + ".json";
   if (fs.existsSync(fileName)) {
       console.info("moving old file into trash");
       fs.unlink(fileName);
