@@ -73,7 +73,7 @@ HomeMaticRegaRequest.prototype = {
   },
 
   setValue: function(channel, datapoint, value) {
-
+    this.log.debug('Rega SetValue %s of %s.%s',value,channel,datapoint)
     var script = "var d = dom.GetObject(\"" + channel + "." + datapoint + "\");if (d){d.State(\"" + value + "\");}";
     this.script(script, function(data) {
 

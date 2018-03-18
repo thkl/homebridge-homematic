@@ -240,7 +240,7 @@ HomeMaticRPC.prototype.getValue = function(channel, datapoint, callback) {
   }
 }
 
-HomeMaticRPC.prototype.setValue = function(channel, datapoint, value) {
+HomeMaticRPC.prototype.setValue = function(channel, datapoint, value,callback) {
 
   var that = this;
   this.log.debug('XMLRpc setValue %s %s %s',channel,datapoint,value)
@@ -257,10 +257,14 @@ HomeMaticRPC.prototype.setValue = function(channel, datapoint, value) {
   //  value = String(value);
   //}
 
+
   this.log.debug("RPC setValue Call for %s %s Value %s Type %s",channel,datapoint,value, typeof value);
 
   this.client.methodCall("setValue", [channel, datapoint, value], function(error, value) {
     that.log.debug("RPC setValue (%s %s) Response %s Errors: %s",channel, datapoint, JSON.stringify(value),error);
+    if (callback != undefined) {
+      callback(error,value);
+    }
   });
 }
 

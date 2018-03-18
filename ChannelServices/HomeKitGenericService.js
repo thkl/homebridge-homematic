@@ -518,14 +518,13 @@ HomeKitGenericService.prototype = {
   command: function(mode,dp,value,callback) {
     var newValue = value;
     var tp = this.transformDatapoint(dp);
-    if (tp[1] == 'LEVEL') {
-      newValue = parseFloat(newValue / 100).toFixed(2);
+
+    if ((tp[1] == 'LEVEL') || (tp[1] == 'LEVEL_2')) {
+      newValue = parseFloat((newValue / 100).toFixed(2));
     }
     if ((tp[1] == 'COLOR') && (this.type == "RGBW_COLOR")) {
       newValue = Math.round((value / 360) * 199);
     }
-
-
 
     if (this.eventupdate==true) {
       return;
@@ -534,13 +533,13 @@ HomeKitGenericService.prototype = {
 
     if (mode == "set") {
       var interf = this.intf;
-      that.log.debug("(Rpc) Send " + newValue + " to Datapoint " + tp[1] + " at " + tp[0]);
+      that.log.debug("(Rpc) Send %s to %s at %s type %s" ,newValue, tp[1] , tp[0],typeof newValue);
       that.platform.setValue(interf,tp[0], tp[1], newValue);
       if (callback != undefined) {callback()}
     }
 
     if (mode == "setrega") {
-      that.log.debug("(Rega) Send " + newValue + " to Datapoint " + tp[1] + " at " + tp[0]);
+      that.log.debug("(Rega) Send %s to %s at %s type %s",newValue, tp[1] , tp[0],typeof newValue);
       that.platform.setRegaValue(tp[0], tp[1], newValue);
       if (callback != undefined) {callback()}
     }

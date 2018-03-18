@@ -423,14 +423,42 @@ HomeMaticPlatform.prototype.buildaccesories = function (json,callback,internalco
 	callback(that.foundAccessories)
 }
 
+HomeMaticPlatform.prototype.setValue_rf_rpc = function (channel, datapoint, value,callback) {
+	this.xmlrpc.setValue(channel, datapoint, value,callback);
+}
+
+HomeMaticPlatform.prototype.setValue_hmip_rpc = function (channel, datapoint, value,callback) {
+	this.xmlrpchmip.setValue(channel, datapoint, value,callback)
+}
+
+HomeMaticPlatform.prototype.setValue_wired_rpc = function (channel, datapoint, value,callback) {
+	this.xmlrpcwired.setValue(channel, datapoint, value,callback)
+
+}
+
+HomeMaticPlatform.prototype.setValue_rega = function (channel, datapoint, value,callback) {
+	let rega = this.createRegaRequest()
+	rega.setValue(channel, datapoint, value)
+	if (callback != undefined) {callback()}
+}
+
+
 HomeMaticPlatform.prototype.setValue = function (intf, channel, datapoint, value) {
+	let that = this
 	if (channel != undefined) {
 		if (intf != undefined) {
 			let rpc = false
+
 			if (intf.toLowerCase() === 'bidcos-rf') {
 				rpc = true
 				this.log.debug('routing via rf xmlrpc')
-				this.xmlrpc.setValue(channel, datapoint, value)
+				this.setValue_rf_rpc(channel,datapoint,value,function(error,result){
+					if (error != undefined) {
+						// fall back to rega
+						that.log.debug('fallback routing via rega')
+						that.setValue_rega(channel,datapoint,value);
+					}
+				})
 				return
 			}
 
@@ -438,12 +466,19 @@ HomeMaticPlatform.prototype.setValue = function (intf, channel, datapoint, value
 				rpc = true
 				if (this.xmlrpcwired != undefined) {
 					this.log.debug('routing via wired xmlrpc')
-					this.xmlrpcwired.setValue(channel, datapoint, value)
+
+					this.setValue_wired_rpc(channel,datapoint,value,function(error,result){
+						if (error != undefined) {
+							// fall back to rega
+							that.log.debug('fallback routing via rega')
+							that.setValue_rega(channel,datapoint,value);
+						}
+					})
+
 				} else {
 					// Send over Rega
 					this.log.debug('routing via rega')
-					var rega = this.createRegaRequest()
-					rega.setValue(channel, datapoint, value)
+					this.setValue_rega(channel,datapoint,value);
 				}
 				return
 			}
@@ -452,12 +487,20 @@ HomeMaticPlatform.prototype.setValue = function (intf, channel, datapoint, value
 				rpc = true
 				if (this.xmlrpchmip != undefined) {
 					this.log.debug('routing via ip xmlrpc')
-					this.xmlrpchmip.setValue(channel, datapoint, value)
+
+					this.setValue_hmip_rpc(channel,datapoint,value,function(error,result){
+						if (error != undefined) {
+							// fall back to rega
+							that.log.debug('fallback routing via rega')
+							that.setValue_rega(channel,datapoint,value);
+						}
+					})
+
+
 				} else {
 					// Send over Rega
 					this.log.debug('routing via rega')
-					let rega = this.createRegaRequest()
-					rega.setValue(channel, datapoint, value)
+					this.setValue_rega(channel,datapoint,value);
 				}
 				return
 			}
@@ -472,14 +515,12 @@ HomeMaticPlatform.prototype.setValue = function (intf, channel, datapoint, value
 			// Rega Fallback
 			if (rpc == false) {
 				this.log.debug('routing via fallback rega')
-				let rega = this.createRegaRequest()
-				rega.setValue(channel, datapoint, value)
+				this.setValue_rega(channel,datapoint,value);
 			}
 		} else {
 			// Undefined Interface -> Rega should know how to deal with it
 			this.log.debug('routing via rega')
-			let rega = this.createRegaRequest()
-			rega.setValue(channel, datapoint, value)
+			this.setValue_rega(channel,datapoint,value);
 		}
 	}
 }
