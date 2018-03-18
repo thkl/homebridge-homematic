@@ -19,7 +19,7 @@ HomeMaticHomeKitThermostatWeatherService.prototype.createDeviceService = functio
 
   var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge);
   this.log.debug("Adding Log Service for %s",this.displayName);
-  this.loggingService = new FakeGatoHistoryService("weather", this, {storage: 'fs', path: this.platform.localCache,disableTimer:true});
+  this.loggingService = new FakeGatoHistoryService("weather", this, {storage: 'fs', path: this.platform.localPath,disableTimer:true});
   this.services.push(this.loggingService);
   this.currentTemperature = -255;
   this.currentHumidity = -255;

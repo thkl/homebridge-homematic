@@ -23,7 +23,7 @@ HomeMaticHomeKitThermalControlService.prototype.createDeviceService = function(S
 	var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge);
 	var that = this;
 	this.log.debug("Adding Log Service for %s Adress %s",this.displayName,this.adress);
-	this.loggingService = new FakeGatoHistoryService("weather", this, {storage: 'fs', path: this.platform.localCache,disableTimer:true});
+	this.loggingService = new FakeGatoHistoryService("weather", this, {storage: 'fs', path: this.platform.localPath,disableTimer:true});
 	this.services.push(this.loggingService);
     this.thermostat = new Service["Thermostat"](this.name);
     this.services.push(this.thermostat);

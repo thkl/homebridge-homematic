@@ -12,11 +12,11 @@ util.inherits(HomeMaticHomeKitMotionDetectorServiceIP, HomeKitGenericService)
 
 
 HomeMaticHomeKitMotionDetectorServiceIP.prototype.createDeviceService = function(Service, Characteristic) {
-  
+
   var that = this
   var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge)
   this.log.debug('Adding Log Service for %s',this.displayName)
-  this.loggingService = new FakeGatoHistoryService('motion', this, {storage: 'fs', path: this.platform.localCache, file:this.adress})
+  this.loggingService = new FakeGatoHistoryService('motion', this, {storage: 'fs', path: this.platform.localPath, file:this.adress})
   this.services.push(this.loggingService)
 
 

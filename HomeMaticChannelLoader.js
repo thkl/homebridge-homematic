@@ -25,6 +25,7 @@ HomeMaticChannelLoader.prototype.loadChannelService = function(list, deviceType,
 	var adress = channel.address;
 	var intf = channel.intf;
 	this.platform = platform
+	this.localPath = platform.localPath;
 	// try to load device:type
 	var serviceclass;
 	var options;
@@ -107,6 +108,8 @@ HomeMaticChannelLoader.prototype.loadClass = function(serviceclass) {
 		this.log.debug('Load BuildIn Service Class %s',serviceclass)
 		return require(path.join(__dirname,'ChannelServices',serviceclass))
 	}
+
+
 
 	if (fs.existsSync(path.join(this.localPath,serviceclass+'.js'))) {
 		this.log.debug('Load Custom Service Class %s',serviceclass)

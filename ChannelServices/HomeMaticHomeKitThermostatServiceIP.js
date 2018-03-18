@@ -19,7 +19,7 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function(Ser
   var thermo = new Service["Thermostat"](this.name);
   this.services.push(thermo);
   this.log.debug("Adding Log Service for %s",this.displayName);
-  this.loggingService = new FakeGatoHistoryService("thermo", this, {storage: 'fs', path: this.platform.localCache,disableTimer:true});
+  this.loggingService = new FakeGatoHistoryService("thermo", this, {storage: 'fs', path: this.platform.localPath,disableTimer:true});
   this.loggingService.adress = this.adress;
   this.services.push(this.loggingService);
 
