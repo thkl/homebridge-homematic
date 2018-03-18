@@ -1,13 +1,10 @@
 #!/usr/bin/env node
+'use strict'
 
-// since mocha is not able to exclude files .. skip this the ugly way
 
-var isInTest = typeof global.it === 'function';
-if (!isInTest) {
-
-const HomeMaticRegaRequest = require('HomeMaticRegaRequest.js').HomeMaticRegaRequest
+const HomeMaticRegaRequest = require('../HomeMaticRegaRequest.js').HomeMaticRegaRequest
 const program = require('commander');
-const log = require("./test/lib/logger")._system;
+const log = require("../test/lib/logger")._system;
 const fs = require('fs')
 const path = require('path')
 
@@ -61,13 +58,14 @@ request.script(script, data => {
   console.info("Rebuilding JSON");
   let jData = JSON.parse(data);
   let device = jData.devices[0];
+  if (device!=undefined) {
   let adr = device.address;
   let dtype = device.type;
   device.address = "ADR1234567890";
   device.channels.map(function (channel){
     channel.address = channel.address.replace(adr,"ADR1234567890");
   })
-  let fileName = path.join(__dirname,'test','lib','data','data_test_') + dtype + ".json";
+  let fileName = path.join(__dirname,'..','test','lib','data','data_test_') + dtype + ".json";
   if (fs.existsSync(fileName)) {
       console.info("moving old file into trash");
       fs.unlink(fileName);
@@ -75,5 +73,7 @@ request.script(script, data => {
   var buffer = JSON.stringify(jData,null, 2);
 	fs.writeFileSync(fileName, buffer);
   console.info("written to %s",fileName);
-})
+} else {
+  console.info("No data for %s",program.address)
 }
+})
