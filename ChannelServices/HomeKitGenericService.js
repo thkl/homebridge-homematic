@@ -520,7 +520,7 @@ HomeKitGenericService.prototype = {
     var tp = this.transformDatapoint(dp);
 
     if ((tp[1] == 'LEVEL') || (tp[1] == 'LEVEL_2')) {
-      newValue = parseFloat((newValue / 100).toFixed(2));
+      newValue = parseFloat(newValue) / 100;
     }
     if ((tp[1] == 'COLOR') && (this.type == "RGBW_COLOR")) {
       newValue = Math.round((value / 360) * 199);
