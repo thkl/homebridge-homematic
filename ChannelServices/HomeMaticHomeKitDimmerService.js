@@ -14,74 +14,52 @@ util.inherits(HomeMaticHomeKitDimmerService, HomeKitGenericService);
 
 
 HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, Characteristic) {
-
   var that = this;
   var lightbulb = new Service.Lightbulb(this.name);
   this.delayOnSet = 5;
   this.services.push(lightbulb);
-
   this.onc = lightbulb.getCharacteristic(Characteristic.On)
 
   .on('get', function(callback) {
-    // that.log("Get On command.");
     that.query("LEVEL",function(value) {
-
       if (value==undefined) {
         value = 0;
       }
-
       that.state["LAST"] = value;
-      // that.log("Ret On command. "+ value );
       if (callback) callback(null,value>0);
-
     });
   }.bind(this))
 
   .on('set', function(value, callback) {
-
-    // that.log("Set On to " + value + " command.");
-
-
     var lastLevel = that.state["LAST"];
     if (lastLevel == undefined) {
       lastLevel = -1;
     }
-
     if (((value==true) || ((value==1))) && ((lastLevel<1))) {
-      //that.log("On Command send 100 to Level");
       that.state["LAST"]=100;
       that.command("set","LEVEL" , 100);
     } else
-
     if ((value==0) || (value==false)) {
-      //that.log("Off Command send 0 to Level");
       that.state["LAST"]=0;
       that.command("set","LEVEL" , 0);
     } else
-
     if (((value==true) || ((value==1))) && ((lastLevel>0))) {
-      // that.log("Do Nothing on is on");
-      // Do Nothing just skip the ON Command cause the Dimmer is on
+
     }
 
     else {
-      // that.log("Fallback set Lastlevel", lastLevel);
       that.delayed("set","LEVEL" , lastLevel,2);
     }
-
-
     callback();
   }.bind(this));
 
 
   this.brightness = lightbulb.getCharacteristic(Characteristic.Brightness)
-
   .on('get', function(callback) {
     that.query("LEVEL",function(value){
       that.state["LAST"] = (value*100);
       if (callback) callback(null,value);
     });
-
   }.bind(this))
 
   .on('set', function(value, callback) {
@@ -101,27 +79,32 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
     if (callback)  callback();
   }.bind(this));
 
-  that.currentStateCharacteristic["LEVEL"] = this.brightness;
   this.brightness.eventEnabled = true;
 
-  this.remoteGetValue("LEVEL");
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".LEVEL",this)
+  this.remoteGetValue('LEVEL',function(newValue){
+    that.processDimmerLevel(newValue)
+  })
 
 }
 
+HomeMaticHomeKitDimmerService.prototype.processDimmerLevel = function(newValue){
+    let isOn = (newValue>0)
+    this.onc.updateValue(isOn,null)
+    this.brightness.updateValue((newValue*100),null)
+}
 
 HomeMaticHomeKitDimmerService.prototype.endWorking=function()  {
-  this.remoteGetValue("LEVEL");
+  let that  = this
   this.isWorking = false;
+  this.remoteGetValue('LEVEL',function(newValue){
+    that.processDimmerLevel(newValue)
+  })
 }
 
 HomeMaticHomeKitDimmerService.prototype.event = function(channel,dp,newValue){
-  let that = this
   if (dp=='LEVEL') {
-    if (!this.isWorking) {
-      let isOn = (newValue>0)
-      this.onc.updateValue(isOn,null)
-      this.brightness.updateValue((newValue*100),null)
-    }
+    this.processDimmerLevel(newValue)
   }
 }
 

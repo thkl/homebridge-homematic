@@ -55,7 +55,7 @@ describe("Homematic Plugin (index)", function() {
             let cc = s.getCharacteristic(Characteristic.On)
             assert.ok(cc, "Characteristic.On not found in testdimmer %s",ac.name);
             cc.getValue(function(context,value){
-              assert.equal(value, true);
+              assert.equal(value, true,"Dimmer set to 100% On should be true");
             });
 
             let cl = s.getCharacteristic(Characteristic.Brightness)
@@ -79,7 +79,7 @@ describe("Homematic Plugin (index)", function() {
             let cc = s.getCharacteristic(Characteristic.On)
             assert.ok(cc, "Characteristic.On not found in testdimmer %s",ac.name);
             cc.getValue(function(context,value){
-              assert.equal(value, false);
+              assert.equal(value, false, "Dimmer set to 0% On should be true");
             });
 
             let cl = s.getCharacteristic(Characteristic.Brightness)
