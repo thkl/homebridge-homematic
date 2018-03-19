@@ -120,10 +120,13 @@
 	},
 
 	{
-	   "type": "HmIP-BDT:DIMMER_VIRTUAL_RECEIVER",
+	   "type": "HmIP-FDT:DIMMER_VIRTUAL_RECEIVER",
 	   "service": "HomeMaticHomeKitDimmerService"
 	},
-
+	{
+		 "type": "HmIP-BDT:DIMMER_VIRTUAL_RECEIVER",
+		 "service": "HomeMaticHomeKitDimmerService"
+	},
 	{
 	   "type": "SENSOR",
 	   "service": "HomeMaticHomeKitSensorService"
