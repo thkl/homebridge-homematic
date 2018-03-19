@@ -13,7 +13,7 @@ util.inherits(HomeMaticHomeKitSmokeDetectorServiceIP, HomeKitGenericService);
 
 HomeMaticHomeKitSmokeDetectorServiceIP.prototype.createDeviceService = function(Service, Characteristic) {
 
-  var that = this;
+  let that = this;
   var sensor = new Service.SmokeSensor(this.name)
   this.memyselfandi = this.getClazzConfigValue('single_alarm',false)
 
@@ -22,8 +22,8 @@ HomeMaticHomeKitSmokeDetectorServiceIP.prototype.createDeviceService = function(
     that.query("SMOKE_DETECTOR_ALARM_STATUS",function(value){
 
       // https://github.com/thkl/homebridge-homematic/issues/215
-
-      if ((this.memyselfandi == true) && (value==1)) {
+      // https://github.com/thkl/homebridge-homematic/issues/229
+      if ((that.memyselfandi == true) && (value==1)) {
         if (callback) callback(null,value);
       } else {
         if (callback) callback(null,value);
