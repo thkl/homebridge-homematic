@@ -26,9 +26,7 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function(Service,
     });
   }.bind(this));
 
-  this.currentStateCharacteristic["LEVEL"] = this.currentPos;
   this.currentPos.eventEnabled = true;
-
 
   this.targetPos = blind.getCharacteristic(Characteristic.TargetPosition)
 

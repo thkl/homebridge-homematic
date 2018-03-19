@@ -13,14 +13,14 @@ require("../../index")(homebridgeMock);
 
 describe("Homematic Plugin (index)", function() {
 
-  let datapath = path.join(__dirname,'data','data_test_rhs.json')
+  let datapath = path.join(__dirname,'data','data_test_lightsensor.json')
   let data = fs.readFileSync(datapath).toString();
   let that = this
   var config = { ccu_ip: '127.0.0.1',subsection :'HomeKit', testdata:data };
   var platform = new homebridgeMock.PlatformType(log, config);
 
   before(function() {
-    log.debug('Init Platform with Switch');
+    log.debug('Init Platform with lightsensor');
     platform.accessories(function(acc) {
       that.accessories = acc;
     })
@@ -34,7 +34,7 @@ describe("Homematic Plugin (index)", function() {
   });
 
 
-  describe("Homebridge Platform RHS Service Test", function() {
+  describe("Homebridge Platform lightsensor Service Test", function() {
 
     it('test accessory build', function (done) {
       assert.ok(that.accessories, "Did not find any accessories!");
@@ -42,37 +42,31 @@ describe("Homematic Plugin (index)", function() {
       done();
     });
 
-    it('test RHS close', function (done) {
-      platform.xmlrpc.event(['BidCos-RF','ABC1234560:1','STATE',0]);
+    it('test lightsensor set to 25', function (done) {
+      platform.xmlrpc.event(['BidCos-RF','ABC1234560:1','LUX',25]);
       // check
       that.accessories.map(ac => {
-        let s = ac.get_Service(Service.ContactSensor)
-        assert.ok(s, "Service.ContactSensor not found in rhs %s",ac.name);
-        let cc = s.getCharacteristic(Characteristic.ContactSensorState)
-        assert.ok(cc, "Characteristic.ContactSensorState not found in rhs %s",ac.name);
+        let s = ac.get_Service(Service.LightSensor)
+        assert.ok(s, "Service.LightSensor not found in lightsensor %s",ac.name);
+        let cc = s.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
+        assert.ok(cc, "Characteristic.CurrentAmbientLightLevel not found in lightsensor %s",ac.name);
         cc.getValue(function(context,value){
-          assert.equal(value, 0);
-        });
-        cc.emit('get',function(context,result){
-          assert.equal(result, 0,"get logic result should be 0");
+          assert.equal(value, 25);
         });
       })
       done();
     });
 
-    it('test rhs open', function (done) {
-      platform.xmlrpc.event(['BidCos-RF','ABC1234560:1','STATE',1]);
+    it('test lightsensor set to 100', function (done) {
+      platform.xmlrpc.event(['BidCos-RF','ABC1234560:1','LUX',100]);
       // check
       that.accessories.map(ac => {
-        let s = ac.get_Service(Service.ContactSensor)
-        assert.ok(s, "Service.ContactSensor not found in rhs %s",ac.name);
-        let cc = s.getCharacteristic(Characteristic.ContactSensorState)
-        assert.ok(cc, "Characteristic.ContactSensorState not found in rhs %s",ac.name);
+        let s = ac.get_Service(Service.LightSensor)
+        assert.ok(s, "Service.LightSensor not found in lightsensor %s",ac.name);
+        let cc = s.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
+        assert.ok(cc, "Characteristic.CurrentAmbientLightLevel not found in lightsensor %s",ac.name);
         cc.getValue(function(context,value){
-          assert.equal(value, 1);
-        });
-        cc.emit('get',function(context,result){
-          assert.equal(result, 1,"get logic result should be 1");
+          assert.equal(value, 100);
         });
       })
       done();

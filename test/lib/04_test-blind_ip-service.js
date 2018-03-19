@@ -83,11 +83,19 @@ describe("Homematic Plugin (index)", function() {
           assert.equal(value, 100);
         });
 
+        ccp.emit('get',function(context,result){
+          assert.equal(result, 100,"get logic result should be 100");
+        });
+
         let ctp = s.getCharacteristic(Characteristic.TargetPosition)
         assert.ok(ctp, "Characteristic.TargetPosition not found in Blind %s",ac.name);
         ctp.getValue(function(context,value){
           assert.equal(value, 100);
         });
+        ctp.emit('get',function(context,result){
+          assert.equal(result, 100,"get logic result should be 100");
+        });
+
       });
       done();
     });
@@ -123,12 +131,12 @@ describe("Homematic Plugin (index)", function() {
         ccp.getValue(function(context,value){
           assert.equal(value, 25);
         });
-
         let ctp = s.getCharacteristic(Characteristic.TargetPosition)
         assert.ok(ctp, "Characteristic.TargetPosition not found in Blind %s",ac.name);
         ctp.getValue(function(context,value){
           assert.equal(value, 25);
         });
+        // Note get emits will not work in simulator because set on channel 3 will not set the same value on channel 4 (there is the getter)
       });
       done();
     });

@@ -205,10 +205,9 @@ HomeMaticHomeKitRotaryHandleService.prototype.processWindowSensorData = function
   }
 }
 
-HomeMaticHomeKitRotaryHandleService.prototype.event = function(channel,dp,newValue){
+HomeMaticHomeKitRotaryHandleService.prototype.datapointEvent = function(dp,newValue){
   // Chech sensors
   let that = this
-  let event_address = channel + '.' + dp
   this.processWindowSensorData(newValue)
 }
 

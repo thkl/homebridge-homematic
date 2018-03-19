@@ -22,6 +22,7 @@ HomeMaticRPCTestDriver.prototype.getIPAddress = function() {
 
 HomeMaticRPCTestDriver.prototype.getValue = function(channel, datapoint, callback) {
   if (this.platform.homebridge != undefined) {
+    this.log.info('Client ask for %s.%s',channel,datapoint)
     callback(this.platform.homebridge.values[channel + '.' + datapoint]);
   } else {
     callback(0)
@@ -56,6 +57,12 @@ HomeMaticRPCTestDriver.prototype.event = function(params,callback) {
   var datapoint = params[2];
   var value = params[3];
   let address = this.interface + params[1] + '.' + params[2]
+
+  if (typeof value == 'object') {
+    value = value['explicitDouble'];
+  }
+
+  this.platform.homebridge.values[params[1] + '.' + params[2]] = value;
 
   this.log.debug("Ok here is the Event" + JSON.stringify(params));
   this.log.debug("RPC single event for %s.%s with value %s",channel,datapoint,value);

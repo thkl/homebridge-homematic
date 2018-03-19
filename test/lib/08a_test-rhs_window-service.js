@@ -53,12 +53,17 @@ describe("Homematic Plugin (index)", function() {
         cc.getValue(function(context,value){
           assert.equal(value, 0 , "Send 0 CurrentPosition should be 0");
         });
+        cc.emit('get',function(context,result){
+          assert.equal(result, 0,"get logic result should be 0");
+        });
         let ct = s.getCharacteristic(Characteristic.TargetPosition)
         assert.ok(ct, "Characteristic.TargetPosition not found in rhs %s",ac.name);
         ct.getValue(function(context,value){
           assert.equal(value, 0, "Send 1 TargetPosition should be 0");
         });
-
+        ct.emit('get',function(context,result){
+          assert.equal(result, 0,"get logic result should be 0");
+        });
       })
       done();
     });
@@ -74,10 +79,16 @@ describe("Homematic Plugin (index)", function() {
         cc.getValue(function(context,value){
           assert.equal(value, 50, "Send 1 CurrentPosition should be 50");
         });
+        cc.emit('get',function(context,result){
+          assert.equal(result, 50,"get logic result should be 50");
+        });
         let ct = s.getCharacteristic(Characteristic.TargetPosition)
         assert.ok(ct, "Characteristic.TargetPosition not found in rhs %s",ac.name);
         ct.getValue(function(context,value){
           assert.equal(value, 50, "Send 1 TargetPosition  should be 50");
+        });
+        ct.emit('get',function(context,result){
+          assert.equal(result, 50,"get logic result should be 50");
         });
       })
       done();
@@ -94,12 +105,18 @@ describe("Homematic Plugin (index)", function() {
         cc.getValue(function(context,value){
           assert.equal(value, 100, "Send 2 CurrentPosition should be 100");
         });
+        cc.emit('get',function(context,result){
+          assert.equal(result, 100,"get logic result should be 100");
+        });
         let ct = s.getCharacteristic(Characteristic.TargetPosition)
         assert.ok(ct, "Characteristic.TargetPosition not found in rhs %s",ac.name);
         ct.getValue(function(context,value){
           assert.equal(value, 100,"Send 2 TargetPosition should be 100");
         });
-      })
+        ct.emit('get',function(context,result){
+          assert.equal(result, 100,"get logic result should be 100");
+        });
+      });
       done();
     });
 

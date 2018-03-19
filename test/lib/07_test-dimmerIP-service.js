@@ -55,11 +55,16 @@ describe("Homematic Plugin (index)", function() {
             cc.getValue(function(context,value){
               assert.equal(value, true);
             });
-
+            cc.emit('get',function(context,result){
+              assert.equal(result, true ,"get logic result should be true");
+            });
             let cl = s.getCharacteristic(Characteristic.Brightness)
             assert.ok(cl, "Characteristic.Brightness not found in testdimmer %s",ac.name);
             cl.getValue(function(context,value){
               assert.equal(value, 100);
+            });
+            cl.emit('get',function(context,result){
+              assert.equal(result, 100,"get logic result should be 100");
             });
           });
        done();
@@ -78,10 +83,17 @@ describe("Homematic Plugin (index)", function() {
               assert.equal(value, false);
             });
 
+            cc.emit('get',function(context,result){
+              assert.equal(result, false,"get logic result should be false∞");
+            });
             let cl = s.getCharacteristic(Characteristic.Brightness)
             assert.ok(cl, "Characteristic.Brightness not found in testdimmer %s",ac.name);
             cl.getValue(function(context,value){
               assert.equal(value, 0);
+            });
+
+            cl.emit('get',function(context,result){
+              assert.equal(result, 0,"get logic result should be 0");
             });
           })
           done();

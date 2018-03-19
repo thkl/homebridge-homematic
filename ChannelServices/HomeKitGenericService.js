@@ -179,7 +179,6 @@ HomeKitGenericService.prototype = {
 
 
     if ((this.usecache == true ) && (this.state[dp] != undefined) && (this.state[dp]!=null)) {
-      //that.log("Use Cache");
       if (callback!=undefined){
         callback(this.state[dp]);
       }
@@ -397,7 +396,6 @@ HomeKitGenericService.prototype = {
 
   event:function(channel,dp,newValue) {
     var that = this;
-
     if ((channel!=undefined) && (dp!=undefined)) {
 
       var tp = this.transformDatapoint(dp);
@@ -468,12 +466,10 @@ HomeKitGenericService.prototype = {
 
         var chnl = channel.slice(channel.indexOf(":")+1);
         this.cache(chnl + ":" + dp,newValue);
-        this.log.debug('jump into dpe')
         this.datapointEvent(chnl + ":" + dp,newValue);
       } else {
 
         this.cache(dp,newValue);
-        this.log.debug('jump into dpe')
         this.datapointEvent(dp,newValue);
       }
       this.eventupdate = false;
