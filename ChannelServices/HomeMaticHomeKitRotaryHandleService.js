@@ -5,7 +5,7 @@ var util = require("util");
 
 
 function HomeMaticHomeKitRotaryHandleService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
-    HomeMaticHomeKitRotaryHandleService.super_.apply(this, arguments);
+  HomeMaticHomeKitRotaryHandleService.super_.apply(this, arguments);
 }
 
 util.inherits(HomeMaticHomeKitRotaryHandleService, HomeKitGenericService);
@@ -14,130 +14,203 @@ util.inherits(HomeMaticHomeKitRotaryHandleService, HomeKitGenericService);
 
 HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function(Service, Characteristic) {
 
-     var that = this;
-     if (this.special=="WINDOW") {
-		
-      var window = new Service.Window(this.name);
-      this.cwindow = window.getCharacteristic(Characteristic.CurrentPosition);
-      this.cwindow.on('get', function(callback) {
+  var that = this;
+  if (this.special=="WINDOW") {
+    var window = new Service.Window(this.name);
+    this.cwindow = window.getCharacteristic(Characteristic.CurrentPosition);
+    this.cwindow.on('get', function(callback) {
       that.query("STATE",function(value){
-       if (callback) {
-         var cbvalue = 0;
-         if (value>0) {cbvalue = 100;}
-         callback(null,cbvalue);
-       }
-      });
-      }.bind(this));
-      
-      
-      this.currentStateCharacteristic["STATE"] = this.cwindow;
-      this.cwindow.eventEnabled = true;
-      
-      this.twindow = window.getCharacteristic(Characteristic.TargetPosition);
-      this.twindow.on('set',  function(value,callback) {
-      	  	// This is just a sensor so reset homekit data to ccu value after 1 second playtime
-	      	setTimeout(function () {
-		      	that.remoteGetValue("STATE",function(value){
-			      	
-		      		that.processWindowSensorData(value)
-		      	})
-	      	}, 1000)
-	      	
-	    if (callback) {
-	      	callback()
-	    }
-      }.bind(this));
-      
-      this.swindow = window.getCharacteristic(Characteristic.PositionState);
-      this.swindow.on('get', function(callback) {
-	     if (callback) callback(null, Characteristic.PositionState.STOPPED);
-      }.bind(this));
-      
-      this.services.push(window);
+        if (callback) {
+          switch (value) {
+            case 0:
+            callback(null,0)
+            break;
+            case 1:
+            callback(null,50)
+            break
+            case 2:
+            callback(null,100)
+            break
+            default:
+            callback(null,0)
 
-    } else 
-
-
-    if (this.special=="DOOR") {
-
-      var door = new Service["Door"](this.name);
-      var cdoor = door.getCharacteristic(Characteristic.CurrentPosition);
-      cdoor.on('get', function(callback) {
-      	that.query("STATE",function(value){
-      	var hkvalue = 0;
-      	if (value==undefined) {
-          hkvalue = 0;
+          }
         }
-        
-        if (value==0) {hkvalue=100;}
-        if (value==1) {hkvalue=0;}
-        if (value==2) {hkvalue=0;}
-        
-		if (callback) callback(null,hkvalue);
-      	});
-      }.bind(this));
+      });
+    }.bind(this));
 
-      this.currentStateCharacteristic["STATE"] = cdoor;
-      cdoor.eventEnabled = true;
-      
-      
-      this.addValueMapping("STATE",0,100);
-      this.addValueMapping("STATE",1,0);
-      this.addValueMapping("STATE",2,0);
-      this.services.push(door);
 
-    } else {
+    this.cwindow.eventEnabled = true;
 
-      var contact = new Service["ContactSensor"](this.name);
-      var state = contact.getCharacteristic(Characteristic.ContactSensorState)
-      .on('get', function(callback) {
-        that.query("STATE",function(value) {
-         if (callback) {callback(null,value);}
-        });
-      }.bind(this));
-      this.currentStateCharacteristic["STATE"] = state;
-      state.eventEnabled = true;
-      this.addValueMapping("STATE",0,0);
-      this.addValueMapping("STATE",1,1);
-      this.addValueMapping("STATE",2,1);
-      this.addTamperedCharacteristic(contact,Characteristic);
-	  this.addLowBatCharacteristic(contact,Characteristic);
-      this.services.push(contact);
-    }
+    this.twindow = window.getCharacteristic(Characteristic.TargetPosition);
+    this.twindow.on('set',  function(value,callback) {
+      // This is just a sensor so reset homekit data to ccu value after 1 second playtime
+      setTimeout(function () {
+        that.remoteGetValue("STATE",function(value){
+          that.processWindowSensorData(value)
+        })
+      }, 1000)
 
-    this.remoteGetValue("STATE");
+      if (callback) {
+        callback()
+      }
+    }.bind(this))
+
+    .on('get', function(callback) {
+      that.query("STATE",function(value){
+        if (callback) {
+          switch (value) {
+            case 0:
+            callback(null,0)
+            break;
+            case 1:
+            callback(null,50)
+            break
+            case 2:
+            callback(null,100)
+            break
+            default:
+            callback(null,0)
+          }
+        }
+      });
+    }.bind(this));
+
+    this.swindow = window.getCharacteristic(Characteristic.PositionState);
+    this.swindow.on('get', function(callback) {
+      if (callback) callback(null, Characteristic.PositionState.STOPPED);
+    }.bind(this));
+
+    this.services.push(window);
+
+  } else
+
+
+  if (this.special=="DOOR") {
+    var door = new Service["Door"](this.name);
+    this.cdoor = door.getCharacteristic(Characteristic.CurrentPosition);
+    this.cdoor.on('get', function(callback) {
+      that.query("STATE",function(value){
+        if (callback) {
+          switch (value) {
+            case 0:
+            callback(null,0)
+            break;
+            case 1:
+            callback(null,50)
+            break
+            case 2:
+            callback(null,100)
+            break
+            default:
+            callback(null,0)
+          }
+        }
+      });
+    }.bind(this));
+
+    this.cdoor.eventEnabled = true;
+    this.services.push(door);
+
+  } else {
+
+    var contact = new Service.ContactSensor(this.name);
+    this.ccontact = contact.getCharacteristic(Characteristic.ContactSensorState)
+    .on('get', function(callback) {
+      that.query("STATE",function(value) {
+        if (callback) {
+          switch (value) {
+            case 0:
+            callback(null,0)
+            break;
+            case 1:
+            callback(null,1)
+            break
+            case 2:
+            callback(null,1)
+            break
+            default:
+            callback(null,0)
+          }
+        }
+      });
+    }.bind(this));
+
+    this.ccontact.eventEnabled = true;
+    this.addTamperedCharacteristic(contact,Characteristic);
+    this.addLowBatCharacteristic(contact,Characteristic);
+    this.services.push(contact);
+  }
+
+  this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ":1.STATE",this)
+  this.remoteGetValue('STATE',function(newValue){
+    that.processWindowSensorData(newValue)
+  })
 
 }
 
 HomeMaticHomeKitRotaryHandleService.prototype.processWindowSensorData = function(newValue){
-	switch (newValue) {
-			case 0 : 
-			  this.cwindow.updateValue(0,null)		    
-			  this.swindow.updateValue(2,null)	
-			  this.twindow.updateValue(0,null)
-			  break;
-			case 1: 
-			  this.cwindow.updateValue(50,null)		    
-			  this.swindow.updateValue(2,null)		    
-			  this.twindow.updateValue(50,null)
-			  break;
-			case 2:
-			  this.cwindow.updateValue(100,null)		    
-			  this.swindow.updateValue(2,null)		    
-			  this.twindow.updateValue(100,null)
-			  break;
 
-	}
+  if (this.special == "WINDOW") {
+    if (this.haz([this.cwindow,this.swindow,this.twindow])) {
+      switch (newValue) {
+        case 0 :
+        this.cwindow.updateValue(0,null)
+        this.swindow.updateValue(2,null)
+        this.twindow.updateValue(0,null)
+        break;
+        case 1:
+        this.cwindow.updateValue(50,null)
+        this.swindow.updateValue(2,null)
+        this.twindow.updateValue(50,null)
+        break;
+        case 2:
+        this.cwindow.updateValue(100,null)
+        this.swindow.updateValue(2,null)
+        this.twindow.updateValue(100,null)
+        break;
+      }
+    }
+  } else
+
+  if (this.special == "DOOR") {
+    if (this.haz([this.cdoor])) {
+      switch (newValue) {
+        case 0 :
+        this.cdoor.updateValue(0,null)
+        break;
+        case 1:
+        this.cdoor.updateValue(50,null)
+        break;
+        case 2:
+        this.cdoor.updateValue(100,null)
+        break;
+      }
+    }
+  }
+  else {
+    if (this.haz([this.ccontact])) {
+      switch (newValue) {
+        case 0 :
+        this.ccontact.updateValue(0,null)
+        break;
+        case 1:
+        this.ccontact.updateValue(1,null)
+        break;
+        case 2:
+        this.ccontact.updateValue(1,null)
+        break;
+      }
+    }
+  }
 }
 
 HomeMaticHomeKitRotaryHandleService.prototype.event = function(channel,dp,newValue){
-	// Chech sensors
-	let that = this
-    let event_address = channel + '.' + dp
-    if ((this.cwindow != undefined) && (this.swindow != undefined)) {
-	    this.processWindowSensorData(newValue)
-    }
+  // Chech sensors
+  let that = this
+  let event_address = channel + '.' + dp
+  this.processWindowSensorData(newValue)
 }
 
 
-module.exports = HomeMaticHomeKitRotaryHandleService; 
+module.exports = HomeMaticHomeKitRotaryHandleService;

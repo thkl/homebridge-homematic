@@ -1,0 +1,8 @@
+{"devices":[
+	{"id": "10001","name": "TA1","address": "ABC1234560","type": "HM-Sec-RHS",
+	"channels": [
+		{"cId": 10002,"name": "TA1_C1","intf": "BidCos-RF","address": "BidCos-RF.ABC1234560:1","type": "ROTARY_HANDLE_SENSOR","access": "255"}
+	]}
+],
+	"subsection":[10002]
+}

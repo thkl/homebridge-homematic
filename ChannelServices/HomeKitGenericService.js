@@ -74,6 +74,20 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
 
 
 HomeKitGenericService.prototype = {
+
+    haz:function(array) {
+      var result = true
+      if (array) {
+        array.some(function(element){
+          if (element == undefined) {
+            result = false
+          }
+        })
+      }
+      return result
+    },
+
+
   /**
    add FakeGato History object only if not in a testcase
    **/
