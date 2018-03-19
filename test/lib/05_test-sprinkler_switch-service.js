@@ -16,6 +16,7 @@ describe("Homematic Plugin (index)", function() {
   let datapath = path.join(__dirname,'data','data_test_switch.json')
   let data = fs.readFileSync(datapath).toString();
   let that = this
+  
   var config = { ccu_ip: '127.0.0.1',subsection :'HomeKit', testdata:data , valves :['BidCos-RF.ABC1234560:1']};
   var platform = new homebridgeMock.PlatformType(log, config);
 

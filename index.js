@@ -33,7 +33,6 @@ function HomeMaticPlatform(log, config) {
 	this.config = config
   this.localCache = path.join(_homebridge.user.storagePath(), 'ccu.json')
 	this.localPath = _homebridge.user.storagePath()
-
 	this.ccuIP = config.ccu_ip
 
 	if (isInTest) {

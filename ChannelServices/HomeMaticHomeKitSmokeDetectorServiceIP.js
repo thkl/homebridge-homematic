@@ -17,12 +17,31 @@ HomeMaticHomeKitSmokeDetectorServiceIP.prototype.createDeviceService = function(
   var sensor = new Service.SmokeSensor(this.name)
   this.memyselfandi = this.getClazzConfigValue('single_alarm',false)
 
-  var state = sensor.getCharacteristic(Characteristic.SmokeDetected)
+  this.state = sensor.getCharacteristic(Characteristic.SmokeDetected)
   .on('get', function(callback) {
     that.query("SMOKE_DETECTOR_ALARM_STATUS",function(value){
 
       // https://github.com/thkl/homebridge-homematic/issues/215
       // https://github.com/thkl/homebridge-homematic/issues/229
+      switch (newValue) {
+
+        case 0: // idle
+          if (callback) callback(null,false);
+          break;
+        case 1: // primary alarm
+          if (callback) callback(null,true);
+          break;
+        case 2: // INTRUSION_ALARM
+          if (callback) callback(null,true);
+          break;
+        case 3 : // SECONDARY_ALARM only set if not a single signaling
+          if (this.memyselfandi != true) {
+            if (callback) callback(null,true);
+          }
+          break;
+      }
+
+
       if ((that.memyselfandi == true) && (value==1)) {
         if (callback) callback(null,value);
       } else {
@@ -32,22 +51,33 @@ HomeMaticHomeKitSmokeDetectorServiceIP.prototype.createDeviceService = function(
     });
   }.bind(this));
 
-  this.currentStateCharacteristic["SMOKE_DETECTOR_ALARM_STATUS"] = state;
-  state.eventEnabled = true;
   this.services.push(sensor);
   this.remoteGetValue("SMOKE_DETECTOR_ALARM_STATUS");
+  this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ":1.SMOKE_DETECTOR_ALARM_STATUS",this)
 
 }
 
 HomeMaticHomeKitSmokeDetectorServiceIP.prototype.datapointEvent=function(dp,newValue)  {
+  this.log.debug('HomeMaticHomeKitSmokeDetectorServiceIP event %s %s',dp,newValue)
   if (dp=='SMOKE_DETECTOR_ALARM_STATUS') {
 
-    if ((this.memyselfandi == true) && (newValue==1)) {
-      if (callback) callback(null,newValue);
-    } else {
-      if (callback) callback(null,newValue);
-    }
+    switch (newValue) {
 
+      case 0: // idle
+        this.state.updateValue(false,null);
+        break;
+      case 1: // primary alarm
+        this.state.updateValue(true,null);
+        break;
+      case 2: // INTRUSION_ALARM
+        this.state.updateValue(true,null);
+        break;
+      case 3 : // SECONDARY_ALARM only set if not a single signaling
+        if (this.memyselfandi != true) {
+          this.state.updateValue(true,null);
+        }
+        break;
+    }
   }
 }
 

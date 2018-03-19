@@ -15,15 +15,9 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function(Ser
 
   var that = this;
   this.usecache = false;
-  var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge);
   var thermo = new Service["Thermostat"](this.name);
   this.services.push(thermo);
-  this.log.debug("Adding Log Service for %s",this.displayName);
-  this.loggingService = new FakeGatoHistoryService("thermo", this, {storage: 'fs', path: this.platform.localPath,disableTimer:true});
-  this.loggingService.adress = this.adress;
-  this.services.push(this.loggingService);
-
-
+  this.enableLoggingService("thermo");
 
   var mode = thermo.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
   .on('get', function(callback) {
@@ -140,8 +134,14 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function(Ser
 
 HomeMaticHomeKitIPThermostatService.prototype.queryData = function() {
   var that = this;
-  this.query("HUMIDITY",function(value){that.loggingService.addEntry({time: moment().unix(), humidity:parseFloat(value)})});
-  this.query("ACTUAL_TEMPERATURE",function(value){that.loggingService.addEntry({time: moment().unix(), currentTemp:parseFloat(value)})});
+  this.query("HUMIDITY",function(value){
+    that.addLogEntry({humidity:parseFloat(value)})
+  });
+
+  this.query("ACTUAL_TEMPERATURE",function(value){
+    that.addLogEntry({currentTemp:parseFloat(value)})
+  });
+
   //create timer to query device every 10 minutes
   this.refreshTimer = setTimeout(function(){that.queryData()}, 10 * 60 * 1000);
 }
@@ -156,15 +156,15 @@ HomeMaticHomeKitIPThermostatService.prototype.shutdown = function() {
 HomeMaticHomeKitIPThermostatService.prototype.datapointEvent= function(dp,newValue) {
 
   if (dp=='ACTUAL_TEMPERATURE') {
-    this.loggingService.addEntry({time: moment().unix(), currentTemp:parseFloat(newValue)});
+      this.addLogEntry({currentTemp:parseFloat(newValue)});
   }
 
   if (dp=='HUMIDITY') {
-    this.loggingService.addEntry({time: moment().unix(), humidity:parseFloat(newValue)});
+      this.addLogEntry({humidity:parseFloat(newValue)});
   }
 
   if (dp=='SET_POINT_TEMPERATURE') {
-    this.loggingService.addEntry({time: moment().unix(), setTemp:parseFloat(newValue)});
+      that.addLogEntry({setTemp:parseFloat(newValue)});
   }
 
 }

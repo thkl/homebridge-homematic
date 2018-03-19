@@ -13,14 +13,10 @@ util.inherits(HomeMaticHomeKitPowerMeterService, HomeKitGenericService);
 
 HomeMaticHomeKitPowerMeterService.prototype.propagateServices = function(homebridge, Service, Characteristic) {
 
+  // Enable the Logging Service for Energy
+  this.enableLoggingService("energy");
+
   // Register new Characteristic or Services here
-
-  var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge);
-  this.log.debug("Adding Log Service for %s",this.displayName);
-  this.loggingService = new FakeGatoHistoryService("energy", this, {storage: 'fs', path: this.platform.localCache,disableTimer:true});
-  this.services.push(this.loggingService);
-
-
   var uuid = homebridge.uuid;
 
 
@@ -113,7 +109,7 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
   var power = sensor.getCharacteristic(Characteristic.PowerCharacteristic)
   .on('get', function(callback) {
     that.query("2:POWER",function(value){
-      that.loggingService.addEntry({time: moment().unix(), power:parseFloat(value)});
+      that.addLogEntry({power:parseFloat(value)})
       if (callback) callback(null,value);
     });
   }.bind(this));
@@ -170,15 +166,17 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
 
 HomeMaticHomeKitPowerMeterService.prototype.queryData = function() {
   var that = this;
-  this.query("2:POWER",function(value){that.loggingService.addEntry({time: moment().unix(), power:parseFloat(value)})});
+  this.query("2:POWER",function(value){
+    that.addLogEntry({power:parseFloat(value)})
+  });
   //create timer to query device every 10 minutes
   this.refreshTimer = setTimeout(function(){that.queryData()}, 10 * 60 * 1000);
 }
-
+if (this.loggingService != undefined) {
 HomeMaticHomeKitPowerMeterService.prototype.datapointEvent= function(dp,newValue) {
   if (dp=='2:POWER') {
-    this.loggingService.addEntry({time: moment().unix(), power:parseInt(newValue)});
+    that.addLogEntry({power:parseFloat(value)})
   }
 }
-
+}
 module.exports = HomeMaticHomeKitPowerMeterService;

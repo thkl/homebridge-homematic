@@ -2,7 +2,6 @@
 
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService;
 var util = require("util");
-var moment = require('moment');
 
 function HomeMaticHomeKitThermostatWeatherService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
   HomeMaticHomeKitThermostatWeatherService.super_.apply(this, arguments);
@@ -16,11 +15,8 @@ HomeMaticHomeKitThermostatWeatherService.prototype.createDeviceService = functio
   var that = this;
   var thermo = new Service["TemperatureSensor"](this.name);
   this.services.push(thermo);
+  this.enableLoggingService("weather");
 
-  var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge);
-  this.log.debug("Adding Log Service for %s",this.displayName);
-  this.loggingService = new FakeGatoHistoryService("weather", this, {storage: 'fs', path: this.platform.localPath,disableTimer:true});
-  this.services.push(this.loggingService);
   this.currentTemperature = -255;
   this.currentHumidity = -255;
 
@@ -60,7 +56,7 @@ HomeMaticHomeKitThermostatWeatherService.prototype.queryData = function() {
     that.query("HUMIDITY",function(value){
       that.currentHumidity = parseFloat(value);
       if ((that.currentTemperature > -255) && (that.currentHumidity > -255)) {
-        that.loggingService.addEntry({time: moment().unix(), temp:that.currentTemperature, pressure:0, humidity:that.currentHumidity})
+        that.addLogEntry({temp:that.currentTemperature, pressure:0, humidity:that.currentHumidity})
       }
     });
   });
@@ -85,7 +81,7 @@ HomeMaticHomeKitThermostatWeatherService.prototype.datapointEvent= function(dp,n
   }
 
   if ((this.currentTemperature > -255) && (this.currentHumidity > -255)) {
-    this.loggingService.addEntry({time: moment().unix(), temp:this.currentTemperature, pressure:0, humidity:this.currentHumidity});
+    this.addLogEntry({ temp:this.currentTemperature, pressure:0, humidity:this.currentHumidity});
   }
 }
 

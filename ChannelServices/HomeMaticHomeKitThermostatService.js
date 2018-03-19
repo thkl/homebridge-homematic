@@ -17,11 +17,7 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function(Servi
   var thermo = new Service["Thermostat"](this.name);
   this.services.push(thermo);
 
-  var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge);
-  this.log.debug("Adding Log Service for %s",this.displayName);
-  this.loggingService = new FakeGatoHistoryService("thermo", this, {storage: 'fs', path: this.platform.localPath,disableTimer:true});
-  this.services.push(this.loggingService);
-
+  this.enableLoggingService("thermo");
 
   // this.addLowBatCharacteristic(thermo,Characteristic);
 
@@ -78,8 +74,7 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function(Servi
   .setProps({ minValue: -100 })
   .on('get', function(callback) {
     this.remoteGetValue("1:TEMPERATURE",function(value){
-      that.loggingService.addEntry({time: moment().unix(), currentTemp:parseFloat(value)});
-
+      that.addLogEntry({currentTemp:parseFloat(value)})
       if (callback) callback(null,value);
     });
   }.bind(this));
@@ -112,7 +107,7 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function(Servi
       if (value>30) {
         value=30.5;
       }
-      that.loggingService.addEntry({time: moment().unix(), setTemp:parseFloat(value)});
+      that.addLogEntry({setTemp:parseFloat(value)})
       if (callback) callback(null,value);
     });
 
@@ -143,8 +138,13 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function(Servi
 
 HomeMaticHomeKitThermostatService.prototype.queryData = function() {
   var that = this;
-  this.query("HUMIDITY",function(value){that.loggingService.addEntry({time: moment().unix(), humidity:parseFloat(value)})});
-  this.query("TEMPERATURE",function(value){that.loggingService.addEntry({time: moment().unix(), currentTemp:parseFloat(value)})});
+  this.query("HUMIDITY",function(value){
+    that.addLogEntry({humidity:parseFloat(value)})
+  })
+
+  this.query("TEMPERATURE",function(value){
+      that.addLogEntry({currentTemp:parseFloat(value)})
+  });
   //create timer to query device every 10 minutes
   this.refreshTimer = setTimeout(function(){that.queryData()}, 10 * 60 * 1000);
 }

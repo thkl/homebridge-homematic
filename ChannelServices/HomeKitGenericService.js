@@ -2,6 +2,7 @@
 
 const fs = require('fs')
 const path = require('path')
+var moment = require('moment')
 
 function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic, deviceType) {
 
@@ -36,9 +37,8 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.tampered = false;
   this.tamperedCharacteristic = undefined;
   this.delayOnSet = 0;
-
+  this.runsInTestMode = (typeof global.it === 'function');
   var that = this;
-
 
   if (that.adress.indexOf("CUxD.") > -1) {
     this.usecache = false;
@@ -74,7 +74,27 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
 
 
 HomeKitGenericService.prototype = {
+  /**
+   add FakeGato History object only if not in a testcase
+   **/
+  enableLoggingService:function(type) {
+    if (this.runsInTestMode == true) {
+      this.log.debug("Skip Loging Service for %s because of testmode",this.displayName);
+    } else {
+      var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge);
+      this.log.debug("Adding Log Service for %s",this.displayName);
+      this.loggingService = new FakeGatoHistoryService(type, this, {storage: 'fs', path: this.platform.localCache,disableTimer:true});
+      this.services.push(this.loggingService);
+    }
+  },
 
+  addLogEntry:function(data) {
+    // check if loggin is enabled
+    if ((this.loggingService != undefined) && (data != undefined)) {
+      data.time =  moment().unix()
+      this.loggingService.addEntry(data)
+    }
+  },
 
   getClazzConfigValue:function(key,defaultValue) {
     var result = defaultValue

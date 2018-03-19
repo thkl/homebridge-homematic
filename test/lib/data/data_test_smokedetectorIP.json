@@ -1,0 +1,8 @@
+{"devices":[
+	{"id": "10001","name": "TA1","address": "ADR1234567890","type": "HmIP-SWSD",
+	"channels": [
+		{"cId": 10002,"name": "TA1_C1","intf": "HmIP-RF","address": "HmIP-RF.ADR1234567890:1","type": "SMOKE_DETECTOR","access": "255"}
+	]}
+],
+	"subsection":[10002]
+}
