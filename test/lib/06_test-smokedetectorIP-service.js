@@ -53,9 +53,15 @@ describe("Homematic Plugin (index)", function() {
             assert.ok(s, "Service.SmokeSensor not found in SmokeDetector %s",ac.name);
             let cc = s.getCharacteristic(Characteristic.SmokeDetected)
             assert.ok(cc, "Characteristic.SmokeDetected not found in SmokeDetector %s",ac.name);
+            // EventLogic
             cc.getValue(function(context,value){
-              assert.equal(value, true);
+              assert.equal(value, true,"event logic result should be true");
             });
+            // Getlogic
+            cc.emit('get',function(context,result){
+              assert.equal(result,true,"get logic result should be true");
+            });
+
           });
        done();
      });
@@ -70,7 +76,10 @@ describe("Homematic Plugin (index)", function() {
             let cc = s.getCharacteristic(Characteristic.SmokeDetected)
             assert.ok(cc, "Characteristic.SmokeDetected not found in SmokeDetector %s",ac.name);
             cc.getValue(function(context,value){
-              assert.equal(value, false);
+              assert.equal(value, false,"event logic result should be false");
+            });
+            cc.emit('get',function(context,result){
+              assert.equal(result,false,"get logic result should be false");
             });
           });
           done();
@@ -86,8 +95,12 @@ describe("Homematic Plugin (index)", function() {
           let cc = s.getCharacteristic(Characteristic.SmokeDetected)
           assert.ok(cc, "Characteristic.SmokeDetected not found in SmokeDetector %s",ac.name);
           cc.getValue(function(context,value){
-            assert.equal(value, false);
+            assert.equal(value, false,"event logic result should be false");
           });
+          cc.emit('get',function(context,result){
+            assert.equal(result,false,"get logic result should be false");
+          });
+
         });
         done();
       });
@@ -102,7 +115,10 @@ describe("Homematic Plugin (index)", function() {
           let cc = s.getCharacteristic(Characteristic.SmokeDetected)
           assert.ok(cc, "Characteristic.SmokeDetected not found in SmokeDetector %s",ac.name);
           cc.getValue(function(context,value){
-            assert.equal(value, true);
+            assert.equal(value, true,"event logic result should be true");
+          });
+          cc.emit('get',function(context,result){
+            assert.equal(result,true,"get logic result should be true");
           });
         });
         done();

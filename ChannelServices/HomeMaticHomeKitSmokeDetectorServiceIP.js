@@ -20,11 +20,9 @@ HomeMaticHomeKitSmokeDetectorServiceIP.prototype.createDeviceService = function(
   this.state = sensor.getCharacteristic(Characteristic.SmokeDetected)
   .on('get', function(callback) {
     that.query("SMOKE_DETECTOR_ALARM_STATUS",function(value){
-
       // https://github.com/thkl/homebridge-homematic/issues/215
       // https://github.com/thkl/homebridge-homematic/issues/229
-      switch (newValue) {
-
+      switch (value) {
         case 0: // idle
           if (callback) callback(null,false);
           break;
@@ -35,19 +33,13 @@ HomeMaticHomeKitSmokeDetectorServiceIP.prototype.createDeviceService = function(
           if (callback) callback(null,true);
           break;
         case 3 : // SECONDARY_ALARM only set if not a single signaling
-          if (this.memyselfandi != true) {
+          if (that.memyselfandi != true) {
             if (callback) callback(null,true);
+          } else {
+            if (callback) callback(null,false);
           }
           break;
       }
-
-
-      if ((that.memyselfandi == true) && (value==1)) {
-        if (callback) callback(null,value);
-      } else {
-        if (callback) callback(null,value);
-      }
-
     });
   }.bind(this));
 
@@ -58,7 +50,6 @@ HomeMaticHomeKitSmokeDetectorServiceIP.prototype.createDeviceService = function(
 }
 
 HomeMaticHomeKitSmokeDetectorServiceIP.prototype.datapointEvent=function(dp,newValue)  {
-  this.log.debug('HomeMaticHomeKitSmokeDetectorServiceIP event %s %s',dp,newValue)
   if (dp=='SMOKE_DETECTOR_ALARM_STATUS') {
 
     switch (newValue) {
