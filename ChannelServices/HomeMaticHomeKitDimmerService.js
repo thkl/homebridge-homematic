@@ -18,6 +18,7 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
   var lightbulb = new Service.Lightbulb(this.name);
   this.delayOnSet = 5;
   this.services.push(lightbulb);
+  this.ignoreWorking = true
   this.onc = lightbulb.getCharacteristic(Characteristic.On)
 
   .on('get', function(callback) {
@@ -57,7 +58,8 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
   this.brightness = lightbulb.getCharacteristic(Characteristic.Brightness)
   .on('get', function(callback) {
     that.query("LEVEL",function(value){
-      that.state["LAST"] = (value*100);
+      that.log.info('get b %s',value)
+      that.state["LAST"] = (value);
       if (callback) callback(null,value);
     });
   }.bind(this))
@@ -91,7 +93,7 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
 HomeMaticHomeKitDimmerService.prototype.processDimmerLevel = function(newValue){
     let isOn = (newValue>0)
     this.onc.updateValue(isOn,null)
-    this.brightness.updateValue((newValue*100),null)
+    this.brightness.updateValue(newValue,null)
 }
 
 HomeMaticHomeKitDimmerService.prototype.endWorking=function()  {
@@ -102,7 +104,7 @@ HomeMaticHomeKitDimmerService.prototype.endWorking=function()  {
   })
 }
 
-HomeMaticHomeKitDimmerService.prototype.event = function(channel,dp,newValue){
+HomeMaticHomeKitDimmerService.prototype.datapointEvent = function(dp,newValue){
   if (dp=='LEVEL') {
     this.processDimmerLevel(newValue)
   }

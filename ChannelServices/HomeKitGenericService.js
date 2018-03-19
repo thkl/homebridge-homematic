@@ -327,8 +327,6 @@ HomeKitGenericService.prototype = {
     var that = this;
     var tp = this.transformDatapoint(dp);
     var interf = this.intf;
-    //that.platform.getValue(that.adress,dp,function(newValue) {
-
     that.platform.getValue(interf,tp[0],tp[1],function(newValue) {
       if ((newValue != undefined) && (newValue != null)) {
 
@@ -395,6 +393,8 @@ HomeKitGenericService.prototype = {
 
   datapointEvent:function(dp,newValue) {
     // just a stub
+    this.log.debug('dpe stup')
+
   },
 
   event:function(channel,dp,newValue) {
@@ -469,11 +469,14 @@ HomeKitGenericService.prototype = {
         // datapoints from such channels named  as channelnumber:datapoint ... (no better approach yet)
 
         var chnl = channel.slice(channel.indexOf(":")+1);
-        this.datapointEvent(chnl + ":" + dp,newValue);
         this.cache(chnl + ":" + dp,newValue);
+        this.log.debug('jump into dpe')
+        this.datapointEvent(chnl + ":" + dp,newValue);
       } else {
-        this.datapointEvent(dp,newValue);
+
         this.cache(dp,newValue);
+        this.log.debug('jump into dpe')
+        this.datapointEvent(dp,newValue);
       }
       this.eventupdate = false;
     } else {
@@ -518,6 +521,8 @@ HomeKitGenericService.prototype = {
       }
       if (this.usecache) {
         this.state[dp] = value;
+      } else {
+
       }
     } else {
       that.log.debug("Skip update because of working flag (%s) or IsNull(%s)",that.isWorking,value);

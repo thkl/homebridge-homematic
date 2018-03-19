@@ -63,6 +63,11 @@ describe("Homematic Plugin (index)", function() {
             cl.getValue(function(context,value){
               assert.equal(value, 100);
             });
+
+            cl.emit('get',function(context,result){
+              assert.equal(result,100,"get logic result should be 100");
+            });
+
           });
        done();
      });
@@ -87,6 +92,11 @@ describe("Homematic Plugin (index)", function() {
             cl.getValue(function(context,value){
               assert.equal(value, 0);
             });
+
+            cl.emit('get',function(context,result){
+              assert.equal(result, 0,"get logic result should be 0");
+            });
+
           })
           done();
       });
@@ -101,8 +111,8 @@ describe("Homematic Plugin (index)", function() {
           // Set Delay to 0 sec for use with tests
           ac.delayOnSet = 0;
           cb.emit('set', 50,function(){
-          let res = platform.homebridge.values[ac.adress + '.LEVEL'];
-          assert.equal(res,0.5);
+            let res = platform.homebridge.values[ac.adress + '.LEVEL'];
+            assert.equal(res,0.5);
           });
         });
         done();
