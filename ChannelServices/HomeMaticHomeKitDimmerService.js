@@ -58,7 +58,6 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
   this.brightness = lightbulb.getCharacteristic(Characteristic.Brightness)
   .on('get', function(callback) {
     that.query("LEVEL",function(value){
-      that.log.info('get b %s',value)
       that.state["LAST"] = (value);
       if (callback) callback(null,value);
     });

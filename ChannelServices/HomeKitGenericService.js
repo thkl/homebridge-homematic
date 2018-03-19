@@ -393,8 +393,6 @@ HomeKitGenericService.prototype = {
 
   datapointEvent:function(dp,newValue) {
     // just a stub
-    this.log.debug('dpe stup')
-
   },
 
   event:function(channel,dp,newValue) {
