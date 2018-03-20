@@ -31,7 +31,7 @@ function HomeMaticPlatform(log, config) {
 	this.uuid = uuid
 	this.homebridge = _homebridge
 	this.config = config
-  	this.localCache = path.join(_homebridge.user.storagePath(), 'ccu.json')
+  this.localCache = path.join(_homebridge.user.storagePath(), 'ccu.json')
 	this.localPath = _homebridge.user.storagePath()
 	this.ccuIP = config.ccu_ip
 
@@ -68,7 +68,6 @@ function HomeMaticPlatform(log, config) {
 	this.specialdevices = config.special
 	this.programs = config.programs
 	this.subsection = config.subsection
-	this.localCache = config.lcache
 	this.vuc = config.variable_update_trigger_channel
 
 	if ((this.subsection == undefined) || (this.subsection == '')) {
@@ -178,6 +177,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 		script += 'Write(\'\}\'\);';
 
 		var regarequest = this.createRegaRequest()
+		this.log.debug('Local cache is set to %s',this.localCache)
 		regarequest.timeout = this.config.ccufetchtimeout || 120
 		regarequest.script(script, data => {
 			if (data != undefined) {
@@ -187,13 +187,15 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 					json = JSON.parse(data)
 					if ((json != undefined) && (json.devices != undefined)) {
 						// Seems to be valid json
-						if (localCache != undefined) {
+						if (that.localCache != undefined) {
 							fs.writeFile(that.localCache, data, err => {
 								if (err) {
 									that.log.warn('Cannot cache ccu data ', err)
 								}
-								that.log.info('will cache ccu response ...')
+								that.log.info('will cache ccu response to %s',that.localCache)
 							})
+						} else {
+							that.log.warn('Cannot cache ccu data local cache was not set')
 						}
 					}
 				} catch (e) {
@@ -205,7 +207,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 			// Check if we got valid json from ccu
 			if ((json == undefined) && (that.localCache != undefined)) {
 				// Try to load Data
-
+				that.log.info('ok local cache is set to %s',that.localCache)
 				try {
 					fs.accessSync(that.localCache, fs.F_OK)
 					// Try to load Data
