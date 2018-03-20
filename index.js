@@ -31,7 +31,7 @@ function HomeMaticPlatform(log, config) {
 	this.uuid = uuid
 	this.homebridge = _homebridge
 	this.config = config
-  this.localCache = path.join(_homebridge.user.storagePath(), 'ccu.json')
+  	this.localCache = path.join(_homebridge.user.storagePath(), 'ccu.json')
 	this.localPath = _homebridge.user.storagePath()
 	this.ccuIP = config.ccu_ip
 
@@ -188,7 +188,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 					if ((json != undefined) && (json.devices != undefined)) {
 						// Seems to be valid json
 						if (localCache != undefined) {
-							fs.writeFile(localCache, data, err => {
+							fs.writeFile(that.localCache, data, err => {
 								if (err) {
 									that.log.warn('Cannot cache ccu data ', err)
 								}
@@ -203,13 +203,13 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 			}
 
 			// Check if we got valid json from ccu
-			if ((json == undefined) && (localCache != undefined)) {
+			if ((json == undefined) && (that.localCache != undefined)) {
 				// Try to load Data
 
 				try {
-					fs.accessSync(localCache, fs.F_OK)
+					fs.accessSync(that.localCache, fs.F_OK)
 					// Try to load Data
-					data = fs.readFileSync(localCache).toString()
+					data = fs.readFileSync(that.localCache).toString()
 					if (data != undefined) {
 						try {
 							json = JSON.parse(data)
