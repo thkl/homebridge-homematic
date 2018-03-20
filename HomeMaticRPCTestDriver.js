@@ -22,7 +22,7 @@ HomeMaticRPCTestDriver.prototype.getIPAddress = function() {
 
 HomeMaticRPCTestDriver.prototype.getValue = function(channel, datapoint, callback) {
   if (this.platform.homebridge != undefined) {
-    this.log.info('Client ask for %s.%s',channel,datapoint)
+    this.log.debug('Client ask for %s.%s',channel,datapoint)
     callback(this.platform.homebridge.values[channel + '.' + datapoint]);
   } else {
     callback(0)

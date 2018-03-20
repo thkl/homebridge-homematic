@@ -16,6 +16,7 @@ util.inherits(HomeMaticHomeKitSwitchService, HomeKitGenericService);
 HomeMaticHomeKitSwitchService.prototype.createDeviceService = function(Service, Characteristic) {
   let that = this;
   this.ignoreWorking = true;
+  this.delayOnSet = 1000;
 
   if (this.special=="PROGRAM") {
     this.createProgrammService(Service, Characteristic)
@@ -73,13 +74,13 @@ HomeMaticHomeKitSwitchService.prototype.createProgrammService = function(Service
 
   .on('set', function(value, callback) {
     if (value==1) {
-      that.log("Launch Program " + that.adress);
+      that.log.debug("Launch Program " + that.adress);
       that.command("sendregacommand","","var x=dom.GetObject(\""+that.adress+"\");if (x) {x.ProgramExecute();}",function() {
       });
 
       setTimeout(function() {
         that.c_isOn.setValue(0, null);
-      },1000);
+      },that.delayOnSet);
     }
     callback(0);
   }.bind(this));

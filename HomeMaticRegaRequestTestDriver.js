@@ -15,7 +15,10 @@ function HomeMaticRegaRequestTestDriver(log, ccuip) {
 HomeMaticRegaRequestTestDriver.prototype = {
 
   script: function(script, callback) {
-    callback(this.data)
+    if (this.platform.homebridge != undefined) {
+        this.platform.homebridge.values['lastScript'] = script;
+    }
+    callback()
   },
 
   getValue: function(channel, datapoint, callback) {

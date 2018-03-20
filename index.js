@@ -31,7 +31,7 @@ function HomeMaticPlatform(log, config) {
 	this.uuid = uuid
 	this.homebridge = _homebridge
 	this.config = config
-  this.localCache = path.join(_homebridge.user.storagePath(), 'ccu.json')
+	this.localCache = path.join(_homebridge.user.storagePath(), 'ccu.json')
 	this.localPath = _homebridge.user.storagePath()
 	this.ccuIP = config.ccu_ip
 
@@ -162,9 +162,14 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 
 	var json
 	if (isInTest) {
-		json = JSON.parse(this.config.testdata)
+		try {
+			json = JSON.parse(this.config.testdata)
+		} catch (e) {
+			json = {}
+			this.log.error("Error (%s) while loading test data %s",error,this.config.testdata);
+		}
 		this.buildaccesories(json,callback,internalconfig,channelLoader)
-    return
+		return
 	} else {
 		let script = 'string sDeviceId;string sChannelId;boolean df = true;Write(\'{"devices":[\');foreach(sDeviceId, root.Devices().EnumIDs()){object oDevice = dom.GetObject(sDeviceId);if(oDevice){var oInterface = dom.GetObject(oDevice.Interface());if(df) {df = false;} else { Write(\',\');}Write(\'{\');Write(\'"id": "\' # sDeviceId # \'",\');Write(\'"name": "\' # oDevice.Name() # \'",\');Write(\'"address": "\' # oDevice.Address() # \'",\');Write(\'"type": "\' # oDevice.HssType() # \'",\');Write(\'"channels": [\');boolean bcf = true;foreach(sChannelId, oDevice.Channels().EnumIDs()){object oChannel = dom.GetObject(sChannelId);if(bcf) {bcf = false;} else {Write(\',\');}Write(\'{\');Write(\'"cId": \' # sChannelId # \',\');Write(\'"name": "\' # oChannel.Name() # \'",\');if(oInterface){Write(\'"intf": "\' # oInterface.Name() 	# \'",\');Write(\'"address": "\' # oInterface.Name() #\'.\'\ # oChannel.Address() # \'",\');}Write(\'"type": "\' # oChannel.HssType() # \'",\');Write(\'"access": "\' # oChannel.UserAccessRights(iulOtherThanAdmin)# \'"\');Write(\'}\');}Write(\']}\');}}Write(\']\');';
 
@@ -302,15 +307,12 @@ HomeMaticPlatform.prototype.buildaccesories = function (json,callback,internalco
 						isChannelFiltered = !cin
 						isSubsectionSelected = cin
 					}
-
 					if ((cfg != undefined) && (cfg.filter != undefined) && (cfg.filter.indexOf(ch.type) > -1)) {
 						isChannelFiltered = true
 					}
-
 					if ((that.filter_channel !== undefined) && (that.filter_channel.indexOf(ch.address) > -1)) {
 						isChannelFiltered = true
 					}
-
 					// That.log('name', ch.name, ' -> address:', ch.address)
 					if ((ch.address !== undefined) && (!isChannelFiltered)) {
 						// Switch found
@@ -329,7 +331,6 @@ HomeMaticPlatform.prototype.buildaccesories = function (json,callback,internalco
 						if ((that.valves != undefined) && (that.valves.indexOf(ch.address) > -1)) {
 							special = 'VALVE'
 						}
-
 						// Check if VIRTUAL KEY is Set as Variable Trigger
 						if ((that.vuc != undefined) && (ch.type == 'VIRTUAL_KEY') && (ch.name == that.vuc)) {
 							that.log.debug('Channel ' + that.vuc + ' added as Variable Update Trigger')
@@ -345,61 +346,62 @@ HomeMaticPlatform.prototype.buildaccesories = function (json,callback,internalco
 			} else {
 				that.log.debug(device.name + ' has no channels or is filtered')
 			}
-		}) // End Mapping all JSON Data
+		})
+	} // End Mapping all JSON Data
+	this.log.info("Programs : %s",that.programs)
+	if (that.programs != undefined) {
+		that.programs.map(program => {
+			const prgtype = ''
 
-		if (that.programs != undefined) {
-			that.programs.map(program => {
-				const prgtype = ''
+			if (that.iosworkaround == undefined) {
+				that.log.debug('Program ' + program + ' added as Program_Launcher')
 
-				if (that.iosworkaround == undefined) {
-					that.log.debug('Program ' + program + ' added as Program_Launcher')
+				var ch = {}
+				var cfg = {}
+				ch.type = 'PROGRAM_LAUNCHER'
+				ch.address = program
+				ch.name = program
+				channelLoader.loadChannelService(that.foundAccessories, 'PROGRAM_LAUNCHER', ch, that, 'PROGRAM', cfg, 255, Service, Characteristic)
+			} else {
+				var cfg = that.deviceInfo(internalconfig, '')
+				that.log.debug('Program ' + program + ' added as SWITCH cause of IOS 10')
+				var ch = {}
+				ch.type = 'SWITCH'
+				ch.address = program
+				ch.name = program
+				channelLoader.loadChannelService(that.foundAccessories, 'SWITCH', ch, that, 'PROGRAM', cfg, 255, Service, Characteristic)
+			}
+		})
+	} // End Mapping Programs
 
-					var ch = {}
-					var cfg = {}
-					ch.type = 'PROGRAM_LAUNCHER'
-					ch.address = program
-					ch.name = program
-					channelLoader.loadChannelService(that.foundAccessories, 'PROGRAM_LAUNCHER', ch, that, 'PROGRAM', cfg, 255, Service, Characteristic)
-				} else {
-					var cfg = that.deviceInfo(internalconfig, '')
-					that.log.debug('Program ' + program + ' added as SWITCH cause of IOS 10')
-					var ch = {}
-					ch.type = 'SWITCH'
-					ch.address = program
-					ch.name = program
-					channelLoader.loadChannelService(that.foundAccessories, 'SWITCH', ch, that, 'PROGRAM', cfg, 255, Service, Characteristic)
-				}
-			})
-		} // End Mapping Programs
+	if (that.specialdevices != undefined) {
+		that.specialdevices.map(specialdevice => {
+			let name = specialdevice.name
+			let type = specialdevice.type
+			if ((name != undefined) && (type != undefined)) {
+				var ch = {}
+				ch.type = type
+				ch.address = ""
+				ch.name = name
+				channelLoader.loadChannelService(that.foundAccessories, ch.type , ch , that, "", specialdevice.parameter || {} , 255, Service, Characteristic)
+			}
 
-		if (that.specialdevices != undefined) {
-			that.specialdevices.map(specialdevice => {
-				let name = specialdevice.name
-				let type = specialdevice.type
-				if ((name != undefined) && (type != undefined)) {
-					var ch = {}
-					ch.type = type
-					ch.address = ""
-					ch.name = name
-					channelLoader.loadChannelService(that.foundAccessories, ch.type , ch , that, "", specialdevice.parameter || {} , 255, Service, Characteristic)
-				}
-
-			})
-		}
-
-		// Add Optional Variables
-		if (that.variables != undefined) {
-			that.variables.map(variable => {
-				const ch = {}
-				const cfg = {}
-				ch.type = 'VARIABLE'
-				ch.address = variable
-				ch.name = variable
-				ch.intf = 'Variable'
-				channelLoader.loadChannelService(that.foundAccessories, 'VARIABLE', ch, that,	'VARIABLE', cfg, 255, Service, Characteristic)
-			})
-		} // End Variables
+		})
 	}
+
+	// Add Optional Variables
+	if (that.variables != undefined) {
+		that.variables.map(variable => {
+			const ch = {}
+			const cfg = {}
+			ch.type = 'VARIABLE'
+			ch.address = variable
+			ch.name = variable
+			ch.intf = 'Variable'
+			channelLoader.loadChannelService(that.foundAccessories, 'VARIABLE', ch, that,	'VARIABLE', cfg, 255, Service, Characteristic)
+		})
+	} // End Variables
+
 
 	// Check number of devices
 	const noD = that.foundAccessories.length
