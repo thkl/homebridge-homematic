@@ -66,7 +66,7 @@ HomeMaticHomeKitSwitchService.prototype.createProgrammService = function(Service
     if (callback) callback(null,1);
   }.bind(this));
 
-  var onCharacteristic = this.service_item.getCharacteristic(Characteristic.On)
+  this.c_isOn = this.service_item.getCharacteristic(Characteristic.On)
   .on('get', function(callback) {
     if (callback) callback(null,0);
   }.bind(this))
@@ -78,7 +78,7 @@ HomeMaticHomeKitSwitchService.prototype.createProgrammService = function(Service
       });
 
       setTimeout(function() {
-        cc.setValue(0, null);
+        that.c_isOn.setValue(0, null);
       },1000);
     }
     callback(0);
