@@ -14,7 +14,9 @@ util.inherits(HomeMaticHomeKitBlindService, HomeKitGenericService);
 HomeMaticHomeKitBlindService.prototype.createDeviceService = function(Service, Characteristic) {
 
     var that = this;
-    var blind = new Service["WindowCovering"](this.name);
+    var blind = new Service.WindowCovering(this.name);
+    this.delayOnSet = 750;
+    this.inhibit = false;
     this.services.push(blind);
 
     this.currentPos = blind.getCharacteristic(Characteristic.CurrentPosition)
@@ -25,12 +27,9 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function(Service, C
       });
     }.bind(this));
 
-    this.currentStateCharacteristic["LEVEL"] = this.currentPos;
     this.currentPos.eventEnabled = true;
 
-
     this.targetPos = blind.getCharacteristic(Characteristic.TargetPosition)
-    
     .on('get', function(callback) {
 		that.query("LEVEL",function(value){
 			if (callback) {
@@ -38,22 +37,29 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function(Service, C
 			}
 		})
     }.bind(this))
-    
-        
+
     .on('set', function(value, callback) {
-      that.delayed("set", "LEVEL", value, 750);
+
+      if (that.inhibit == false) {
+        that.delayed("set", "LEVEL", value, that.delayOnSet);
+      } else {
+        // wait one second to resync data
+        that.log.debug('inhibit is true wait to resync')
+        setTimeout(function(){
+          that.queryData()
+        },1000);
+      }
+
       callback();
     }.bind(this));
 
     this.pstate = blind.getCharacteristic(Characteristic.PositionState)
-	
-		
-	.on('get', function(callback) {
+	   .on('get', function(callback) {
       that.query("DIRECTION",function(value){
        if (callback) {
 	      var result = 2;
           if (value!=undefined) {
-	      	switch (value) {   
+	      	switch (value) {
 	         case 0:
 			 	result = 2 // Characteristic.PositionState.STOPPED
 			 	break
@@ -75,9 +81,33 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function(Service, C
       });
     }.bind(this));
 
-    this.remoteGetValue("LEVEL");
-    this.remoteGetValue("DIRECTION");
-	this.deviceAdress = this.adress.slice(0, this.adress.indexOf(":"));
+    this.obstruction = blind.getCharacteristic(Characteristic.ObstructionDetected)
+    .on('get', function(callback) {
+        callback(that.inhibit)
+    }.bind(this))
+    this.obstruction.eventEnabled = true;
+
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".DIRECTION",this)
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".LEVEL",this)
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".INHIBIT",this)
+  this.deviceAdress = this.adress.slice(0, this.adress.indexOf(":"));
+  this.queryData();
+}
+
+HomeMaticHomeKitBlindService.prototype.queryData = function(newValue)  {
+  let that = this;
+  this.remoteGetValue("LEVEL",function(newValue){
+    that.datapointEvent('1:LEVEL',newValue)
+  });
+
+  this.remoteGetValue("INHIBIT",function(newValue){
+    that.datapointEvent('1:INHIBIT',newValue)
+  });
+
+  this.remoteGetValue("LEVEL",function(newValue){
+    that.datapointEvent('1:LEVEL',newValue)
+  });
+
 }
 
 HomeMaticHomeKitBlindService.prototype.endWorking=function()  {
@@ -88,8 +118,15 @@ HomeMaticHomeKitBlindService.prototype.endWorking=function()  {
  })
 }
 
-HomeMaticHomeKitBlindService.prototype.datapointEvent=function(dp,newValue)  {
+
+
+HomeMaticHomeKitBlindService.prototype.datapointEvent = function(dp,newValue)  {
   let that = this
+  if (dp == "1:INHIBIT") {
+      this.inhibit = newValue
+      this.obstruction.updateValue(newValue,null);
+  }
+
   if (dp == "1:DIRECTION") {
 	 switch (newValue) {
 		 case 0:
@@ -104,9 +141,9 @@ HomeMaticHomeKitBlindService.prototype.datapointEvent=function(dp,newValue)  {
 		 case 3:
 		 	this.pstate.updateValue(2,null);
 		 	break;
-	 } 
+	 }
   }
-  
+
   if (dp == "1:WORKING_SLATS") {
 	  if (newValue == false) {
 	  	this.remoteGetValue("LEVEL",function(value) {
@@ -115,6 +152,11 @@ HomeMaticHomeKitBlindService.prototype.datapointEvent=function(dp,newValue)  {
  		})
 	  }
   }
+
+  if (dp == "1:LEVEL") {
+	  		that.currentPos.updateValue(newValue,null);
+	  		that.targetPos.updateValue(newValue,null);
+  }
 }
 
-module.exports = HomeMaticHomeKitBlindService; 
+module.exports = HomeMaticHomeKitBlindService;
