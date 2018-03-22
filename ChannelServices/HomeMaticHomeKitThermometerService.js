@@ -44,6 +44,7 @@ HomeMaticHomeKitThermometerService.prototype.queryData = function() {
     that.addLogEntry({currentTemp:parseFloat(value)})
     //create timer to query device every 10 minutes
     this.refreshTimer = setTimeout(function(){that.queryData()}, 10 * 60 * 1000);
+  })
 }
 
 HomeMaticHomeKitThermometerService.prototype.shutdown = function() {
