@@ -157,11 +157,11 @@ HomeMaticHomeKitThermostatService.prototype.shutdown = function() {
 
 HomeMaticHomeKitThermostatService.prototype.datapointEvent= function(dp,newValue) {
   if (dp=='TEMPERATURE') {
-    this.loggingService.addEntry({time: moment().unix(), currentTemp:parseFloat(newValue)});
+    that.addLogEntry({ currentTemp:parseFloat(newValue)});
   }
 
   if (dp=='SETPOINT') {
-    this.loggingService.addEntry({time: moment().unix(), setTemp:parseFloat(newValue)});
+    that.addLogEntry({ setTemp:parseFloat(newValue)});
   }
 }
 

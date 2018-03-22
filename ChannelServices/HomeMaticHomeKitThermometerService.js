@@ -43,7 +43,7 @@ HomeMaticHomeKitThermometerService.prototype.queryData = function() {
   this.query("TEMPERATURE",function(value){
     that.addLogEntry({currentTemp:parseFloat(value)})
     //create timer to query device every 10 minutes
-    this.refreshTimer = setTimeout(function(){that.queryData()}, 10 * 60 * 1000);
+    that.refreshTimer = setTimeout(function(){that.queryData()}, 10 * 60 * 1000);
   })
 }
 
@@ -53,7 +53,7 @@ HomeMaticHomeKitThermometerService.prototype.shutdown = function() {
 
 HomeMaticHomeKitThermometerService.prototype.datapointEvent= function(dp,newValue) {
   if (dp=='TEMPERATURE') {
-    this.loggingService.addEntry({time: moment().unix(), currentTemp:parseFloat(newValue)});
+    this.addLogEntry({currentTemp:parseFloat(newValue)});
   }
 }
 
