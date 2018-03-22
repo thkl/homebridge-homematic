@@ -67,7 +67,6 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   }
 
   this.createDeviceService(Service, Characteristic);
-
 }
 
 

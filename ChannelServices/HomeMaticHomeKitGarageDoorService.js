@@ -23,7 +23,6 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function(Servi
 
   let that = this
   this.characteristic = Characteristic
-  this.log.debug(JSON.stringify(this.cfg))
 
   this.address_sensor_close = this.getClazzConfigValue('address_sensor_close',undefined)
   this.address_sensor_open = this.getClazzConfigValue('address_sensor_open',undefined)

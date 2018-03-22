@@ -13,7 +13,7 @@ util.inherits(HomeMaticHomeKitThermostatWeatherService, HomeKitGenericService);
 HomeMaticHomeKitThermostatWeatherService.prototype.createDeviceService = function(Service, Characteristic) {
 
   var that = this;
-  var thermo = new Service["TemperatureSensor"](this.name);
+  var thermo = new Service.TemperatureSensor(this.name);
   this.services.push(thermo);
   this.enableLoggingService("weather");
 
@@ -33,7 +33,7 @@ HomeMaticHomeKitThermostatWeatherService.prototype.createDeviceService = functio
   this.currentStateCharacteristic["TEMPERATURE"] = ctemp;
   ctemp.eventEnabled = true;
 
-  var humidity = new Service["HumiditySensor"](this.name);
+  var humidity = new Service.HumiditySensor(this.name);
   this.services.push(humidity);
 
   var chum = humidity.getCharacteristic(Characteristic.CurrentRelativeHumidity)

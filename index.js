@@ -348,7 +348,6 @@ HomeMaticPlatform.prototype.buildaccesories = function (json,callback,internalco
 			}
 		})
 	} // End Mapping all JSON Data
-	this.log.info("Programs : %s",that.programs)
 	if (that.programs != undefined) {
 		that.programs.map(program => {
 			const prgtype = ''

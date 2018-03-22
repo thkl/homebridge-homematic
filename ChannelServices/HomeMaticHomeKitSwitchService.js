@@ -284,15 +284,15 @@ HomeMaticHomeKitSwitchService.prototype.datapointEvent = function(dp,newValue){
     }
 
     if (this.c_isActive != undefined) {
-      this.c_isActive.updateValue(hmState)
+      this.c_isActive.updateValue(hmState,null)
     }
 
     if (this.c_isOn != undefined) {
-      this.c_isOn.updateValue(hmState)
+      this.c_isOn.updateValue(hmState,null)
     }
 
     if (this.c_isInUse != undefined) {
-      this.c_isInUse.updateValue(hmState)
+      this.c_isInUse.updateValue(hmState,null)
     }
   }
 }
