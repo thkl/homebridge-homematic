@@ -132,9 +132,11 @@ HomeMaticHomeKitBlindService.prototype.endWorking=function()  {
 HomeMaticHomeKitBlindService.prototype.datapointEvent = function(dp,newValue)  {
   let that = this
 
-  if ((dp == "1:INHIBIT") && (this.observeInhibit == true)) {
+  if (dp == "1:INHIBIT") {
     this.inhibit = newValue
-    this.obstruction.updateValue(newValue,null);
+    if (this.obstruction != undefined) {
+      this.obstruction.updateValue(newValue,null);
+    }
   }
 
   if (dp == "1:DIRECTION") {
