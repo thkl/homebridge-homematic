@@ -83,7 +83,7 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function(Service, C
 
     this.obstruction = blind.getCharacteristic(Characteristic.ObstructionDetected)
     .on('get', function(callback) {
-        callback(that.inhibit)
+        callback(null,that.inhibit)
     }.bind(this))
     this.obstruction.eventEnabled = true;
 
