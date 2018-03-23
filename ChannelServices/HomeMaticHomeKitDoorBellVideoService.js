@@ -97,6 +97,8 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
       callback()
     }.bind(this))
     target_state.eventEnabled = true
+  } else {
+    this.log.warn('No address found for a lock. So there will be ne Unlock Door Button')
   }
 
   this.platform.api.publishCameraAccessories(this.name, [doorbell_accessory]);
