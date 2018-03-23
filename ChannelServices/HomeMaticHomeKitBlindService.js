@@ -83,8 +83,8 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function(Service, C
 
     this.obstruction = blind.getCharacteristic(Characteristic.ObstructionDetected)
     .on('get', function(callback) {
-        callback(that.inhibit)
-    }.bind(this))
+        callback(null, that.inhibit ? 1 : 0);
+    }.bind(this));
     this.obstruction.eventEnabled = true;
 
   this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".DIRECTION",this)
@@ -123,8 +123,8 @@ HomeMaticHomeKitBlindService.prototype.endWorking=function()  {
 HomeMaticHomeKitBlindService.prototype.datapointEvent = function(dp,newValue)  {
   let that = this
   if (dp == "1:INHIBIT") {
-      this.inhibit = newValue
-      this.obstruction.updateValue(newValue,null);
+      this.inhibit = newValue;
+      this.obstruction.updateValue(newValue ? 1 : 0,null);
   }
 
   if (dp == "1:DIRECTION") {
