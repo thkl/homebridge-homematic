@@ -35,7 +35,26 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
   var camera = this.getClazzConfigValue('camera',undefined)
   var adrKey = this.getClazzConfigValue('address_key_event',undefined)
   var adrunlockactor = this.getClazzConfigValue('address_unlock_actor',undefined)
-  var cmdunlockactor = this.getClazzConfigValue('command_unlock_actor',1)
+  var cmdunlockactor = this.getClazzConfigValue('command_unlock_actor',{"on":true,"off":false})
+  this.stdKey = this.getClazzConfigValue('state_key_event',undefined)
+  var onTimeUnlock = this.getClazzConfigValue('ontime_unlock_actor',5)
+
+  if (this.isDatapointAddressValid(adrKey,false)==false) {
+    this.log.error('cannot initialize doorbell device adress for bell trigger is invalid')
+    return
+  }
+
+
+  if (this.isDatapointAddressValid(adrunlockactor,true)==false) {
+    this.log.error('cannot initialize doorbell device adress for unlock actor is invalid')
+    return
+  }
+
+  let unlockCommand = cmdunlockactor['on']
+  let unlockResetCommand = cmdunlockactor['off']
+
+  this.log.debug('Unlock Command is %s',unlockCommand)
+  this.log.debug('Lock Command is %s',unlockResetCommand)
 
   this.lockState = 1;
 
@@ -69,6 +88,10 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
   if (adrKey != undefined) {
     this.log.debug("Register %s for Ring the bell events",adrKey)
     this.platform.registerAdressForEventProcessingAtAccessory(adrKey,this)
+    // parse and get dp
+    let parts = adrKey.split('.')
+    this.ringDingDp = parts[2]
+    this.log.debug("Datapoint for Ringelingedingdong is %s",this.ringDingDp)
   }
 
   // if there is a actor for door opening add a lock mechanims
@@ -92,11 +115,26 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
     }.bind(this))
 
     .on('set', function(value, callback) {
-      that.log.debug('send unlock command')
-      that.remoteSetDatapointValue(adrunlockactor,cmdunlockactor)
+      that.log.debug('send unlock command %s',unlockCommand)
+      that.remoteSetDatapointValue(adrunlockactor,unlockCommand)
+      that.lockState = 0
+      target_state.updateValue(that.lockState,null)
+      lock_current_state.updateValue(that.lockState,null)
+      setTimeout(function(){
+        if (unlockResetCommand != undefined) {
+          that.log.debug('send lock reset command %s',unlockResetCommand)
+          that.remoteSetDatapointValue(adrunlockactor,unlockResetCommand)
+        }
+          that.lockState = 1
+          target_state.updateValue(that.lockState,null)
+          lock_current_state.updateValue(that.lockState,null)
+        },1000 * onTimeUnlock)
+
       callback()
     }.bind(this))
     target_state.eventEnabled = true
+  } else {
+    this.log.warn('No address found for a lock. So there will be ne Unlock Door Button')
   }
 
   this.platform.api.publishCameraAccessories(this.name, [doorbell_accessory]);
@@ -104,9 +142,11 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
 
 
 HomeMaticHomeKitDoorBellVideoService.prototype.datapointEvent = function(dp,newValue){
-  if (dp.indexOf('PRESS_SHORT')>-1) {
+  if (dp.indexOf(this.ringDingDp)>-1) {
+    if (((this.stdKey != undefined) && (newValue == this.stdKey)) || (this.stdKey == undefined)) {
       this.log.debug("Palimm Palimm at %s", this.name);
       this.dingdongevent.setValue(0);
+    }
   }
 }
 module.exports = HomeMaticHomeKitDoorBellVideoService;

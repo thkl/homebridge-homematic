@@ -25,7 +25,7 @@ module.exports = function (homebridge) {
 	homebridge.registerPlatform('homebridge-homematic', 'HomeMatic', HomeMaticPlatform)
 }
 
-function HomeMaticPlatform(log, config) {
+function HomeMaticPlatform(log, config,api) {
 	let that = this
 	this.log = log
 	this.uuid = uuid
@@ -34,6 +34,14 @@ function HomeMaticPlatform(log, config) {
 	this.localCache = path.join(_homebridge.user.storagePath(), 'ccu.json')
 	this.localPath = _homebridge.user.storagePath()
 	this.ccuIP = config.ccu_ip
+
+	if (api) {
+	    this.api = api;
+
+	    if (api.version < 2.1) {
+	      throw new Error("Unexpected API version.");
+	    }
+  }
 
 	if (isInTest) {
 
