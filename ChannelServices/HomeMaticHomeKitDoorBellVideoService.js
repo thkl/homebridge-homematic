@@ -56,7 +56,7 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
   this.log.debug('Unlock Command is %s',unlockCommand)
   this.log.debug('Lock Command is %s',unlockResetCommand)
 
-  this.lockState = 1;
+  this.lockState = Characteristic.LockCurrentState.SECURED;
 
   if (camera == undefined) {
     this.log.error("missing camera config");
@@ -71,6 +71,12 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
 
   var doorbell_accessory = new Accessory(this.name, UUIDGen.generate(this.name), this.platform.homebridge.hap.Accessory.Categories.VIDEO_DOORBELL);
   var doorbell_service = new Service.Doorbell(this.name);
+
+  doorbell_accessory.on('identify', function(callback){
+    that.log.debug('identify - send a dingdong')
+    that.dingdongevent.setValue(0)
+  }
+  .bind(this))
 
   this.dingdongevent = doorbell_service.getCharacteristic(Characteristic.ProgrammableSwitchEvent)
     .on('get', function(callback) {
@@ -117,7 +123,7 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
     .on('set', function(value, callback) {
       that.log.debug('send unlock command %s',unlockCommand)
       that.remoteSetDatapointValue(adrunlockactor,unlockCommand)
-      that.lockState = 0
+      that.lockState = Characteristic.LockCurrentState.UNSECURED
       target_state.updateValue(that.lockState,null)
       lock_current_state.updateValue(that.lockState,null)
       setTimeout(function(){
@@ -125,7 +131,7 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
           that.log.debug('send lock reset command %s',unlockResetCommand)
           that.remoteSetDatapointValue(adrunlockactor,unlockResetCommand)
         }
-          that.lockState = 1
+          that.lockState = Characteristic.LockCurrentState.SECURED
           target_state.updateValue(that.lockState,null)
           lock_current_state.updateValue(that.lockState,null)
         },1000 * onTimeUnlock)
@@ -138,6 +144,20 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
   }
 
   this.platform.api.publishCameraAccessories(this.name, [doorbell_accessory]);
+
+
+  // add AccessoryInformation
+
+  doorbell_accessory.getService(Service.AccessoryInformation)
+    .setCharacteristic(Characteristic.Name, this.name)
+    .setCharacteristic(Characteristic.Manufacturer, 'https://github.com/thkl')
+    .setCharacteristic(Characteristic.Model,'Homematic Video Doorbell')
+    .setCharacteristic(Characteristic.SerialNumber, '42')
+    .setCharacteristic(Characteristic.FirmwareRevision, this.platform.getVersion());
+
+  // Set Lock State to locked at launch
+  target_state.updateValue(Characteristic.LockCurrentState.SECURED,null)
+  lock_current_state.updateValue(Characteristic.LockCurrentState.SECURED,null)
 }
 
 
@@ -149,4 +169,6 @@ HomeMaticHomeKitDoorBellVideoService.prototype.datapointEvent = function(dp,newV
     }
   }
 }
+
+
 module.exports = HomeMaticHomeKitDoorBellVideoService;
