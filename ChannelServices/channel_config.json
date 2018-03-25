@@ -300,6 +300,10 @@
 	   "type" : "HmIP-BBL:BLIND_TRANSMITTER",
 	   "service": "HomeMaticHomeKitBlindSlatServiceIP"
 	},
+  {
+		"type": "HmIP-FBL:BLIND_VIRTUAL_RECEIVER",
+    "service": "HomeMaticHomeKitBlindSlatServiceIP"
+	},
 	{
 		"type" : "HmIP-SPI:PRESENCEDETECTOR_TRANSCEIVER",
 		"service" : "HomeMaticHomeKitPresenceDetectorServiceIP"

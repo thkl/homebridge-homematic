@@ -30,6 +30,7 @@ HomeMaticRegaRequestTestDriver.prototype = {
   },
 
   setValue: function(channel, datapoint, value) {
+    this.log.debug("Set Rega Called %s.%s - %s",channel, datapoint, value)
     if (this.platform.homebridge != undefined) {
       if (typeof value == 'object') {
         value = value['explicitDouble'];

@@ -132,10 +132,8 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
 
   var that = this;
 
-  var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge);
   this.log.debug("Adding Log Service for %s",this.displayName);
-  this.loggingService = new FakeGatoHistoryService("weather", this, {storage: 'fs', path: this.platform.localCache, disableTimer:true});
-  this.services.push(this.loggingService);
+  this.enableLoggingService("weather");
   this.currentTemperature = -255;
   this.currentHumidity = -255;
 
@@ -289,7 +287,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.queryData = function() {
     that.query("HUMIDITY",function(value){
       that.currentHumidity = parseFloat(value);
       if ((that.currentTemperature > -255) && (that.currentHumidity > -255)) {
-        that.loggingService.addEntry({time: moment().unix(), temp:that.currentTemperature, pressure:0, humidity:that.currentHumidity})
+        that.addLogEntry({temp:that.currentTemperature, pressure:0, humidity:that.currentHumidity})
       }
     });
   });
@@ -300,6 +298,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.queryData = function() {
 
 
 HomeMaticHomeKitWeatherStationServiceIP.prototype.datapointEvent= function(dp,newValue) {
+
   if (dp=='ACTUAL_TEMPERATURE') {
     this.currentTemperature = parseFloat(newValue);
   }
@@ -309,7 +308,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.datapointEvent= function(dp,ne
   }
 
   if ((this.currentTemperature > -255) && (this.currentHumidity > -255)) {
-    this.loggingService.addEntry({time: moment().unix(), temp:this.currentTemperature, pressure:0, humidity:this.currentHumidity});
+    this.addLogEntry({ temp:this.currentTemperature, pressure:0, humidity:this.currentHumidity});
   }
 }
 
