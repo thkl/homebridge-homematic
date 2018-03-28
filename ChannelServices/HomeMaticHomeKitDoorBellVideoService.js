@@ -198,9 +198,11 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
     .setCharacteristic(Characteristic.FirmwareRevision, this.platform.getVersion());
 
   // Set Lock State to locked at launch
+if (adrunlockactor != undefined) {
   target_state.updateValue(Characteristic.LockCurrentState.SECURED,null)
   lock_current_state.updateValue(Characteristic.LockCurrentState.SECURED,null)
 
+}
 }
 
 HomeMaticHomeKitDoorBellVideoService.prototype.sendOpenDoorCommand = function(adrunlockactor,command){
