@@ -210,6 +210,7 @@ HomeMaticHomeKitDoorBellVideoService.prototype.sendOpenDoorCommand = function(ad
       // no ? run as a Program name
       this.log.debug("Launch Program " + adrunlockactor);
       this.command("sendregacommand","","var x=dom.GetObject(\""+adrunlockactor+"\");if (x) {x.ProgramExecute();}",function() {
+})
   } else {
       this.remoteSetDatapointValue(adrunlockactor,command)
   }
