@@ -130,14 +130,18 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
 
     .on('set', function(value, callback) {
       that.log.debug('send unlock command %s',unlockCommand)
-      that.remoteSetDatapointValue(adrunlockactor,unlockCommand)
+      // Send Command to the actor (or run program)
+      that.sendOpenDoorCommand(adrunlockactor,unlockCommand)
+      // set HK Device to unlocked
       that.lockState = Characteristic.LockCurrentState.UNSECURED
       target_state.updateValue(that.lockState,null)
       lock_current_state.updateValue(that.lockState,null)
+      // wait unlock time
       setTimeout(function(){
+        // and reset all this 
         if (unlockResetCommand != undefined) {
           that.log.debug('send lock reset command %s',unlockResetCommand)
-          that.remoteSetDatapointValue(adrunlockactor,unlockResetCommand)
+          that.sendOpenDoorCommand(adrunlockactor,unlockResetCommand)
         }
           that.lockState = Characteristic.LockCurrentState.SECURED
           target_state.updateValue(that.lockState,null)
@@ -167,7 +171,7 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
       }.bind(this))
       // add Events
       this.platform.registerAdressForEventProcessingAtAccessory(this.piraddress,this)
-    
+
 
     this.motionDetectorIsActiveCharacteristic = motionSensor.getCharacteristic(Characteristic.StatusActive)
     .on('get', function(callback) {
@@ -199,6 +203,17 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
 
 }
 
+HomeMaticHomeKitDoorBellVideoService.prototype.sendOpenDoorCommand = function(adrunlockactor,command){
+  let parts = adrunlockactor.split('.')
+  // Check if it matches Foo.Bar.Bla
+  if (parts.length != 3) {
+      // no ? run as a Program name
+      this.log.debug("Launch Program " + adrunlockactor);
+      this.command("sendregacommand","","var x=dom.GetObject(\""+adrunlockactor+"\");if (x) {x.ProgramExecute();}",function() {
+  } else {
+      this.remoteSetDatapointValue(adrunlockactor,command)
+  }
+}
 
 HomeMaticHomeKitDoorBellVideoService.prototype.channelDatapointEvent = function(channel,dp,newValue){
 
