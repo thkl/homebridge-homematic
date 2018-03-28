@@ -167,7 +167,7 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
       }.bind(this))
       // add Events
       this.platform.registerAdressForEventProcessingAtAccessory(this.piraddress,this)
-    }
+    
 
     this.motionDetectorIsActiveCharacteristic = motionSensor.getCharacteristic(Characteristic.StatusActive)
     .on('get', function(callback) {
@@ -179,7 +179,7 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
       var drive = require('./google_drive').drive;
       this.drive = new drive();
     }
-
+   }
   }
 
   // add AccessoryInformation
