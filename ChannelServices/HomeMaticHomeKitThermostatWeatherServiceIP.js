@@ -4,13 +4,13 @@ var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGeneric
 var util = require("util");
 
 function HomeMaticHomeKitThermostatWeatherServiceIP(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
-  HomeMaticHomeKitThermostatWeatherService.super_.apply(this, arguments);
+  HomeMaticHomeKitThermostatWeatherServiceIP.super_.apply(this, arguments);
 }
 
-util.inherits(HomeMaticHomeKitThermostatWeatherService, HomeKitGenericService);
+util.inherits(HomeMaticHomeKitThermostatWeatherServiceIP, HomeKitGenericService);
 
 
-HomeMaticHomeKitThermostatWeatherService.prototype.createDeviceService = function(Service, Characteristic) {
+HomeMaticHomeKitThermostatWeatherServiceIP.prototype.createDeviceService = function(Service, Characteristic) {
 
   var that = this;
   var thermo = new Service.TemperatureSensor(this.name);
@@ -48,7 +48,7 @@ HomeMaticHomeKitThermostatWeatherService.prototype.createDeviceService = functio
   this.queryData();
 }
 
-HomeMaticHomeKitThermostatWeatherService.prototype.queryData = function() {
+HomeMaticHomeKitThermostatWeatherServiceIP.prototype.queryData = function() {
   var that = this;
   this.query("ACTUAL_TEMPERATURE",function(value){
     that.currentTemperature = parseFloat(value);
@@ -65,12 +65,12 @@ HomeMaticHomeKitThermostatWeatherService.prototype.queryData = function() {
 
 
 
-HomeMaticHomeKitThermostatWeatherService.prototype.shutdown = function() {
+HomeMaticHomeKitThermostatWeatherServiceIP.prototype.shutdown = function() {
   clearTimeout(this.refreshTimer)
 }
 
 
-HomeMaticHomeKitThermostatWeatherService.prototype.datapointEvent= function(dp,newValue) {
+HomeMaticHomeKitThermostatWeatherServiceIP.prototype.datapointEvent= function(dp,newValue) {
   if (dp=='ACTUAL_TEMPERATURE') {
     this.currentTemperature = parseFloat(newValue);
   }
@@ -84,4 +84,4 @@ HomeMaticHomeKitThermostatWeatherService.prototype.datapointEvent= function(dp,n
   }
 }
 
-module.exports = HomeMaticHomeKitThermostatWeatherService;
+module.exports = HomeMaticHomeKitThermostatWeatherServiceIP;
