@@ -42,10 +42,15 @@ HomeMaticHomeKitEnergyCounterService.prototype.createDeviceService = function(Se
   }.bind(this));
 
   this.energyCounter.eventEnabled = true;
-  this.platform.registerAdressForEventProcessingAtAccessory(this.adress,this)
+
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".POWER",this)
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".ENERGY_COUNTER",this)
 
   this.services.push(sensor);
-  this.queryData();
+  // wait some time
+  setTimeout(function(){
+    that.queryData()
+  },1000)
 }
 
 
@@ -53,6 +58,7 @@ HomeMaticHomeKitEnergyCounterService.prototype.queryData = function() {
   var that = this;
   this.query("POWER",function(value){
     that.addLogEntry({power:parseFloat(value)})
+    that.log.info("EZ POWER %s",value)
     that.power.updateValue(value,null)
   });
 

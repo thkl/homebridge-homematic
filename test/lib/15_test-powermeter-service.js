@@ -43,9 +43,9 @@ describe("Homematic Plugin (index)", function() {
     });
 
 
-    it('test set voltage to 230 v, current to 1 a, power to 230 w', function (done) {
+    it('test set voltage to 230 v, current to 500 mA, power to 230 w', function (done) {
         platform.xmlrpc.event(['BidCos-RF','ADR1234567890:2','VOLTAGE',230]);
-        platform.xmlrpc.event(['BidCos-RF','ADR1234567890:2','CURRENT',1]);
+        platform.xmlrpc.event(['BidCos-RF','ADR1234567890:2','CURRENT',500]);
         platform.xmlrpc.event(['BidCos-RF','ADR1234567890:2','POWER',230]);
 
         // check
@@ -62,7 +62,7 @@ describe("Homematic Plugin (index)", function() {
           assert.ok(cc, "Characteristic.CurrentCharacteristic not found in Energy Counter %s",ac.name);
           cc.getValue(function(context,value){
             // Note there is a internal recalculation to amepere ccu sends milliamps
-            assert.equal(value, 0.001,"Current is " + value + " not 0.001");
+            assert.equal(value, 0.5,"Current is " + value + " not 0.5A");
           });
 
           let cv = s.getCharacteristic(Characteristic.VoltageCharacteristic)

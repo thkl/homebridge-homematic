@@ -19,18 +19,17 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function(Ser
   this.switchChannel = this.cfg["switchChannel"] || "3";
   this.enableLoggingService("energy");
 
-  var sensor = new Service["PowerMeterService"](this.name);
-  var voltage = sensor.getCharacteristic(Characteristic.VoltageCharacteristic)
+  var sensor = new Service.PowerMeterService(this.name);
+  this.voltage = sensor.getCharacteristic(Characteristic.VoltageCharacteristic)
   .on('get', function(callback) {
     that.query(that.meterChannel + ":VOLTAGE",function(value){
       if (callback) callback(null,value);
     });
   }.bind(this));
 
-  this.currentStateCharacteristic[that.meterChannel + ":VOLTAGE"] = voltage;
-  voltage.eventEnabled = true;
+  this.voltage.eventEnabled = true;
 
-  var current = sensor.getCharacteristic(Characteristic.CurrentCharacteristic)
+  this.current = sensor.getCharacteristic(Characteristic.CurrentCharacteristic)
   .on('get', function(callback) {
     that.query(that.meterChannel + ":CURRENT",function(value){
       if (value!=undefined) {
@@ -41,10 +40,9 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function(Ser
     });
   }.bind(this));
 
-  this.currentStateCharacteristic[that.meterChannel + ":CURRENT"] = current;
-  current.eventEnabled = true;
+  this.current.eventEnabled = true;
 
-  var power = sensor.getCharacteristic(Characteristic.PowerCharacteristic)
+  this.power = sensor.getCharacteristic(Characteristic.PowerCharacteristic)
   .on('get', function(callback) {
     that.query(that.meterChannel + ":POWER",function(value){
       that.addLogEntry({power:parseFloat(value)});
@@ -52,15 +50,12 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function(Ser
     });
   }.bind(this));
 
-  this.currentStateCharacteristic[that.meterChannel + ":POWER"] = power;
-  power.eventEnabled = true;
-
-
+  this.power.eventEnabled = true;
   this.services.push(sensor);
 
   this.addValueFactor("CURRENT",0.001);
 
-  var outlet = new Service["Outlet"](this.name);
+  var outlet = new Service.Outlet(this.name);
   outlet.getCharacteristic(Characteristic.OutletInUse)
   .on('get', function(callback) {
     if (callback) callback(null,1);
@@ -96,6 +91,12 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function(Ser
 
   this.services.push(outlet);
   this.deviceAdress = this.adress.slice(0, this.adress.indexOf(":"));
+
+  this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ":" + this.meterChannel + ".POWER",this)
+  this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ":" + this.meterChannel + ".VOLTAGE",this)
+  this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ":" + this.meterChannel + ".CURRENT",this)
+
+
   this.queryData();
 }
 
@@ -105,7 +106,11 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.shutdown = function() {
 
 HomeMaticHomeKitPowerMeterServiceIP.prototype.queryData = function() {
   var that = this;
-  this.query(this.meterChannel + ":POWER",function(value){that.addLogEntry({power:parseFloat(value)})});
+  let dps = [this.meterChannel + ":POWER",this.meterChannel + ":VOLTAGE",this.meterChannel + ":CURRENT"]
+  dps.map(function(dp){
+    that.query(dp,function(value){that.datapointEvent(dp,value)});
+  })
+
   //create timer to query device every 10 minutes
   this.refreshTimer = setTimeout(function(){that.queryData()}, 10 * 60 * 1000);
 }
@@ -113,7 +118,19 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.queryData = function() {
 HomeMaticHomeKitPowerMeterServiceIP.prototype.datapointEvent= function(dp,newValue) {
   if (dp==this.meterChannel + ":POWER") {
     this.addLogEntry({power:parseInt(newValue)});
+    this.power.updateValue(newValue,null);
   }
+
+  if (dp==this.meterChannel + ":VOLTAGE") {
+    this.addLogEntry({power:parseInt(newValue)});
+    this.voltage.updateValue(newValue,null);
+  }
+
+  if (dp==this.meterChannel + ":CURRENT") {
+    this.addLogEntry({power:parseInt(newValue)});
+    this.current.updateValue(newValue,null);
+  }
+
 }
 
 module.exports = HomeMaticHomeKitPowerMeterServiceIP;

@@ -307,7 +307,8 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.datapointEvent= function(dp,ne
     this.currentHumidity = parseFloat(newValue);
   }
 
-  if ((this.currentTemperature > -255) && (this.currentHumidity > -255)) {
+  // make this call a little less often
+  if ((dp=='ACTUAL_TEMPERATURE') || (dp=='HUMIDITY') && (this.currentTemperature > -255) && (this.currentHumidity > -255)) {
     this.addLogEntry({ temp:this.currentTemperature, pressure:0, humidity:this.currentHumidity});
   }
 }
