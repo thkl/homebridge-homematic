@@ -50,10 +50,10 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function(Service, C
   .on('get', function(callback) {
     that.query("LEVEL",function(value){
       if (callback) {
-        if (value < that.minValueForClose) {
+        if (value <= that.minValueForClose) {
           value = 0
         }
-        if (value > that.maxValueForOpen) {
+        if (value => that.maxValueForOpen) {
           value = 100
         }
         callback(null,value);

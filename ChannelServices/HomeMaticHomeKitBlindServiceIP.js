@@ -123,10 +123,10 @@ HomeMaticHomeKitBlindServiceIP.prototype.endWorking=function()  {
 // if there is a custom close level and the real level is below homekit will get the 0% ... and visevera for max level
 HomeMaticHomeKitBlindServiceIP.prototype.processBlindLevel = function(newValue)  {
 
-  if (newValue < this.minValueForClose) {
+  if (newValue <= this.minValueForClose) {
     newValue = 0
   }
-  if (newValue > this.maxValueForOpen) {
+  if (newValue >= this.maxValueForOpen) {
     newValue = 100
   }
 
