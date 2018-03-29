@@ -10,69 +10,6 @@ function HomeMaticHomeKitPowerMeterService(log,platform, id ,name, type ,adress,
 
 util.inherits(HomeMaticHomeKitPowerMeterService, HomeKitGenericService);
 
-
-HomeMaticHomeKitPowerMeterService.prototype.propagateServices = function(homebridge, Service, Characteristic) {
-
-  // Enable the Logging Service for Energy
-  this.enableLoggingService("energy");
-
-  // Register new Characteristic or Services here
-  var uuid = homebridge.uuid;
-
-
-  Characteristic.VoltageCharacteristic = function() {
-    var charUUID = uuid.generate('E863F10A-079E-48FF-8F27-9C2605A29F52');
-    Characteristic.call(this, 'Voltage', charUUID);
-    this.setProps({
-      format: Characteristic.Formats.UInt16,
-      unit: "V",
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-    });
-    this.value = this.getDefaultValue();
-  };
-
-  util.inherits(Characteristic.VoltageCharacteristic, Characteristic);
-
-
-  Characteristic.CurrentCharacteristic = function() {
-    var charUUID = uuid.generate('E863F126-079E-48FF-8F27-9C2605A29F52');
-    Characteristic.call(this, 'Current', charUUID);
-    this.setProps({
-      format: Characteristic.Formats.UInt16,
-      unit: "A",
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-    });
-    this.value = this.getDefaultValue();
-  };
-
-  util.inherits(Characteristic.CurrentCharacteristic, Characteristic);
-
-  Characteristic.PowerCharacteristic = function() {
-    var charUUID = uuid.generate('E863F10D-079E-48FF-8F27-9C2605A29F52');
-    Characteristic.call(this, 'Power', charUUID);
-    this.setProps({
-      format: Characteristic.Formats.UInt16,
-      unit: "W",
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-    });
-    this.value = this.getDefaultValue();
-  };
-
-  util.inherits(Characteristic.PowerCharacteristic, Characteristic);
-
-
-
-  Service.PowerMeterService = function(displayName, subtype) {
-    var servUUID = uuid.generate('E863F117-079E-48FF-8F27-9C2605A29F52');
-    Service.call(this, displayName, servUUID, subtype);
-    this.addCharacteristic(Characteristic.VoltageCharacteristic);
-    this.addCharacteristic(Characteristic.CurrentCharacteristic);
-    this.addCharacteristic(Characteristic.PowerCharacteristic);
-  };
-
-  util.inherits(Service.PowerMeterService, Service);
-}
-
 HomeMaticHomeKitPowerMeterService.prototype.shutdown = function() {
   clearTimeout(this.refreshTimer)
 }
@@ -80,7 +17,8 @@ HomeMaticHomeKitPowerMeterService.prototype.shutdown = function() {
 HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Service, Characteristic) {
 
   var that = this;
-
+  this.enableLoggingService("energy");
+  this.log.info("generating %s",this.adress)
   var sensor = new Service["PowerMeterService"](this.name);
   var voltage = sensor.getCharacteristic(Characteristic.VoltageCharacteristic)
   .on('get', function(callback) {

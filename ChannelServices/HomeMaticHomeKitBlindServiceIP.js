@@ -137,7 +137,6 @@ HomeMaticHomeKitBlindServiceIP.prototype.processBlindLevel = function(newValue) 
 
 HomeMaticHomeKitBlindServiceIP.prototype.datapointEvent=function(dp,newValue)  {
   let that = this
-  this.log.debug("DP Event %s %s",dp,newValue)
   if ((dp == "4:PROCESS") && (newValue == 0)) {
     this.remoteGetValue("4:LEVEL",function(value) {
       that.processBlindLevel(newValue)

@@ -12,79 +12,12 @@ function HomeMaticHomeKitPowerMeterServiceIP(log,platform, id ,name, type ,adres
 util.inherits(HomeMaticHomeKitPowerMeterServiceIP, HomeKitGenericService);
 
 
-HomeMaticHomeKitPowerMeterServiceIP.prototype.propagateServices = function(homebridge, Service, Characteristic) {
-
-  // Register new Characteristic or Services here
-
-  var uuid = homebridge.uuid;
-  var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge);
-  this.log.debug("Adding Log Service for %s",this.displayName);
-  this.loggingService = new FakeGatoHistoryService("energy", this, {storage: 'fs', path: this.platform.localCache, disableTimer:true});
-  this.services.push(this.loggingService);
-
-
-  this.meterChannel = this.cfg["meterChannel"] || "6";
-  this.switchChannel = this.cfg["switchChannel"] || "3";
-
-
-  Characteristic.VoltageCharacteristic = function() {
-    var charUUID = uuid.generate('E863F10A-079E-48FF-8F27-9C2605A29F52');
-    Characteristic.call(this, 'Voltage', charUUID);
-    this.setProps({
-      format: Characteristic.Formats.UInt16,
-      unit: "V",
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-    });
-    this.value = this.getDefaultValue();
-  };
-
-  util.inherits(Characteristic.VoltageCharacteristic, Characteristic);
-
-
-  Characteristic.CurrentCharacteristic = function() {
-    var charUUID = uuid.generate('E863F126-079E-48FF-8F27-9C2605A29F52');
-    Characteristic.call(this, 'Current', charUUID);
-    this.setProps({
-      format: Characteristic.Formats.UInt16,
-      unit: "A",
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-    });
-    this.value = this.getDefaultValue();
-  };
-
-  util.inherits(Characteristic.CurrentCharacteristic, Characteristic);
-
-  Characteristic.PowerCharacteristic = function() {
-    var charUUID = uuid.generate('E863F10D-079E-48FF-8F27-9C2605A29F52');
-    Characteristic.call(this, 'Power', charUUID);
-    this.setProps({
-      format: Characteristic.Formats.UInt16,
-      unit: "W",
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-    });
-    this.value = this.getDefaultValue();
-  };
-
-  util.inherits(Characteristic.PowerCharacteristic, Characteristic);
-
-
-
-  Service.PowerMeterService = function(displayName, subtype) {
-    var servUUID = uuid.generate('E863F117-079E-48FF-8F27-9C2605A29F52');
-    Service.call(this, displayName, servUUID, subtype);
-    this.addCharacteristic(Characteristic.VoltageCharacteristic);
-    this.addCharacteristic(Characteristic.CurrentCharacteristic);
-    this.addCharacteristic(Characteristic.PowerCharacteristic);
-  };
-
-  util.inherits(Service.PowerMeterService, Service);
-}
-
-
-
 HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function(Service, Characteristic) {
 
   var that = this;
+  this.meterChannel = this.cfg["meterChannel"] || "6";
+  this.switchChannel = this.cfg["switchChannel"] || "3";
+  this.enableLoggingService("energy");
 
   var sensor = new Service["PowerMeterService"](this.name);
   var voltage = sensor.getCharacteristic(Characteristic.VoltageCharacteristic)
@@ -114,7 +47,7 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function(Ser
   var power = sensor.getCharacteristic(Characteristic.PowerCharacteristic)
   .on('get', function(callback) {
     that.query(that.meterChannel + ":POWER",function(value){
-      that.loggingService.addEntry({time: new Date().getTime(), power:parseFloat(value)});
+      that.addLogEntry({power:parseFloat(value)});
       if (callback) callback(null,value);
     });
   }.bind(this));
@@ -172,14 +105,14 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.shutdown = function() {
 
 HomeMaticHomeKitPowerMeterServiceIP.prototype.queryData = function() {
   var that = this;
-  this.query(this.meterChannel + ":POWER",function(value){that.loggingService.addEntry({time: moment().unix(), power:parseFloat(value)})});
+  this.query(this.meterChannel + ":POWER",function(value){that.addLogEntry({power:parseFloat(value)})});
   //create timer to query device every 10 minutes
   this.refreshTimer = setTimeout(function(){that.queryData()}, 10 * 60 * 1000);
 }
 
 HomeMaticHomeKitPowerMeterServiceIP.prototype.datapointEvent= function(dp,newValue) {
   if (dp==this.meterChannel + ":POWER") {
-    this.loggingService.addEntry({time: moment().unix(), power:parseInt(newValue)});
+    this.addLogEntry({power:parseInt(newValue)});
   }
 }
 

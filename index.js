@@ -93,7 +93,7 @@ function HomeMaticPlatform(log, config,api) {
 	this.foundAccessories = []
 	this.eventAdresses=[]
 	this.adressesToQuery = []
-
+	this.addOptionalServices()
 	// only init stuff if there is no test running
 	if (!isInTest) {
 
@@ -243,6 +243,71 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 			this.checkUpdate()
 		})
 	}
+}
+
+HomeMaticPlatform.prototype.addOptionalServices = function() {
+
+Characteristic.PowerCharacteristic = function() {
+	var charUUID = uuid.generate('E863F10D-079E-48FF-8F27-9C2605A29F52');
+	Characteristic.call(this, 'Power', charUUID);
+	this.setProps({
+		format: Characteristic.Formats.UInt16,
+		unit: "W",
+		perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+	});
+	this.value = this.getDefaultValue();
+};
+
+inherits(Characteristic.PowerCharacteristic, Characteristic);
+
+Characteristic.PowerConsumptionCharacteristic = function() {
+	var charUUID = uuid.generate('E863F10C-079E-48FF-8F27-9C2605A29F52');
+	Characteristic.call(this, 'Total Consumption', charUUID);
+	this.setProps({
+		format: Characteristic.Formats.UInt16,
+		unit: "kWh",
+		perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+	});
+	this.value = this.getDefaultValue();
+};
+
+inherits(Characteristic.PowerConsumptionCharacteristic, Characteristic);
+
+Characteristic.VoltageCharacteristic = function() {
+	var charUUID = uuid.generate('E863F10A-079E-48FF-8F27-9C2605A29F52');
+	Characteristic.call(this, 'Voltage', charUUID);
+	this.setProps({
+		format: Characteristic.Formats.UInt16,
+		unit: "V",
+		perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+	});
+	this.value = this.getDefaultValue();
+};
+
+inherits(Characteristic.VoltageCharacteristic, Characteristic);
+
+Characteristic.CurrentCharacteristic = function() {
+	var charUUID = uuid.generate('E863F126-079E-48FF-8F27-9C2605A29F52');
+	Characteristic.call(this, 'Current', charUUID);
+	this.setProps({
+		format: Characteristic.Formats.UInt16,
+		unit: "A",
+		perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+	});
+	this.value = this.getDefaultValue();
+};
+inherits(Characteristic.CurrentCharacteristic, Characteristic);
+
+Service.PowerMeterService = function(displayName, subtype) {
+	var servUUID = uuid.generate('E863F117-079E-48FF-8F27-9C2605A29F52');
+	Service.call(this, displayName, servUUID, subtype);
+	this.addCharacteristic(Characteristic.PowerCharacteristic);
+	this.addOptionalCharacteristic(Characteristic.PowerConsumptionCharacteristic);
+	this.addOptionalCharacteristic(Characteristic.VoltageCharacteristic);
+	this.addOptionalCharacteristic(Characteristic.CurrentCharacteristic);
+};
+
+inherits(Service.PowerMeterService, Service);
 }
 
 
