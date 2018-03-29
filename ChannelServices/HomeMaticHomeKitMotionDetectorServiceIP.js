@@ -41,6 +41,8 @@ HomeMaticHomeKitMotionDetectorServiceIP.prototype.createDeviceService = function
       callback(null,value)
     })
   }.bind(this))
+  
+  // Change max Lux to 100
 
   cbright.setProps({
     format: Characteristic.Formats.FLOAT,
@@ -54,7 +56,6 @@ HomeMaticHomeKitMotionDetectorServiceIP.prototype.createDeviceService = function
   cbright.eventEnabled= true
   this.services.push(brightness)
 
-  // Change max Lux to 100
 
 
   this.addTamperedCharacteristic(sensor,Characteristic)

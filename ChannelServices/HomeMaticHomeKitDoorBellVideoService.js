@@ -138,7 +138,7 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function() {
       lock_current_state.updateValue(that.lockState,null)
       // wait unlock time
       setTimeout(function(){
-        // and reset all this 
+        // and reset all this
         if (unlockResetCommand != undefined) {
           that.log.debug('send lock reset command %s',unlockResetCommand)
           that.sendOpenDoorCommand(adrunlockactor,unlockResetCommand)
