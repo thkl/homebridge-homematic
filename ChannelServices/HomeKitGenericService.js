@@ -96,7 +96,7 @@ HomeKitGenericService.prototype = {
     } else {
       var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge);
       this.log.debug("Adding Log Service for %s",this.displayName);
-      this.loggingService = new FakeGatoHistoryService(type, this, {storage: 'fs', path: this.platform.localCache,disableTimer:true});
+      this.loggingService = new FakeGatoHistoryService(type, this, {storage: 'fs', path: this.platform.localPath,disableTimer:true});
       this.services.push(this.loggingService);
     }
   },
@@ -393,7 +393,7 @@ HomeKitGenericService.prototype = {
     // just a stub
   },
 
-  // Event only with datapoint infos 
+  // Event only with datapoint infos
   datapointEvent:function(dp,newValue,channel) {
     // just a stub
   },
