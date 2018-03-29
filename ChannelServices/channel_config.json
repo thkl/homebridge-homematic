@@ -307,6 +307,10 @@
 	{
 		"type" : "HmIP-SPI:PRESENCEDETECTOR_TRANSCEIVER",
 		"service" : "HomeMaticHomeKitPresenceDetectorServiceIP"
+	},
+	{
+	  "type" : "POWERMETER_IGL",
+		"service" : "HomeMaticHomeKitEnergyCounterService"
 	}
 
 
