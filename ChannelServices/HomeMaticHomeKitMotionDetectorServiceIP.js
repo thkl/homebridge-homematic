@@ -20,7 +20,7 @@ HomeMaticHomeKitMotionDetectorServiceIP.prototype.createDeviceService = function
   this.services.push(this.loggingService)
 
 
-  var sensor = new Service['MotionSensor'](this.name)
+  var sensor = new Service.MotionSensor(this.name)
   var state = sensor.getCharacteristic(Characteristic.MotionDetected)
   .on('get', function(callback) {
     that.query('MOTION',function(value){
@@ -34,7 +34,7 @@ HomeMaticHomeKitMotionDetectorServiceIP.prototype.createDeviceService = function
   this.services.push(sensor)
   this.remoteGetValue('MOTION')
 
-  var brightness = new Service['LightSensor'](this.name)
+  var brightness = new Service.LightSensor(this.name)
   var cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
   .on('get', function(callback) {
     that.query('ILLUMINATION',function(value){
@@ -42,9 +42,20 @@ HomeMaticHomeKitMotionDetectorServiceIP.prototype.createDeviceService = function
     })
   }.bind(this))
 
+  cbright.setProps({
+    format: Characteristic.Formats.FLOAT,
+    unit: Characteristic.Units.LUX,
+    maxValue: 100,
+    minValue: 0.0001,
+    perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+  })
+
   this.currentStateCharacteristic['ILLUMINATION'] = cbright
   cbright.eventEnabled= true
   this.services.push(brightness)
+
+  // Change max Lux to 100
+
 
   this.addTamperedCharacteristic(sensor,Characteristic)
   this.addLowBatCharacteristic(sensor,Characteristic)
