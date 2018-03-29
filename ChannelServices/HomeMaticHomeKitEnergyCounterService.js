@@ -12,6 +12,7 @@ inherits(HomeMaticHomeKitEnergyCounterService, HomeKitGenericService);
 
 HomeMaticHomeKitEnergyCounterService.prototype.shutdown = function() {
   clearTimeout(this.refreshTimer)
+  clearTimeout(this.initialQueryTimer)
 }
 
 HomeMaticHomeKitEnergyCounterService.prototype.createDeviceService = function(Service, Characteristic) {
@@ -48,7 +49,7 @@ HomeMaticHomeKitEnergyCounterService.prototype.createDeviceService = function(Se
 
   this.services.push(sensor);
   // wait some time
-  setTimeout(function(){
+  this.initialQueryTimer = setTimeout(function(){
     that.queryData()
   },1000)
 }
@@ -58,7 +59,6 @@ HomeMaticHomeKitEnergyCounterService.prototype.queryData = function() {
   var that = this;
   this.query("POWER",function(value){
     that.addLogEntry({power:parseFloat(value)})
-    that.log.info("EZ POWER %s",value)
     that.power.updateValue(value,null)
   });
 
