@@ -23,7 +23,7 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function(Ser
   this.voltage = sensor.getCharacteristic(Characteristic.VoltageCharacteristic)
   .on('get', function(callback) {
     that.query(that.meterChannel + ":VOLTAGE",function(value){
-      if (callback) callback(null,value);
+      if (callback) callback(null,Number(value).toFixed(2));
     });
   }.bind(this));
 
@@ -33,7 +33,7 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function(Ser
   .on('get', function(callback) {
     that.query(that.meterChannel + ":CURRENT",function(value){
       if (value!=undefined) {
-        if (callback) callback(null,value);
+        if (callback) callback(null,Number(value).toFixed(2));
       } else {
         if (callback) callback(null,0);
       }
@@ -46,7 +46,7 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function(Ser
   .on('get', function(callback) {
     that.query(that.meterChannel + ":POWER",function(value){
       that.addLogEntry({power:parseFloat(value)});
-      if (callback) callback(null,value);
+      if (callback) callback(null,Number(value).toFixed(4));
     });
   }.bind(this));
 
@@ -118,17 +118,18 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.queryData = function() {
 HomeMaticHomeKitPowerMeterServiceIP.prototype.datapointEvent= function(dp,newValue) {
   if (dp==this.meterChannel + ":POWER") {
     this.addLogEntry({power:parseInt(newValue)});
-    this.power.updateValue(newValue,null);
+    let value = Number(newValue).toFixed(2)
+    this.power.updateValue(value,null);
   }
 
   if (dp==this.meterChannel + ":VOLTAGE") {
-    this.addLogEntry({power:parseInt(newValue)});
-    this.voltage.updateValue(newValue,null);
+    let value = Number(newValue).toFixed(2)
+    this.voltage.updateValue(value,null);
   }
 
   if (dp==this.meterChannel + ":CURRENT") {
-    this.addLogEntry({power:parseInt(newValue)});
-    this.current.updateValue(newValue,null);
+    let value = Number(newValue).toFixed(4)
+    this.current.updateValue(value,null);
   }
 
 }
