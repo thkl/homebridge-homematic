@@ -66,15 +66,16 @@ HomeMaticHomeKitEnergyCounterService.prototype.queryData = function() {
 
 
 HomeMaticHomeKitEnergyCounterService.prototype.datapointEvent= function(dp,newValue) {
+
   if (dp=='POWER') {
-    that.power.updateValue(newValue,null)
-    that.addLogEntry({power:parseFloat(value)})
+    this.power.updateValue(newValue,null)
+    this.addLogEntry({power:parseFloat(newValue)})
   }
 
   if (dp=='ENERGY_COUNTER') {
     // CCU sends wH -- homekit haz kwh - so calculate /1000
     let value = (newValue / 1000)
-    that.energyCounter.updateValue(Number(value).toFixed(2),null)
+    this.energyCounter.updateValue(Number(value).toFixed(2),null)
   }
 }
 

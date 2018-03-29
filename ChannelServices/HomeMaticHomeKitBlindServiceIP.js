@@ -20,11 +20,11 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function(Service,
   this.minValueForClose = this.getClazzConfigValue('minValueForClose',0)
   this.maxValueForOpen = this.getClazzConfigValue('maxValueForOpen',100)
   if (this.minValueForClose > 0) {
-      this.log.info("there is a custom closed level of %s",this.minValueForClose)
+      this.log.debug("there is a custom closed level of %s",this.minValueForClose)
   }
 
-  if (this.maxValueForOpen > 0) {
-      this.log.info("there is a custom open level of %s",this.maxValueForOpen)
+  if (this.maxValueForOpen < 100) {
+      this.log.debug("there is a custom open level of %s",this.maxValueForOpen)
   }
 
   this.currentPos = blind.getCharacteristic(Characteristic.CurrentPosition)
