@@ -106,6 +106,10 @@ HomeMaticHomeKitWeatherStationService.prototype.createDeviceService = function(S
 
 	var that = this;
 
+  this.enableLoggingService("weather");
+  this.currentTemperature = -255;
+  this.currentHumidity = -255;
+
   var thermo = new Service["TemperatureSensor"](this.name);
     this.services.push(thermo);
 
@@ -202,6 +206,44 @@ HomeMaticHomeKitWeatherStationService.prototype.createDeviceService = function(S
 	  this.currentStateCharacteristic["WIND_DIRECTION_RANGE"] = cwindrange;
     cwindrange.eventEnabled= true;
 
+
+  this.queryData();
+
+}
+
+HomeMaticHomeKitWeatherStationService.prototype.queryData = function() {
+
+  var that = this;
+
+  this.query("TEMPERATURE",function(value){
+    that.currentTemperature = parseFloat(value);
+    that.query("HUMIDITY",function(value){
+      that.currentHumidity = parseFloat(value);
+      if ((that.currentTemperature > -255) && (that.currentHumidity > -255)) {
+        that.addLogEntry({temp:that.currentTemperature, pressure:0, humidity:that.currentHumidity})
+      }
+    });
+  });
+
+  // Timer: Query device every 10 minutes
+  setTimeout(function(){that.queryData()}, 10 * 60 * 1000);
+}
+
+
+HomeMaticHomeKitWeatherStationService.prototype.datapointEvent= function(dp,newValue) {
+
+  if (dp=='TEMPERATURE') {
+    this.currentTemperature = parseFloat(newValue);
+  }
+
+  if (dp=='HUMIDITY') {
+    this.currentHumidity = parseFloat(newValue);
+  }
+
+  // make this call a little less often
+  if ((dp=='TEMPERATURE') || (dp=='HUMIDITY') && (this.currentTemperature > -255) && (this.currentHumidity > -255)) {
+    this.addLogEntry({ temp:this.currentTemperature, pressure:0, humidity:this.currentHumidity});
+  }
 }
 
 module.exports = HomeMaticHomeKitWeatherStationService;

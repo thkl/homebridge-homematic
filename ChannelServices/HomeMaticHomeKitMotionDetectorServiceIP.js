@@ -15,7 +15,6 @@ HomeMaticHomeKitMotionDetectorServiceIP.prototype.createDeviceService = function
 
   var that = this
 
-  this.log.debug("Adding Log Service for %s",this.displayName);
   this.enableLoggingService("motion");
 
   var sensor = new Service.MotionSensor(this.name)

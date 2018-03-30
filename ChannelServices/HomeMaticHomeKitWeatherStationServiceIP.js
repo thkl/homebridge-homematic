@@ -130,7 +130,6 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
 
   var that = this;
 
-  this.log.debug("Adding Log Service for %s",this.displayName);
   this.enableLoggingService("weather");
   this.currentTemperature = -255;
   this.currentHumidity = -255;
