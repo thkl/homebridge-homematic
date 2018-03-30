@@ -23,7 +23,7 @@ HomeMaticRegaRequestTestDriver.prototype = {
 
   getValue: function(channel, datapoint, callback) {
     if (this.platform.homebridge != undefined) {
-      callback(this.platform.homebridge.values[channel + '.' + datapoint]);
+      if (callback != undefined ) {callback(this.platform.homebridge.values[channel + '.' + datapoint]);}
     } else {
       callback(0);
     }
