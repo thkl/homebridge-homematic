@@ -1,0 +1,63 @@
+{
+  "devices": [
+    {
+      "id": "1000",
+      "name": "TA1",
+      "address": "ADR1234567890",
+      "type": "HM-ES-PMSw1-Pl",
+      "channels": [
+        {
+          "cId": 1001,
+          "name": "TA1_0",
+          "intf": "BidCos-RF",
+          "address": "BidCos-RF.ADR1234567890:1",
+          "type": "SWITCH",
+          "access": "255"
+        },
+        {
+          "cId": 1002,
+          "name": "TA1_0",
+          "intf": "BidCos-RF",
+          "address": "BidCos-RF.ADR1234567890:2",
+          "type": "POWERMETER",
+          "access": "255"
+        },
+        {
+          "cId": 1003,
+          "name": "TA1_0",
+          "intf": "BidCos-RF",
+          "address": "BidCos-RF.ADR1234567890:3",
+          "type": "CONDITION_POWER",
+          "access": "255"
+        },
+        {
+          "cId": 1004,
+          "name": "TA1_0",
+          "intf": "BidCos-RF",
+          "address": "BidCos-RF.ADR1234567890:4",
+          "type": "CONDITION_CURRENT",
+          "access": "255"
+        },
+        {
+          "cId": 1005,
+          "name": "TA1_0",
+          "intf": "BidCos-RF",
+          "address": "BidCos-RF.ADR1234567890:5",
+          "type": "CONDITION_VOLTAGE",
+          "access": "255"
+        },
+        {
+          "cId": 1006,
+          "name": "TA1_0",
+          "intf": "BidCos-RF",
+          "address": "BidCos-RF.ADR1234567890:6",
+          "type": "CONDITION_FREQUENCY",
+          "access": "255"
+        }
+      ]
+    }
+  ],
+  "subsection": [
+    1002
+  ]
+}

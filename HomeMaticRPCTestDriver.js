@@ -22,18 +22,26 @@ HomeMaticRPCTestDriver.prototype.getIPAddress = function() {
 
 HomeMaticRPCTestDriver.prototype.getValue = function(channel, datapoint, callback) {
   if (this.platform.homebridge != undefined) {
-    this.log.debug('Client ask for %s.%s',channel,datapoint)
-    callback(this.platform.homebridge.values[channel + '.' + datapoint]);
+    var adrchannel = channel + "." + datapoint
+    if (channel.indexOf(this.interface)==-1) {
+       adrchannel = this.interface + channel + "." + datapoint
+    }
+    callback(this.platform.homebridge.values[adrchannel]);
   } else {
     callback(0)
   }
 }
 
 HomeMaticRPCTestDriver.prototype.setValue = function(channel, datapoint, value) {
+  var adrchannel = channel + "." + datapoint
+  if (channel.indexOf(this.interface)==-1) {
+     adrchannel = this.interface + channel + "." + datapoint
+  }
   if (typeof value == 'object') {
     value = value['explicitDouble'];
   }
-  this.platform.homebridge.values[channel + '.' + datapoint] = value;
+
+  this.platform.homebridge.values[adrchannel] = value;
 }
 
 HomeMaticRPCTestDriver.prototype.connect = function() {

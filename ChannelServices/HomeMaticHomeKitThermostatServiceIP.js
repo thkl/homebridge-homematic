@@ -22,7 +22,7 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function(Ser
   var mode = thermo.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
   .on('get', function(callback) {
 
-    this.query("SET_POINT_TEMPERATURE",function(value) {
+    that.query("SET_POINT_TEMPERATURE",function(value) {
       if (value<6.0){
         that.currentStateCharacteristic["CONTROL_MODE"].setValue(1, null);
         if (callback) callback(null,0);
@@ -41,7 +41,7 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function(Ser
   var targetMode = thermo.getCharacteristic(Characteristic.TargetHeatingCoolingState)
   .on('get', function(callback) {
 
-    this.query("SET_POINT_TEMPERATURE",function(value) {
+    that.query("SET_POINT_TEMPERATURE",function(value) {
       if (value<6.0){
         if (callback) callback(null,0);
       } else {

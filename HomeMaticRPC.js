@@ -232,7 +232,7 @@ HomeMaticRPC.prototype.getValue = function(channel, datapoint, callback) {
 
     this.log.debug("RPC getValue Call for %s %s",channel,datapoint);
     this.client.methodCall("getValue", [channel, datapoint], function(error, value) {
-      that.log.debug("RPC getValue (%s %s) Response %s Errors: %s",channel,datapoint, JSON.stringify(value),error);
+      that.log.debug("RPC getValue (%s %s) Response %s  | Errors: %s",channel,datapoint, JSON.stringify(value),error);
       callback(value);
     });
     return;

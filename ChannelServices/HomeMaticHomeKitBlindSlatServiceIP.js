@@ -14,7 +14,7 @@ util.inherits(HomeMaticHomeKitBlindSlatServiceIP, HomeKitGenericService);
 HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function(Service, Characteristic) {
 
     var that = this;
-    var blind = new Service["WindowCovering"](this.name);
+    var blind = new Service.WindowCovering(this.name);
     this.services.push(blind);
 
     this.currentPos = blind.getCharacteristic(Characteristic.CurrentPosition)
@@ -32,7 +32,7 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function(Serv
 
 
     this.targetPos = blind.getCharacteristic(Characteristic.TargetPosition)
-    
+
     .on('get', function(callback) {
  	   that.log.info("get TargetPosition ")
 
@@ -43,15 +43,15 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function(Serv
 			}
 		})
     }.bind(this))
-    
-        
+
+
     .on('set', function(value, callback) {
       that.delayed("set", "4:LEVEL", value, 750);
       callback();
     }.bind(this));
 
     var pstate = blind.getCharacteristic(Characteristic.PositionState)
-	
+
 	.on('get', function(callback) {
       that.query("DIRECTION",function(value){
        if (callback) {
@@ -60,11 +60,11 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function(Serv
           } else {
             callback(null,"0");
           }
-                
+
        }
       });
     }.bind(this));
-    
+
     this.currentStateCharacteristic["DIRECTION"] = pstate;
     pstate.eventEnabled = true;
 
@@ -74,7 +74,7 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function(Serv
 		that.query("LEVEL_2",function(value){
 		if (callback) {
           if (value!=undefined) {
-	          // Recalculate 
+	          // Recalculate
 	          let vl = -90 + (1.8 * (value*100))
 			  callback(null,vl)
           } else {
@@ -88,7 +88,7 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function(Serv
 	this.tslat = blind.getCharacteristic(Characteristic.TargetHorizontalTiltAngle)
 	.on('set', function(value,callback){
 		let nlv = (value+90/100)/1.8
-		that.delayed("set", "LEVEL_2", nlv, 750);      
+		that.delayed("set", "LEVEL_2", nlv, 750);
     }.bind(this));
 
     this.addValueMapping("DIRECTION",0,2);
@@ -124,5 +124,4 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.datapointEvent=function(dp,newValue
 
 }
 
-
-module.exports = HomeMaticHomeKitBlindSlatServiceIP; 
+module.exports = HomeMaticHomeKitBlindSlatServiceIP;
