@@ -287,7 +287,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.queryData = function() {
     that.query("HUMIDITY",function(value){
       that.currentHumidity = parseFloat(value);
       if ((that.currentTemperature > -255) && (that.currentHumidity > -255)) {
-        that.addLogEntry({temp:that.currentTemperature, pressure:0, humidity:that.currentHumidity})
+        that.addLogEntry({temp:that.currentTemperature, pressure:0, humidity:that.currentHumidity});
       }
     });
   });

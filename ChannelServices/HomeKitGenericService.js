@@ -104,8 +104,37 @@ HomeKitGenericService.prototype = {
   addLogEntry:function(data) {
     // check if loggin is enabled
     if ((this.loggingService != undefined) && (data != undefined)) {
-      data.time =  moment().unix()
-      this.loggingService.addEntry(data)
+
+      data.time =  moment().unix();
+      // check if the last logentry was just recently and is the same as the previous
+      var logChanges = true;
+      // there is a previous logentry, let's compare...
+      if (this.lastLogEntry != undefined) {
+        logChanges = false;
+        // compare data
+        var that = this;
+        Object.keys(data).forEach(function (key) {
+          if(key == 'time') {
+            return;
+          }
+          // log changes if values differ
+          if (data[key] != that.lastLogEntry[key]) {
+            logChanges = true;
+          }
+        });
+        // log changes if last log entry is older than 7 minutes,
+        // homematic usually sends updates evry 120-180 seconds
+        if ((data.time - that.lastLogEntry.time) > 7 * 60) {
+          logChanges = true;
+        }
+      }
+
+      if (logChanges) {
+        // this.log.debug("Saving log data for %s:", this.displayName);
+        // this.log.debug(JSON.stringify(data));
+        this.loggingService.addEntry(data);
+        this.lastLogEntry = data;
+      }
     }
   },
 
