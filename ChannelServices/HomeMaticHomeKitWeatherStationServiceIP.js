@@ -131,6 +131,8 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.propagateServices = function(h
 HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function(Service, Characteristic) {
 
   var that = this;
+
+  this.log.debug("Adding Log Service for %s",this.displayName);
   this.enableLoggingService("weather");
   this.currentTemperature = -255;
   this.currentHumidity = -255;
@@ -296,6 +298,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.queryData = function() {
 
 
 HomeMaticHomeKitWeatherStationServiceIP.prototype.datapointEvent= function(dp,newValue) {
+
   if (dp=='ACTUAL_TEMPERATURE') {
     this.currentTemperature = parseFloat(newValue);
   }
@@ -304,8 +307,9 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.datapointEvent= function(dp,ne
     this.currentHumidity = parseFloat(newValue);
   }
 
-  if ((this.currentTemperature > -255) && (this.currentHumidity > -255)) {
-    this.addLogEntry({temp:this.currentTemperature, pressure:0, humidity:this.currentHumidity});
+  // make this call a little less often
+  if ((dp=='ACTUAL_TEMPERATURE') || (dp=='HUMIDITY') && (this.currentTemperature > -255) && (this.currentHumidity > -255)) {
+    this.addLogEntry({ temp:this.currentTemperature, pressure:0, humidity:this.currentHumidity});
   }
 }
 

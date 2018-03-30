@@ -1,0 +1,23 @@
+{
+  "devices": [
+    {
+      "id": "1000",
+      "name": "TA1",
+      "address": "ADR1234567890",
+      "type": "HM-ES-TX-WM",
+      "channels": [
+        {
+          "cId": 1001,
+          "name": "TA1_0",
+          "intf": "BidCos-RF",
+          "address": "BidCos-RF.ADR1234567890:1",
+          "type": "POWERMETER_IGL",
+          "access": "255"
+        }
+      ]
+    }
+  ],
+  "subsection": [
+    1001
+  ]
+}

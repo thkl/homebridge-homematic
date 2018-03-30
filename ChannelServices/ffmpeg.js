@@ -140,8 +140,8 @@ FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
   var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
   let ffmpeg = spawn('ffmpeg', (imageSource + ' -t 1 -s '+ resolution + ' -f image2 -').split(' '), {env: process.env});
   var imageBuffer = Buffer(0);
-  this.log("Snapshot from " + this.name + " at " + resolution);
-  if(this.debug) console.log('ffmpeg '+imageSource + ' -t 1 -s '+ resolution + ' -f image2 -');
+  this.log.debug("Snapshot from " + this.name + " at " + resolution);
+  //this.log.debug('ffmpeg '+imageSource + ' -t 1 -s '+ resolution + ' -f image2 -');
   ffmpeg.stdout.on('data', function(data) {
     imageBuffer = Buffer.concat([imageBuffer, data]);
   });
@@ -314,9 +314,9 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         }
 
         let ffmpeg = spawn('ffmpeg', ffmpegCommand.split(' '), {env: process.env});
-        this.log("Start streaming video from " + this.name + " with " + width + "x" + height + "@" + vbitrate + "kBit");
+        this.log.debug("Start streaming video from " + this.name + " with " + width + "x" + height + "@" + vbitrate + "kBit");
         if(this.debug){
-          console.log("ffmpeg " + ffmpegCommand);
+          this.log.debug("ffmpeg " + ffmpegCommand);
           ffmpeg.stderr.on('data', function(data) {
             console.log(data.toString());
           });
@@ -324,9 +324,9 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         let self = this;
         ffmpeg.on('close', (code) => {
           if(code == null || code == 0 || code == 255){
-            self.log("Stopped streaming");
+            self.log.debug("Stopped streaming");
           } else {
-            self.log("ERROR: FFmpeg exited with code " + code);
+            self.log.debug("ERROR: FFmpeg exited with code " + code);
             for(var i=0; i < self.streamControllers.length; i++){
               var controller = self.streamControllers[i];
               if(controller.sessionIdentifier === sessionID){

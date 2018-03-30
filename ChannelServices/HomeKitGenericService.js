@@ -417,8 +417,13 @@ HomeKitGenericService.prototype = {
 
   },
 
+  // Event with complete channel and dp infos
+  channelDatapointEvent:function(channel,dp,newValue) {
+    // just a stub
+  },
 
-  datapointEvent:function(dp,newValue) {
+  // Event only with datapoint infos
+  datapointEvent:function(dp,newValue,channel) {
     // just a stub
   },
 
@@ -469,7 +474,8 @@ HomeKitGenericService.prototype = {
           setTimeout(function(){targetChar.setValue(0);}, 1000);
         }
         var chnl = channel.slice(channel.indexOf(":")+1);
-        this.datapointEvent(chnl + ":" + dp,newValue);
+        this.channelDatapointEvent(channel,dp,newValue);
+        this.datapointEvent(chnl + ":" + dp,newValue,channel);
         return;
       }
 
@@ -494,12 +500,13 @@ HomeKitGenericService.prototype = {
 
         var chnl = channel.slice(channel.indexOf(":")+1);
         this.cache(chnl + ":" + dp,newValue);
-        this.datapointEvent(chnl + ":" + dp,newValue);
+        this.datapointEvent(chnl + ":" + dp,newValue,channel);
       } else {
 
         this.cache(dp,newValue);
-        this.datapointEvent(dp,newValue);
+        this.datapointEvent(dp,newValue,channel);
       }
+      this.channelDatapointEvent(channel,dp,newValue);
       this.eventupdate = false;
     } else {
       this.log.warn("channel %s or dp %s is undefined",channel,dp);

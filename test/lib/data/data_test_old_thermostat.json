@@ -1,0 +1,10 @@
+{"devices":[
+	{"id": "10001","name": "TA5","address": "ABC1234560","type": "HM-CC-TC",
+	"channels": [
+		{"cId": 10002,"name": "TA5_C1","intf": "BidCos-RF","address": "BidCos-RF.ABC1234560:1","type": "WEATHER","access": "255"},
+		{"cId": 10003,"name": "TA5_C2","intf": "BidCos-RF","address": "BidCos-RF.ABC1234560:2","type": "CLIMATECONTROL_REGULATOR","access": "255"},
+		{"cId": 10004,"name": "TA5_C3","intf": "BidCos-RF","address": "BidCos-RF.ABC1234560:3","type": "WINDOW_SWITCH_RECEIVER","access": "255"}
+	]}
+],
+	"subsection":[10003]
+}

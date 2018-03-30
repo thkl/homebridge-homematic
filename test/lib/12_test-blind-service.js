@@ -17,7 +17,7 @@ describe("Homematic Plugin (index)", function() {
   let datapath = path.join(__dirname,'data','data_test_blind.json')
   let data = fs.readFileSync(datapath).toString();
   let that = this
-  var config = { ccu_ip: '127.0.0.1',subsection :'HomeKit' , testdata:data};
+  var config = { ccu_ip: '127.0.0.1',subsection :'HomeKit' , testdata:data ,'HM-LC-Bl1-SM:BLIND':{'observeInhibit':true}};
   var platform = new homebridgeMock.PlatformType(log, config);
 
 
@@ -27,6 +27,7 @@ describe("Homematic Plugin (index)", function() {
       that.accessories = acc;
     })
     // reset
+
     platform.xmlrpc.event(['BidCos-RF','ABC1234560:1','INHIBIT',false]);
   });
 
@@ -115,6 +116,7 @@ describe("Homematic Plugin (index)", function() {
       platform.xmlrpc.event(['BidCos-RF','ABC1234560:1','INHIBIT',true]);
 
       that.accessories.map(ac => {
+
 
         assert.equal(ac.inhibit, true, "Inhibit event but state not in sync");
 

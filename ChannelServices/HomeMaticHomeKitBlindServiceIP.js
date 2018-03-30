@@ -17,11 +17,25 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function(Service,
   var blind = new Service.WindowCovering(this.name);
   this.delayOnSet = 750;
   this.services.push(blind);
+  this.minValueForClose = this.getClazzConfigValue('minValueForClose',0)
+  this.maxValueForOpen = this.getClazzConfigValue('maxValueForOpen',100)
+  if (this.minValueForClose > 0) {
+      this.log.debug("there is a custom closed level of %s",this.minValueForClose)
+  }
+
+  if (this.maxValueForOpen < 100) {
+      this.log.debug("there is a custom open level of %s",this.maxValueForOpen)
+  }
 
   this.currentPos = blind.getCharacteristic(Characteristic.CurrentPosition)
-
   .on('get', function(callback) {
     that.query("4:LEVEL",function(value){
+      if (value < that.minValueForClose) {
+        value = 0
+      }
+      if (value > that.maxValueForOpen) {
+        value = 100
+      }
       if (callback) callback(null,value);
     });
   }.bind(this));
@@ -33,6 +47,12 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function(Service,
   .on('get', function(callback) {
     that.query("4:LEVEL",function(value){
       if (callback) {
+        if (value < that.minValueForClose) {
+          value = 0
+        }
+        if (value > that.maxValueForOpen) {
+          value = 100
+        }
         callback(null,value);
       }
     })
@@ -83,7 +103,9 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function(Service,
   this.addValueMapping("DIRECTION",2,1);
   this.addValueMapping("DIRECTION",3,2);
 
-  this.remoteGetValue("4:LEVEL");
+  this.remoteGetValue("4:LEVEL",function(newValue){
+    that.processBlindLevel(newValue)
+  });
 
   this.deviceAdress = this.adress.slice(0, this.adress.indexOf(":"));
   this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ":3.LEVEL",this)
@@ -92,26 +114,41 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function(Service,
 }
 
 HomeMaticHomeKitBlindServiceIP.prototype.endWorking=function()  {
-  this.remoteGetValue("4:LEVEL");
+  this.remoteGetValue("4:LEVEL",function(newValue){
+    that.processBlindLevel(newValue)
+  });
+}
+
+// https://github.com/thkl/homebridge-homematic/issues/208
+// if there is a custom close level and the real level is below homekit will get the 0% ... and visevera for max level
+HomeMaticHomeKitBlindServiceIP.prototype.processBlindLevel = function(newValue)  {
+
+  if (newValue <= this.minValueForClose) {
+    newValue = 0
+  }
+  if (newValue >= this.maxValueForOpen) {
+    newValue = 100
+  }
+
+  this.currentPos.updateValue(newValue,null);
+  this.targetPos.updateValue(newValue,null);
+
 }
 
 HomeMaticHomeKitBlindServiceIP.prototype.datapointEvent=function(dp,newValue)  {
   let that = this
   if ((dp == "4:PROCESS") && (newValue == 0)) {
     this.remoteGetValue("4:LEVEL",function(value) {
-      that.currentPos.updateValue(value,null);
-      that.targetPos.updateValue(value,null);
+      that.processBlindLevel(newValue)
     })
   }
 
   if (dp == "4:LEVEL") {
-    that.currentPos.updateValue(newValue,null);
-    that.targetPos.updateValue(newValue,null);
+    this.processBlindLevel(newValue)
   }
 
   if (dp == "3:LEVEL") {
-    that.currentPos.updateValue(newValue,null);
-    that.targetPos.updateValue(newValue,null);
+    this.processBlindLevel(newValue)
   }
 }
 

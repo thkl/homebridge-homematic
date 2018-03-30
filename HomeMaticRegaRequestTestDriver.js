@@ -23,13 +23,14 @@ HomeMaticRegaRequestTestDriver.prototype = {
 
   getValue: function(channel, datapoint, callback) {
     if (this.platform.homebridge != undefined) {
-      callback(this.platform.homebridge.values[channel + '.' + datapoint]);
+      if (callback != undefined ) {callback(this.platform.homebridge.values[channel + '.' + datapoint]);}
     } else {
       callback(0);
     }
   },
 
   setValue: function(channel, datapoint, value) {
+    this.log.debug("Set Rega Called %s.%s - %s",channel, datapoint, value)
     if (this.platform.homebridge != undefined) {
       if (typeof value == 'object') {
         value = value['explicitDouble'];
