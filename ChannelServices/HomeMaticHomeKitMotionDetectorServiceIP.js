@@ -14,17 +14,15 @@ util.inherits(HomeMaticHomeKitMotionDetectorServiceIP, HomeKitGenericService)
 HomeMaticHomeKitMotionDetectorServiceIP.prototype.createDeviceService = function(Service, Characteristic) {
 
   var that = this
-  var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge)
-  this.log.debug('Adding Log Service for %s',this.displayName)
-  this.loggingService = new FakeGatoHistoryService('motion', this, {storage: 'fs', path: this.platform.localPath, file:this.adress})
-  this.services.push(this.loggingService)
 
+  this.log.debug("Adding Log Service for %s",this.displayName);
+  this.enableLoggingService("motion");
 
   var sensor = new Service.MotionSensor(this.name)
   var state = sensor.getCharacteristic(Characteristic.MotionDetected)
   .on('get', function(callback) {
     that.query('MOTION',function(value){
-      that.loggingService.addEntry({time: moment().unix(), status:(value==true)?1:0})
+      that.addLogEntry({ status:(value==true)?1:0 });
       if (callback) callback(null,value)
     })
   }.bind(this))
@@ -64,10 +62,8 @@ HomeMaticHomeKitMotionDetectorServiceIP.prototype.createDeviceService = function
 
 HomeMaticHomeKitMotionDetectorServiceIP.prototype.datapointEvent= function(dp,newValue) {
   if (dp=='MOTION') {
-    this.loggingService.addEntry({time: moment().unix(), status:(newValue==true)?1:0})
+    that.addLogEntry({ status:(newValue==true)?1:0 });
   }
 }
-
-
 
 module.exports = HomeMaticHomeKitMotionDetectorServiceIP
