@@ -74,7 +74,6 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.propagateServices = function(h
   };
   util.inherits(Characteristic.WindDirectionCharacteristic, Characteristic);
 
-
   Service.WindDirectionService = function(displayName, subtype) {
     var servUUID = uuid.generate('HomeMatic:customchar:WindDirectionService');
     Service.call(this, displayName, servUUID, subtype);
@@ -95,7 +94,6 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.propagateServices = function(h
     this.value = this.getDefaultValue();
   };
   util.inherits(Characteristic.WindRangeCharacteristic, Characteristic);
-
 
   Service.WindRangeService = function(displayName, subtype) {
     var servUUID = uuid.generate('HomeMatic:customchar:WindRangeService');
@@ -132,7 +130,6 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
 
   var that = this;
 
-  this.log.debug("Adding Log Service for %s",this.displayName);
   this.enableLoggingService("weather");
   this.currentTemperature = -255;
   this.currentHumidity = -255;
