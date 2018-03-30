@@ -16,7 +16,6 @@ HomeMaticHomeKitThermostatWeatherService.prototype.createDeviceService = functio
   var thermo = new Service.TemperatureSensor(this.name);
   this.services.push(thermo);
   this.enableLoggingService("weather");
-
   this.currentTemperature = -255;
   this.currentHumidity = -255;
 
