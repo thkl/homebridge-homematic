@@ -61,6 +61,11 @@ HomeMaticHomeKitSensorService.prototype.createDeviceService = function(Service, 
 
 }
 
+HomeMaticHomeKitSensorService.prototype.datapointEvent= function(dp,newValue) {
+  if (dp=='SENSOR') {
+    this.addLogEntry({ status:(newValue==true)?1:0 });
+  }
+}
 
 
 module.exports = HomeMaticHomeKitSensorService; 

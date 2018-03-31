@@ -27,9 +27,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     reverse = true;
    }
   }
-      
- 
-      
+
   if (this.special=="WINDOW") {
 
     var window = new Service["Window"](this.name);
@@ -154,5 +152,12 @@ HomeMaticHomeKitContactService.prototype.stateCharacteristicDidChange = function
 	}
 }
 
+HomeMaticHomeKitContactService.prototype.datapointEvent= function(dp,newValue) {
+  if ( this.special !== "WINDOW" && this.special !== "DOOR" ) {
+    if (dp=='STATE') {
+      this.addLogEntry({ status:(newValue==true)?1:0 });
+    }
+  }
+}
 
 module.exports = HomeMaticHomeKitContactService; 
