@@ -351,7 +351,7 @@ HomeMaticHomeKitContactService.prototype.datapointEvent= function(dp,newValue) {
         this.timesOpened = this.timesOpened + 1;
         this.CharacteristicTimesOpened.updateValue(this.timesOpened,null)
         this.setPersistentState("timesOpened",this.timesOpened)
-        this.setPersistentState("lastOpen",)
+        this.setPersistentState("lastOpen",this.lastOpen)
         this.CharacteristicLastOpen.updateValue(this.lastOpen,null)
       } else {
         this.timeOpen = this.timeOpen + (now - this.timeStamp)
