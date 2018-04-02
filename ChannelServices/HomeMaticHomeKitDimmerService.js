@@ -59,6 +59,7 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
   .on('get', function(callback) {
     that.query("LEVEL",function(value){
       that.state["LAST"] = (value);
+      that.log.info("Get Level %s",value)
       if (callback) callback(null,value);
     });
   }.bind(this))
@@ -104,7 +105,7 @@ HomeMaticHomeKitDimmerService.prototype.endWorking=function()  {
 }
 
 HomeMaticHomeKitDimmerService.prototype.datapointEvent = function(dp,newValue){
-  if (dp=='LEVEL') {
+  if (this.isDataPointEvent(dp,'LEVEL')) {
     this.processDimmerLevel(newValue)
   }
 }

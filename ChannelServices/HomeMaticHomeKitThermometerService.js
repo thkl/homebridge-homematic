@@ -22,7 +22,7 @@ HomeMaticHomeKitThermometerService.prototype.createDeviceService = function(Serv
   this.enableLoggingService("thermo");
 
 
-  var cctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
+  this.cctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
   .setProps({ minValue: -100 })
   .on('get', function(callback) {
     this.remoteGetValue("TEMPERATURE",function(value){
@@ -31,8 +31,8 @@ HomeMaticHomeKitThermometerService.prototype.createDeviceService = function(Serv
     });
   }.bind(this));
 
-  this.currentStateCharacteristic["TEMPERATURE"] = cctemp;
-  cctemp.eventEnabled = true;
+  this.currentStateCharacteristic[this.channelnumber + ":TEMPERATURE"] = this.cctemp;
+  this.eventEnabled = true;
 
   this.remoteGetValue("TEMPERATURE");
   this.queryData();
@@ -52,7 +52,10 @@ HomeMaticHomeKitThermometerService.prototype.shutdown = function() {
 }
 
 HomeMaticHomeKitThermometerService.prototype.datapointEvent= function(dp,newValue) {
-  if (dp=='TEMPERATURE') {
+  this.log.info("DP %s",dp)
+
+  if (this.isDataPointEvent(dp,'TEMPERATURE')) {
+    this.cctemp.updateValue(newValue,null)
     this.addLogEntry({currentTemp:parseFloat(newValue)});
   }
 }

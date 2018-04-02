@@ -10,6 +10,11 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.displayName = name;
   this.type     = type;
   this.deviceType = deviceType;
+
+  if (adress == undefined) {
+    this.log.warn("Device Address for %s is undefined this will end up in a desaster",name)
+  }
+
   this.adress   = adress;
   this.deviceAdress = undefined
   this.log      = log;
@@ -104,6 +109,33 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
 
 HomeKitGenericService.prototype = {
 
+  // Add ChannelNumber if not here
+  setCurrentStateCharacteristic : function(key,aCharacteristic) {
+    if (key.indexOf(":")== -1) {
+      key = this.channelnumber + ":" + key;
+    }
+    this.currentStateCharacteristic[key] = aCharacteristic;
+  },
+
+  // Add ChannelNumber if not here
+  getCurrentStateCharacteristic : function(key) {
+    if (key.indexOf(":")== -1) {
+      key = this.channelnumber + ":" + key;
+    }
+    return this.currentStateCharacteristic[key];
+  },
+
+  // build the complete datapoint address and check if the event dp matches
+  isDataPointEvent:function(dp_i,dp_test) {
+    if (dp_test.indexOf(":")== -1) {
+      dp_test = this.channelnumber + ":" + dp_test;
+    }
+    if (dp_i)
+
+    return (dp_i === dp_test)
+  },
+
+
   haz:function(array) {
     var result = true
     if (array) {
@@ -152,6 +184,23 @@ HomeKitGenericService.prototype = {
       this.log.debug("Adding Log Service for %s with type %s",this.displayName,type);
       this.loggingService = new FakeGatoHistoryService(type, this, {storage: 'fs', path: this.platform.localPath,disableTimer:true});
       this.services.push(this.loggingService);
+    }
+  },
+
+  addLoggingCharacteristic:function(aCharacteristic) {
+    if ((this.runsInTestMode == true) || (this.loggingService != undefined)) {
+      this.log.debug("adding Characteristic skipped for %s because of testmode",this.displayName);
+    } else {
+      this.loggingService.addOptionalCharacteristic(aCharacteristic)
+    }
+  },
+
+  getLoggingCharacteristic:function(aCharacteristic) {
+    if ((this.runsInTestMode == true) || (this.loggingService != undefined)) {
+      this.log.debug("get Characteristic not available for %s because of testmode",this.displayName);
+      return undefined
+    } else {
+      return this.loggingService.getCharacteristic(aCharacteristic)
     }
   },
 
@@ -262,9 +311,9 @@ HomeKitGenericService.prototype = {
     } else
 
 
-    if ((this.usecache == true ) && (this.state[dp] != undefined) && (this.state[dp]!=null)) {
+    if ((this.usecache == true ) && (this.state[this.adress + "." + dp] != undefined) && (this.state[this.adress + "." + dp]!=null)) {
       if (callback!=undefined){
-        callback(this.state[dp]);
+        callback(this.state[this.adress + "." + dp]);
       }
     } else {
       //this.log("Ask CCU");
@@ -391,7 +440,7 @@ HomeKitGenericService.prototype = {
         that.eventupdate = true;
         //var ow = newValue;
         newValue = that.convertValue(dp,newValue);
-        that.cache(dp,newValue);
+        that.cache(this.adress + "." + dp,newValue);
         that.eventupdate = false;
       } else {
         //newValue = 0;
@@ -428,7 +477,7 @@ HomeKitGenericService.prototype = {
         that.eventupdate = true;
         //var ow = newValue;
         newValue = that.convertValue(dp,newValue);
-        that.cache(dp,newValue);
+        that.cache(that.adress + "." + dp,newValue);
         that.eventupdate = false;
       } else {
         //newValue = 0;
@@ -552,13 +601,12 @@ HomeKitGenericService.prototype = {
         // if there is an rpc event at this channel the event will be forward here.
         // now fetch the real adress of that channel and get the channelnumber
         // datapoints from such channels named  as channelnumber:datapoint ... (no better approach yet)
-
         var chnl = channel.slice(channel.indexOf(":")+1);
-        this.cache(chnl + ":" + dp,newValue);
+        this.cache(this.adress + "." +  dp,newValue);
         this.datapointEvent(chnl + ":" + dp,newValue,channel);
       } else {
 
-        this.cache(dp,newValue);
+        this.cache(this.adress + "." + dp,newValue);
         this.datapointEvent(dp,newValue,channel);
       }
       this.channelDatapointEvent(channel,dp,newValue);

@@ -55,11 +55,11 @@ describe("Homematic Plugin (index)", function() {
             assert.ok(cc, "Characteristic.SmokeDetected not found in SmokeDetector %s",ac.name);
             // EventLogic
             cc.getValue(function(context,value){
-              assert.equal(value, true,"event logic result should be true");
+              assert.equal(value, true,"event logic result should be true is "+ value);
             });
             // Getlogic
             cc.emit('get',function(context,result){
-              assert.equal(result,true,"get logic result should be true");
+              assert.equal(result,true,"get logic result should be true is " +  result);
             });
 
           });

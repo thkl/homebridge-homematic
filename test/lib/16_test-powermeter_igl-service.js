@@ -23,6 +23,8 @@ describe("Homematic Plugin (index)", function() {
     log.debug('Init Platform with Energy Counter');
     platform.accessories(function(acc) {
       that.accessories = acc;
+      log.info("ServiceClass %s",acc[0].serviceClassName)
+
     })
   });
 

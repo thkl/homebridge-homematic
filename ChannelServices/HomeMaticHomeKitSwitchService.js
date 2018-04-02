@@ -273,7 +273,7 @@ HomeMaticHomeKitSwitchService.prototype.queryState = function(){
 }
 
 HomeMaticHomeKitSwitchService.prototype.datapointEvent = function(dp,newValue){
-  if (dp =='STATE') {
+  if (dp == this.channelnumber + ':STATE') {
     let hmState = ((newValue=='true') || (newValue==true)) ? 1 : 0;
 
     if (hmState == 0) {

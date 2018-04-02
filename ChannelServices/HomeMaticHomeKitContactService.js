@@ -109,31 +109,32 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
   util.inherits(Characteristic.LastOpen, Characteristic);
   Characteristic.LastOpen.UUID = 'E863F11A-079E-48FF-8F27-9C2605A29F52'
 
-  this.loggingService.addOptionalCharacteristic(Characteristic.ResetTotal)
+  this.addLoggingCharacteristic(Characteristic.ResetTotal)
 
-  var rt = this.loggingService.getCharacteristic(Characteristic.ResetTotal)
-  rt.on('set',  function(value,callback) {
+  var rt = this.getLoggingCharacteristic(Characteristic.ResetTotal)
+  if (rt != undefined) {
+    rt.on('set',  function(value,callback) {
 
-    that.log.debug("set ResetTotal called %s",value)
-    that.timesOpened = 0
-    that.setPersistentState("timesOpened",that.timesOpened)
-    if (that.CharacteristicTimesOpened) {
-      that.CharacteristicTimesOpened.updateValue(that.timesOpened,null)
-    }
-    that.lastReset = moment().unix()-epoch
-    that.setPersistentState("lastReset",that.lastReset)
-    if (callback) {
-      callback()
-    }
-  }.bind(this))
+      that.log.debug("set ResetTotal called %s",value)
+      that.timesOpened = 0
+      that.setPersistentState("timesOpened",that.timesOpened)
+      if (that.CharacteristicTimesOpened) {
+        that.CharacteristicTimesOpened.updateValue(that.timesOpened,null)
+      }
+      that.lastReset = moment().unix()-epoch
+      that.setPersistentState("lastReset",that.lastReset)
+      if (callback) {
+        callback()
+      }
+    }.bind(this))
 
-  .on('get', function(callback) {
-    that.log.debug("get ResetTotal called ")
-    callback(null,that.lastReset)
-  }.bind(this))
+    .on('get', function(callback) {
+      that.log.debug("get ResetTotal called ")
+      callback(null,that.lastReset)
+    }.bind(this))
+  }
 
-
-//
+  //
 
   var reverse = false;
   if (this.cfg != undefined) {
@@ -335,33 +336,33 @@ HomeMaticHomeKitContactService.prototype.processDoorState = function(newValue) {
 
 HomeMaticHomeKitContactService.prototype.datapointEvent= function(dp,newValue) {
   this.log.debug("%s %s",dp,newValue)
-    if (dp == this.channelnumber + ':STATE') {
-      this.log.info("Add Log %s %s",dp,newValue)
-      this.addLogEntry({status:(newValue==true)?1:0});
-      if ( this.special == "DOOR" ) {
-        this.processDoorState(newValue)
-      } else {
-        this.processContactState(newValue)
-      }
-      let now = moment().unix()
-
-      if (newValue == true) {
-        this.lastOpen = moment().unix();
-        this.timeClosed = this.timeClosed + (now - this.timeStamp)
-        this.timesOpened = this.timesOpened + 1;
-        this.CharacteristicTimesOpened.updateValue(this.timesOpened,null)
-        this.setPersistentState("timesOpened",this.timesOpened)
-        this.setPersistentState("lastOpen",this.lastOpen)
-        this.CharacteristicLastOpen.updateValue(this.lastOpen,null)
-      } else {
-        this.timeOpen = this.timeOpen + (now - this.timeStamp)
-      }
-      this.timeStamp = now
-      this.setPersistentState("timeOpen",this.timeOpen)
-      this.setPersistentState("timeClosed",this.timeClosed)
-      this.CharacteristicOpenDuration.updateValue(this.timeOpen,null)
-      this.CharacteristicClosedDuration.updateValue(this.timeClosed,null)
+  if (dp == this.channelnumber + ':STATE') {
+    this.log.info("Add Log %s %s",dp,newValue)
+    this.addLogEntry({status:(newValue==true)?1:0});
+    if ( this.special == "DOOR" ) {
+      this.processDoorState(newValue)
+    } else {
+      this.processContactState(newValue)
     }
+    let now = moment().unix()
+
+    if (newValue == true) {
+      this.lastOpen = moment().unix();
+      this.timeClosed = this.timeClosed + (now - this.timeStamp)
+      this.timesOpened = this.timesOpened + 1;
+      this.CharacteristicTimesOpened.updateValue(this.timesOpened,null)
+      this.setPersistentState("timesOpened",this.timesOpened)
+      this.setPersistentState("lastOpen",this.lastOpen)
+      this.CharacteristicLastOpen.updateValue(this.lastOpen,null)
+    } else {
+      this.timeOpen = this.timeOpen + (now - this.timeStamp)
+    }
+    this.timeStamp = now
+    this.setPersistentState("timeOpen",this.timeOpen)
+    this.setPersistentState("timeClosed",this.timeClosed)
+    this.CharacteristicOpenDuration.updateValue(this.timeOpen,null)
+    this.CharacteristicClosedDuration.updateValue(this.timeClosed,null)
+  }
 }
 
 module.exports = HomeMaticHomeKitContactService;
