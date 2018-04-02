@@ -11,8 +11,19 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.type     = type;
   this.deviceType = deviceType;
   this.adress   = adress;
-  this.deviceAdress = undefined;
+  this.deviceAdress = undefined
   this.log      = log;
+
+  // Build Deviceadress
+  let parts = this.adress.split('.')
+  if (parts.length == 2) {
+    let serial = parts[1].split(':')
+    if (serial.length > 0) {
+      this.deviceAdress = parts[0] + "." + serial[0];
+      this.channelnumber = serial[1]
+    }
+  }
+
   this.platform = platform;
   this.state  	= [];
   this.eventupdate = false;
@@ -38,6 +49,8 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.tamperedCharacteristic = undefined;
   this.delayOnSet = 0;
   this.runsInTestMode = (typeof global.it === 'function');
+  this.persistentStates = {};
+
   var that = this;
 
   if (that.adress.indexOf("CUxD.") > -1) {
@@ -66,6 +79,23 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
     this.propagateServices(platform, Service, Characteristic);
   }
 
+  // init old storage data
+  if (this.deviceAdress != undefined) {
+    this.persistFile = path.join(this.platform.localPath,this.deviceAdress) + ".pstor"
+    this.log.debug("Pstore for %s is %s",this.deviceAdress,this.persistFile)
+    if (fs.existsSync(this.persistFile)) {
+        try {
+          var buffer = fs.readFileSync(this.persistFile);
+  			  this.persistentStates = JSON.parse(buffer.toString());
+          this.log.debug("loading previous data done %s",JSON.stringify(this.persistentStates))
+        } catch (e){
+          this.log.error(e)
+        }
+		} else {
+      this.log.debug("File doesnt exists. Will create a new one on the first etry")
+    }
+  }
+
   this.createDeviceService(Service, Characteristic);
 }
 
@@ -74,28 +104,52 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
 
 HomeKitGenericService.prototype = {
 
-    haz:function(array) {
-      var result = true
-      if (array) {
-        array.some(function(element){
-          if (element == undefined) {
-            result = false
-          }
-        })
-      }
-      return result
-    },
+  haz:function(array) {
+    var result = true
+    if (array) {
+      array.some(function(element){
+        if (element == undefined) {
+          result = false
+        }
+      })
+    }
+    return result
+  },
 
+  getPersistentState:function(key,defaultValue) {
+    if ((this.persistentStates!=undefined) && (this.persistentStates[key]!=undefined)) {
+      return this.persistentStates[key];
+    } else {
+      return defaultValue
+    }
+  },
+
+  setPersistentState:function(key,value) {
+    if (this.persistentStates==undefined) {
+      this.log.debug("new store")
+      this.persistentStates = {}
+    }
+    this.persistentStates[key] = value;
+    // save this
+    if (this.persistFile != undefined) {
+      try {
+		       var buffer = JSON.stringify(this.persistentStates);
+		       fs.writeFileSync(this.persistFile, buffer)
+	    } catch (e) {
+          // just ignore
+      }
+    }
+  },
 
   /**
-   add FakeGato History object only if not in a testcase
-   **/
+  add FakeGato History object only if not in a testcase
+  **/
   enableLoggingService:function(type) {
     if (this.runsInTestMode == true) {
       this.log.debug("Skip Loging Service for %s because of testmode",this.displayName);
     } else {
       var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge);
-      this.log.debug("Adding Log Service for %s",this.displayName);
+      this.log.debug("Adding Log Service for %s with type %s",this.displayName,type);
       this.loggingService = new FakeGatoHistoryService(type, this, {storage: 'fs', path: this.platform.localPath,disableTimer:true});
       this.services.push(this.loggingService);
     }
@@ -130,8 +184,7 @@ HomeKitGenericService.prototype = {
       }
 
       if (logChanges) {
-        // this.log.debug("Saving log data for %s:", this.displayName);
-        // this.log.debug(JSON.stringify(data));
+        this.log.debug("Saving log data for %s: %s", this.displayName,JSON.stringify(data));
         this.loggingService.addEntry(data);
         this.lastLogEntry = data;
       }
@@ -162,7 +215,7 @@ HomeKitGenericService.prototype = {
 
   },
 
-  addTamperedCharacteristic:function(rootService,Characteristic) {
+  addTamperedCharacteristic:function(rootService,Characteristic,address) {
     var tampered = rootService.getCharacteristic(Characteristic.StatusTampered);
 
     if (tampered != undefined) {
@@ -172,6 +225,9 @@ HomeKitGenericService.prototype = {
       this.log.debug("added Tampered to %s",this.name)
       rootService.addOptionalCharacteristic(Characteristic.StatusTampered);
       this.tamperedCharacteristic = rootService.getCharacteristic(Characteristic.StatusTampered)
+    }
+    if (address != undefined) {
+      this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ":" + address,this)
     }
 
   },
@@ -441,9 +497,8 @@ HomeKitGenericService.prototype = {
         }
       }
 
-
-      if (tp[1] == 'ERROR_SABOTAGE') {
-        that.tampered = (newValue === 1)
+      if ((tp[1] == 'ERROR_SABOTAGE') || (tp[1] == 'SABOTAGE')) {
+        that.tampered = ((newValue === 1) || (newValue === true))
         if (that.tamperedCharacteristic != undefined) {
           that.tamperedCharacteristic.setValue(newValue)
         }
