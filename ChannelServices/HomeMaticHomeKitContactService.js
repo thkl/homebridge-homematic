@@ -109,30 +109,8 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
   util.inherits(Characteristic.LastOpen, Characteristic);
   Characteristic.LastOpen.UUID = 'E863F11A-079E-48FF-8F27-9C2605A29F52'
 
-  this.addLoggingCharacteristic(Characteristic.ResetTotal)
 
-  var rt = this.getLoggingCharacteristic(Characteristic.ResetTotal)
-  if (rt != undefined) {
-    rt.on('set',  function(value,callback) {
 
-      that.log.debug("set ResetTotal called %s",value)
-      that.timesOpened = 0
-      that.setPersistentState("timesOpened",that.timesOpened)
-      if (that.CharacteristicTimesOpened) {
-        that.CharacteristicTimesOpened.updateValue(that.timesOpened,null)
-      }
-      that.lastReset = moment().unix()-epoch
-      that.setPersistentState("lastReset",that.lastReset)
-      if (callback) {
-        callback()
-      }
-    }.bind(this))
-
-    .on('get', function(callback) {
-      that.log.debug("get ResetTotal called ")
-      callback(null,that.lastReset)
-    }.bind(this))
-  }
 
   //
 
@@ -231,10 +209,38 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
   } else {
     this.log.debug("Creating a ContactSensor")
     this.contact = new Service.ContactSensor(this.name);
+
     this.contact.addOptionalCharacteristic(Characteristic.TimesOpened)
     this.contact.addOptionalCharacteristic(Characteristic.OpenDuration)
     this.contact.addOptionalCharacteristic(Characteristic.ClosedDuration)
     this.contact.addOptionalCharacteristic(Characteristic.LastOpen)
+    this.loggingService.addOptionalCharacteristic(Characteristic.ResetTotal)
+
+    var rt = this.contact.getCharacteristic(Characteristic.ResetTotal)
+    if (rt != undefined) {
+      rt.on('set',  function(value,callback) {
+
+        that.log.debug("set ResetTotal called %s",value)
+        that.timesOpened = 0
+        that.lastReset = value;
+        that.setPersistentState("timesOpened",that.timesOpened)
+        this.setPersistentState("lastReset",that.lastReset)
+
+        if (that.CharacteristicTimesOpened) {
+          that.CharacteristicTimesOpened.updateValue(that.timesOpened,null)
+        }
+
+        if (callback) {
+          callback()
+        }
+      }.bind(this))
+
+      .on('get', function(callback) {
+        that.log.debug("get ResetTotal called ")
+        callback(null,that.lastReset)
+      }.bind(this))
+    }
+
 
     this.CharacteristicOpenDuration = this.contact.getCharacteristic(Characteristic.OpenDuration)
     .on('get',function(callback){
@@ -347,7 +353,7 @@ HomeMaticHomeKitContactService.prototype.datapointEvent= function(dp,newValue) {
     let now = moment().unix()
 
     if (newValue == true) {
-      this.lastOpen = moment().unix();
+      this.lastOpen = moment().unix() - epoch;
       this.timeClosed = this.timeClosed + (now - this.timeStamp)
       this.timesOpened = this.timesOpened + 1;
       this.CharacteristicTimesOpened.updateValue(this.timesOpened,null)

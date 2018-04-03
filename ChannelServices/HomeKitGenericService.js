@@ -3,6 +3,7 @@
 const fs = require('fs')
 const path = require('path')
 var moment = require('moment')
+var os = require('os');
 
 function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic, deviceType) {
 
@@ -180,9 +181,11 @@ HomeKitGenericService.prototype = {
     if (this.runsInTestMode == true) {
       this.log.debug("Skip Loging Service for %s because of testmode",this.displayName);
     } else {
-      var FakeGatoHistoryService = require('./fakegato-history.js')(this.platform.homebridge);
+      var FakeGatoHistoryService = require('fakegato-history')(this.platform.homebridge);
       this.log.debug("Adding Log Service for %s with type %s",this.displayName,type);
-      this.loggingService = new FakeGatoHistoryService(type, this, {storage: 'fs', path: this.platform.localPath,disableTimer:true});
+      var hostname = os.hostname();
+      let filename = hostname+"_"+this.adress+"_persist.json"
+      this.loggingService = new FakeGatoHistoryService(type, this, {storage: 'fs', filename: filename, path: this.platform.localPath,disableTimer:true});
       this.services.push(this.loggingService);
     }
   },
