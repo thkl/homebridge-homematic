@@ -134,10 +134,10 @@ HomeMaticHomeKitThermalControlService.prototype.createDeviceService = function(S
 
   .on('set', function(value, callback) {
     if (that.state["CONTROL_MODE"]!=1) {
-      that.delayed("set", "MANU_MODE",value,that.delayOnSet);
+      that.delayed("set", "MANU_MODE",{"explicitDouble":value},that.delayOnSet);
       that.state["CONTROL_MODE"]=1; // set to Manual Mode
     } else {
-      that.delayed("set", "SET_TEMPERATURE", value,that.delayOnSet);
+      that.delayed("set", "SET_TEMPERATURE", {"explicitDouble":value},that.delayOnSet);
     }
     callback();
   }.bind(this));
