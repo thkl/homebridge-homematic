@@ -49,7 +49,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     Characteristic.call(this, 'Open Duration', 'E863F118-079E-48FF-8F27-9C2605A29F52');
     this.setProps({
       format: Characteristic.Formats.UINT32,
-      unit: 'seconds',
+      unit: Characteristic.Units.SECONDS,
       perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY, Characteristic.Perms.WRITE]
     });
     this.value = this.getDefaultValue();
@@ -62,7 +62,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     Characteristic.call(this, 'Closed Duration', 'E863F119-079E-48FF-8F27-9C2605A29F52');
     this.setProps({
       format: Characteristic.Formats.UINT32,
-      unit: 'seconds',
+      unit: Characteristic.Units.SECONDS,
       perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY, Characteristic.Perms.WRITE]
     });
     this.value = this.getDefaultValue();
@@ -76,7 +76,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     Characteristic.call(this, 'Reset Total', 'E863F112-079E-48FF-8F27-9C2605A29F52');
     this.setProps({
       format: Characteristic.Formats.UINT32,
-      unit: 'seconds',
+      unit: Characteristic.Units.SECONDS,
       perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY, Characteristic.Perms.WRITE]
     });
     this.value = this.getDefaultValue();
@@ -88,7 +88,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     Characteristic.call(this, 'Times Opened', 'E863F129-079E-48FF-8F27-9C2605A29F52');
     this.setProps({
       format: Characteristic.Formats.UINT32,
-      unit: 'seconds',
+      unit: Characteristic.Units.SECONDS,
       perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
     });
     this.value = this.getDefaultValue();
@@ -101,7 +101,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     Characteristic.call(this, 'Last Activation', 'E863F11A-079E-48FF-8F27-9C2605A29F52');
     this.setProps({
       format: Characteristic.Formats.UINT32,
-      unit: 'seconds',
+      unit: Characteristic.Units.SECONDS,
       perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
     });
     this.value = this.getDefaultValue();
@@ -214,34 +214,45 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     this.contact.addOptionalCharacteristic(Characteristic.OpenDuration)
     this.contact.addOptionalCharacteristic(Characteristic.ClosedDuration)
     this.contact.addOptionalCharacteristic(Characteristic.LastOpen)
+    this.contact.addOptionalCharacteristic(Characteristic.ResetTotal)
 
-    this.addLoggingCharacteristic(Characteristic.ResetTotal)
-
-    var rt = this.getLoggingCharacteristic(Characteristic.ResetTotal)
+    var rt = this.contact.getCharacteristic(Characteristic.ResetTotal)
     if (rt != undefined) {
       rt.on('set',  function(value,callback) {
 
-        that.log.debug("set ResetTotal called %s",value)
-        that.timesOpened = 0
-        that.lastReset = value;
-        that.setPersistentState("timesOpened",that.timesOpened)
-        this.setPersistentState("lastReset",that.lastReset)
+        // only reset if its not equal the reset time we know
+        if (value != that.lastReset) {
+          that.log.debug("set ResetTotal called %s != last reset so do a reset",value)
+          that.timesOpened = 0
+          that.lastReset = value;
+          that.setPersistentState("timesOpened",that.timesOpened)
+          this.setPersistentState("lastReset",that.lastReset)
 
-        if (that.CharacteristicTimesOpened) {
-          that.CharacteristicTimesOpened.updateValue(that.timesOpened,null)
+          if (that.CharacteristicTimesOpened) {
+            that.CharacteristicTimesOpened.updateValue(that.timesOpened,null)
+          }
+        } else {
+          that.log.debug("set ResetTotal called %s its equal the last reset time so ignore",value)
         }
-
         if (callback) {
           callback()
         }
       }.bind(this))
 
       .on('get', function(callback) {
-        that.log.debug("get ResetTotal called ")
+        that.log.debug("get ResetTotal called %s",that.lastReset)
         callback(null,that.lastReset)
       }.bind(this))
+
+      rt.setValue(this.lastReset)
     }
 
+
+    this.contact.getCharacteristic(Characteristic.StatusActive)
+    .on('get',function(callback){
+      callback(null,true)
+    }.bind(this))
+    this.contact.getCharacteristic(Characteristic.StatusActive).setValue(true)
 
     this.CharacteristicOpenDuration = this.contact.getCharacteristic(Characteristic.OpenDuration)
     .on('get',function(callback){
@@ -260,7 +271,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
 
     this.CharacteristicLastOpen = this.contact.getCharacteristic(Characteristic.LastOpen)
     .on('get',function(callback){
-      that.log.debug("getLastOpen")
+      that.log.debug("getLastOpen will report %s",that.lastOpen)
       callback(null,that.lastOpen)
     }.bind(this));
     this.CharacteristicLastOpen.setValue(this.lastOpen)
@@ -268,7 +279,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
 
     this.CharacteristicTimesOpened = this.contact.getCharacteristic(Characteristic.TimesOpened)
     .on('get',function(callback){
-      that.log.debug("GetTimesOpened")
+      that.log.debug("getTimesOpened will report %s",that.timesOpened)
       callback(null,that.timesOpened)
     })
     this.CharacteristicTimesOpened.setValue(this.timesOpened);
@@ -354,15 +365,17 @@ HomeMaticHomeKitContactService.prototype.datapointEvent= function(dp,newValue) {
     let now = moment().unix()
 
     if (newValue == true) {
-      this.lastOpen = moment().unix() - epoch;
-      this.timeClosed = this.timeClosed + (now - this.timeStamp)
+
+      this.lastOpen = (moment().unix()-epoch);
+      this.log.info("Last Reset %s Now %s LastAction %s",moment().unix(),this.lastReset,this.lastOpen)
+      this.timeClosed = this.timeClosed + (moment().unix() - this.timeStamp)
       this.timesOpened = this.timesOpened + 1;
       this.CharacteristicTimesOpened.updateValue(this.timesOpened,null)
       this.setPersistentState("timesOpened",this.timesOpened)
       this.setPersistentState("lastOpen",this.lastOpen)
       this.CharacteristicLastOpen.updateValue(this.lastOpen,null)
     } else {
-      this.timeOpen = this.timeOpen + (now - this.timeStamp)
+      this.timeOpen = this.timeOpen + (moment().unix() - this.timeStamp)
     }
     this.timeStamp = now
     this.setPersistentState("timeOpen",this.timeOpen)
