@@ -214,9 +214,10 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     this.contact.addOptionalCharacteristic(Characteristic.OpenDuration)
     this.contact.addOptionalCharacteristic(Characteristic.ClosedDuration)
     this.contact.addOptionalCharacteristic(Characteristic.LastOpen)
-    this.loggingService.addOptionalCharacteristic(Characteristic.ResetTotal)
 
-    var rt = this.contact.getCharacteristic(Characteristic.ResetTotal)
+    this.addLoggingCharacteristic(Characteristic.ResetTotal)
+
+    var rt = this.getLoggingCharacteristic(Characteristic.ResetTotal)
     if (rt != undefined) {
       rt.on('set',  function(value,callback) {
 
