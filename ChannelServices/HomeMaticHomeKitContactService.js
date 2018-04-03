@@ -214,9 +214,9 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     this.contact.addOptionalCharacteristic(Characteristic.OpenDuration)
     this.contact.addOptionalCharacteristic(Characteristic.ClosedDuration)
     this.contact.addOptionalCharacteristic(Characteristic.LastOpen)
-    this.contact.addOptionalCharacteristic(Characteristic.ResetTotal)
+    this.loggingService.addOptionalCharacteristic(Characteristic.ResetTotal)
 
-    var rt = this.contact.getCharacteristic(Characteristic.ResetTotal)
+    var rt = this.loggingService.getCharacteristic(Characteristic.ResetTotal)
     if (rt != undefined) {
       rt.on('set',  function(value,callback) {
 
@@ -308,8 +308,8 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     }
 
 
-    this.addTamperedCharacteristic(this.contact,Characteristic,"0.SABOTAGE");
-    this.addLowBatCharacteristic(this.contact,Characteristic);
+    // this.addTamperedCharacteristic(this.contact,Characteristic,"0.SABOTAGE");
+    // this.addLowBatCharacteristic(this.contact,Characteristic);
     this.services.push(this.contact);
 
   }
@@ -374,14 +374,23 @@ HomeMaticHomeKitContactService.prototype.datapointEvent= function(dp,newValue) {
       this.setPersistentState("timesOpened",this.timesOpened)
       this.setPersistentState("lastOpen",this.lastOpen)
       this.CharacteristicLastOpen.updateValue(this.lastOpen,null)
+      
+      //this.CharacteristicOpenDuration.updateValue(now-this.lastReset,null)
+      
     } else {
       this.timeOpen = this.timeOpen + (moment().unix() - this.timeStamp)
+      
+      //this.CharacteristicClosedDuration.updateValue(now-this.lastReset,null)
+      
+      
     }
-    this.timeStamp = now
+    
+    
+    
     this.setPersistentState("timeOpen",this.timeOpen)
     this.setPersistentState("timeClosed",this.timeClosed)
-    this.CharacteristicOpenDuration.updateValue(this.timeOpen,null)
-    this.CharacteristicClosedDuration.updateValue(this.timeClosed,null)
+    //this.CharacteristicOpenDuration.updateValue(this.timeOpen,null)
+    //this.CharacteristicClosedDuration.updateValue(this.timeClosed,null)
   }
 }
 
