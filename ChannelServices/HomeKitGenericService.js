@@ -24,7 +24,7 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   let parts = this.adress.split('.')
   if (parts.length == 2) {
     let serial = parts[1].split(':')
-    if (serial.length > 0) {
+    if (serial.length > 0)Â {
       this.deviceAdress = parts[0] + "." + serial[0];
       this.channelnumber = serial[1]
     }
@@ -56,7 +56,7 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   this.delayOnSet = 0;
   this.runsInTestMode = (typeof global.it === 'function');
   this.persistentStates = {};
-
+  this.loggingService;
   var that = this;
 
   if (that.adress.indexOf("CUxD.") > -1) {
@@ -86,7 +86,7 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
   }
 
   // init old storage data
-  if (this.deviceAdress != undefined) {
+  if (this.deviceAdress != undefined)Â {
     this.persistFile = path.join(this.platform.localPath,this.deviceAdress) + ".pstor"
     this.log.debug("Pstore for %s is %s",this.deviceAdress,this.persistFile)
     if (fs.existsSync(this.persistFile)) {
@@ -158,13 +158,13 @@ HomeKitGenericService.prototype = {
   },
 
   setPersistentState:function(key,value) {
-    if (this.persistentStates==undefined) {
+    if (this.persistentStates==undefined)Â {
       this.log.debug("new store")
       this.persistentStates = {}
     }
     this.persistentStates[key] = value;
     // save this
-    if (this.persistFile != undefined) {
+    if (this.persistFile != undefined)Â {
       try {
 		       var buffer = JSON.stringify(this.persistentStates);
 		       fs.writeFileSync(this.persistFile, buffer)
@@ -514,7 +514,7 @@ HomeKitGenericService.prototype = {
       return true
     } else {
       // dp is undefined .. check if this is valid
-      if (acceptNull == false) {
+      if (acceptNull == false)Â {
         this.log.error('null is not a valid datapoint')
       }
       return acceptNull
@@ -550,7 +550,7 @@ HomeKitGenericService.prototype = {
       }
 
       if ((tp[1] == 'ERROR_SABOTAGE') || (tp[1] == 'SABOTAGE')) {
-        that.tampered = ((newValue === 1) || (newValue === true))
+        that.tampered = ((newValue === 1) ||Â (newValue === true))
         if (that.tamperedCharacteristic != undefined) {
           that.tamperedCharacteristic.setValue(newValue)
         }
@@ -599,7 +599,7 @@ HomeKitGenericService.prototype = {
         that.isWorking = newValue;
       }
       this.eventupdate = true;
-      if ((this.cadress!=undefined) || (this.deviceAdress!=undefined)){
+      if ((this.cadress!=undefined) ||Â (this.deviceAdress!=undefined)){
         // this is dirty shit. ok there is a config that will set the cadress to a defined channel
         // if there is an rpc event at this channel the event will be forward here.
         // now fetch the real adress of that channel and get the channelnumber
@@ -648,7 +648,7 @@ HomeKitGenericService.prototype = {
         value = map[value];
       }
     }
-    if ((value!=undefined) && ((that.isWorking==false) || (that.ignoreWorking==true))) {
+    if ((value!=undefined) && ((that.isWorking==false) ||Â (that.ignoreWorking==true))) {
       if (that.currentStateCharacteristic[dp]!=undefined) {
         that.stateCharacteristicWillChange(that.currentStateCharacteristic[dp],value);
         that.currentStateCharacteristic[dp].setValue(value, null);
@@ -693,7 +693,7 @@ HomeKitGenericService.prototype = {
     var newValue = value;
     var tp = this.transformDatapoint(dp);
 
-    if ((tp[1] == 'LEVEL') || (tp[1] == 'LEVEL_2')) {
+    if ((tp[1] == 'LEVEL') ||Â (tp[1] == 'LEVEL_2')) {
       newValue = parseFloat(newValue) / 100;
       newValue = {"explicitDouble":newValue};
     }
@@ -727,7 +727,7 @@ HomeKitGenericService.prototype = {
 
 
   transformDatapoint : function(dp) {
-    if (dp) {
+    if (dp)Â {
       var pos = dp.indexOf(":");
       if (pos==-1) {
         return [this.adress,dp];
