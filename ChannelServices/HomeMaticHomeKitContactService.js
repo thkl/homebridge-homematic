@@ -214,9 +214,9 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     this.contact.addOptionalCharacteristic(Characteristic.OpenDuration)
     this.contact.addOptionalCharacteristic(Characteristic.ClosedDuration)
     this.contact.addOptionalCharacteristic(Characteristic.LastOpen)
-    this.contact.addOptionalCharacteristic(Characteristic.ResetTotal)
+    this.addLoggingCharacteristic(Characteristic.ResetTotal)
 
-    var rt = this.contact.getCharacteristic(Characteristic.ResetTotal)
+    var rt = this.getLoggingCharacteristic(Characteristic.ResetTotal)
     if (rt != undefined) {
       rt.on('set',  function(value,callback) {
 
@@ -306,12 +306,8 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
       this.addValueMapping("STATE",true,1);
       this.addValueMapping("STATE",false,0);
     }
-
-
-    this.addTamperedCharacteristic(this.contact,Characteristic,"0.SABOTAGE");
-    this.addLowBatCharacteristic(this.contact,Characteristic);
+    
     this.services.push(this.contact);
-
   }
   this.remoteGetValue("STATE",function(value){
     if ( that.special == "DOOR" ) {
