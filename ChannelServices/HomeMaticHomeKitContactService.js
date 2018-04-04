@@ -24,7 +24,6 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
   this.timesOpened = this.getPersistentState("timesOpened",0)
   this.timeOpen = this.getPersistentState("timeOpen",0)
   this.timeClosed = this.getPersistentState("timeClosed",0)
-
   this.timeStamp = moment().unix()
 
   this.lastReset = this.getPersistentState("lastReset",undefined)
@@ -34,6 +33,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     this.setPersistentState("lastReset",this.lastReset)
   }
 
+/*
   this.lastOpen = this.getPersistentState("lastOpen",undefined)
   if (this.lastOpen == undefined) {
     // Set to now
@@ -41,7 +41,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     this.setPersistentState("lastOpen",this.lastOpen)
     this.log.debug("No LastOpen - set it to just now")
   }
-
+*/
 
   this.log.info("Adding additional characteristics")
 
@@ -213,11 +213,12 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     this.contact.addOptionalCharacteristic(Characteristic.TimesOpened)
     this.contact.addOptionalCharacteristic(Characteristic.OpenDuration)
     this.contact.addOptionalCharacteristic(Characteristic.ClosedDuration)
-    this.contact.addOptionalCharacteristic(Characteristic.LastOpen)
+  //  this.contact.addOptionalCharacteristic(Characteristic.LastOpen)
     this.addLoggingCharacteristic(Characteristic.ResetTotal)
 
     var rt = this.getLoggingCharacteristic(Characteristic.ResetTotal)
     if (rt != undefined) {
+      this.log.info("Adding LR Events")
       rt.on('set',  function(value,callback) {
 
         // only reset if its not equal the reset time we know
@@ -268,14 +269,14 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     }.bind(this));
     this.CharacteristicClosedDuration.setValue(0);
 
-
+/*
     this.CharacteristicLastOpen = this.contact.getCharacteristic(Characteristic.LastOpen)
     .on('get',function(callback){
       that.log.debug("getLastOpen will report %s",that.lastOpen)
       callback(null,that.lastOpen)
     }.bind(this));
     this.CharacteristicLastOpen.setValue(this.lastOpen)
-
+*/
 
     this.CharacteristicTimesOpened = this.contact.getCharacteristic(Characteristic.TimesOpened)
     .on('get',function(callback){
@@ -306,7 +307,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
       this.addValueMapping("STATE",true,1);
       this.addValueMapping("STATE",false,0);
     }
-    
+
     this.services.push(this.contact);
   }
   this.remoteGetValue("STATE",function(value){
@@ -361,15 +362,14 @@ HomeMaticHomeKitContactService.prototype.datapointEvent= function(dp,newValue) {
     let now = moment().unix()
 
     if (newValue == true) {
-
-      this.lastOpen = (moment().unix()-epoch);
-      this.log.info("Last Reset %s Now %s LastAction %s",moment().unix(),this.lastReset,this.lastOpen)
       this.timeClosed = this.timeClosed + (moment().unix() - this.timeStamp)
       this.timesOpened = this.timesOpened + 1;
       this.CharacteristicTimesOpened.updateValue(this.timesOpened,null)
       this.setPersistentState("timesOpened",this.timesOpened)
+/*
       this.setPersistentState("lastOpen",this.lastOpen)
       this.CharacteristicLastOpen.updateValue(this.lastOpen,null)
+*/
     } else {
       this.timeOpen = this.timeOpen + (moment().unix() - this.timeStamp)
     }
