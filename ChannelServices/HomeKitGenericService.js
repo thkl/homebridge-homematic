@@ -199,7 +199,7 @@ HomeKitGenericService.prototype = {
   },
 
   getLoggingCharacteristic:function(aCharacteristic) {
-    if ((this.runsInTestMode == true) || (this.loggingService != undefined)) {
+    if ((this.runsInTestMode == true) || (this.loggingService == undefined)) {
       this.log.debug("get Characteristic not available for %s because of testmode",this.displayName);
       return undefined
     } else {
