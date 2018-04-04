@@ -213,7 +213,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     this.contact.addOptionalCharacteristic(Characteristic.TimesOpened)
     this.contact.addOptionalCharacteristic(Characteristic.OpenDuration)
     this.contact.addOptionalCharacteristic(Characteristic.ClosedDuration)
-  //  this.contact.addOptionalCharacteristic(Characteristic.LastOpen)
+    //this.contact.addOptionalCharacteristic(Characteristic.LastOpen)
     this.addLoggingCharacteristic(Characteristic.ResetTotal)
 
     var rt = this.getLoggingCharacteristic(Characteristic.ResetTotal)
@@ -269,8 +269,9 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     }.bind(this));
     this.CharacteristicClosedDuration.setValue(0);
 
+
+  //  this.CharacteristicLastOpen = this.contact.getCharacteristic(Characteristic.LastOpen)
 /*
-    this.CharacteristicLastOpen = this.contact.getCharacteristic(Characteristic.LastOpen)
     .on('get',function(callback){
       that.log.debug("getLastOpen will report %s",that.lastOpen)
       callback(null,that.lastOpen)
@@ -350,9 +351,7 @@ HomeMaticHomeKitContactService.prototype.processDoorState = function(newValue) {
 }
 
 HomeMaticHomeKitContactService.prototype.datapointEvent= function(dp,newValue) {
-  this.log.debug("%s %s",dp,newValue)
-  if (dp == this.channelnumber + ':STATE') {
-    this.log.info("Add Log %s %s",dp,newValue)
+  if (this.isDataPointEvent(dp,'STATE')) {
     this.addLogEntry({status:(newValue==true)?1:0});
     if ( this.special == "DOOR" ) {
       this.processDoorState(newValue)
@@ -366,18 +365,15 @@ HomeMaticHomeKitContactService.prototype.datapointEvent= function(dp,newValue) {
       this.timesOpened = this.timesOpened + 1;
       this.CharacteristicTimesOpened.updateValue(this.timesOpened,null)
       this.setPersistentState("timesOpened",this.timesOpened)
-/*
-      this.setPersistentState("lastOpen",this.lastOpen)
-      this.CharacteristicLastOpen.updateValue(this.lastOpen,null)
-*/
+      // this.CharacteristicLastOpen.updateValue(0,null)
     } else {
       this.timeOpen = this.timeOpen + (moment().unix() - this.timeStamp)
     }
     this.timeStamp = now
-    this.setPersistentState("timeOpen",this.timeOpen)
-    this.setPersistentState("timeClosed",this.timeClosed)
-    this.CharacteristicOpenDuration.updateValue(this.timeOpen,null)
-    this.CharacteristicClosedDuration.updateValue(this.timeClosed,null)
+    //this.setPersistentState("timeOpen",this.timeOpen)
+    //this.setPersistentState("timeClosed",this.timeClosed)
+    //this.CharacteristicOpenDuration.updateValue(this.timeOpen,null)
+    //this.CharacteristicClosedDuration.updateValue(this.timeClosed,null)
   }
 }
 
