@@ -19,7 +19,7 @@ HomeMaticHomeKitContactService.prototype.propagateServices = function(homebridge
 HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service, Characteristic) {
 
   var that = this;
-  this.enableLoggingService("door");
+  this.enableLoggingService("door",false);
 
   this.timesOpened = this.getPersistentState("timesOpened",0)
   this.timeOpen = this.getPersistentState("timeOpen",0)

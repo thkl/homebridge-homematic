@@ -110,7 +110,13 @@ function HomeKitGenericService(log,platform, id ,name, type ,adress,special, cfg
 
 HomeKitGenericService.prototype = {
 
-  // Add ChannelNumber if not here
+
+  /**
+   * link a datapoint to a characteristic
+   * @param  {[type]} key             Datapointname or channeladdress
+   * @param  {[type]} aCharacteristic Characteristic to link
+   * @return {[type]}
+   */
   setCurrentStateCharacteristic : function(key,aCharacteristic) {
     if (key.indexOf(":")== -1) {
       key = this.channelnumber + ":" + key;
@@ -118,7 +124,11 @@ HomeKitGenericService.prototype = {
     this.currentStateCharacteristic[key] = aCharacteristic;
   },
 
-  // Add ChannelNumber if not here
+  /**
+   * returns a characteristic for a linked datapoint
+   * @param  {[type]} key Datapointname or channeladdress
+   * @return {[type]}     linked characteristic
+   */
   getCurrentStateCharacteristic : function(key) {
     if (key.indexOf(":")== -1) {
       key = this.channelnumber + ":" + key;
@@ -126,17 +136,24 @@ HomeKitGenericService.prototype = {
     return this.currentStateCharacteristic[key];
   },
 
-  // build the complete datapoint address and check if the event dp matches
+  /**
+   * Check if the Event was triggerd by a Datapointname
+   * @param  {[type]} dp_i    Eventkey
+   * @param  {[type]} dp_test Datapoint name (channel address will beautocompleted)
+   * @return {[type]}         true if the eventkey matches the datapoint name
+   */
   isDataPointEvent:function(dp_i,dp_test) {
     if (dp_test.indexOf(":")== -1) {
       dp_test = this.channelnumber + ":" + dp_test;
     }
-    if (dp_i)
-
     return (dp_i === dp_test)
   },
 
-
+  /**
+   * checks if a array contains a undefined element
+   * @param  {[type]} array
+   * @return {[type]}       returns true if all elements are defined
+   */
   haz:function(array) {
     var result = true
     if (array) {
@@ -149,6 +166,13 @@ HomeKitGenericService.prototype = {
     return result
   },
 
+  /**
+   * Returns a stored value for a key specified for the current channel
+   *
+   * @param  {[type]} key          a key
+   * @param  {[type]} defaultValue value to return if there is no previously saved value
+   * @return {[type]}              the value
+   */
   getPersistentState:function(key,defaultValue) {
     if ((this.persistentStates!=undefined) && (this.persistentStates[key]!=undefined)) {
       return this.persistentStates[key];
@@ -157,6 +181,12 @@ HomeKitGenericService.prototype = {
     }
   },
 
+  /**
+   * saves a value for a key persistent to disc
+   * @param  {[type]} key   the key
+   * @param  {[type]} value the value
+   * @return {[type]}
+   */
   setPersistentState:function(key,value) {
     if (this.persistentStates==undefined) {
       this.log.debug("new store")
@@ -177,19 +207,28 @@ HomeKitGenericService.prototype = {
   /**
   add FakeGato History object only if not in a testcase
   **/
-  enableLoggingService:function(type) {
+  enableLoggingService:function(type,disableTimer) {
+
     if (this.runsInTestMode == true) {
       this.log.debug("Skip Loging Service for %s because of testmode",this.displayName);
     } else {
+      if (disableTimer == undefined) {
+        disableTimer = true
+      }
       var FakeGatoHistoryService = require('fakegato-history')(this.platform.homebridge);
       this.log.debug("Adding Log Service for %s with type %s",this.displayName,type);
       var hostname = os.hostname();
       let filename = hostname+"_"+this.adress+"_persist.json"
-      this.loggingService = new FakeGatoHistoryService(type, this, {storage: 'fs', filename: filename, path: this.platform.localPath,disableTimer:true});
+      this.loggingService = new FakeGatoHistoryService(type, this, {storage: 'fs', filename: filename, path: this.platform.localPath,disableTimer:disableTimer});
       this.services.push(this.loggingService);
     }
   },
 
+  /**
+   * adds a characteristic to the current logging service
+   * @param  {[type]} aCharacteristic [description]
+   * @return {[type]}                 [description]
+   */
   addLoggingCharacteristic:function(aCharacteristic) {
     if ((this.runsInTestMode == true) || (this.loggingService != undefined)) {
       this.log.debug("adding Characteristic skipped for %s because of testmode",this.displayName);
@@ -198,6 +237,11 @@ HomeKitGenericService.prototype = {
     }
   },
 
+  /**
+   * returns a characteristic from the current logging service
+   * @param  {[type]} aCharacteristic [description]
+   * @return {[type]}                 [description]
+   */
   getLoggingCharacteristic:function(aCharacteristic) {
     if ((this.runsInTestMode == true) || (this.loggingService == undefined)) {
       this.log.debug("get Characteristic not available for %s because of testmode",this.displayName);
@@ -207,6 +251,11 @@ HomeKitGenericService.prototype = {
     }
   },
 
+  /**
+   * adds a log entry
+   * @param  {[type]} data {key:value}
+   * @return {[type]}      [description]
+   */
   addLogEntry:function(data) {
     // check if loggin is enabled
     if ((this.loggingService != undefined) && (data != undefined)) {
@@ -243,6 +292,12 @@ HomeKitGenericService.prototype = {
     }
   },
 
+  /**
+   * returns a class configuration value by a key
+   * @param  {[type]} key          [description]
+   * @param  {[type]} defaultValue [description]
+   * @return {[type]}              [description]
+   */
   getClazzConfigValue:function(key,defaultValue) {
     var result = defaultValue
     if (this.cfg!=undefined) {
@@ -253,6 +308,12 @@ HomeKitGenericService.prototype = {
     return result
   },
 
+ /**
+  * adds the low bat characteristic to the current service. this will also auto enable event listening for LOWBAT Events
+  * @param  {[type]} rootService    [description]
+  * @param  {[type]} Characteristic [description]
+  * @return {[type]}                [description]
+  */
   addLowBatCharacteristic:function(rootService,Characteristic) {
     var bat = rootService.getCharacteristic(Characteristic.StatusLowBattery);
 
@@ -267,6 +328,13 @@ HomeKitGenericService.prototype = {
 
   },
 
+  /**
+   * adds the sabotage characteristic to the current service. this will also auto enable evnent listening for .SABOTAGE and .ERROR_SABOTAGE
+   * @param  {[type]} rootService    [description]
+   * @param  {[type]} Characteristic [description]
+   * @param  {[type]} address        [description]
+   * @return {[type]}                [description]
+   */
   addTamperedCharacteristic:function(rootService,Characteristic,address) {
     var tampered = rootService.getCharacteristic(Characteristic.StatusTampered);
 
@@ -284,6 +352,11 @@ HomeKitGenericService.prototype = {
 
   },
 
+  /**
+   * set the current Service to readonly
+   * @param  {[type]} readOnly [description]
+   * @return {[type]}          [description]
+   */
   setReadOnly:function(readOnly) {
     this.readOnly = readOnly
     if (readOnly==true) {
