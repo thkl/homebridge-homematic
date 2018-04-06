@@ -366,7 +366,6 @@ HomeMaticHomeKitContactService.prototype.datapointEvent= function(dp,newValue,ch
       this.timesOpened = this.timesOpened + 1;
       if (this.loggingService!=undefined) {
         let firstLog = this.loggingService.getInitialTime();
-        this.log.info("First Log Entry at %s",firstLog);
         this.lastOpen = moment().unix() - firstLog;
         this.CharacteristicLastOpen.updateValue(this.lastOpen,null)
         this.setPersistentState("lastOpen",this.lastOpen)
