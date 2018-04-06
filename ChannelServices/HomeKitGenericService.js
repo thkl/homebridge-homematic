@@ -230,8 +230,8 @@ HomeKitGenericService.prototype = {
    * @return {[type]}                 [description]
    */
   addLoggingCharacteristic:function(aCharacteristic) {
-    if ((this.runsInTestMode == true) || (this.loggingService != undefined)) {
-      this.log.debug("adding Characteristic skipped for %s because of testmode",this.displayName);
+    if ((this.runsInTestMode == true) || (this.loggingService == undefined)) {
+      this.log.debug("adding Characteristic skipped for %s because of testmode ",this.displayName);
     } else {
       this.loggingService.addOptionalCharacteristic(aCharacteristic)
     }
@@ -605,10 +605,10 @@ HomeKitGenericService.prototype = {
 
   // Event only with datapoint infos
   datapointEvent:function(dp,newValue,channel) {
-    // just a stub
+
   },
 
-  event:function(channel,dp,newValue) {
+  event:function(channel,dp,newValue,optionalFunction) {
     var that = this;
     if ((channel!=undefined) && (dp!=undefined)) {
 
@@ -655,6 +655,9 @@ HomeKitGenericService.prototype = {
         }
         var chnl = channel.slice(channel.indexOf(":")+1);
         this.channelDatapointEvent(channel,dp,newValue);
+        if (typeof optionalFunction == "function") {
+          optionalFunction.call(this,newValue);
+        }
         this.datapointEvent(chnl + ":" + dp,newValue,channel);
         return;
       }
@@ -672,7 +675,13 @@ HomeKitGenericService.prototype = {
         that.isWorking = newValue;
       }
       this.eventupdate = true;
-      if ((this.cadress!=undefined) || (this.deviceAdress!=undefined)){
+
+      if (typeof optionalFunction == "function") {
+        this.log.debug("Registred Event handler is a function")
+        optionalFunction.call(this,newValue);
+      }
+
+      if ((this.cadress!=undefined) || (this.deviceAdress!=undefined)){
         // this is dirty shit. ok there is a config that will set the cadress to a defined channel
         // if there is an rpc event at this channel the event will be forward here.
         // now fetch the real adress of that channel and get the channelnumber

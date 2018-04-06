@@ -33,15 +33,17 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     this.setPersistentState("lastReset",this.lastReset)
   }
 
-/*
+  // register state event
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".STATE",this)
+
+
   this.lastOpen = this.getPersistentState("lastOpen",undefined)
-  if (this.lastOpen == undefined) {
+  if ((this.lastOpen == undefined) && (this.loggingService!=undefined)) {
     // Set to now
-    this.lastOpen = moment().unix()
+    this.lastOpen = moment().unix()-this.loggingService.getInitialTime();
     this.setPersistentState("lastOpen",this.lastOpen)
     this.log.debug("No LastOpen - set it to just now")
   }
-*/
 
   this.log.info("Adding additional characteristics")
 
@@ -202,7 +204,6 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     }.bind(this));
 
     this.services.push(door);
-    this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".STATE",this)
     this.remoteGetValue("STATE",function(value){
       that.processDoorState(value)
     });
@@ -270,14 +271,14 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     this.CharacteristicClosedDuration.setValue(0);
 
 
-  //  this.CharacteristicLastOpen = this.contact.getCharacteristic(Characteristic.LastOpen)
-/*
+  this.CharacteristicLastOpen = this.contact.getCharacteristic(Characteristic.LastOpen)
+
     .on('get',function(callback){
       that.log.debug("getLastOpen will report %s",that.lastOpen)
       callback(null,that.lastOpen)
     }.bind(this));
     this.CharacteristicLastOpen.setValue(this.lastOpen)
-*/
+
 
     this.CharacteristicTimesOpened = this.contact.getCharacteristic(Characteristic.TimesOpened)
     .on('get',function(callback){
@@ -350,8 +351,9 @@ HomeMaticHomeKitContactService.prototype.processDoorState = function(newValue) {
   }
 }
 
-HomeMaticHomeKitContactService.prototype.datapointEvent= function(dp,newValue) {
+HomeMaticHomeKitContactService.prototype.datapointEvent= function(dp,newValue,channel) {
   if (this.isDataPointEvent(dp,'STATE')) {
+
     this.addLogEntry({status:(newValue==true)?1:0});
     if ( this.special == "DOOR" ) {
       this.processDoorState(newValue)
@@ -363,17 +365,19 @@ HomeMaticHomeKitContactService.prototype.datapointEvent= function(dp,newValue) {
     if (newValue == true) {
       this.timeClosed = this.timeClosed + (moment().unix() - this.timeStamp)
       this.timesOpened = this.timesOpened + 1;
+      if (this.loggingService!=undefined) {
+        let firstLog = this.loggingService.getInitialTime();
+        this.log.info("First Log Entry at %s",firstLog);
+        this.lastOpen = moment().unix() - firstLog;
+        this.CharacteristicLastOpen.updateValue(this.lastOpen,null)
+        this.setPersistentState("lastOpen",this.lastOpen)
+      }
       this.CharacteristicTimesOpened.updateValue(this.timesOpened,null)
       this.setPersistentState("timesOpened",this.timesOpened)
-      // this.CharacteristicLastOpen.updateValue(0,null)
     } else {
       this.timeOpen = this.timeOpen + (moment().unix() - this.timeStamp)
     }
     this.timeStamp = now
-    //this.setPersistentState("timeOpen",this.timeOpen)
-    //this.setPersistentState("timeClosed",this.timeClosed)
-    //this.CharacteristicOpenDuration.updateValue(this.timeOpen,null)
-    //this.CharacteristicClosedDuration.updateValue(this.timeClosed,null)
   }
 }
 

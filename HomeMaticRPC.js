@@ -144,8 +144,8 @@ HomeMaticRPC.prototype.init = function() {
 
         that.platform.eventAdresses.map(function(tuple){
           if (address == tuple.address) {
-            that.log.debug("found accessory %s",tuple.adress );
-            tuple.accessory.event(channel,datapoint, value)
+            that.log.debug("found accessory %s run registred event",tuple.address );
+            tuple.accessory.event(channel,datapoint, value, tuple.function)
           }
         })
 
@@ -183,7 +183,7 @@ HomeMaticRPC.prototype.init = function() {
 
                 that.platform.eventAdresses.map(function(tuple){
                   if (address == tuple.address) {
-                    tuple.accessory.event(channel,datapoint, value)
+                    tuple.accessory.event(channel,datapoint, value, tuple.function)
                   }
                 })
               }

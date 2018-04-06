@@ -769,10 +769,16 @@ HomeMaticPlatform.prototype.deviceInfo = function (config, devicetype) {
 }
 
 
-HomeMaticPlatform.prototype.registerAdressForEventProcessingAtAccessory = function (address, accessory) {
+HomeMaticPlatform.prototype.registerAdressForEventProcessingAtAccessory = function (address, accessory,aFunction) {
 	if (address != undefined) {
 		this.log.debug('adding new address %s for processing events at %s',address,accessory.name)
-		this.eventAdresses.push({address:address,accessory:accessory})
+		if (aFunction!=undefined) {
+			this.eventAdresses.push({address:address,accessory:accessory,function:aFunction})
+		} else {
+			this.eventAdresses.push({address:address,accessory:accessory})
+		}
+	} else {
+		this.log.warn("Address not given %s,%s,%s",address, accessory,aFunction)
 	}
 }
 

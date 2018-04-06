@@ -27,7 +27,7 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function(Serv
       });
     }.bind(this));
 
-    this.currentStateCharacteristic["LEVEL"] = this.currentPos;
+    this.setCurrentStateCharacteristic("LEVEL",this.currentPos);
     this.currentPos.eventEnabled = true;
 
 
@@ -65,7 +65,7 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function(Serv
       });
     }.bind(this));
 
-    this.currentStateCharacteristic["DIRECTION"] = pstate;
+    this.setCurrentStateCharacteristic("DIRECTION",pstate);
     pstate.eventEnabled = true;
 
 
