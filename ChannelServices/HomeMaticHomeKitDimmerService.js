@@ -83,7 +83,9 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
 
   this.brightness.eventEnabled = true;
 
-  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".LEVEL",this,function(newValue){this.processDimmerLevel(newValue)})
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".LEVEL",this,function(newValue){
+    this.processDimmerLevel(newValue)
+  })
 
   this.remoteGetValue('LEVEL',function(newValue){
     that.processDimmerLevel(newValue)

@@ -90,7 +90,7 @@ HomeMaticRPCTestDriver.prototype.event = function(params,callback) {
     that.log.debug('check %s vs %s',address,tuple.address)
     if (address == tuple.address) {
       that.log.debug('found jump into')
-      tuple.accessory.event(channel,datapoint, value)
+      tuple.accessory.event(channel,datapoint, value,tuple.function)
     }
   })
 
@@ -129,7 +129,7 @@ HomeMaticRPCTestDriver.prototype.multicall = function(events,callback) {
 
           that.platform.eventAdresses.map(function(tuple){
             if (address == tuple.address) {
-              tuple.accessory.event(channel,datapoint, value)
+              tuple.accessory.event(channel,datapoint, value,tuple.function)
             }
           })
         }

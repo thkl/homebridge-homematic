@@ -214,7 +214,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     this.contact.addOptionalCharacteristic(Characteristic.TimesOpened)
     this.contact.addOptionalCharacteristic(Characteristic.OpenDuration)
     this.contact.addOptionalCharacteristic(Characteristic.ClosedDuration)
-    //this.contact.addOptionalCharacteristic(Characteristic.LastOpen)
+    this.contact.addOptionalCharacteristic(Characteristic.LastOpen)
     this.addLoggingCharacteristic(Characteristic.ResetTotal)
 
     var rt = this.getLoggingCharacteristic(Characteristic.ResetTotal)
@@ -272,12 +272,11 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
 
 
   this.CharacteristicLastOpen = this.contact.getCharacteristic(Characteristic.LastOpen)
-
-    .on('get',function(callback){
+  .on('get',function(callback){
       that.log.debug("getLastOpen will report %s",that.lastOpen)
       callback(null,that.lastOpen)
     }.bind(this));
-    this.CharacteristicLastOpen.setValue(this.lastOpen)
+  this.CharacteristicLastOpen.setValue(this.lastOpen)
 
 
     this.CharacteristicTimesOpened = this.contact.getCharacteristic(Characteristic.TimesOpened)
