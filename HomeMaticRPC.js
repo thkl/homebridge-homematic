@@ -22,7 +22,7 @@ var HomeMaticRPC = function (log, ccuip,port,system,platform) {
   this.watchDogTimer;
   this.rpc;
   this.rpcInit;
-
+  this.pathname = "/";
   this.watchDogTimeout = 0;
 
   if (platform.config["watchdog"] != undefined) {
@@ -71,6 +71,15 @@ var HomeMaticRPC = function (log, ccuip,port,system,platform) {
     this.rpcInit = "http://";
     break;
 
+    case 3 :
+    this.interface = "VirtualDevices.";
+    this.rpc = xmlrpc;
+    this.ccuport = 9292;
+    this.pathname = "/groups"
+    this.rpcInit = "http://";
+    break;
+
+
   }
 
   this.log.info("init RPC for %s",this.interface);
@@ -99,11 +108,11 @@ HomeMaticRPC.prototype.init = function() {
     if (inUse == false) {
       that.server = that.rpc.createServer({
         host: that.localIP,
-        port: that.listeningPort
+        port: that.listeningPort,
       });
 
       that.server.on("NotFound", function(method, params) {
-        that.log.debug("Method %s does not exist. - %s",method, JSON.stringify(params));
+        //that.log.debug("Method %s does not exist. - %s",method, JSON.stringify(params));
       });
 
       that.server.on("system.listMethods", function(err, params, callback) {
@@ -125,14 +134,14 @@ HomeMaticRPC.prototype.init = function() {
 
 
       that.server.on("event", function(err, params, callback) {
-        that.log.debug('rpc <- event  on %s'  , this.interface );
+        that.log.debug('rpc <- event  on %s' , that.interface );
         that.lastMessage = Math.floor((new Date()).getTime() / 1000);
         var channel = that.interface + params[1];
         var datapoint = params[2];
         var value = params[3];
         let address = that.interface + params[1] + '.' + params[2]
 
-        that.log.debug("Ok here is the Event" + JSON.stringify(params));
+//        that.log.debug("Ok here is the Event" + JSON.stringify(params));
         that.log.debug("RPC single event for %s %s with value %s",channel,datapoint,value);
 
         that.platform.foundAccessories.map(function(accessory) {
@@ -279,7 +288,7 @@ HomeMaticRPC.prototype.connect = function() {
   this.client = that.rpc.createClient({
     host: this.ccuip,
     port: port,
-    path: "/",
+    path: this.pathname,
     queueMaxLength:100
   });
   this.log.debug("CCU RPC Init Call on port %s for interface %s", port , this.interface);

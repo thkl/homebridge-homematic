@@ -30,7 +30,7 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function(Ser
   this.voltage = sensor.getCharacteristic(eve.Characteristic.Voltage)
   .on('get', function(callback) {
     that.query(that.meterChannel + ":VOLTAGE",function(value){
-      if (callback) callback(null,Number(value).toFixed(2));
+      if (callback) callback(null,that.round(value,2));
     });
   }.bind(this));
 
@@ -69,7 +69,7 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function(Ser
     });
   }.bind(this));
 
-  this.power.eventEnabled = true;
+  this.powerConsumption.eventEnabled = true;
 
   this.services.push(sensor);
 
@@ -98,7 +98,7 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function(Ser
     callback();
   }.bind(this));
 
-  this.currentStateCharacteristic[that.switchChannel + ":STATE"] = cc;
+  this.setCurrentStateCharacteristic(that.switchChannel + ":STATE", cc);
   cc.eventEnabled = true;
 
   this.addValueMapping(that.switchChannel + ":STATE",true,1);

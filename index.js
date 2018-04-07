@@ -105,6 +105,9 @@ function HomeMaticPlatform(log, config,api) {
 		this.xmlrpc = new HomeMaticRPC(this.log, this.ccuIP, port, 0, this)
 		this.xmlrpc.init()
 
+		this.virtual_xmlrpc = new HomeMaticRPC(this.log, this.ccuIP, port+3, 3, this)
+		this.virtual_xmlrpc.init()
+
 		if (config.enable_wired != undefined) {
 			this.xmlrpcwired = new HomeMaticRPC(this.log, this.ccuIP, port + 1, 1, this)
 			this.xmlrpcwired.init()
@@ -128,6 +131,11 @@ function HomeMaticPlatform(log, config,api) {
 			if (that.xmlrpchmip != undefined) {
 				that.xmlrpchmip.stop()
 			}
+
+			if (that.virtual_xmlrpc != undefined) {
+				that.virtual_xmlrpc.stop()
+			}
+
 			setTimeout(process.exit(0), 2000)
 		})
 
@@ -444,8 +452,13 @@ HomeMaticPlatform.prototype.setValue_hmip_rpc = function (channel, datapoint, va
 
 HomeMaticPlatform.prototype.setValue_wired_rpc = function (channel, datapoint, value,callback) {
 	this.xmlrpcwired.setValue(channel, datapoint, value,callback)
-
 }
+
+HomeMaticPlatform.prototype.setValue_virtual_rpc = function (channel, datapoint, value,callback) {
+	this.virtual_xmlrpc.setValue(channel, datapoint, value,callback)
+}
+
+
 
 HomeMaticPlatform.prototype.setValue_rega = function (interf, channel, datapoint, value,callback) {
 	let rega = this.createRegaRequest()
@@ -498,6 +511,28 @@ HomeMaticPlatform.prototype.setValue = function (intf, channel, datapoint, value
 				}
 				return
 			}
+
+			if (intf.toLowerCase() === 'virtualdevices') {
+				rpc = true
+				if (this.setValue_virtual_rpc != undefined) {
+					this.log.debug('routing via wired virtual_rpc')
+
+					this.setValue_virtual_rpc(channel,datapoint,value,function(error,result){
+						if (error != undefined) {
+							// fall back to rega
+							that.log.debug('fallback routing via rega')
+							that.setValue_rega(intf,channel,datapoint,value);
+						}
+					})
+
+				} else {
+					// Send over Rega
+					this.log.debug('virtual_rpc is not activ;routing via rega')
+					this.setValue_rega(intf,channel,datapoint,value);
+				}
+				return
+			}
+
 
 			if (intf.toLowerCase() === 'hmip-rf') {
 				rpc = true
@@ -596,6 +631,18 @@ HomeMaticPlatform.prototype.getValue = function (intf, channel, datapoint, callb
 				this.log.debug("route call via rpc bidcosrf")
 				this.xmlrpc.getValue(channel, datapoint, callback)
 				rpc = true
+				return
+			}
+
+			if (intf.toLowerCase() === 'virtualdevices') {
+				rpc = true
+				if (this.virtual_xmlrpc != undefined) {
+					this.log.debug("getValue: route call via virtual_xmlrpc")
+					this.virtual_xmlrpc.getValue(channel, datapoint, callback)
+				} else {
+					// Send over Rega
+					this.getValue_rega(intf,channel, datapoint, callback)
+				}
 				return
 			}
 

@@ -31,7 +31,7 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
   this.voltage = sensor.getCharacteristic(eve.Characteristic.Voltage)
   .on('get', function(callback) {
     that.query("2:VOLTAGE",function(value){
-      if (callback) callback(null,Number(value).toFixed(2));
+      if (callback) callback(null,that.round(value,2));
     });
   }.bind(this));
 
@@ -41,7 +41,8 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
   .on('get', function(callback) {
     that.query("2:CURRENT",function(value){
       if (value!=undefined) {
-        if (callback) callback(null,Number(value).toFixed(4));
+        value = that.round((value/1000),2)
+        if (callback) callback(null,value);
       } else {
         if (callback) callback(null,0);
       }
@@ -54,14 +55,12 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
   .on('get', function(callback) {
     that.query("2:POWER",function(value){
       that.addLogEntry({power:parseFloat(value)})
-      if (callback) callback(null,Number(value).toFixed(2));
+      if (callback) callback(null,that.round(value,4));
     });
   }.bind(this));
 
   this.power.eventEnabled = true;
   this.services.push(sensor);
-
-  this.addValueFactor("CURRENT",0.001);
 
   var outlet = new Service["Outlet"](this.name);
   outlet.getCharacteristic(Characteristic.OutletInUse)
@@ -90,7 +89,18 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
     callback();
   }.bind(this));
 
-  this.currentStateCharacteristic["2:STATE"] = cc;
+  this.setCurrentStateCharacteristic("1:STATE", cc);
+
+
+  this.powerConsumption = sensor.getCharacteristic(eve.Characteristic.TotalConsumption)
+  .on('get', function(callback) {
+    that.query(that.meterChannel + ":ENERGY_COUNTER",function(value){
+      if (callback) callback(null,that.round((value/1000),4));
+    });
+  }.bind(this));
+
+  this.powerConsumption.eventEnabled = true;
+
   cc.eventEnabled = true;
 
   this.addValueMapping("1:STATE",true,1);
@@ -103,9 +113,23 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
   this.cadress = this.adress.replace(":2",":1");
 
 
-  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".POWER",this)
-  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".VOLTAGE",this)
-  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".CURRENT",this)
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".POWER",this,function(newValue){
+    that.addLogEntry({power:parseInt(newValue)});
+    that.power.updateValue(that.round(newValue,2),null);
+  })
+
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".VOLTAGE",this,function(newValue){
+    that.voltage.updateValue(that.round(newValue,2),null);
+  })
+
+
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".CURRENT",this,function(newValue){
+    that.current.updateValue(that.round((newValue/1000),2),null);
+  })
+
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".ENERGY_COUNTER",this,function(newValue){
+    that.powerConsumption.updateValue((that.round((newValue/1000),2)),null);
+  })
 
   this.queryData();
 }
@@ -113,36 +137,14 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
 
 HomeMaticHomeKitPowerMeterService.prototype.queryData = function() {
   var that = this;
-  this.query("2:POWER",function(value){
-    that.datapointEvent("2:POWER",value)
-  });
 
-  this.query("2:VOLTAGE",function(value){
-    that.datapointEvent("2:VOLTAGE",value)
-  });
+  let dps = ["2:POWER","2:VOLTAGE","2:CURRENT","2:ENERGY_COUNTER"]
+  dps.map(function(dp){
+    that.remoteGetValue(dp)
+  })
 
-  this.query("2:CURRENT",function(value){
-    that.datapointEvent("2:CURRENT",value)
-  });
   //create timer to query device every 10 minutes
   this.refreshTimer = setTimeout(function(){that.queryData()}, 10 * 60 * 1000);
-}
-
-HomeMaticHomeKitPowerMeterService.prototype.datapointEvent= function(dp,newValue) {
-
-  if (dp=='2:CURRENT') {
-    this.current.updateValue(Number(newValue).toFixed(4),null)
-  }
-
-  if (dp=='2:VOLTAGE') {
-    this.voltage.updateValue(Number(newValue).toFixed(2),null)
-  }
-
-  if (dp=='2:POWER') {
-    this.addLogEntry({power:parseFloat(newValue)})
-    this.power.updateValue(Number(newValue).toFixed(2),null)
-  }
-
 }
 
 module.exports = HomeMaticHomeKitPowerMeterService;

@@ -693,7 +693,6 @@ HomeKitGenericService.prototype = {
       this.eventupdate = true;
 
       if (typeof optionalFunction == "function") {
-        this.log.debug("Registred Event handler is a function")
         optionalFunction.call(this,newValue);
       }
 
