@@ -16,7 +16,7 @@ require("../../index")(homebridgeMock);
 
 describe("Homematic Plugin (index)", function() {
 
-  let datapath = path.join(__dirname,'data','data_test_HM-ES-PMSw1-Pl.json')
+  let datapath = path.join(__dirname,'data','data_test_HMIP-PSM.json')
   let data = fs.readFileSync(datapath).toString();
   let that = this
   var config = { ccu_ip: '127.0.0.1',subsection :'HomeKit', testdata:data};
@@ -28,6 +28,7 @@ describe("Homematic Plugin (index)", function() {
     platform.accessories(function(acc) {
       that.accessories = acc;
     })
+        platform.xmlrpc.interface = "HmIP-RF.";
   });
 
   after(function() {
@@ -48,9 +49,9 @@ describe("Homematic Plugin (index)", function() {
 
 
     it('test set voltage to 230 v, current to 500 mA, power to 230 w', function (done) {
-        platform.xmlrpc.event(['BidCos-RF','ADR1234567890:2','VOLTAGE',230]);
-        platform.xmlrpc.event(['BidCos-RF','ADR1234567890:2','CURRENT',500]);
-        platform.xmlrpc.event(['BidCos-RF','ADR1234567890:2','POWER',230]);
+        platform.xmlrpc.event(['HmIP-RF','ADR1234567890:6','VOLTAGE',230]);
+        platform.xmlrpc.event(['HmIP-RF','ADR1234567890:6','CURRENT',500]);
+        platform.xmlrpc.event(['HmIP-RF','ADR1234567890:6','POWER',230]);
 
         // check
         that.accessories.map(ac => {

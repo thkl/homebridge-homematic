@@ -69,14 +69,14 @@ HomeMaticHomeKitMotionDetectorService.prototype.createDeviceService = function(S
   })
 
   this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".MOTION",this,function(newValue){
-      this.state.updateValue(newValue,null)
-      this.addLogEntry({ status:(newValue==true)?1:0 })
+      that.state.updateValue(newValue,null)
+      that.addLogEntry({ status:(newValue==true)?1:0 })
       if (newValue == true) {
-        if (this.loggingService != undefined) {
-        let firstLog = this.loggingService.getInitialTime()
-        this.lastActivation = moment().unix() - firstLog
-        this.CharacteristicLastActivation.updateValue(lastActivation,null)
-        this.setPersistentState("lastActivation",lastActivation)
+        if (that.loggingService != undefined) {
+        let firstLog = that.loggingService.getInitialTime()
+        that.lastActivation = moment().unix() - firstLog
+        that.CharacteristicLastActivation.updateValue(that.lastActivation,null)
+        that.setPersistentState("lastActivation",that.lastActivation)
       }
     }
   })

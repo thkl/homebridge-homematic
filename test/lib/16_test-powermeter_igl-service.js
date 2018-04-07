@@ -6,6 +6,8 @@ const path = require('path');
 const fs = require('fs');
 const Characteristic = require('./characteristic-mock').Characteristic;
 const Service = require('./service-mock').Service;
+var EveHomeKitTypes = require('../../ChannelServices/EveHomeKitTypes.js');
+let eve
 
 const homebridgeMock = require('./homebridge-mock')();
 
@@ -18,6 +20,7 @@ describe("Homematic Plugin (index)", function() {
   let that = this
   var config = { ccu_ip: '127.0.0.1',subsection :'HomeKit', testdata:data};
   var platform = new homebridgeMock.PlatformType(log, config);
+  eve = new EveHomeKitTypes(platform)
 
   before(function() {
     log.debug('Init Platform with Energy Counter');
@@ -51,16 +54,16 @@ describe("Homematic Plugin (index)", function() {
 
         // check
         that.accessories.map(ac => {
-          let s = ac.get_Service(Service.PowerMeterService)
+          let s = ac.get_Service(eve.Service.PowerMeterService)
           assert.ok(s, "Service.PowerMeterService not found in Energy Counter %s",ac.name);
-          let cp = s.getCharacteristic(Characteristic.PowerCharacteristic)
-          assert.ok(cp, "Characteristic.PowerCharacteristic not found in Energy Counter %s",ac.name);
+          let cp = s.getCharacteristic(eve.Characteristic.ElectricPower)
+          assert.ok(cp, "Characteristic.ElectricPower not found in Energy Counter %s",ac.name);
           cp.getValue(function(context,value){
             assert.equal(value, 230,"Power is " + value + " not 230");
           });
 
-          let ce = s.getCharacteristic(Characteristic.PowerConsumptionCharacteristic)
-          assert.ok(ce, "Characteristic.PowerConsumptionCharacteristic not found in Energy Counter %s",ac.name);
+          let ce = s.getCharacteristic(eve.Characteristic.TotalConsumption)
+          assert.ok(ce, "Characteristic.TotalConsumption not found in Energy Counter %s",ac.name);
           ce.getValue(function(context,value){
             // haz to be devided by 1000 -> wh vs kwh
             assert.equal(value, 42.42,"Power Consumption is " + value + " not 42.42Kwh");

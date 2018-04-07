@@ -3,6 +3,8 @@
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService;
 const inherits = require('util').inherits
 var moment = require('moment');
+var EveHomeKitTypes = require('./EveHomeKitTypes.js');
+let eve
 
 function HomeMaticHomeKitEnergyCounterService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
   HomeMaticHomeKitEnergyCounterService.super_.apply(this, arguments);
@@ -15,15 +17,22 @@ HomeMaticHomeKitEnergyCounterService.prototype.shutdown = function() {
   clearTimeout(this.initialQueryTimer)
 }
 
+
+HomeMaticHomeKitEnergyCounterService.prototype.propagateServices = function(homebridge, Service, Characteristic) {
+  eve = new EveHomeKitTypes(homebridge)
+}
+
+
+
 HomeMaticHomeKitEnergyCounterService.prototype.createDeviceService = function(Service, Characteristic) {
 
   var that = this;
   // Enable the Logging Service for Energy
   this.enableLoggingService("energy");
 
-  var sensor = new Service.PowerMeterService(this.name);
+  var sensor = new eve.Service.PowerMeterService(this.name);
 
-  this.power = sensor.getCharacteristic(Characteristic.PowerCharacteristic)
+  this.power = sensor.getCharacteristic(eve.Characteristic.ElectricPower)
   .on('get', function(callback) {
     that.query("POWER",function(value){
       that.addLogEntry({power:parseFloat(value)})
@@ -33,7 +42,7 @@ HomeMaticHomeKitEnergyCounterService.prototype.createDeviceService = function(Se
 
   this.power.eventEnabled = true;
 
-  this.energyCounter = sensor.getCharacteristic(Characteristic.PowerConsumptionCharacteristic)
+  this.energyCounter = sensor.getCharacteristic(eve.Characteristic.TotalConsumption)
   .on('get', function(callback) {
     that.query("ENERGY_COUNTER",function(value){
       // CCU sends wH -- homekit haz kwh - so calculate /1000

@@ -3,6 +3,9 @@
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService;
 var util = require("util");
 var moment = require('moment');
+var EveHomeKitTypes = require('./EveHomeKitTypes.js');
+let eve
+
 
 function HomeMaticHomeKitPowerMeterService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
   HomeMaticHomeKitPowerMeterService.super_.apply(this, arguments);
@@ -14,12 +17,18 @@ HomeMaticHomeKitPowerMeterService.prototype.shutdown = function() {
   clearTimeout(this.refreshTimer)
 }
 
+
+HomeMaticHomeKitPowerMeterService.prototype.propagateServices = function(homebridge, Service, Characteristic) {
+  eve = new EveHomeKitTypes(homebridge)
+}
+
+
 HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Service, Characteristic) {
 
   var that = this;
   this.enableLoggingService("energy");
-  var sensor = new Service["PowerMeterService"](this.name);
-  this.voltage = sensor.getCharacteristic(Characteristic.VoltageCharacteristic)
+  var sensor = new eve.Service.PowerMeterService(this.name);
+  this.voltage = sensor.getCharacteristic(eve.Characteristic.Voltage)
   .on('get', function(callback) {
     that.query("2:VOLTAGE",function(value){
       if (callback) callback(null,Number(value).toFixed(2));
@@ -28,7 +37,7 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
 
   this.voltage.eventEnabled = true;
 
-  this.current = sensor.getCharacteristic(Characteristic.CurrentCharacteristic)
+  this.current = sensor.getCharacteristic(eve.Characteristic.ElectricCurrent)
   .on('get', function(callback) {
     that.query("2:CURRENT",function(value){
       if (value!=undefined) {
@@ -41,7 +50,7 @@ HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function(Servi
 
   this.current.eventEnabled = true;
 
-  this.power = sensor.getCharacteristic(Characteristic.PowerCharacteristic)
+  this.power = sensor.getCharacteristic(eve.Characteristic.ElectricPower)
   .on('get', function(callback) {
     that.query("2:POWER",function(value){
       that.addLogEntry({power:parseFloat(value)})

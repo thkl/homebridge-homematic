@@ -565,8 +565,13 @@ HomeKitGenericService.prototype = {
       if (callback!=undefined) {
         callback(newValue);
       } else {
-        // send a Event - we have to walk a extra round to get the enclosure function back
+        let parts = dp.split(':')
+        if (parts.length > 1) {
+          dp = parts[1]
+        }
         let address = that.adress + "." + dp
+        that.log.debug("remoteGetValue response; empty callback route via event for %s",address)
+        // send a Event - we have to walk a extra round to get the enclosure function back
         that.platform.eventAdresses.map(function(tuple){
           if (address == tuple.address) {
             that.log.debug("found accessory %s run registred event",tuple.address )
@@ -852,7 +857,26 @@ HomeKitGenericService.prototype = {
       else if (typeof name === 'function' && ((service instanceof name) || (name.UUID === service.UUID)))
       return service;
     }
+  },
+
+
+  round: function(val, precision) {
+	if (typeof val !== 'number') {
+    return val
+	}
+
+	if (!Number.isInteger(precision)) {
+    return val
+	}
+
+	const exponent = precision > 0 ? 'e' : 'e-';
+	const exponentNeg = precision > 0 ? 'e-' : 'e';
+	precision = Math.abs(precision);
+
+		return Number(Math.sign(val) * (Math.round(Math.abs(val) + exponent + precision) + exponentNeg + precision));
   }
+
+
 };
 
 module.exports = {
