@@ -29,7 +29,7 @@ HomeMaticHomeKitThermostatWeatherServiceIP.prototype.createDeviceService = funct
     });
   }.bind(this));
 
-  this.currentStateCharacteristic["ACTUAL_TEMPERATURE"] = ctemp;
+  this.setCurrentStateCharacteristic("ACTUAL_TEMPERATURE",ctemp);
   ctemp.eventEnabled = true;
 
   var humidity = new Service.HumiditySensor(this.name);
@@ -43,7 +43,7 @@ HomeMaticHomeKitThermostatWeatherServiceIP.prototype.createDeviceService = funct
     });
   }.bind(this));
 
-  this.currentStateCharacteristic["HUMIDITY"] = chum;
+  this.setCurrentStateCharacteristic("HUMIDITY",chum);
   chum.eventEnabled= true;
   this.queryData();
 }
@@ -71,11 +71,11 @@ HomeMaticHomeKitThermostatWeatherServiceIP.prototype.shutdown = function() {
 
 
 HomeMaticHomeKitThermostatWeatherServiceIP.prototype.datapointEvent= function(dp,newValue) {
-  if (dp=='ACTUAL_TEMPERATURE') {
+  if (this.isDataPointEvent(dp,'ACTUAL_TEMPERATURE')) {
     this.currentTemperature = parseFloat(newValue);
   }
 
-  if (dp=='HUMIDITY') {
+  if (this.isDataPointEvent(dp,'HUMIDITY')) {
     this.currentHumidity = parseFloat(newValue);
   }
 
