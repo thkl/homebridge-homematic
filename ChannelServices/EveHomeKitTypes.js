@@ -1,5 +1,6 @@
-'use strict';
-const CustomHomeKitTypes = require('./CustomHomeKitTypes')
+'use strict'
+
+const CustomHomeKitTypes = require('./CustomHomeKitTypes.js')
 
 
 let hap

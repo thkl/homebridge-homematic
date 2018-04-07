@@ -1,5 +1,6 @@
-'use strict';
-var util = require("util");
+'use strict'
+
+var util = require("util")
 
 let hap
 
