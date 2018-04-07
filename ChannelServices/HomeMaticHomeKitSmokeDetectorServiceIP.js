@@ -50,7 +50,7 @@ HomeMaticHomeKitSmokeDetectorServiceIP.prototype.createDeviceService = function(
 }
 
 HomeMaticHomeKitSmokeDetectorServiceIP.prototype.datapointEvent=function(dp,newValue)  {
-  if (dp=='SMOKE_DETECTOR_ALARM_STATUS') {
+  if (this.isDataPointEvent(dp,'SMOKE_DETECTOR_ALARM_STATUS')) {
 
     switch (newValue) {
 

@@ -26,7 +26,9 @@ HomeMaticRPCTestDriver.prototype.getValue = function(channel, datapoint, callbac
     if (channel.indexOf(this.interface)==-1) {
        adrchannel = this.interface + channel + "." + datapoint
     }
-    callback(this.platform.homebridge.values[adrchannel]);
+    let result = this.platform.homebridge.values[adrchannel]
+    this.log.debug("RPC Query %s (%s)",adrchannel,result)
+    callback(result);
   } else {
     callback(0)
   }
@@ -40,7 +42,7 @@ HomeMaticRPCTestDriver.prototype.setValue = function(channel, datapoint, value) 
   if (typeof value == 'object') {
     value = value['explicitDouble'];
   }
-
+  this.log.debug("RPC Set %s (%s)",adrchannel,value)
   this.platform.homebridge.values[adrchannel] = value;
 }
 
@@ -70,7 +72,9 @@ HomeMaticRPCTestDriver.prototype.event = function(params,callback) {
     value = value['explicitDouble'];
   }
 
-  this.platform.homebridge.values[params[1] + '.' + params[2]] = value;
+  this.log.debug("RPC Event %s (%s)",address,value)
+
+  this.platform.homebridge.values[address] = value;
 
   this.log.debug("Ok here is the Event" + JSON.stringify(params));
   this.log.debug("RPC single event for %s.%s with value %s",channel,datapoint,value);
@@ -86,7 +90,7 @@ HomeMaticRPCTestDriver.prototype.event = function(params,callback) {
     that.log.debug('check %s vs %s',address,tuple.address)
     if (address == tuple.address) {
       that.log.debug('found jump into')
-      tuple.accessory.event(channel,datapoint, value)
+      tuple.accessory.event(channel,datapoint, value,tuple.function)
     }
   })
 
@@ -117,7 +121,7 @@ HomeMaticRPCTestDriver.prototype.multicall = function(events,callback) {
             if ((accessory.adress == channel) || 
             ((accessory.cadress != undefined) && (accessory.cadress == channel)) || 
             ((accessory.deviceAdress != undefined) && (accessory.deviceAdress == deviceAdress))) {
-              that.log.debug("Accessory %s found -> Send Event",accessory.name);
+              that.log.info("Accessory %s found -> Send Event",accessory.name);
               accessory.event(channel,datapoint, value);
             }
 
@@ -125,7 +129,7 @@ HomeMaticRPCTestDriver.prototype.multicall = function(events,callback) {
 
           that.platform.eventAdresses.map(function(tuple){
             if (address == tuple.address) {
-              tuple.accessory.event(channel,datapoint, value)
+              tuple.accessory.event(channel,datapoint, value,tuple.function)
             }
           })
         }

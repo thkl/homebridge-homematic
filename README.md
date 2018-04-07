@@ -151,3 +151,13 @@ As a sample: the device with the channel WEATHER of the device with type HM-WDS1
 	}]
 
 ```
+
+or you could use for example the device HmIP-STH just as a regular Temperature and
+Humidity sensor:
+
+```
+"services": [
+  { "type": "HmIP-STH:HEATING_CLIMATECONTROL_TRANSCEIVER",
+    "service": "HomeMaticHomeKitThermostatWeatherServiceIP" }
+]
+```

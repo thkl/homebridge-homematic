@@ -16,8 +16,8 @@ HomeMaticHomeKitCarbonDioxideSensorService.prototype.createDeviceService = funct
     var that = this;
     var co2sensor = new Service.CarbonDioxideSensor(this.name);
 	this.services.push(co2sensor);
-    
-    
+
+
     this.co2level = co2sensor.getCharacteristic(Characteristic.CarbonDioxideDetected)
 	.on('get', function(callback) {
       that.query("STATE",function(value){
@@ -37,15 +37,15 @@ HomeMaticHomeKitCarbonDioxideSensorService.prototype.createDeviceService = funct
       });
     }.bind(this));
 
-    this.currentStateCharacteristic["STATE"] = this.co2level;
+    this.setCurrentStateCharacteristic("STATE",this.co2level);
     this.remoteGetValue("STATE");
 
-	this.addValueMapping("STATE",0,Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
+	  this.addValueMapping("STATE",0,Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
     this.addValueMapping("STATE",1,Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
     this.addValueMapping("STATE",2,Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL);
-    
+
 }
 
 
 
-module.exports = HomeMaticHomeKitCarbonDioxideSensorService; 
+module.exports = HomeMaticHomeKitCarbonDioxideSensorService;

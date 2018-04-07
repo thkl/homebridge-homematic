@@ -94,6 +94,7 @@ HomeMaticChannelLoader.prototype.loadChannelService = function(list, deviceType,
 
 		var accessory = new service(log, platform, id, name, channelType, adress, special, cfg, Service, Characteristic, deviceType);
 		accessory.setReadOnly(access != 255)
+		accessory.serviceClassName = serviceclass
 		// Only add if there are more than 1 Service (number 1 is the informationService)
 		// see https://github.com/thkl/homebridge-homematic/issues/234#issuecomment-375764819
 		this.log.debug("Number of Services in %s is %s",name,accessory.getServices().length)

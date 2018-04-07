@@ -60,7 +60,7 @@ describe("Homematic Plugin (index)", function() {
           cc.getValue(function(context,value){
             assert.equal(value, testdegree);
           });
-          
+
           let sh = ac.get_Service(Service.HumiditySensor)
           assert.ok(sh, "Service.HumiditySensor not found in Thermometer %s",ac.name);
           let ch = sh.getCharacteristic(Characteristic.CurrentRelativeHumidity)

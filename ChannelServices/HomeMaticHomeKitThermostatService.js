@@ -26,7 +26,7 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function(Servi
 
     self.query("2:SETPOINT",function(value) {
       if (value<6.0){
-        self.currentStateCharacteristic["MODE"].setValue(1, null);
+        self.getCurrentStateCharacteristic("MODE").setValue(1, null);
         if (callback) callback(null,0);
       } else {
         if (callback) callback(null,1);
@@ -36,7 +36,7 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function(Servi
 
   }.bind(self));
 
-  self.currentStateCharacteristic["MODE"] = mode;
+  self.setCurrentStateCharacteristic("MODE", mode);
   mode.eventEnabled = true;
 
   var targetMode = thermo.getCharacteristic(Characteristic.TargetHeatingCoolingState)

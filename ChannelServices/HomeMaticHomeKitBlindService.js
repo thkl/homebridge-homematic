@@ -164,14 +164,14 @@ HomeMaticHomeKitBlindService.prototype.endWorking=function()  {
 HomeMaticHomeKitBlindService.prototype.datapointEvent = function(dp,newValue)  {
   let that = this
 
-  if (dp == "1:INHIBIT") {
+  if (this.isDataPointEvent(dp,"INHIBIT")) {
     this.inhibit = newValue
     if (this.obstruction != undefined) {
       this.obstruction.updateValue(newValue,null);
     }
   }
 
-  if (dp == "1:DIRECTION") {
+  if (this.isDataPointEvent(dp,"DIRECTION")) {
     switch (newValue) {
       case 0:
       this.pstate.updateValue(2,null);
@@ -188,7 +188,7 @@ HomeMaticHomeKitBlindService.prototype.datapointEvent = function(dp,newValue)  {
     }
   }
 
-  if (dp == "1:WORKING_SLATS") {
+  if (this.isDataPointEvent(dp,"WORKING_SLATS")) {
     if (newValue == false) {
       this.remoteGetValue("LEVEL",function(value) {
         that.currentPos.updateValue(value,null);
@@ -197,7 +197,7 @@ HomeMaticHomeKitBlindService.prototype.datapointEvent = function(dp,newValue)  {
     }
   }
 
-  if (dp == "1:LEVEL") {
+  if (this.isDataPointEvent(dp,"LEVEL")) {
     that.processBlindLevel(newValue)
   }
 }

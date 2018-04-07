@@ -24,10 +24,10 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function(Ser
 
     that.query("SET_POINT_TEMPERATURE",function(value) {
       if (value<6.0){
-        that.currentStateCharacteristic["CONTROL_MODE"].setValue(1, null);
+        that.getCurrentStateCharacteristic("CONTROL_MODE").setValue(1, null);
         if (callback) callback(null,0);
       } else {
-        that.currentStateCharacteristic["CONTROL_MODE"].setValue(0, null);
+        that.getCurrentStateCharacteristic("CONTROL_MODE").setValue(0, null);
         if (callback) callback(null,1);
       }
     });
@@ -35,7 +35,7 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function(Ser
 
   }.bind(this));
 
-  this.currentStateCharacteristic["CONTROL_MODE"] = mode;
+  this.setCurrentStateCharacteristic("CONTROL_MODE",mode);
   mode.eventEnabled = true;
 
   var targetMode = thermo.getCharacteristic(Characteristic.TargetHeatingCoolingState)
@@ -69,7 +69,7 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function(Ser
     minStep: 1,
   });
 
-  var cctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
+  this.cctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
   .setProps({ minValue: -100 })
   .on('get', function(callback) {
     this.remoteGetValue("ACTUAL_TEMPERATURE",function(value){
@@ -77,23 +77,19 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function(Ser
     });
   }.bind(this));
 
-  this.currentStateCharacteristic["ACTUAL_TEMPERATURE"] = cctemp;
-  cctemp.eventEnabled = true;
+  this.cctemp.eventEnabled = true;
 
 
-  var cchum = thermo.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+  this.cchum = thermo.getCharacteristic(Characteristic.CurrentRelativeHumidity)
   .on('get', function(callback) {
     this.remoteGetValue("HUMIDITY",function(value){
       if (callback) callback(null,value);
     });
   }.bind(this));
 
-  this.currentStateCharacteristic["HUMIDITY"] = cchum;
-  cchum.eventEnabled = true;
+  this.cchum.eventEnabled = true;
 
-
-
-  var ttemp = thermo.getCharacteristic(Characteristic.TargetTemperature)
+  this.ttemp = thermo.getCharacteristic(Characteristic.TargetTemperature)
   .setProps({ minValue: 6.0, maxValue: 30.5, minStep: 0.1 })
   .on('get', function(callback) {
 
@@ -115,8 +111,7 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function(Ser
     callback();
   }.bind(this));
 
-  this.currentStateCharacteristic["SET_POINT_TEMPERATURE"] = ttemp;
-  ttemp.eventEnabled = true;
+  this.ttemp.eventEnabled = true;
 
   thermo.getCharacteristic(Characteristic.TemperatureDisplayUnits)
   .on('get', function(callback) {
@@ -135,10 +130,12 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function(Ser
 HomeMaticHomeKitIPThermostatService.prototype.queryData = function() {
   var that = this;
   this.query("HUMIDITY",function(value){
+    that.cchum.updateValue(parseFloat(value),null)
     that.addLogEntry({humidity:parseFloat(value)})
   });
 
   this.query("ACTUAL_TEMPERATURE",function(value){
+    that.cctemp.updateValue(parseFloat(value),null)
     that.addLogEntry({currentTemp:parseFloat(value)})
   });
 
@@ -155,16 +152,19 @@ HomeMaticHomeKitIPThermostatService.prototype.shutdown = function() {
 
 HomeMaticHomeKitIPThermostatService.prototype.datapointEvent= function(dp,newValue) {
 
-  if (dp=='ACTUAL_TEMPERATURE') {
+  if (this.isDataPointEvent(dp,'ACTUAL_TEMPERATURE')) {
+      this.cctemp.updateValue(parseFloat(value),null)
       this.addLogEntry({currentTemp:parseFloat(newValue)});
   }
 
-  if (dp=='HUMIDITY') {
+  if (this.isDataPointEvent(dp,'HUMIDITY')) {
+      this.cchum.updateValue(parseFloat(newValue),null)
       this.addLogEntry({humidity:parseFloat(newValue)});
   }
 
-  if (dp=='SET_POINT_TEMPERATURE') {
-      that.addLogEntry({setTemp:parseFloat(newValue)});
+  if (this.isDataPointEvent(dp,'SET_POINT_TEMPERATURE')) {
+      this.ttemp.updateValue(parseFloat(newValue),null);
+      this.addLogEntry({setTemp:parseFloat(newValue)});
   }
 
 }
