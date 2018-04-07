@@ -564,6 +564,17 @@ HomeKitGenericService.prototype = {
 
       if (callback!=undefined) {
         callback(newValue);
+      } else {
+        // send a Event - we have to walk a extra round to get the enclosure function back
+        let address = that.adress + "." + dp
+        that.platform.eventAdresses.map(function(tuple){
+          if (address == tuple.address) {
+            that.log.debug("found accessory %s run registred event",tuple.address )
+            let channel = that.deviceAdress +":"+that.channelnumber
+            that.log.debug("Channel %s",channel)
+            tuple.accessory.event(channel,dp, newValue, tuple.function)
+          }
+        })
       }
 
     });

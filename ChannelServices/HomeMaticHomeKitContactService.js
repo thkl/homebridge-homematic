@@ -2,8 +2,11 @@
 
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService;
 var util = require("util");
+var EveHomeKitTypes = require('./EveHomeKitTypes.js');
+
 const moment = require('moment');
 const epoch = moment('2001-01-01T00:00:00Z').unix()
+let eve
 
 function HomeMaticHomeKitContactService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
   HomeMaticHomeKitContactService.super_.apply(this, arguments);
@@ -13,7 +16,7 @@ util.inherits(HomeMaticHomeKitContactService, HomeKitGenericService);
 
 
 HomeMaticHomeKitContactService.prototype.propagateServices = function(homebridge, Service, Characteristic) {
-
+  eve = new EveHomeKitTypes(homebridge)
 }
 
 HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service, Characteristic) {
@@ -33,10 +36,6 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     this.setPersistentState("lastReset",this.lastReset)
   }
 
-  // register state event
-  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + ".STATE",this)
-
-
   this.lastOpen = this.getPersistentState("lastOpen",undefined)
   if ((this.lastOpen == undefined) && (this.loggingService!=undefined)) {
     // Set to now
@@ -44,77 +43,6 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     this.setPersistentState("lastOpen",this.lastOpen)
     this.log.debug("No LastOpen - set it to just now")
   }
-
-  this.log.info("Adding additional characteristics")
-
-  Characteristic.OpenDuration = function() {
-    Characteristic.call(this, 'Open Duration', 'E863F118-079E-48FF-8F27-9C2605A29F52');
-    this.setProps({
-      format: Characteristic.Formats.UINT32,
-      unit: Characteristic.Units.SECONDS,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY, Characteristic.Perms.WRITE]
-    });
-    this.value = this.getDefaultValue();
-  };
-
-  util.inherits(Characteristic.OpenDuration, Characteristic);
-  Characteristic.OpenDuration.UUID = 'E863F118-079E-48FF-8F27-9C2605A29F52'
-
-  Characteristic.ClosedDuration = function() {
-    Characteristic.call(this, 'Closed Duration', 'E863F119-079E-48FF-8F27-9C2605A29F52');
-    this.setProps({
-      format: Characteristic.Formats.UINT32,
-      unit: Characteristic.Units.SECONDS,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY, Characteristic.Perms.WRITE]
-    });
-    this.value = this.getDefaultValue();
-  };
-
-  util.inherits(Characteristic.ClosedDuration, Characteristic);
-  Characteristic.ClosedDuration.UUID = 'E863F119-079E-48FF-8F27-9C2605A29F52'
-
-
-  Characteristic.ResetTotal = function() {
-    Characteristic.call(this, 'Reset Total', 'E863F112-079E-48FF-8F27-9C2605A29F52');
-    this.setProps({
-      format: Characteristic.Formats.UINT32,
-      unit: Characteristic.Units.SECONDS,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY, Characteristic.Perms.WRITE]
-    });
-    this.value = this.getDefaultValue();
-  };
-  util.inherits(Characteristic.ResetTotal, Characteristic);
-  Characteristic.ResetTotal.UUID = 'E863F112-079E-48FF-8F27-9C2605A29F52'
-
-  Characteristic.TimesOpened = function() {
-    Characteristic.call(this, 'Times Opened', 'E863F129-079E-48FF-8F27-9C2605A29F52');
-    this.setProps({
-      format: Characteristic.Formats.UINT32,
-      unit: Characteristic.Units.SECONDS,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-    });
-    this.value = this.getDefaultValue();
-  };
-
-  util.inherits(Characteristic.TimesOpened, Characteristic);
-  Characteristic.TimesOpened.UUID = 'E863F129-079E-48FF-8F27-9C2605A29F52'
-
-  Characteristic.LastOpen = function() {
-    Characteristic.call(this, 'Last Activation', 'E863F11A-079E-48FF-8F27-9C2605A29F52');
-    this.setProps({
-      format: Characteristic.Formats.UINT32,
-      unit: Characteristic.Units.SECONDS,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-    });
-    this.value = this.getDefaultValue();
-  }
-  util.inherits(Characteristic.LastOpen, Characteristic);
-  Characteristic.LastOpen.UUID = 'E863F11A-079E-48FF-8F27-9C2605A29F52'
-
-
-
-
-  //
 
   var reverse = false;
   if (this.cfg != undefined) {
@@ -210,17 +138,15 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
   } else {
     this.log.debug("Creating a ContactSensor")
     this.contact = new Service.ContactSensor(this.name);
+    this.contact.addOptionalCharacteristic(eve.Characteristic.TimesOpened)
+    this.contact.addOptionalCharacteristic(eve.Characteristic.OpenDuration)
+    this.contact.addOptionalCharacteristic(eve.Characteristic.ClosedDuration)
+    this.contact.addOptionalCharacteristic(eve.Characteristic.LastActivation)
+    this.addLoggingCharacteristic(eve.Characteristic.ResetTotal)
 
-    this.contact.addOptionalCharacteristic(Characteristic.TimesOpened)
-    this.contact.addOptionalCharacteristic(Characteristic.OpenDuration)
-    this.contact.addOptionalCharacteristic(Characteristic.ClosedDuration)
-    this.contact.addOptionalCharacteristic(Characteristic.LastOpen)
-    this.addLoggingCharacteristic(Characteristic.ResetTotal)
-
-    var rt = this.getLoggingCharacteristic(Characteristic.ResetTotal)
+    var rt = this.getLoggingCharacteristic(eve.Characteristic.ResetTotal)
     if (rt != undefined) {
-      this.log.info("Adding LR Events")
-      rt.on('set',  function(value,callback) {
+    rt.on('set',  function(value,callback) {
 
         // only reset if its not equal the reset time we know
         if (value != that.lastReset) {
@@ -256,14 +182,14 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     }.bind(this))
     this.contact.getCharacteristic(Characteristic.StatusActive).setValue(true)
 
-    this.CharacteristicOpenDuration = this.contact.getCharacteristic(Characteristic.OpenDuration)
+    this.CharacteristicOpenDuration = this.contact.getCharacteristic(eve.Characteristic.OpenDuration)
     .on('get',function(callback){
       that.log.debug("getOpenDuration")
       callback(null,that.timeOpen)
     }.bind(this));
     this.CharacteristicOpenDuration.setValue(0);
 
-    this.CharacteristicClosedDuration = this.contact.getCharacteristic(Characteristic.ClosedDuration)
+    this.CharacteristicClosedDuration = this.contact.getCharacteristic(eve.Characteristic.ClosedDuration)
     .on('get',function(callback){
       that.log.debug("getClosedDuration")
       callback(null,that.timeClosed)
@@ -271,7 +197,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     this.CharacteristicClosedDuration.setValue(0);
 
 
-  this.CharacteristicLastOpen = this.contact.getCharacteristic(Characteristic.LastOpen)
+  this.CharacteristicLastOpen = this.contact.getCharacteristic(eve.Characteristic.LastActivation)
   .on('get',function(callback){
       that.log.debug("getLastOpen will report %s",that.lastOpen)
       callback(null,that.lastOpen)
@@ -279,7 +205,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
   this.CharacteristicLastOpen.setValue(this.lastOpen)
 
 
-    this.CharacteristicTimesOpened = this.contact.getCharacteristic(Characteristic.TimesOpened)
+    this.CharacteristicTimesOpened = this.contact.getCharacteristic(eve.Characteristic.TimesOpened)
     .on('get',function(callback){
       that.log.debug("getTimesOpened will report %s",that.timesOpened)
       callback(null,that.timesOpened)
@@ -359,8 +285,8 @@ HomeMaticHomeKitContactService.prototype.datapointEvent= function(dp,newValue,ch
     } else {
       this.processContactState(newValue)
     }
-    let now = moment().unix()
 
+    let now = moment().unix()
     if (newValue == true) {
       this.timeClosed = this.timeClosed + (moment().unix() - this.timeStamp)
       this.timesOpened = this.timesOpened + 1;
