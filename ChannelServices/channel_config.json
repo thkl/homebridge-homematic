@@ -311,6 +311,9 @@
 	{
 	  "type" : "POWERMETER_IGL",
 		"service" : "HomeMaticHomeKitEnergyCounterService"
+	},
+	{ "type":"HM-LC-Ja1PBU-FM:JALOUSIE", 
+	  "service": "HomeMaticHomeKitBlindService"
 	}
 
 
