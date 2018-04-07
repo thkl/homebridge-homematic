@@ -119,11 +119,7 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function(Ser
   }.bind(this));
 
 
-  this.remoteGetValue("ACTUAL_TEMPERATURE");
-  this.remoteGetValue("HUMIDITY");
   this.remoteGetValue("SET_POINT_TEMPERATURE");
-
-
   this.queryData()
 }
 
