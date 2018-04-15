@@ -256,7 +256,9 @@ HomeMaticHomeKitContactService.prototype.stateCharacteristicDidChange = function
 }
 
 HomeMaticHomeKitContactService.prototype.processContactState = function(newValue) {
-  this.contactstate.updateValue(newValue,null)
+ if (  this.contactstate != undefined) {
+   this.contactstate.updateValue(newValue,null)
+ }
 }
 
 HomeMaticHomeKitContactService.prototype.processDoorState = function(newValue) {
