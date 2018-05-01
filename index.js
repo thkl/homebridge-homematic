@@ -627,13 +627,19 @@ HomeMaticPlatform.prototype.getValue = function (intf, channel, datapoint, callb
 		if (intf != undefined) {
 			let rpc = false
 			this.log.debug("platform getValue (%s) %s.%s",intf, channel, datapoint)
+
+			// switched back to asking rega to prevent DC from growing ..
+			//
+
+/*
 			if ((intf.toLowerCase() === 'bidcos-rf') && (this.xmlrpc != undefined)) {
 				this.log.debug("route call via rpc bidcosrf")
 				this.xmlrpc.getValue(channel, datapoint, callback)
 				rpc = true
 				return
 			}
-
+*/
+/*
 			if (intf.toLowerCase() === 'virtualdevices') {
 				rpc = true
 				if (this.virtual_xmlrpc != undefined) {
@@ -645,7 +651,8 @@ HomeMaticPlatform.prototype.getValue = function (intf, channel, datapoint, callb
 				}
 				return
 			}
-
+*/
+/*
 			if (intf.toLowerCase() === 'bidcos-wired') {
 				rpc = true
 				if (this.xmlrpcwired != undefined) {
@@ -657,7 +664,8 @@ HomeMaticPlatform.prototype.getValue = function (intf, channel, datapoint, callb
 				}
 				return
 			}
-
+*/
+/*
 			if (intf.toLowerCase() === 'hmip-rf') {
 				if (this.xmlrpchmip != undefined) {
 					this.log.debug("getValue: route call via rpc hmip")
@@ -667,7 +675,7 @@ HomeMaticPlatform.prototype.getValue = function (intf, channel, datapoint, callb
 				}
 				return
 			}
-
+*/
 			if (intf == 'Variable') {
 				var rega = this.createRegaRequest()
 				rega.getVariable(channel, callback)
