@@ -21,7 +21,7 @@ HomeMaticHomeKitSmokeDetectorService.prototype.createDeviceService = function(Se
        if (callback) callback(null,value);
       });
     }.bind(this));
-    detectorstate.eventEnabled = true;
+    this.detectorstate.eventEnabled = true;
     this.services.push(sensor);
     this.remoteGetValue("STATE");
 
