@@ -61,7 +61,6 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function(Service, 
   .on('get', function(callback) {
     that.query("LEVEL",function(value){
       that.state["LAST"] = (value);
-      that.log.info("Get Level %s",value)
       if (callback) callback(null,value);
     });
   }.bind(this))
