@@ -93,7 +93,7 @@ function HomeMaticPlatform(log, config,api) {
 	this.foundAccessories = []
 	this.eventAdresses=[]
 	this.adressesToQuery = []
-	this.addOptionalServices()
+
 	// only init stuff if there is no test running
 	if (!isInTest) {
 
@@ -104,6 +104,9 @@ function HomeMaticPlatform(log, config,api) {
 
 		this.xmlrpc = new HomeMaticRPC(this.log, this.ccuIP, port, 0, this)
 		this.xmlrpc.init()
+
+		this.virtual_xmlrpc = new HomeMaticRPC(this.log, this.ccuIP, port+3, 3, this)
+		this.virtual_xmlrpc.init()
 
 		if (config.enable_wired != undefined) {
 			this.xmlrpcwired = new HomeMaticRPC(this.log, this.ccuIP, port + 1, 1, this)
@@ -128,6 +131,11 @@ function HomeMaticPlatform(log, config,api) {
 			if (that.xmlrpchmip != undefined) {
 				that.xmlrpchmip.stop()
 			}
+
+			if (that.virtual_xmlrpc != undefined) {
+				that.virtual_xmlrpc.stop()
+			}
+
 			setTimeout(process.exit(0), 2000)
 		})
 
@@ -245,70 +253,6 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 	}
 }
 
-HomeMaticPlatform.prototype.addOptionalServices = function() {
-
-Characteristic.PowerCharacteristic = function() {
-	var charUUID = uuid.generate('E863F10D-079E-48FF-8F27-9C2605A29F52');
-	Characteristic.call(this, 'Power', charUUID);
-	this.setProps({
-		format: Characteristic.Formats.UInt16,
-		unit: "W",
-		perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-	});
-	this.value = this.getDefaultValue();
-};
-
-inherits(Characteristic.PowerCharacteristic, Characteristic);
-
-Characteristic.PowerConsumptionCharacteristic = function() {
-	var charUUID = uuid.generate('E863F10C-079E-48FF-8F27-9C2605A29F52');
-	Characteristic.call(this, 'Total Consumption', charUUID);
-	this.setProps({
-		format: Characteristic.Formats.UInt16,
-		unit: "kWh",
-		perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-	});
-	this.value = this.getDefaultValue();
-};
-
-inherits(Characteristic.PowerConsumptionCharacteristic, Characteristic);
-
-Characteristic.VoltageCharacteristic = function() {
-	var charUUID = uuid.generate('E863F10A-079E-48FF-8F27-9C2605A29F52');
-	Characteristic.call(this, 'Voltage', charUUID);
-	this.setProps({
-		format: Characteristic.Formats.UInt16,
-		unit: "V",
-		perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-	});
-	this.value = this.getDefaultValue();
-};
-
-inherits(Characteristic.VoltageCharacteristic, Characteristic);
-
-Characteristic.CurrentCharacteristic = function() {
-	var charUUID = uuid.generate('E863F126-079E-48FF-8F27-9C2605A29F52');
-	Characteristic.call(this, 'Current', charUUID);
-	this.setProps({
-		format: Characteristic.Formats.UInt16,
-		unit: "A",
-		perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-	});
-	this.value = this.getDefaultValue();
-};
-inherits(Characteristic.CurrentCharacteristic, Characteristic);
-
-Service.PowerMeterService = function(displayName, subtype) {
-	var servUUID = uuid.generate('E863F117-079E-48FF-8F27-9C2605A29F52');
-	Service.call(this, displayName, servUUID, subtype);
-	this.addCharacteristic(Characteristic.PowerCharacteristic);
-	this.addOptionalCharacteristic(Characteristic.PowerConsumptionCharacteristic);
-	this.addOptionalCharacteristic(Characteristic.VoltageCharacteristic);
-	this.addOptionalCharacteristic(Characteristic.CurrentCharacteristic);
-};
-
-inherits(Service.PowerMeterService, Service);
-}
 
 
 HomeMaticPlatform.prototype.checkUpdate = function() {
@@ -508,8 +452,13 @@ HomeMaticPlatform.prototype.setValue_hmip_rpc = function (channel, datapoint, va
 
 HomeMaticPlatform.prototype.setValue_wired_rpc = function (channel, datapoint, value,callback) {
 	this.xmlrpcwired.setValue(channel, datapoint, value,callback)
-
 }
+
+HomeMaticPlatform.prototype.setValue_virtual_rpc = function (channel, datapoint, value,callback) {
+	this.virtual_xmlrpc.setValue(channel, datapoint, value,callback)
+}
+
+
 
 HomeMaticPlatform.prototype.setValue_rega = function (interf, channel, datapoint, value,callback) {
 	let rega = this.createRegaRequest()
@@ -562,6 +511,28 @@ HomeMaticPlatform.prototype.setValue = function (intf, channel, datapoint, value
 				}
 				return
 			}
+
+			if (intf.toLowerCase() === 'virtualdevices') {
+				rpc = true
+				if (this.setValue_virtual_rpc != undefined) {
+					this.log.debug('routing via wired virtual_rpc')
+
+					this.setValue_virtual_rpc(channel,datapoint,value,function(error,result){
+						if (error != undefined) {
+							// fall back to rega
+							that.log.debug('fallback routing via rega')
+							that.setValue_rega(intf,channel,datapoint,value);
+						}
+					})
+
+				} else {
+					// Send over Rega
+					this.log.debug('virtual_rpc is not activ;routing via rega')
+					this.setValue_rega(intf,channel,datapoint,value);
+				}
+				return
+			}
+
 
 			if (intf.toLowerCase() === 'hmip-rf') {
 				rpc = true
@@ -656,13 +627,32 @@ HomeMaticPlatform.prototype.getValue = function (intf, channel, datapoint, callb
 		if (intf != undefined) {
 			let rpc = false
 			this.log.debug("platform getValue (%s) %s.%s",intf, channel, datapoint)
+
+			// switched back to asking rega to prevent DC from growing ..
+			//
+
+/*
 			if ((intf.toLowerCase() === 'bidcos-rf') && (this.xmlrpc != undefined)) {
 				this.log.debug("route call via rpc bidcosrf")
 				this.xmlrpc.getValue(channel, datapoint, callback)
 				rpc = true
 				return
 			}
-
+*/
+/*
+			if (intf.toLowerCase() === 'virtualdevices') {
+				rpc = true
+				if (this.virtual_xmlrpc != undefined) {
+					this.log.debug("getValue: route call via virtual_xmlrpc")
+					this.virtual_xmlrpc.getValue(channel, datapoint, callback)
+				} else {
+					// Send over Rega
+					this.getValue_rega(intf,channel, datapoint, callback)
+				}
+				return
+			}
+*/
+/*
 			if (intf.toLowerCase() === 'bidcos-wired') {
 				rpc = true
 				if (this.xmlrpcwired != undefined) {
@@ -674,7 +664,8 @@ HomeMaticPlatform.prototype.getValue = function (intf, channel, datapoint, callb
 				}
 				return
 			}
-
+*/
+/*
 			if (intf.toLowerCase() === 'hmip-rf') {
 				if (this.xmlrpchmip != undefined) {
 					this.log.debug("getValue: route call via rpc hmip")
@@ -684,7 +675,7 @@ HomeMaticPlatform.prototype.getValue = function (intf, channel, datapoint, callb
 				}
 				return
 			}
-
+*/
 			if (intf == 'Variable') {
 				var rega = this.createRegaRequest()
 				rega.getVariable(channel, callback)
@@ -769,10 +760,16 @@ HomeMaticPlatform.prototype.deviceInfo = function (config, devicetype) {
 }
 
 
-HomeMaticPlatform.prototype.registerAdressForEventProcessingAtAccessory = function (address, accessory) {
+HomeMaticPlatform.prototype.registerAdressForEventProcessingAtAccessory = function (address, accessory,aFunction) {
 	if (address != undefined) {
 		this.log.debug('adding new address %s for processing events at %s',address,accessory.name)
-		this.eventAdresses.push({address:address,accessory:accessory})
+		if (aFunction!=undefined) {
+			this.eventAdresses.push({address:address,accessory:accessory,function:aFunction})
+		} else {
+			this.eventAdresses.push({address:address,accessory:accessory})
+		}
+	} else {
+		this.log.warn("Address not given %s,%s,%s",address, accessory,aFunction)
 	}
 }
 

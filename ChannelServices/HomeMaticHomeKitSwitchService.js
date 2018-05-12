@@ -165,12 +165,27 @@ HomeMaticHomeKitSwitchService.prototype.createValveService = function(Service, C
 
   configured.updateValue(Characteristic.IsConfigured.CONFIGURED,null);
 
+  // Load ValveType from parameters #268
+  // Characteristic.ValveType.GENERIC_VALVE = 0;
+  // Characteristic.ValveType.IRRIGATION = 1;
+  // Characteristic.ValveType.SHOWER_HEAD = 2;
+  // Characteristic.ValveType.WATER_FAUCET = 3;
+  let types = this.getClazzConfigValue('types',undefined)
+  this.log.debug(types);
+  var vtype = Characteristic.ValveType.IRRIGATION
+  if (types != undefined) {
+    if (types[this.adress] != undefined) {
+      vtype = types[this.adress];
+    }
+    if (vtype > 3) {vtype = 0;}
+  }
+
   var valveType = this.service_item.getCharacteristic(Characteristic.ValveType)
   .on('get', function(callback) {
-    callback(null,Characteristic.ValveType.IRRIGATION);
+    callback(null,vtype);
   }.bind(this));
 
-  valveType.updateValue(Characteristic.ValveType.IRRIGATION,null)
+  valveType.updateValue(vtype,null)
 
   this.service_item.getCharacteristic(Characteristic.SetDuration)
   .on('get', function(callback) {
@@ -273,7 +288,7 @@ HomeMaticHomeKitSwitchService.prototype.queryState = function(){
 }
 
 HomeMaticHomeKitSwitchService.prototype.datapointEvent = function(dp,newValue){
-  if (dp =='STATE') {
+  if (dp == this.channelnumber + ':STATE') {
     let hmState = ((newValue=='true') || (newValue==true)) ? 1 : 0;
 
     if (hmState == 0) {

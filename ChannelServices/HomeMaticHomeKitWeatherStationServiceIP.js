@@ -20,13 +20,13 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.propagateServices = function(h
 
   Characteristic.RainCountCharacteristic = function() {
     var charUUID = uuid.generate('HomeMatic:customchar:RainCountCharacteristic');
-  Characteristic.call(this, 'Regenmenge', charUUID);
+    Characteristic.call(this, 'Regenmenge', charUUID);
     this.setProps({
-        format: Characteristic.Formats.FLOAT,
-    unit: 'mm',
-    minStep: 0.1,
-        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-            });
+      format: Characteristic.Formats.FLOAT,
+      unit: 'mm',
+      minStep: 0.1,
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+    });
     this.value = this.getDefaultValue();
   };
   util.inherits(Characteristic.RainCountCharacteristic, Characteristic);
@@ -34,7 +34,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.propagateServices = function(h
   Service.RainCountService = function(displayName, subtype) {
     var servUUID = uuid.generate('HomeMatic:customchar:RainCountService');
     Service.call(this, displayName, servUUID, subtype);
-  this.addCharacteristic(Characteristic.RainCountCharacteristic);
+    this.addCharacteristic(Characteristic.RainCountCharacteristic);
   };
 
   util.inherits(Service.RainCountService, Service);
@@ -42,13 +42,13 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.propagateServices = function(h
 
   Characteristic.WindSpeedCharacteristic = function() {
     var charUUID = uuid.generate('HomeMatic:customchar:WindSpeedCharacteristic');
-  Characteristic.call(this, 'Wind Geschwindigkeit', charUUID);
+    Characteristic.call(this, 'Wind Geschwindigkeit', charUUID);
     this.setProps({
-        format: Characteristic.Formats.FLOAT,
-    unit: 'km/h',
-    minStep: 0.1,
-        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-            });
+      format: Characteristic.Formats.FLOAT,
+      unit: 'km/h',
+      minStep: 0.1,
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+    });
     this.value = this.getDefaultValue();
   };
   util.inherits(Characteristic.WindSpeedCharacteristic, Characteristic);
@@ -56,7 +56,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.propagateServices = function(h
   Service.WindSpeedService = function(displayName, subtype) {
     var servUUID = uuid.generate('HomeMatic:customchar:WindSpeedService');
     Service.call(this, displayName, servUUID, subtype);
-  this.addCharacteristic(Characteristic.WindSpeedCharacteristic);
+    this.addCharacteristic(Characteristic.WindSpeedCharacteristic);
   };
 
   util.inherits(Service.WindSpeedService, Service);
@@ -64,12 +64,12 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.propagateServices = function(h
 
   Characteristic.WindDirectionCharacteristic = function() {
     var charUUID = uuid.generate('HomeMatic:customchar:WindDirectionCharacteristic');
-  Characteristic.call(this, 'Wind Richtung', charUUID);
+    Characteristic.call(this, 'Wind Richtung', charUUID);
     this.setProps({
-        format: Characteristic.Formats.INTEGER,
-    unit: 'Grad',
-        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-            });
+      format: Characteristic.Formats.INTEGER,
+      unit: 'Grad',
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+    });
     this.value = this.getDefaultValue();
   };
   util.inherits(Characteristic.WindDirectionCharacteristic, Characteristic);
@@ -77,7 +77,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.propagateServices = function(h
   Service.WindDirectionService = function(displayName, subtype) {
     var servUUID = uuid.generate('HomeMatic:customchar:WindDirectionService');
     Service.call(this, displayName, servUUID, subtype);
-  this.addCharacteristic(Characteristic.WindDirectionCharacteristic);
+    this.addCharacteristic(Characteristic.WindDirectionCharacteristic);
   };
 
   util.inherits(Service.WindDirectionService, Service);
@@ -85,12 +85,12 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.propagateServices = function(h
 
   Characteristic.WindRangeCharacteristic = function() {
     var charUUID = uuid.generate('HomeMatic:customchar:WindRangeCharacteristic');
-  Characteristic.call(this, 'Wind Schwankungsbreite', charUUID);
+    Characteristic.call(this, 'Wind Schwankungsbreite', charUUID);
     this.setProps({
-        format: Characteristic.Formats.INTEGER,
-    unit: 'Grad',
-        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-            });
+      format: Characteristic.Formats.INTEGER,
+      unit: 'Grad',
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+    });
     this.value = this.getDefaultValue();
   };
   util.inherits(Characteristic.WindRangeCharacteristic, Characteristic);
@@ -98,7 +98,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.propagateServices = function(h
   Service.WindRangeService = function(displayName, subtype) {
     var servUUID = uuid.generate('HomeMatic:customchar:WindRangeService');
     Service.call(this, displayName, servUUID, subtype);
-  this.addCharacteristic(Characteristic.WindRangeCharacteristic);
+    this.addCharacteristic(Characteristic.WindRangeCharacteristic);
   };
 
   util.inherits(Service.WindRangeService, Service);
@@ -106,12 +106,12 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.propagateServices = function(h
 
   Characteristic.SunshineCharacteristic = function() {
     var charUUID = uuid.generate('HomeMatic:customchar:SunshineCharacteristic');
-  Characteristic.call(this, 'Sonnenscheindauer', charUUID);
+    Characteristic.call(this, 'Sonnenscheindauer', charUUID);
     this.setProps({
-        format: Characteristic.Formats.FLOAT,
-    unit: 'Minuten',
-        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-            });
+      format: Characteristic.Formats.FLOAT,
+      unit: 'Minuten',
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+    });
     this.value = this.getDefaultValue();
   };
   util.inherits(Characteristic.SunshineCharacteristic, Characteristic);
@@ -119,7 +119,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.propagateServices = function(h
   Service.SunshineService = function(displayName, subtype) {
     var servUUID = uuid.generate('HomeMatic:customchar:SunshineService');
     Service.call(this, displayName, servUUID, subtype);
-  this.addCharacteristic(Characteristic.SunshineCharacteristic);
+    this.addCharacteristic(Characteristic.SunshineCharacteristic);
   };
 
   util.inherits(Service.SunshineService, Service);
@@ -136,105 +136,105 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
 
   // HmIP-SWO-B - TemperatureSensor, HumiditySensor, LightSensor, SunshineService, WindSpeedService
   var thermo = new Service["TemperatureSensor"](this.name);
-    this.services.push(thermo);
+  this.services.push(thermo);
 
-    var ctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
-    .setProps({ minValue: -100 })
-    .on('get', function(callback) {
-      that.query("ACTUAL_TEMPERATURE",function(value){
-        if (callback) callback(null,value);
-      });
-    }.bind(this));
+  var ctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
+  .setProps({ minValue: -100 })
+  .on('get', function(callback) {
+    that.query("ACTUAL_TEMPERATURE",function(value){
+      if (callback) callback(null,value);
+    });
+  }.bind(this));
 
-    this.currentStateCharacteristic["ACTUAL_TEMPERATURE"] = ctemp;
-    ctemp.eventEnabled = true;
+  this.setCurrentStateCharacteristic("ACTUAL_TEMPERATURE",ctemp);
+  ctemp.eventEnabled = true;
 
 
   var humidity = new Service["HumiditySensor"](this.name);
-    this.services.push(humidity);
+  this.services.push(humidity);
 
-      var chum = humidity.getCharacteristic(Characteristic.CurrentRelativeHumidity)
-      .on('get', function(callback) {
-         that.query("HUMIDITY",function(value){
-            if (callback) callback(null,value);
-         });
-     }.bind(this));
+  var chum = humidity.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+  .on('get', function(callback) {
+    that.query("HUMIDITY",function(value){
+      if (callback) callback(null,value);
+    });
+  }.bind(this));
 
-    this.currentStateCharacteristic["HUMIDITY"] = chum;
-    chum.eventEnabled = true;
+  this.setCurrentStateCharacteristic("HUMIDITY",chum);
+  chum.eventEnabled = true;
 
 
   var brightness = new Service["LightSensor"](this.name);
-    this.services.push(brightness);
+  this.services.push(brightness);
 
-      var cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
-      .on('get', function(callback) {
-         that.query("ILLUMINATION",function(value){
-            if (callback) callback(null,value);
-         });
-     }.bind(this));
+  var cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
+  .on('get', function(callback) {
+    that.query("ILLUMINATION",function(value){
+      if (callback) callback(null,value);
+    });
+  }.bind(this));
 
-    this.currentStateCharacteristic["ILLUMINATION"] = cbright;
-    cbright.eventEnabled = true;
+  this.setCurrentStateCharacteristic("ILLUMINATION",cbright);
+  cbright.eventEnabled = true;
 
 
   var sunshineduration = new Service["SunshineService"](this.name);
-    this.services.push(sunshineduration);
+  this.services.push(sunshineduration);
 
-    var csunshineduration = sunshineduration.getCharacteristic(Characteristic.SunshineCharacteristic)
-      .on('get', function(callback) {
-         this.query("SUNSHINEDURATION",function(value){
-           if (callback) callback(null,value);
-         });
-    }.bind(this))
+  var csunshineduration = sunshineduration.getCharacteristic(Characteristic.SunshineCharacteristic)
+  .on('get', function(callback) {
+    this.query("SUNSHINEDURATION",function(value){
+      if (callback) callback(null,value);
+    });
+  }.bind(this))
 
-    this.currentStateCharacteristic["SUNSHINEDURATION"] = csunshineduration;
-    csunshineduration.eventEnabled = true;
+  this.setCurrentStateCharacteristic("SUNSHINEDURATION",csunshineduration);
+  csunshineduration.eventEnabled = true;
 
 
   var windspeed = new Service["WindSpeedService"](this.name);
-    this.services.push(windspeed);
+  this.services.push(windspeed);
 
-    var cwindspeed = windspeed.getCharacteristic(Characteristic.WindSpeedCharacteristic)
-      .on('get', function(callback) {
-         this.query("WIND_SPEED",function(value){
-           if (callback) callback(null,value);
-         });
-    }.bind(this))
+  var cwindspeed = windspeed.getCharacteristic(Characteristic.WindSpeedCharacteristic)
+  .on('get', function(callback) {
+    this.query("WIND_SPEED",function(value){
+      if (callback) callback(null,value);
+    });
+  }.bind(this))
 
-    this.currentStateCharacteristic["WIND_SPEED"] = cwindspeed;
-    cwindspeed.eventEnabled = true;
+  this.setCurrentStateCharacteristic("WIND_SPEED",cwindspeed);
+  cwindspeed.eventEnabled = true;
 
 
   // HmIP-SWO-PL - HmIP-SWO-B + RainSensor RainCountService
   if ((this.deviceType == "HmIP-SWO-PL") || (this.deviceType == "HmIP-SWO-PR")) {
 
     var raining = new Service["MotionSensor"]("Raining");
-      this.services.push(raining);
+    this.services.push(raining);
 
-      var craining = raining.getCharacteristic(Characteristic.MotionDetected)
-        .on('get', function(callback) {
-          that.query("RAINING",function(value){
-            if (callback) callback(null,value);
-          });
-      }.bind(this));
+    var craining = raining.getCharacteristic(Characteristic.MotionDetected)
+    .on('get', function(callback) {
+      that.query("RAINING",function(value){
+        if (callback) callback(null,value);
+      });
+    }.bind(this));
 
-      this.currentStateCharacteristic["RAINING"] = craining;
-      craining.eventEnabled = true;
+    this.setCurrentStateCharacteristic("RAINING",craining);
+    craining.eventEnabled = true;
 
 
     var raincount = new Service["RainCountService"](this.name);
-      this.services.push(raincount);
+    this.services.push(raincount);
 
-      var craincount = raincount.getCharacteristic(Characteristic.RainCountCharacteristic)
-        .on('get', function(callback) {
-           this.query("RAIN_COUNTER",function(value){
-             if (callback) callback(null,value);
-           });
-      }.bind(this))
+    var craincount = raincount.getCharacteristic(Characteristic.RainCountCharacteristic)
+    .on('get', function(callback) {
+      this.query("RAIN_COUNTER",function(value){
+        if (callback) callback(null,value);
+      });
+    }.bind(this))
 
-      this.currentStateCharacteristic["RAIN_COUNTER"] = craincount;
-      craincount.eventEnabled = true;
+    this.setCurrentStateCharacteristic("RAIN_COUNTER",craincount);
+    craincount.eventEnabled = true;
 
   }
 
@@ -242,31 +242,31 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
   if (this.deviceType == "HmIP-SWO-PR") {
 
     var winddirection = new Service["WindDirectionService"](this.name);
-      this.services.push(winddirection);
+    this.services.push(winddirection);
 
-      var cwinddirection = winddirection.getCharacteristic(Characteristic.WindDirectionCharacteristic)
-        .on('get', function(callback) {
-           this.query("WIND_DIR",function(value){
-             if (callback) callback(null,value);
-           });
-      }.bind(this))
+    var cwinddirection = winddirection.getCharacteristic(Characteristic.WindDirectionCharacteristic)
+    .on('get', function(callback) {
+      this.query("WIND_DIR",function(value){
+        if (callback) callback(null,value);
+      });
+    }.bind(this))
 
-      this.currentStateCharacteristic["WIND_DIR"] = cwinddirection;
-      cwinddirection.eventEnabled = true;
+    this.setCurrentStateCharacteristic("WIND_DIR",cwinddirection);
+    cwinddirection.eventEnabled = true;
 
 
     var windrange = new Service["WindRangeService"](this.name);
-      this.services.push(windrange);
+    this.services.push(windrange);
 
-      var cwindrange = windrange.getCharacteristic(Characteristic.WindRangeCharacteristic)
-        .on('get', function(callback) {
-           this.query("WIND_DIR_RANGE",function(value){
-             if (callback) callback(null,value);
-           });
-      }.bind(this))
+    var cwindrange = windrange.getCharacteristic(Characteristic.WindRangeCharacteristic)
+    .on('get', function(callback) {
+      this.query("WIND_DIR_RANGE",function(value){
+        if (callback) callback(null,value);
+      });
+    }.bind(this))
 
-      this.currentStateCharacteristic["WIND_DIR_RANGE"] = cwindrange;
-      cwindrange.eventEnabled = true;
+    this.setCurrentStateCharacteristic("WIND_DIR_RANGE",cwindrange);
+    cwindrange.eventEnabled = true;
 
   }
 
@@ -296,16 +296,16 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.queryData = function() {
 
 HomeMaticHomeKitWeatherStationServiceIP.prototype.datapointEvent= function(dp,newValue) {
 
-  if (dp=='ACTUAL_TEMPERATURE') {
+  if (this.isDataPointEvent('ACTUAL_TEMPERATURE')) {
     this.currentTemperature = parseFloat(newValue);
   }
 
-  if (dp=='HUMIDITY') {
+  if (this.isDataPointEvent('HUMIDITY')) {
     this.currentHumidity = parseFloat(newValue);
   }
 
   // make this call a little less often
-  if ((dp=='ACTUAL_TEMPERATURE') || (dp=='HUMIDITY') && (this.currentTemperature > -255) && (this.currentHumidity > -255)) {
+  if ((this.isDataPointEvent('ACTUAL_TEMPERATURE')) || (this.isDataPointEvent('HUMIDITY')) && (this.currentTemperature > -255) && (this.currentHumidity > -255)) {
     this.addLogEntry({ temp:this.currentTemperature, pressure:0, humidity:this.currentHumidity});
   }
 }

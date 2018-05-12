@@ -14,18 +14,18 @@ require("../../index")(homebridgeMock);
 
 describe("Homematic Plugin (index)", function() {
 
-  let datapath = path.join(__dirname,'data','data_test_smokedetectorIP.json')
+  let datapath = path.join(__dirname,'data','data_test_smokedetector.json')
   let data = fs.readFileSync(datapath).toString();
   let that = this
   var config = { ccu_ip: '127.0.0.1',subsection :'HomeKit' , testdata:data};
   var platform = new homebridgeMock.PlatformType(log, config);
 
   before(function() {
-    log.debug('Init Platform with IP SmokeDetector');
+    log.debug('Init Platform with NonIp SmokeDetector');
     platform.accessories(function(acc) {
         that.accessories = acc;
     })
-    platform.xmlrpc.interface = "HmIP-RF.";
+    platform.xmlrpc.interface = "BidCos-RF.";
   });
 
   after(function() {
@@ -35,7 +35,7 @@ describe("Homematic Plugin (index)", function() {
     });
   });
 
-  describe("Homebridge Platform SmokeDetector Service Test", function() {
+  describe("Homebridge Platform NonIP SmokeDetector Service Test", function() {
 
     it('check accessory build', function (done) {
         assert.ok(that.accessories, "Did not find any accessories!");
@@ -46,7 +46,7 @@ describe("Homematic Plugin (index)", function() {
 
 
     it('test SmokeDetector Alarm', function (done) {
-          platform.xmlrpc.event(['HmIP-RF','ADR1234567890:1','SMOKE_DETECTOR_ALARM_STATUS',1]);
+          platform.xmlrpc.event(['BidCos-RF','ADR1234567890:1','STATE',1]);
           // check
           that.accessories.map(ac => {
             let s = ac.get_Service(Service.SmokeSensor)
@@ -68,7 +68,7 @@ describe("Homematic Plugin (index)", function() {
 
      it('test SmokeDetector Idle', function (done) {
           // Switch Off
-          platform.xmlrpc.event(['HmIP-RF','ADR1234567890:1','SMOKE_DETECTOR_ALARM_STATUS',0]);
+          platform.xmlrpc.event(['BidCos-RF','ADR1234567890:1','STATE',0]);
           // check
           that.accessories.map(ac => {
             let s = ac.get_Service(Service.SmokeSensor)
@@ -85,44 +85,6 @@ describe("Homematic Plugin (index)", function() {
           done();
       });
 
-      it('test SmokeDetector Alarm not for me', function (done) {
-        // check
-        that.accessories.map(ac => {
-          let s = ac.get_Service(Service.SmokeSensor)
-          assert.ok(s, "Service.SmokeSensor not found in SmokeDetector %s",ac.name);
-          ac.memyselfandi = true;
-          platform.xmlrpc.event(['HmIP-RF','ADR1234567890:1','SMOKE_DETECTOR_ALARM_STATUS',3]);
-          let cc = s.getCharacteristic(Characteristic.SmokeDetected)
-          assert.ok(cc, "Characteristic.SmokeDetected not found in SmokeDetector %s",ac.name);
-          cc.getValue(function(context,value){
-            assert.equal(value, false,"event logic result should be false");
-          });
-          cc.emit('get',function(context,result){
-            assert.equal(result,false,"get logic result should be false");
-          });
-
-        });
-        done();
-      });
-
-      it('test SmokeDetector Intrusion Alarm', function (done) {
-        // check
-        that.accessories.map(ac => {
-          let s = ac.get_Service(Service.SmokeSensor)
-          assert.ok(s, "Service.SmokeSensor not found in SmokeDetector %s",ac.name);
-          ac.memyselfandi = true;
-          platform.xmlrpc.event(['HmIP-RF','ADR1234567890:1','SMOKE_DETECTOR_ALARM_STATUS',2]);
-          let cc = s.getCharacteristic(Characteristic.SmokeDetected)
-          assert.ok(cc, "Characteristic.SmokeDetected not found in SmokeDetector %s",ac.name);
-          cc.getValue(function(context,value){
-            assert.equal(value, true,"event logic result should be true");
-          });
-          cc.emit('get',function(context,result){
-            assert.equal(result,true,"get logic result should be true");
-          });
-        });
-        done();
-      });
 
  });
 });

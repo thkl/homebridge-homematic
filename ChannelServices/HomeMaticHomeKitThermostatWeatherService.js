@@ -20,7 +20,7 @@ HomeMaticHomeKitThermostatWeatherService.prototype.createDeviceService = functio
   this.currentHumidity = -255;
 
 
-  var ctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
+  this.ctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
   .setProps({ minValue: -100 })
   .on('get', function(callback) {
     that.query("TEMPERATURE",function(value){
@@ -29,13 +29,12 @@ HomeMaticHomeKitThermostatWeatherService.prototype.createDeviceService = functio
     });
   }.bind(this));
 
-  this.currentStateCharacteristic["TEMPERATURE"] = ctemp;
-  ctemp.eventEnabled = true;
+  this.ctemp.eventEnabled = true;
 
   var humidity = new Service.HumiditySensor(this.name);
   this.services.push(humidity);
 
-  var chum = humidity.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+  this.chum = humidity.getCharacteristic(Characteristic.CurrentRelativeHumidity)
   .on('get', function(callback) {
     that.query("HUMIDITY",function(value){
       that.currentHumidity = parseFloat(value);
@@ -43,8 +42,7 @@ HomeMaticHomeKitThermostatWeatherService.prototype.createDeviceService = functio
     });
   }.bind(this));
 
-  this.currentStateCharacteristic["HUMIDITY"] = chum;
-  chum.eventEnabled= true;
+  this.chum.eventEnabled= true;
   this.queryData();
 }
 
@@ -55,6 +53,8 @@ HomeMaticHomeKitThermostatWeatherService.prototype.queryData = function() {
     that.query("HUMIDITY",function(value){
       that.currentHumidity = parseFloat(value);
       if ((that.currentTemperature > -255) && (that.currentHumidity > -255)) {
+        that.ctemp.updateValue(that.currentTemperature,null)
+        that.chum.updateValue(that.currentHumidity,null)
         that.addLogEntry({temp:that.currentTemperature, pressure:0, humidity:that.currentHumidity})
       }
     });
@@ -71,11 +71,13 @@ HomeMaticHomeKitThermostatWeatherService.prototype.shutdown = function() {
 
 
 HomeMaticHomeKitThermostatWeatherService.prototype.datapointEvent= function(dp,newValue) {
-  if (dp=='TEMPERATURE') {
+  if (this.isDataPointEvent(dp,'TEMPERATURE')) {
+    this.ctemp.updateValue(parseFloat(newValue),null)
     this.currentTemperature = parseFloat(newValue);
   }
 
-  if (dp=='HUMIDITY') {
+  if (this.isDataPointEvent(dp,'HUMIDITY')) {
+    this.chum.updateValue(parseFloat(newValue),null)
     this.currentHumidity = parseFloat(newValue);
   }
 

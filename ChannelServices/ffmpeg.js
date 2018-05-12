@@ -273,7 +273,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         let targetAudioPort = sessionInfo["audio_port"];
         let audioKey = sessionInfo["audio_srtp"];
         let audioSsrc = sessionInfo["audio_ssrc"];
-
+        
         let ffmpegCommand = this.ffmpegSource + ' -map 0:0' +
           ' -vcodec ' + vcodec +
           ' -pix_fmt yuv420p' +

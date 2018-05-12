@@ -81,7 +81,7 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function(Service,
     });
   }.bind(this));
 
-  this.currentStateCharacteristic["DIRECTION"] = pstate;
+  this.setCurrentStateCharacteristic("DIRECTION",pstate);
   pstate.eventEnabled = true;
 
   /**
@@ -108,8 +108,17 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function(Service,
   });
 
   this.deviceAdress = this.adress.slice(0, this.adress.indexOf(":"));
-  this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ":3.LEVEL",this)
-  this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ":4.LEVEL",this)
+
+  this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ":3.LEVEL",this,function (newValue) {that.processBlindLevel(newValue)})
+  this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ":4.LEVEL",this,function (newValue) {that.processBlindLevel(newValue)})
+
+  this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ":4:PROCESS",this,function (newValue) {
+    if (newValue == 0) {
+      that.remoteGetValue("4:LEVEL",function(value) {
+        that.processBlindLevel(value)
+      })
+    }
+  })
 
 }
 
@@ -132,24 +141,6 @@ HomeMaticHomeKitBlindServiceIP.prototype.processBlindLevel = function(newValue) 
 
   this.currentPos.updateValue(newValue,null);
   this.targetPos.updateValue(newValue,null);
-
-}
-
-HomeMaticHomeKitBlindServiceIP.prototype.datapointEvent=function(dp,newValue)  {
-  let that = this
-  if ((dp == "4:PROCESS") && (newValue == 0)) {
-    this.remoteGetValue("4:LEVEL",function(value) {
-      that.processBlindLevel(newValue)
-    })
-  }
-
-  if (dp == "4:LEVEL") {
-    this.processBlindLevel(newValue)
-  }
-
-  if (dp == "3:LEVEL") {
-    this.processBlindLevel(newValue)
-  }
 }
 
 
