@@ -677,6 +677,19 @@ HomeKitGenericService.prototype = {
         this.datapointEvent(chnl + ":" + dp,newValue,channel);
         return;
       }
+      if (tp[1] == 'PRESS_LONG') {
+        var targetChar = that.currentStateCharacteristic[tp[1]];
+        if (targetChar != undefined) {
+          targetChar.setValue(2);
+        }
+        var chnl = channel.slice(channel.indexOf(":")+1);
+        this.channelDatapointEvent(channel,dp,newValue);
+        if (typeof optionalFunction == "function") {
+          optionalFunction.call(this,newValue);
+        }
+        this.datapointEvent(chnl + ":" + dp,newValue,channel);
+        return;
+      }
 
       var factor = this.datapointvaluefactors[tp[1]];
 
