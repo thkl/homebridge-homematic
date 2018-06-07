@@ -33,12 +33,10 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function (Service,
 
     .on('set', function (value, callback) {
       var lastLevel = that.state["LAST"];
-      if(lastLevel == undefined) {
-        lastLevel = -1;
-      }
+      if(lastLevel == undefined) { lastLevel = -1; }
       if(((value == true) ||  ((value == 1))) && ((lastLevel < 1))) {
-        that.state["LAST"] = 100;
-        that.command("set", "LEVEL", 100);
+        that.command("set", "OLD_LEVEL", true);
+        that.state["LAST"] = undefined;
       } else
       if((value == 0) ||  (value == false)) {
         that.state["LAST"] = 0;
