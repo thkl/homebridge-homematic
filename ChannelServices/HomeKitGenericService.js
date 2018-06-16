@@ -666,8 +666,24 @@ HomeKitGenericService.prototype = {
       if (tp[1] == 'PRESS_SHORT') {
         var targetChar = that.currentStateCharacteristic[tp[1]];
         if (targetChar != undefined) {
-          targetChar.setValue(1);
-          setTimeout(function(){targetChar.setValue(0);}, 1000);
+          // The value property of ProgrammableSwitchEvent must be one of the following:
+          // Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS = 0;
+          // Characteristic.ProgrammableSwitchEvent.DOUBLE_PRESS = 1;
+          //Characteristic.ProgrammableSwitchEvent.LONG_PRESS = 2;
+          targetChar.setValue(0);
+        }
+        var chnl = channel.slice(channel.indexOf(":")+1);
+        this.channelDatapointEvent(channel,dp,newValue);
+        if (typeof optionalFunction == "function") {
+          optionalFunction.call(this,newValue);
+        }
+        this.datapointEvent(chnl + ":" + dp,newValue,channel);
+        return;
+      }
+      if (tp[1] == 'PRESS_LONG') {
+        var targetChar = that.currentStateCharacteristic[tp[1]];
+        if (targetChar != undefined) {
+          targetChar.setValue(2);
         }
         var chnl = channel.slice(channel.indexOf(":")+1);
         this.channelDatapointEvent(channel,dp,newValue);
