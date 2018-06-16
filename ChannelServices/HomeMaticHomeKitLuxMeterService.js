@@ -48,7 +48,7 @@ HomeMaticHomeKitLuxMeterService.prototype.processLightLevel=function(newValue)  
 
 
 HomeMaticHomeKitLuxMeterService.prototype.datapointEvent=function(dp,newValue)  {
-  if (dp == this.channelnumber + ":LUX") {
+  if (this.isDataPointEvent(dp,"LUX")) {
     this.processLightLevel(newValue)
   }
 }
