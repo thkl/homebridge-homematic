@@ -21,7 +21,7 @@ HomeMaticHomeKitLuxMeterService.prototype.createDeviceService = function(Service
   this.cbright = lightSensor.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
   .on('get', function(callback) {
     that.query("LUX",function(value){
-      var fvalue = value.toFixed(2)
+      var fvalue = parseFloat(value).toFixed(2);
       if ((fvalue>0.0001) && (fvalue<100000) && (callback))
       {
         callback(null,fvalue)
@@ -39,7 +39,7 @@ HomeMaticHomeKitLuxMeterService.prototype.createDeviceService = function(Service
 }
 
 HomeMaticHomeKitLuxMeterService.prototype.processLightLevel=function(newValue)  {
-  var fvalue = newValue.toFixed(2)
+  var fvalue = parseFloat(newValue).toFixed(2);
   if ((fvalue>0.0001) && (fvalue<100000)) {
     this.cbright.updateValue(fvalue,null);
   }
@@ -48,7 +48,7 @@ HomeMaticHomeKitLuxMeterService.prototype.processLightLevel=function(newValue)  
 
 
 HomeMaticHomeKitLuxMeterService.prototype.datapointEvent=function(dp,newValue)  {
-  if (this.isDataPointEvent(dp,"LUX")) {
+  if (dp == this.channelnumber + ":LUX") {
     this.processLightLevel(newValue)
   }
 }
