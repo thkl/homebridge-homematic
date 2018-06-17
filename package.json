@@ -35,6 +35,20 @@
   "scripts": {
     "test": "mocha"
   },
+
+  "standard": {
+    "globals": [
+      "describe",
+      "context",
+      "before",
+      "beforeEach",
+      "after",
+      "afterEach",
+      "it",
+      "expect"
+    ]
+  },
+  
   "files": [
     "ChannelServices/",
     "README.md",
