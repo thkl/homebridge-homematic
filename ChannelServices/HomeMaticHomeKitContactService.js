@@ -96,7 +96,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       that.query('STATE', function (value) {
         if (callback) callback(null, (value === true) ? 100 : 0)
       })
-    })
+    }.bind(this))
     this.cdoor.eventEnabled = true
 
     this.tdoor = door.getCharacteristic(Characteristic.TargetPosition)
@@ -104,7 +104,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       that.query('STATE', function (value) {
         if (callback) callback(null, (value === true) ? 100 : 0)
       })
-    })
+    }.bind(this))
 
       .on('set', function (value, callback) {
       // This is just a sensor so reset homekit data to ccu value after 1 second playtime
