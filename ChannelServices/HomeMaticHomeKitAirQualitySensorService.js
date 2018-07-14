@@ -1,39 +1,32 @@
-'use strict';
+'use strict'
 
-var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService;
-var util = require("util");
+var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
+var util = require('util')
 
-
-function HomeMaticHomeKitAirQualitySensorService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
-    HomeMaticHomeKitAirQualitySensorService.super_.apply(this, arguments);
+function HomeMaticHomeKitAirQualitySensorService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
+  HomeMaticHomeKitAirQualitySensorService.super_.apply(this, arguments)
 }
 
-util.inherits(HomeMaticHomeKitAirQualitySensorService, HomeKitGenericService);
+util.inherits(HomeMaticHomeKitAirQualitySensorService, HomeKitGenericService)
 
+HomeMaticHomeKitAirQualitySensorService.prototype.createDeviceService = function (Service, Characteristic) {
+  var that = this
+  var carbondioxideSensor = new Service['CarbonDioxideSensor'](this.name)
+  var state = carbondioxideSensor.getCharacteristic(Characteristic.CarbonDioxideDetected)
+    .on('get', function (callback) {
+      that.query('STATE', function (value) {
+        if (callback) callback(null, value)
+      })
+    })
 
-HomeMaticHomeKitAirQualitySensorService.prototype.createDeviceService = function(Service, Characteristic) {
+  this.addValueMapping('STATE', 0, 0)
+  this.addValueMapping('STATE', 1, 1)
+  this.addValueMapping('STATE', 2, 1)
 
-    var that = this;
-    var carbondioxide_sensor = new Service["CarbonDioxideSensor"](this.name);
-    var state = carbondioxide_sensor.getCharacteristic(Characteristic.CarbonDioxideDetected)
-	.on('get', function(callback) {
-      that.query("STATE",function(value){
-       if (callback) callback(null,value);
-      });
-    }.bind(this));
-
-
-	this.addValueMapping("STATE",0,0);
-    this.addValueMapping("STATE",1,1);
-    this.addValueMapping("STATE",2,1);
-
-    this.currentStateCharacteristic["STATE"] = state;
-    state.eventEnabled = true;
-    this.services.push(carbondioxide_sensor);
-    this.remoteGetValue("STATE");
-
+  this.currentStateCharacteristic['STATE'] = state
+  state.eventEnabled = true
+  this.services.push(carbondioxideSensor)
+  this.remoteGetValue('STATE')
 }
 
-
-
-module.exports = HomeMaticHomeKitAirQualitySensorService;
+module.exports = HomeMaticHomeKitAirQualitySensorService
