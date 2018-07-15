@@ -40,8 +40,8 @@ HomeMaticHomeKitProgramService.prototype.createDeviceService = function (Service
     })
 
     .on('set', function (value, callback) {
-      if (value === 1) {
-        that.log('Launch Program ' + that.adress)
+      if ((value === 1) || (value === true)) {
+        that.log.debug('Launch Program ' + that.adress)
         that.command('sendregacommand', '', 'var x=dom.GetObject("' + that.adress + '");if (x) {x.ProgramExecute();}', function () {
         })
 

@@ -17,6 +17,7 @@ HomeMaticHomeKitSwitchService.prototype.createDeviceService = function (Service,
   this.delayOnSet = 1000
 
   if (this.special === 'PROGRAM') {
+    this.log.debug('Creating Program Service')
     this.createProgrammService(Service, Characteristic)
   } else
 
@@ -65,7 +66,7 @@ HomeMaticHomeKitSwitchService.prototype.createProgrammService = function (Servic
     })
 
     .on('set', function (value, callback) {
-      if (value === 1) {
+      if ((value === 1) || (value === true)) {
         that.log.debug('Launch Program ' + that.adress)
         that.command('sendregacommand', '', 'var x=dom.GetObject("' + that.adress + '");if (x) {x.ProgramExecute();}', function () {
         })
