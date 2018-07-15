@@ -4,6 +4,7 @@
 
 [![Donate some coins if you want](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=DZ5CW7XC9LXMN)
 [![Build Status](https://travis-ci.org/thkl/homebridge-homematic.svg?branch=master)](https://travis-ci.org/thkl/homebridge-homematic) [![Greenkeeper badge](https://badges.greenkeeper.io/thkl/homebridge-homematic.svg)](https://greenkeeper.io/)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 Supports the Homematic System on HomeBridge Platform
 

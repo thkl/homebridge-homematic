@@ -1,0 +1,71 @@
+{
+  "devices": [
+    {
+      "id": "1000",
+      "name": "TA1",
+      "address": "ADR1234567890",
+      "type": "HMIP-PS",
+      "channels": [
+        {
+          "cId": 1001,
+          "name": "TA1_0",
+          "intf": "HmIP-RF",
+          "address": "HmIP-RF.ADR1234567890:0",
+          "type": "MAINTENANCE",
+          "access": "255"
+        },
+        {
+          "cId": 1002,
+          "name": "TA1_0",
+          "intf": "HmIP-RF",
+          "address": "HmIP-RF.ADR1234567890:1",
+          "type": "KEY_TRANSCEIVER",
+          "access": "255"
+        },
+        {
+          "cId": 1003,
+          "name": "TA1_0",
+          "intf": "HmIP-RF",
+          "address": "HmIP-RF.ADR1234567890:2",
+          "type": "SWITCH_TRANSMITTER",
+          "access": "255"
+        },
+        {
+          "cId": 1004,
+          "name": "TA1_0",
+          "intf": "HmIP-RF",
+          "address": "HmIP-RF.ADR1234567890:3",
+          "type": "SWITCH_VIRTUAL_RECEIVER",
+          "access": "255"
+        },
+        {
+          "cId": 1005,
+          "name": "TA1_0",
+          "intf": "HmIP-RF",
+          "address": "HmIP-RF.ADR1234567890:4",
+          "type": "SWITCH_VIRTUAL_RECEIVER",
+          "access": "255"
+        },
+        {
+          "cId": 1006,
+          "name": "TA1_0",
+          "intf": "HmIP-RF",
+          "address": "HmIP-RF.ADR1234567890:5",
+          "type": "SWITCH_VIRTUAL_RECEIVER",
+          "access": "255"
+        },
+        {
+          "cId": 1007,
+          "name": "TA1_0",
+          "intf": "HmIP-RF",
+          "address": "HmIP-RF.ADR1234567890:6",
+          "type": "SWITCH_WEEK_PROFILE",
+          "access": "255"
+        }
+      ]
+    }
+  ],
+  "subsection": [
+    1004
+  ]
+}
