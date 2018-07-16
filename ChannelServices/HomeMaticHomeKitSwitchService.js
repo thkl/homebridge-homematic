@@ -96,11 +96,15 @@ HomeMaticHomeKitSwitchService.prototype.addCoreSwitchFunctions = function (Servi
         if ((onTime !== undefined) && (onTime > 0) && (value === 1)) {
           that.command('set', 'ON_TIME', onTime)
         }
-        if (value === 0) {
+        if ((value === 0) || (value === false)) {
+          that.log.debug('switch set off')
           that.delayed('set', 'STATE', false)
         } else {
+          that.log.debug('switch set on')
           that.delayed('set', 'STATE', true)
         }
+      } else {
+        that.log.debug('ignore Device is readonly')
       }
 
       callback()

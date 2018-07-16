@@ -82,7 +82,7 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function (Se
 
     .on('set', function (value, callback) {
       if (that.readOnly === false) {
-        if (value === 0) {
+        if ((value === 0) || (value === false)) {
           that.delayed('set', that.switchChannel + ':STATE', false)
         } else {
           that.delayed('set', that.switchChannel + ':STATE', true)
