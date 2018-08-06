@@ -1,7 +1,7 @@
-var generate = function(s) {
-  return s+s;
-};
+var generate = function (s) {
+  return s + s
+}
 
 module.exports = {
   generate: generate
-};
+}

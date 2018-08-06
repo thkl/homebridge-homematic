@@ -68,3 +68,4 @@ typings/
 
 # Serverless directories
 .serverless
+.vscode/*

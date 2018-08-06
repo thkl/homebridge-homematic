@@ -1,6 +1,6 @@
 {
   "name": "homebridge-homematic",
-  "version": "0.0.109",
+  "version": "0.1.1",
   "description": "Homematic plugin for homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
   "keywords": [
@@ -30,11 +30,32 @@
   "devDependencies": {
     "assert": "1.4.1",
     "chalk": "",
-    "mocha": "^5.0.4"
+    "mocha": "^5.0.4",
+    "standard": "*" 
   },
   "scripts": {
-    "test": "mocha"
+    "test": "standard && mocha"
   },
+
+  "standard": {
+    "globals": [
+      "describe",
+      "context",
+      "before",
+      "beforeEach",
+      "after",
+      "afterEach",
+      "it",
+      "expect"
+    ],
+    
+    "ignore": [
+        "google_drive.js",
+        "characteristic-mock.js",
+        "user-mock.js"
+      ]
+  },
+  
   "files": [
     "ChannelServices/",
     "README.md",

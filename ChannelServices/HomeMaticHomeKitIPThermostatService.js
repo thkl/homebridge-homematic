@@ -2,6 +2,7 @@
 
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
 var util = require('util')
+var moment = require('moment')
 
 function HomeMaticHomeKitIPThermostatService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
   HomeMaticHomeKitIPThermostatService.super_.apply(this, arguments)
@@ -14,34 +15,35 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function (Se
   this.usecache = false
   var thermo = new Service['Thermostat'](this.name)
   this.services.push(thermo)
-  this.enableLoggingService('thermo')
+
+  this.enableLoggingService('thermo', false)
 
   var mode = thermo.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
     .on('get', function (callback) {
-      that.query('SET_POINT_TEMPERATURE', function (value) {
+      this.query('SET_POINT_TEMPERATURE', function (value) {
         if (value < 6.0) {
-          that.getCurrentStateCharacteristic('CONTROL_MODE').setValue(1, null)
+          that.currentStateCharacteristic['CONTROL_MODE'].setValue(1, null)
           if (callback) callback(null, 0)
         } else {
-          that.getCurrentStateCharacteristic('CONTROL_MODE').setValue(0, null)
+          that.currentStateCharacteristic['CONTROL_MODE'].setValue(0, null)
           if (callback) callback(null, 1)
         }
       })
-    })
+    }.bind(this))
 
-  this.setCurrentStateCharacteristic('CONTROL_MODE', mode)
+  this.currentStateCharacteristic['CONTROL_MODE'] = mode
   mode.eventEnabled = true
 
   var targetMode = thermo.getCharacteristic(Characteristic.TargetHeatingCoolingState)
     .on('get', function (callback) {
-      that.query('SET_POINT_TEMPERATURE', function (value) {
+      this.query('SET_POINT_TEMPERATURE', function (value) {
         if (value < 6.0) {
           if (callback) callback(null, 0)
         } else {
           if (callback) callback(null, 1)
         }
       })
-    })
+    }.bind(this))
 
     .on('set', function (value, callback) {
       if (value === 0) {
@@ -61,7 +63,7 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function (Se
     minStep: 1
   })
 
-  this.cctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
+  var cctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
     .setProps({ minValue: -100 })
     .on('get', function (callback) {
       this.remoteGetValue('ACTUAL_TEMPERATURE', function (value) {
@@ -69,18 +71,20 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function (Se
       })
     }.bind(this))
 
-  this.cctemp.eventEnabled = true
+  this.currentStateCharacteristic['ACTUAL_TEMPERATURE'] = cctemp
+  cctemp.eventEnabled = true
 
-  this.cchum = thermo.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+  var cchum = thermo.getCharacteristic(Characteristic.CurrentRelativeHumidity)
     .on('get', function (callback) {
       this.remoteGetValue('HUMIDITY', function (value) {
         if (callback) callback(null, value)
       })
     }.bind(this))
 
-  this.cchum.eventEnabled = true
+  this.currentStateCharacteristic['HUMIDITY'] = cchum
+  cchum.eventEnabled = true
 
-  this.ttemp = thermo.getCharacteristic(Characteristic.TargetTemperature)
+  var ttemp = thermo.getCharacteristic(Characteristic.TargetTemperature)
     .setProps({ minValue: 6.0, maxValue: 30.5, minStep: 0.1 })
     .on('get', function (callback) {
       this.query('SET_POINT_TEMPERATURE', function (value) {
@@ -99,51 +103,30 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function (Se
       callback()
     }.bind(this))
 
-  this.ttemp.eventEnabled = true
+  this.currentStateCharacteristic['SET_POINT_TEMPERATURE'] = ttemp
+  ttemp.eventEnabled = true
 
   thermo.getCharacteristic(Characteristic.TemperatureDisplayUnits)
     .on('get', function (callback) {
       if (callback) callback(null, Characteristic.TemperatureDisplayUnits.CELSIUS)
     })
 
+  this.remoteGetValue('ACTUAL_TEMPERATURE')
+  this.remoteGetValue('HUMIDITY')
   this.remoteGetValue('SET_POINT_TEMPERATURE')
-  this.queryData()
-}
-
-HomeMaticHomeKitIPThermostatService.prototype.queryData = function () {
-  var that = this
-  this.query('HUMIDITY', function (value) {
-    that.cchum.updateValue(parseFloat(value), null)
-    that.addLogEntry({humidity: parseFloat(value)})
-  })
-
-  this.query('ACTUAL_TEMPERATURE', function (value) {
-    that.cctemp.updateValue(parseFloat(value), null)
-    that.addLogEntry({currentTemp: parseFloat(value)})
-  })
-
-  // create timer to query device every 10 minutes
-  this.refreshTimer = setTimeout(function () { that.queryData() }, 10 * 60 * 1000)
-}
-
-HomeMaticHomeKitIPThermostatService.prototype.shutdown = function () {
-  clearTimeout(this.refreshTimer)
 }
 
 HomeMaticHomeKitIPThermostatService.prototype.datapointEvent = function (dp, newValue) {
   if (this.isDataPointEvent(dp, 'ACTUAL_TEMPERATURE')) {
-    this.cctemp.updateValue(parseFloat(newValue), null)
-    this.addLogEntry({currentTemp: parseFloat(newValue)})
+    this.loggingService.addEntry({time: moment().unix(), currentTemp: parseFloat(newValue)})
   }
 
   if (this.isDataPointEvent(dp, 'HUMIDITY')) {
-    this.cchum.updateValue(parseFloat(newValue), null)
-    this.addLogEntry({humidity: parseFloat(newValue)})
+    this.loggingService.addEntry({time: moment().unix(), humidity: parseFloat(newValue)})
   }
 
   if (this.isDataPointEvent(dp, 'SET_POINT_TEMPERATURE')) {
-    this.ttemp.updateValue(parseFloat(newValue), null)
-    this.addLogEntry({setTemp: parseFloat(newValue)})
+    this.loggingService.addEntry({time: moment().unix(), setTemp: parseFloat(newValue)})
   }
 }
 

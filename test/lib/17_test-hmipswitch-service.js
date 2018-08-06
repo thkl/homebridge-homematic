@@ -12,7 +12,7 @@ const homebridgeMock = require('./homebridge-mock')()
 require('../../index')(homebridgeMock)
 
 describe('Homematic Plugin (index)', function () {
-  let datapath = path.join(__dirname, 'data', 'data_test_switch.json')
+  let datapath = path.join(__dirname, 'data', 'data_test_HMIP-PS.json')
   let data = fs.readFileSync(datapath).toString()
   let that = this
   var config = {ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data}
@@ -23,6 +23,7 @@ describe('Homematic Plugin (index)', function () {
     platform.accessories(function (acc) {
       that.accessories = acc
     })
+    platform.xmlrpc.interface = 'HmIP-RF.'
   })
 
   after(function () {
@@ -32,17 +33,16 @@ describe('Homematic Plugin (index)', function () {
     })
   })
 
-  describe('Homebridge Platform Switch Service Test', function () {
+  describe('Homebridge Platform Switch IP Service Test', function () {
     it('test accessory build', function (done) {
       assert.ok(that.accessories, 'Did not find any accessories!')
-      assert.equal(that.accessories.length, 2)
+      assert.equal(that.accessories.length, 1)
       done()
     })
 
-    it('test switch on', function (done) {
-      // send BidCos-RF.ABC1234560:1.STATE a on Message
-      platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'STATE', true])
-      platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:2', 'STATE', true])
+    it('test ip switch on', function (done) {
+      // send HmIP-RF.ADR1234567890:3.STATE a on Message
+      platform.xmlrpc.event(['HmIP-RF.', 'ADR1234567890:3', 'STATE', true])
       // check
       that.accessories.map(ac => {
         let s = ac.get_Service(Service.Lightbulb)
@@ -56,10 +56,9 @@ describe('Homematic Plugin (index)', function () {
       done()
     })
 
-    it('test switch off', function (done) {
+    it('test ip switch off', function (done) {
       // Switch Off
-      platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'STATE', false])
-      platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:2', 'STATE', false])
+      platform.xmlrpc.event(['HmIP-RF.', 'ADR1234567890:3', 'STATE', false])
       // check
       that.accessories.map(ac => {
         let s = ac.get_Service(Service.Lightbulb)
@@ -73,7 +72,7 @@ describe('Homematic Plugin (index)', function () {
       done()
     })
 
-    it('set switch to on via HK', function (done) {
+    it('set ip switch to on via HK', function (done) {
       // check
       that.accessories.map(ac => {
         let s = ac.get_Service(Service.Lightbulb)

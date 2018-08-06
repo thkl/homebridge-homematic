@@ -1,3 +1,2 @@
-var drive = require('./google_drive').drive;
-
-this.uploader = new drive();
+var Drive = require('./google_drive').drive
+this.uploader = new Drive()
