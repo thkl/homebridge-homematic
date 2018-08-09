@@ -123,6 +123,27 @@ HomeMaticHomeKitBlindServiceIP.prototype.endWorking = function () {
   })
 }
 
+HomeMaticHomeKitBlindServiceIP.prototype.datapointEvent=function (dp , newValue)  {
+  let that = this
+
+  if ((dp == "4:PROCESS") && (newValue == 0)) {
+    this.remoteGetValue("4:LEVEL",function(value) {
+      that.currentPos.updateValue(value,null);
+      that.targetPos.updateValue(value,null);
+    })
+  }
+
+  if (dp == "4:LEVEL") {
+    that.currentPos.updateValue(newValue,null);
+    that.targetPos.updateValue(newValue,null);
+  }
+
+  if (dp == "3:LEVEL") {
+    that.currentPos.updateValue(newValue,null);
+    that.targetPos.updateValue(newValue,null);
+  }
+}
+
 // https://github.com/thkl/homebridge-homematic/issues/208
 // if there is a custom close level and the real level is below homekit will get the 0% ... and visevera for max level
 HomeMaticHomeKitBlindServiceIP.prototype.processBlindLevel = function (newValue) {
