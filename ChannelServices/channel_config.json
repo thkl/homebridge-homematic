@@ -80,6 +80,11 @@
 	},
 
 	{
+		"type": "KEY_TRANSCEIVER",
+		"service": "HomeMaticHomeKitKeyService"
+	},
+	 
+	{
 	   "type": "VIRTUAL_KEY",
 	   "service": "HomeMaticHomeKitKeyService"
 	},
