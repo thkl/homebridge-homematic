@@ -268,16 +268,16 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.queryData = function () {
 }
 
 HomeMaticHomeKitWeatherStationServiceIP.prototype.datapointEvent = function (dp, newValue) {
-  if (this.isDataPointEvent('ACTUAL_TEMPERATURE')) {
+  if (this.isDataPointEvent(dp, 'ACTUAL_TEMPERATURE')) {
     this.currentTemperature = parseFloat(newValue)
   }
 
-  if (this.isDataPointEvent('HUMIDITY')) {
+  if (this.isDataPointEvent(dp, 'HUMIDITY')) {
     this.currentHumidity = parseFloat(newValue)
   }
 
   // make this call a little less often
-  if (((this.isDataPointEvent('ACTUAL_TEMPERATURE')) || (this.isDataPointEvent('HUMIDITY'))) &&
+  if (((this.isDataPointEvent(dp, 'ACTUAL_TEMPERATURE')) || (this.isDataPointEvent(dp, 'HUMIDITY'))) &&
    (this.currentTemperature > -255) && (this.currentHumidity > -255)) {
     this.addLogEntry({temp: this.currentTemperature, pressure: 0, humidity: this.currentHumidity})
   }
