@@ -85,6 +85,11 @@
 	},
 
 	{
+		"type": "KEY_TRANSCEIVER",
+		"service": "HomeMaticHomeKitKeyService"
+	},
+
+	{
 	   "type": "TILT_SENSOR",
 	   "service": "HomeMaticHomeKitContactService"
 	},
