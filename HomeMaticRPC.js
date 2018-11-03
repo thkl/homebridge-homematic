@@ -1,6 +1,5 @@
 'use strict'
 
-const binrpc = require('binrpc')
 const xmlrpc = require('homematic-xmlrpc')
 // const request = require('request')
 // const debug = require('debug')('HomeMaticRPC')
@@ -37,28 +36,28 @@ var HomeMaticRPC = function (log, ccuip, port, system, platform) {
       this.interface = 'BidCos-RF.'
       this.ccuport = 2001
 
-      //if (semver.lt(process.version, '4.5.0')) {
+      // if (semver.lt(process.version, '4.5.0')) {
       this.log.info('using xmprpc for communication with BidCos-RF')
       this.rpc = xmlrpc
       this.rpcInit = 'http://'
-      //} else {
+      // } else {
       //  this.log.info('using binrpc for communication with BidCos-RF')
       //  this.rpc = binrpc
       //  this.rpcInit = 'xmlrpc_bin://'
-      //}
+      // }
 
       break
 
     case 1 :
       this.interface = 'BidCos-Wired.'
-      //if (semver.lt(process.version, '4.5.0')) {
+      // if (semver.lt(process.version, '4.5.0')) {
       this.log.info('using xmprpc for communication with BidCos-Wired')
       this.rpc = xmlrpc
       this.rpcInit = 'http://'
-      //} else {
+      // } else {
       //  this.rpc = binrpc
       //  this.rpcInit = 'xmlrpc_bin://'
-      //}
+      // }
       this.ccuport = 2000
       break
 
