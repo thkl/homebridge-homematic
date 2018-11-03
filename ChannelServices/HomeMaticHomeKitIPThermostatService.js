@@ -118,15 +118,15 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function (Se
 
 HomeMaticHomeKitIPThermostatService.prototype.datapointEvent = function (dp, newValue) {
   if (this.isDataPointEvent(dp, 'ACTUAL_TEMPERATURE')) {
-    this.loggingService.addEntry({time: moment().unix(), currentTemp: parseFloat(newValue)})
+    this.loggingService.addEntry({ time: moment().unix(), currentTemp: parseFloat(newValue) })
   }
 
   if (this.isDataPointEvent(dp, 'HUMIDITY')) {
-    this.loggingService.addEntry({time: moment().unix(), humidity: parseFloat(newValue)})
+    this.loggingService.addEntry({ time: moment().unix(), humidity: parseFloat(newValue) })
   }
 
   if (this.isDataPointEvent(dp, 'SET_POINT_TEMPERATURE')) {
-    this.loggingService.addEntry({time: moment().unix(), setTemp: parseFloat(newValue)})
+    this.loggingService.addEntry({ time: moment().unix(), setTemp: parseFloat(newValue) })
   }
 }
 

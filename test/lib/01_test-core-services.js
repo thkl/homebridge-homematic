@@ -12,11 +12,11 @@ require('../../index')(homebridgeMock)
 describe('Homematic Plugin (index)', function () {
   describe('Homebridge Platform', function () {
     it('registerPlatform is called with name', function () {
-      assert.equal(homebridgeMock.pluginName, 'homebridge-homematic')
+      assert.strict.equal(homebridgeMock.pluginName, 'homebridge-homematic')
     })
 
     it('registerPlatform is called with config name', function () {
-      assert.equal(homebridgeMock.configName, 'HomeMatic')
+      assert.strict.equal(homebridgeMock.configName, 'HomeMatic')
     })
 
     it('Platform is here', function () {
@@ -30,11 +30,11 @@ describe('Homematic Plugin (index)', function () {
         // load some devices
         let datapath = path.join(__dirname, 'data', 'data_test_common.json')
         let data = fs.readFileSync(datapath).toString()
-        var config = {ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data}
+        var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
         var platform = new homebridgeMock.PlatformType(log, config)
         platform.accessories(function (acc) {
           assert.ok(acc, 'Did not find any accessories!')
-          assert.equal(acc.length, 5)
+          assert.strict.equal(acc.length, 5)
           // shutdown devices to kill all timers and so
           acc.map(ac => {
             ac.shutdown()

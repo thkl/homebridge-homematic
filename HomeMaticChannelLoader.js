@@ -158,7 +158,7 @@ HomeMaticChannelLoader.prototype.getServiceClass = function (type) {
       }
     })
   }
-  return {'class': serviceclass, 'options': serviceoptions}
+  return { 'class': serviceclass, 'options': serviceoptions }
 }
 
 HomeMaticChannelLoader.prototype.internalConfig = function (customServices) {

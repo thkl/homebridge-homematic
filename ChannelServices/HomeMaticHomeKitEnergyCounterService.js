@@ -30,7 +30,7 @@ HomeMaticHomeKitEnergyCounterService.prototype.createDeviceService = function (S
   this.power = sensor.getCharacteristic(eve.Characteristic.ElectricPower)
     .on('get', function (callback) {
       that.query('POWER', function (value) {
-        that.addLogEntry({power: parseFloat(value)})
+        that.addLogEntry({ power: parseFloat(value) })
         if (callback) callback(null, value)
       })
     })
@@ -61,7 +61,7 @@ HomeMaticHomeKitEnergyCounterService.prototype.createDeviceService = function (S
 HomeMaticHomeKitEnergyCounterService.prototype.queryData = function () {
   var that = this
   this.query('POWER', function (value) {
-    that.addLogEntry({power: parseFloat(value)})
+    that.addLogEntry({ power: parseFloat(value) })
     that.power.updateValue(value, null)
   })
 
@@ -76,7 +76,7 @@ HomeMaticHomeKitEnergyCounterService.prototype.queryData = function () {
 HomeMaticHomeKitEnergyCounterService.prototype.datapointEvent = function (dp, newValue) {
   if (this.isDataPointEvent(dp, 'POWER')) {
     this.power.updateValue(newValue, null)
-    this.addLogEntry({power: parseFloat(newValue)})
+    this.addLogEntry({ power: parseFloat(newValue) })
   }
 
   if (this.isDataPointEvent(dp, 'ENERGY_COUNTER')) {

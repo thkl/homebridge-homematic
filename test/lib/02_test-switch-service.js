@@ -15,7 +15,7 @@ describe('Homematic Plugin (index)', function () {
   let datapath = path.join(__dirname, 'data', 'data_test_switch.json')
   let data = fs.readFileSync(datapath).toString()
   let that = this
-  var config = {ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data}
+  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
   var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
@@ -35,7 +35,7 @@ describe('Homematic Plugin (index)', function () {
   describe('Homebridge Platform Switch Service Test', function () {
     it('test accessory build', function (done) {
       assert.ok(that.accessories, 'Did not find any accessories!')
-      assert.equal(that.accessories.length, 2)
+      assert.strict.equal(that.accessories.length, 2)
       done()
     })
 
@@ -50,7 +50,7 @@ describe('Homematic Plugin (index)', function () {
         let cc = s.getCharacteristic(Characteristic.On)
         assert.ok(cc, 'Characteristic.On not found in testswitch %s', ac.name)
         cc.getValue(function (context, value) {
-          assert.equal(value, true)
+          assert.strict.equal(value, 1)
         })
       })
       done()
@@ -67,7 +67,7 @@ describe('Homematic Plugin (index)', function () {
         let cc = s.getCharacteristic(Characteristic.On)
         assert.ok(cc, 'Characteristic.On not found in testswitch %s', ac.name)
         cc.getValue(function (context, value) {
-          assert.equal(value, false)
+          assert.strict.equal(value, 0)
         })
       })
       done()
@@ -84,7 +84,7 @@ describe('Homematic Plugin (index)', function () {
         ac.delayOnSet = 0
         co.emit('set', false, function () {
           let res = platform.homebridge.values[ac.adress + '.STATE']
-          assert.equal(res, 0)
+          assert.strict.equal(res, false)
         })
       })
       done()

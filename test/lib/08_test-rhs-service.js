@@ -15,7 +15,7 @@ describe('Homematic Plugin (index)', function () {
   let datapath = path.join(__dirname, 'data', 'data_test_rhs.json')
   let data = fs.readFileSync(datapath).toString()
   let that = this
-  var config = {ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data}
+  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
   var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
@@ -35,7 +35,7 @@ describe('Homematic Plugin (index)', function () {
   describe('Homebridge Platform RHS Service Test', function () {
     it('test accessory build', function (done) {
       assert.ok(that.accessories, 'Did not find any accessories!')
-      assert.equal(that.accessories.length, 1)
+      assert.strict.equal(that.accessories.length, 1)
       done()
     })
 
@@ -48,10 +48,10 @@ describe('Homematic Plugin (index)', function () {
         let cc = s.getCharacteristic(Characteristic.ContactSensorState)
         assert.ok(cc, 'Characteristic.ContactSensorState not found in rhs %s', ac.name)
         cc.getValue(function (context, value) {
-          assert.equal(value, 0)
+          assert.strict.equal(value, 0)
         })
         cc.emit('get', function (context, result) {
-          assert.equal(result, 0, 'get logic result should be 0')
+          assert.strict.equal(result, 0, 'get logic result should be 0')
         })
       })
       done()
@@ -66,10 +66,10 @@ describe('Homematic Plugin (index)', function () {
         let cc = s.getCharacteristic(Characteristic.ContactSensorState)
         assert.ok(cc, 'Characteristic.ContactSensorState not found in rhs %s', ac.name)
         cc.getValue(function (context, value) {
-          assert.equal(value, 1)
+          assert.strict.equal(value, 1)
         })
         cc.emit('get', function (context, result) {
-          assert.equal(result, 1, 'get logic result should be 1')
+          assert.strict.equal(result, 1, 'get logic result should be 1')
         })
       })
       done()

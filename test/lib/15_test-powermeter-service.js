@@ -15,7 +15,7 @@ describe('Homematic Plugin (index)', function () {
   let datapath = path.join(__dirname, 'data', 'data_test_HM-ES-PMSw1-Pl.json')
   let data = fs.readFileSync(datapath).toString()
   let that = this
-  var config = {ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data}
+  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
   var platform = new homebridgeMock.PlatformType(log, config)
   eve = new EveHomeKitTypes(platform)
 
@@ -36,7 +36,7 @@ describe('Homematic Plugin (index)', function () {
   describe('Homebridge Platform Energy Counter Service Test', function () {
     it('test accessory build', function (done) {
       assert.ok(that.accessories, 'Did not find any accessories!')
-      assert.equal(that.accessories.length, 1)
+      assert.strict.equal(that.accessories.length, 1)
       done()
     })
 
@@ -52,20 +52,20 @@ describe('Homematic Plugin (index)', function () {
         let cp = s.getCharacteristic(eve.Characteristic.ElectricPower)
         assert.ok(cp, 'Characteristic.ElectricPower not found in Energy Counter %s', ac.name)
         cp.getValue(function (context, value) {
-          assert.equal(value, 230, 'Power is ' + value + ' not 230')
+          assert.strict.equal(value, 230, 'Power is ' + value + ' not 230')
         })
 
         let cc = s.getCharacteristic(eve.Characteristic.ElectricCurrent)
         assert.ok(cc, 'Characteristic.ElectricCurrent not found in Energy Counter %s', ac.name)
         cc.getValue(function (context, value) {
           // Note there is a internal recalculation to amepere ccu sends milliamps
-          assert.equal(value, 0.5, 'Current is ' + value + ' not 0.5A')
+          assert.strict.equal(value, 0.5, 'Current is ' + value + ' not 0.5A')
         })
 
         let cv = s.getCharacteristic(eve.Characteristic.Voltage)
         assert.ok(cv, 'Characteristic.Voltage not found in Energy Counter %s', ac.name)
         cv.getValue(function (context, value) {
-          assert.equal(value, 230, 'Voltage is ' + value + ' not 230')
+          assert.strict.equal(value, 230, 'Voltage is ' + value + ' not 230')
         })
       })
       done()

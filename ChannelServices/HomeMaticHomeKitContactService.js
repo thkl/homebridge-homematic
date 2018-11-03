@@ -270,7 +270,7 @@ HomeMaticHomeKitContactService.prototype.processDoorState = function (newValue) 
 
 HomeMaticHomeKitContactService.prototype.datapointEvent = function (dp, newValue, channel) {
   if (this.isDataPointEvent(dp, 'STATE')) {
-    this.addLogEntry({status: (newValue === true) ? 1 : 0})
+    this.addLogEntry({ status: (newValue === true) ? 1 : 0 })
     if (this.special === 'DOOR') {
       this.processDoorState(newValue)
     } else {

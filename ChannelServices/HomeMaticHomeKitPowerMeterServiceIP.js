@@ -49,7 +49,7 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function (Se
   this.power = sensor.getCharacteristic(eve.Characteristic.ElectricPower)
     .on('get', function (callback) {
       that.query(that.meterChannel + ':POWER', function (value) {
-        that.addLogEntry({power: parseFloat(value)})
+        that.addLogEntry({ power: parseFloat(value) })
         if (callback) callback(null, that.round(value, 4))
       })
     })
@@ -103,7 +103,7 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function (Se
   this.deviceAdress = this.adress.slice(0, this.adress.indexOf(':'))
 
   this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ':' + this.meterChannel + '.POWER', this, function (newValue) {
-    that.addLogEntry({power: parseInt(newValue)})
+    that.addLogEntry({ power: parseInt(newValue) })
     that.power.updateValue(that.round(newValue, 2), null)
   })
 

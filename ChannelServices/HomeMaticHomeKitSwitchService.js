@@ -193,7 +193,7 @@ HomeMaticHomeKitSwitchService.prototype.createValveService = function (Service, 
       that.log.debug('set Characteristic.SetDuration %s', value)
 
       let strPath = path.join(that.platform.localPath, that.adress) + '.json'
-      fs.writeFileSync(strPath, JSON.stringify({duration: that.setDuration}))
+      fs.writeFileSync(strPath, JSON.stringify({ duration: that.setDuration }))
 
       callback()
     })

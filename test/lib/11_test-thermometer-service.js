@@ -15,7 +15,7 @@ describe('Homematic Plugin (index)', function () {
   let datapath = path.join(__dirname, 'data', 'data_test_thermometer.json')
   let data = fs.readFileSync(datapath).toString()
   let that = this
-  var config = {ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data}
+  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
   var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
@@ -35,7 +35,7 @@ describe('Homematic Plugin (index)', function () {
   describe('Homebridge Platform Thermometer Service Test', function () {
     it('test accessory build', function (done) {
       assert.ok(that.accessories, 'Did not find any accessories!')
-      assert.equal(that.accessories.length, 1)
+      assert.strict.equal(that.accessories.length, 1)
       done()
     })
 
@@ -50,7 +50,7 @@ describe('Homematic Plugin (index)', function () {
           let cc = s.getCharacteristic(Characteristic.CurrentTemperature)
           assert.ok(cc, 'Characteristic.CurrentTemperature not found in Thermometer %s', ac.name)
           cc.getValue(function (context, value) {
-            assert.equal(value, testdegree)
+            assert.strict.equal(value, testdegree)
           })
         })
         done()

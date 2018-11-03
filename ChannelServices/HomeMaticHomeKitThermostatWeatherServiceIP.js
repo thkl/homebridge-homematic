@@ -52,7 +52,7 @@ HomeMaticHomeKitThermostatWeatherServiceIP.prototype.queryData = function () {
     that.query('HUMIDITY', function (value) {
       that.currentHumidity = parseFloat(value)
       if ((that.currentTemperature > -255) && (that.currentHumidity > -255)) {
-        that.addLogEntry({temp: that.currentTemperature, pressure: 0, humidity: that.currentHumidity})
+        that.addLogEntry({ temp: that.currentTemperature, pressure: 0, humidity: that.currentHumidity })
       }
     })
   })
@@ -74,7 +74,7 @@ HomeMaticHomeKitThermostatWeatherServiceIP.prototype.datapointEvent = function (
   }
 
   if ((this.currentTemperature > -255) && (this.currentHumidity > -255)) {
-    this.addLogEntry({temp: this.currentTemperature, pressure: 0, humidity: this.currentHumidity})
+    this.addLogEntry({ temp: this.currentTemperature, pressure: 0, humidity: this.currentHumidity })
   }
 }
 

@@ -212,7 +212,7 @@ HomeKitGenericService.prototype = {
       this.log.debug('Adding Log Service for %s with type %s', this.displayName, type)
       var hostname = os.hostname()
       let filename = hostname + '_' + this.adress + '_persist.json'
-      this.loggingService = new FakeGatoHistoryService(type, this, {storage: 'fs', filename: filename, path: this.platform.localPath, disableTimer: disableTimer})
+      this.loggingService = new FakeGatoHistoryService(type, this, { storage: 'fs', filename: filename, path: this.platform.localPath, disableTimer: disableTimer })
       this.services.push(this.loggingService)
     }
   },
@@ -769,7 +769,7 @@ HomeKitGenericService.prototype = {
 
     if ((tp[1] === 'LEVEL') || (tp[1] === 'LEVEL_2')) {
       newValue = parseFloat(newValue) / 100
-      newValue = {'explicitDouble': newValue}
+      newValue = { 'explicitDouble': newValue }
     }
     if ((tp[1] === 'COLOR') && (this.type === 'RGBW_COLOR')) {
       newValue = Math.round((value / 360) * 199)

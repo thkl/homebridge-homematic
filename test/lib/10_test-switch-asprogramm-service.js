@@ -12,7 +12,7 @@ require('../../index')(homebridgeMock)
 describe('Homematic Plugin (index)', function () {
   let data = '{"devices":[]}'
   let that = this
-  var config = {ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data}
+  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
   var platform = new homebridgeMock.PlatformType(log, config)
   platform.programs = ['TestProgram']
   platform.iosworkaround = true
@@ -34,7 +34,7 @@ describe('Homematic Plugin (index)', function () {
   describe('Homebridge Platform Switch(Program mode) Service Test', function () {
     it('test accessory build', function (done) {
       assert.ok(that.accessories, 'Did not find any accessories!')
-      assert.equal(that.accessories.length, 1)
+      assert.strict.equal(that.accessories.length, 1)
       // Check the correct type for AC1
       let ac = that.accessories[0]
       let s = ac.get_Service(Service.Outlet)
@@ -50,12 +50,12 @@ describe('Homematic Plugin (index)', function () {
       assert.ok(ca, 'Characteristic.On not found in program %s', ac.name)
       ac.delayOnSet = 0
       ca.emit('set', 1, function () {
-        assert.equal(platform.homebridge.values['lastScript'], 'var x=dom.GetObject("TestProgram");if (x) {x.ProgramExecute();}', 'Script was not sent')
+        assert.strict.equal(platform.homebridge.values['lastScript'], 'var x=dom.GetObject("TestProgram");if (x) {x.ProgramExecute();}', 'Script was not sent')
       })
       ac.delayOnSet = 0
       // Check reset of switch
       ca.getValue(function (context, value) {
-        assert.equal(value, 0)
+        assert.strict.equal(value, false)
       })
       done()
     })
@@ -68,7 +68,8 @@ describe('Homematic Plugin (index)', function () {
       assert.ok(ca, 'Characteristic.On not found in program %s', ac.name)
       // Check reset of switch
       ca.getValue(function (context, value) {
-        assert.equal(value, 0)
+        if (value === 0) { value = false }
+        assert.strict.equal(value, false)
       })
       done()
     })

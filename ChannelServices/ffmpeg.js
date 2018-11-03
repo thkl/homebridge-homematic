@@ -136,7 +136,7 @@ FFMPEG.prototype.handleCloseConnection = function (connectionID) {
 FFMPEG.prototype.handleSnapshotRequest = function (request, callback) {
   let resolution = request.width + 'x' + request.height
   var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource
-  let ffmpeg = spawn('ffmpeg', (imageSource + ' -t 1 -s ' + resolution + ' -f image2 -').split(' '), {env: process.env})
+  let ffmpeg = spawn('ffmpeg', (imageSource + ' -t 1 -s ' + resolution + ' -f image2 -').split(' '), { env: process.env })
   var imageBuffer = Buffer.alloc(0)
   this.log.debug('Snapshot from ' + this.name + ' at ' + resolution)
   // this.log.debug('ffmpeg '+imageSource + ' -t 1 -s '+ resolution + ' -f image2 -');
@@ -311,7 +311,7 @@ FFMPEG.prototype.handleStreamRequest = function (request) {
             '&pkt_size=' + packetsize
         }
 
-        let ffmpeg = spawn('ffmpeg', ffmpegCommand.split(' '), {env: process.env})
+        let ffmpeg = spawn('ffmpeg', ffmpegCommand.split(' '), { env: process.env })
         this.log.debug('Start streaming video from ' + this.name + ' with ' + width + 'x' + height + '@' + vbitrate + 'kBit')
         if (this.debug) {
           this.log.debug('ffmpeg ' + ffmpegCommand)

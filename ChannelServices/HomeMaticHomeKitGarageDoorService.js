@@ -31,8 +31,8 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
   this.delay_actor_open = this.getClazzConfigValue('delay_actor_open', 5)
   this.delay_actor_close = this.getClazzConfigValue('delay_actor_close', 5)
 
-  this.message_actor_open = this.getClazzConfigValue('message_actor_open', {'on': 1, 'off': 0})
-  this.message_actor_close = this.getClazzConfigValue('message_actor_close', {'on': 1, 'off': 0})
+  this.message_actor_open = this.getClazzConfigValue('message_actor_open', { 'on': 1, 'off': 0 })
+  this.message_actor_close = this.getClazzConfigValue('message_actor_close', { 'on': 1, 'off': 0 })
 
   this.sensor_requery_time = this.getClazzConfigValue('sensor_requery_time', 30)
 

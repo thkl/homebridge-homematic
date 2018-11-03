@@ -9,11 +9,11 @@ require('../../index')(homebridgeMock)
 describe('Homematic Plugin (index)', function () {
   describe('Homebridge Platform', function () {
     it('registerPlatform is called with name', function () {
-      assert.equal(homebridgeMock.pluginName, 'homebridge-homematic')
+      assert.strict.equal(homebridgeMock.pluginName, 'homebridge-homematic')
     })
 
     it('registerPlatform is called with config name', function () {
-      assert.equal(homebridgeMock.configName, 'HomeMatic')
+      assert.strict.equal(homebridgeMock.configName, 'HomeMatic')
     })
 
     it('Platform is here', function () {
@@ -25,20 +25,20 @@ describe('Homematic Plugin (index)', function () {
     describe('Homebridge Platform', function () {
       it('send datapoint via rega', function (done) {
         // load some devices
-        var platform = new homebridgeMock.PlatformType(log, {ccu_ip: '127.0.0.1', subsection: 'HomeKit'})
+        var platform = new homebridgeMock.PlatformType(log, { ccu_ip: '127.0.0.1', subsection: 'HomeKit' })
         platform.setValue_rega('BidCos-RF', 'ABCD12345:1', 'STATE', true)
         platform.getValue_rega('BidCos-RF', 'ABCD12345:1', 'STATE', function (value) {
-          assert.equal(value, true)
+          assert.strict.equal(value, true)
         })
         done()
       })
 
       it('send datapoint via rega check rpc', function (done) {
         // load some devices
-        var platform = new homebridgeMock.PlatformType(log, {ccu_ip: '127.0.0.1', subsection: 'HomeKit'})
+        var platform = new homebridgeMock.PlatformType(log, { ccu_ip: '127.0.0.1', subsection: 'HomeKit' })
         platform.setValue_rega('BidCos-RF', 'ABCD12345:1', 'STATE', true)
         platform.getValue('BidCos-RF', 'ABCD12345:1', 'STATE', function (value) {
-          assert.equal(value, true)
+          assert.strict.equal(value, true)
         })
         done()
       })

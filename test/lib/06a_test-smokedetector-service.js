@@ -15,7 +15,7 @@ describe('Homematic Plugin (index)', function () {
   let datapath = path.join(__dirname, 'data', 'data_test_smokedetector.json')
   let data = fs.readFileSync(datapath).toString()
   let that = this
-  var config = {ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data}
+  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
   var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
@@ -36,7 +36,7 @@ describe('Homematic Plugin (index)', function () {
   describe('Homebridge Platform NonIP SmokeDetector Service Test', function () {
     it('check accessory build', function (done) {
       assert.ok(that.accessories, 'Did not find any accessories!')
-      assert.equal(that.accessories.length, 1)
+      assert.strict.equal(that.accessories.length, 1)
       that.accessories[0].memyselfandi = false
       done()
     })
@@ -51,11 +51,11 @@ describe('Homematic Plugin (index)', function () {
         assert.ok(cc, 'Characteristic.SmokeDetected not found in SmokeDetector %s', ac.name)
         // EventLogic
         cc.getValue(function (context, value) {
-          assert.equal(value, true, 'event logic result should be true is ' + value)
+          assert.strict.equal(value, true, 'event logic result should be true is ' + value)
         })
         // Getlogic
         cc.emit('get', function (context, result) {
-          assert.equal(result, true, 'get logic result should be true is ' + result)
+          assert.strict.equal(result, 1, 'get logic result should be true is ' + result)
         })
       })
       done()
@@ -71,10 +71,10 @@ describe('Homematic Plugin (index)', function () {
         let cc = s.getCharacteristic(Characteristic.SmokeDetected)
         assert.ok(cc, 'Characteristic.SmokeDetected not found in SmokeDetector %s', ac.name)
         cc.getValue(function (context, value) {
-          assert.equal(value, false, 'event logic result should be false')
+          assert.strict.equal(value, false, 'event logic result should be false')
         })
         cc.emit('get', function (context, result) {
-          assert.equal(result, false, 'get logic result should be false')
+          assert.strict.equal(result, 0, 'get logic result should be false')
         })
       })
       done()

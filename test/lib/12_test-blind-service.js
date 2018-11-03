@@ -15,7 +15,7 @@ describe('Homematic Plugin (index)', function () {
   let datapath = path.join(__dirname, 'data', 'data_test_blind.json')
   let data = fs.readFileSync(datapath).toString()
   let that = this
-  var config = {ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data, 'HM-LC-Bl1-SM:BLIND': {'observeInhibit': true}}
+  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data, 'HM-LC-Bl1-SM:BLIND': { 'observeInhibit': true } }
   var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
@@ -38,9 +38,9 @@ describe('Homematic Plugin (index)', function () {
   describe('Homebridge Platform Blind Service Test', function () {
     it('check accessory build', function (done) {
       let cn = that.accessories[0].constructor.name
-      assert.equal(cn, 'HomeMaticHomeKitBlindService')
+      assert.strict.equal(cn, 'HomeMaticHomeKitBlindService')
       assert.ok(that.accessories, 'Did not find any accessories!')
-      assert.equal(that.accessories.length, 1)
+      assert.strict.equal(that.accessories.length, 1)
       done()
     })
 
@@ -52,13 +52,13 @@ describe('Homematic Plugin (index)', function () {
         let ccp = s.getCharacteristic(Characteristic.CurrentPosition)
         assert.ok(ccp, 'Characteristic.CurrentPosition not found in Blind %s', ac.name)
         ccp.getValue(function (context, value) {
-          assert.equal(value, 0)
+          assert.strict.equal(value, 0)
         })
 
         let ctp = s.getCharacteristic(Characteristic.TargetPosition)
         assert.ok(ctp, 'Characteristic.TargetPosition not found in Blind %s', ac.name)
         ctp.getValue(function (context, value) {
-          assert.equal(value, 0)
+          assert.strict.equal(value, 0)
         })
       })
       done()
@@ -73,13 +73,13 @@ describe('Homematic Plugin (index)', function () {
         let ccp = s.getCharacteristic(Characteristic.CurrentPosition)
         assert.ok(ccp, 'Characteristic.CurrentPosition not found in Blind %s', ac.name)
         ccp.getValue(function (context, value) {
-          assert.equal(value, 100)
+          assert.strict.equal(value, 100)
         })
 
         let ctp = s.getCharacteristic(Characteristic.TargetPosition)
         assert.ok(ctp, 'Characteristic.TargetPosition not found in Blind %s', ac.name)
         ctp.getValue(function (context, value) {
-          assert.equal(value, 100)
+          assert.strict.equal(value, 100)
         })
       })
       done()
@@ -97,7 +97,7 @@ describe('Homematic Plugin (index)', function () {
         ac.delayOnSet = 0
         ctp.emit('set', 50, function () {
           let res = platform.homebridge.values['BidCos-RF.ABC1234560:1.LEVEL']
-          assert.equal(res, 0.5)
+          assert.strict.equal(res, 0.5)
         })
       })
       done()
@@ -111,7 +111,7 @@ describe('Homematic Plugin (index)', function () {
       platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'INHIBIT', true])
 
       that.accessories.map(ac => {
-        assert.equal(ac.inhibit, true, 'Inhibit event but state not in sync')
+        assert.strict.equal(ac.inhibit, true, 'Inhibit event but state not in sync')
 
         let s = ac.get_Service(Service.WindowCovering)
         assert.ok(s, 'Service.WindowCovering not found in Blind %s', ac.name)
@@ -119,14 +119,14 @@ describe('Homematic Plugin (index)', function () {
         let co = s.getCharacteristic(Characteristic.ObstructionDetected)
         assert.ok(co, 'Characteristic.ObstructionDetected not found in Blind %s', ac.name)
         co.getValue(function (context, value) {
-          assert.equal(value, true)
+          assert.strict.equal(value, true)
         })
 
         let ctp = s.getCharacteristic(Characteristic.TargetPosition)
         // send HomeKit event
         ctp.emit('set', 50, function () {
           let res = platform.homebridge.values['BidCos-RF.ABC1234560:1.LEVEL']
-          assert.equal(res, 0, 'Blind was moved but set to inhibit')
+          assert.strict.equal(res, 0, 'Blind was moved but set to inhibit')
         })
       })
       done()

@@ -16,7 +16,7 @@ describe('Homematic Plugin (index)', function () {
   let data = fs.readFileSync(datapath).toString()
   let that = this
 
-  var config = {ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data, valves: ['BidCos-RF.ABC1234560:1']}
+  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data, valves: ['BidCos-RF.ABC1234560:1'] }
   var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
@@ -36,13 +36,13 @@ describe('Homematic Plugin (index)', function () {
   describe('Homebridge Platform Switch(Sprinkler mode) Service Test', function () {
     it('test accessory build', function (done) {
       assert.ok(that.accessories, 'Did not find any accessories!')
-      assert.equal(that.accessories.length, 2)
+      assert.strict.equal(that.accessories.length, 2)
       // Check the correct type for AC1
       let ac = that.accessories[0]
       let s = ac.get_Service(Service.Valve)
       assert.ok(s, '%s is not Service.Valve !', ac.name)
       // Check Initial Remain Time -> 0
-      assert.equal(ac.remainTime, 0, 'Time remain is not 0')
+      assert.strict.equal(ac.remainTime, 0, 'Time remain is not 0')
       done()
     })
 
@@ -58,8 +58,8 @@ describe('Homematic Plugin (index)', function () {
       let ciu = s.getCharacteristic(Characteristic.InUse)
       assert.ok(ciu, 'Characteristic.InUse not found in sprinkler %s', ac.name)
       // should both be 1
-      ca.getValue(function (context, value) { assert.equal(value, true) })
-      ciu.getValue(function (context, value) { assert.equal(value, true) })
+      ca.getValue(function (context, value) { assert.strict.equal(value, 1) })
+      ciu.getValue(function (context, value) { assert.strict.equal(value, 1) })
       done()
     })
 
@@ -75,10 +75,10 @@ describe('Homematic Plugin (index)', function () {
       let ciu = s.getCharacteristic(Characteristic.InUse)
       assert.ok(ciu, 'Characteristic.InUse not found in sprinkler %s', ac.name)
       // should both be off
-      ca.getValue(function (context, value) { assert.equal(value, false) })
-      ciu.getValue(function (context, value) { assert.equal(value, false) })
+      ca.getValue(function (context, value) { assert.strict.equal(value, 0) })
+      ciu.getValue(function (context, value) { assert.strict.equal(value, 0) })
       // time remain should set to 0
-      assert.equal(ac.remainTime, 0)
+      assert.strict.equal(ac.remainTime, 0)
       done()
     })
 
@@ -93,9 +93,9 @@ describe('Homematic Plugin (index)', function () {
       assert.ok(ciu, 'Characteristic.InUse not found in sprinkler %s', ac.name)
       ca.emit('set', 1, function () {
         let res = platform.homebridge.values[ac.adress + '.STATE']
-        assert.equal(res, 1)
+        assert.strict.equal(res, 1)
         // Time remain > 0
-        assert.equal(ac.remainTime, 0, 'Time remain is %s should be 0')
+        assert.strict.equal(ac.remainTime, 0, 'Time remain is %s should be 0')
       })
       done()
     })
@@ -116,7 +116,7 @@ describe('Homematic Plugin (index)', function () {
 
       ca.emit('set', 1, function () {
         let res = platform.homebridge.values[ac.adress + '.STATE']
-        assert.equal(res, 1)
+        assert.strict.equal(res, 1)
         // Time remain > 0
         assert((ac.remainTime > 90), 'Time remain is not > 90')
       })

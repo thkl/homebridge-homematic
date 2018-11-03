@@ -15,7 +15,7 @@ describe('Homematic Plugin (index)', function () {
   let datapath = path.join(__dirname, 'data', 'data_test_blind_ip.json')
   let data = fs.readFileSync(datapath).toString()
   let that = this
-  var config = {ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data}
+  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
   var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
@@ -37,9 +37,9 @@ describe('Homematic Plugin (index)', function () {
   describe('Homebridge Platform Blind Service Test', function () {
     it('check accessory build', function (done) {
       let cn = that.accessories[0].constructor.name
-      assert.equal(cn, 'HomeMaticHomeKitBlindServiceIP')
+      assert.strict.equal(cn, 'HomeMaticHomeKitBlindServiceIP')
       assert.ok(that.accessories, 'Did not find any accessories!')
-      assert.equal(that.accessories.length, 1)
+      assert.strict.equal(that.accessories.length, 1)
       done()
     })
 
@@ -53,13 +53,13 @@ describe('Homematic Plugin (index)', function () {
         let ccp = s.getCharacteristic(Characteristic.CurrentPosition)
         assert.ok(ccp, 'Characteristic.CurrentPosition not found in Blind %s', ac.name)
         ccp.getValue(function (context, value) {
-          assert.equal(value, 0)
+          assert.strict.equal(value, 0)
         })
 
         let ctp = s.getCharacteristic(Characteristic.TargetPosition)
         assert.ok(ctp, 'Characteristic.TargetPosition not found in Blind %s', ac.name)
         ctp.getValue(function (context, value) {
-          assert.equal(value, 0)
+          assert.strict.equal(value, 0)
         })
       })
       done()
@@ -75,20 +75,20 @@ describe('Homematic Plugin (index)', function () {
         let ccp = s.getCharacteristic(Characteristic.CurrentPosition)
         assert.ok(ccp, 'Characteristic.CurrentPosition not found in Blind %s', ac.name)
         ccp.getValue(function (context, value) {
-          assert.equal(value, 100)
+          assert.strict.equal(value, 100)
         })
 
         ccp.emit('get', function (context, result) {
-          assert.equal(result, 100, 'get logic result should be 100')
+          assert.strict.equal(result, 100, 'get logic result should be 100')
         })
 
         let ctp = s.getCharacteristic(Characteristic.TargetPosition)
         assert.ok(ctp, 'Characteristic.TargetPosition not found in Blind %s', ac.name)
         ctp.getValue(function (context, value) {
-          assert.equal(value, 100)
+          assert.strict.equal(value, 100)
         })
         ctp.emit('get', function (context, result) {
-          assert.equal(result, 100, 'get logic result should be 100')
+          assert.strict.equal(result, 100, 'get logic result should be 100')
         })
       })
       done()
@@ -107,7 +107,7 @@ describe('Homematic Plugin (index)', function () {
         ac.delayOnSet = 0
         ctp.emit('set', 50, function () {
           let res = platform.homebridge.values['HmIP-RF.ADR1234567890:4.LEVEL']
-          assert.equal(res, 0.5)
+          assert.strict.equal(res, 0.5)
         })
       })
       done()
@@ -123,12 +123,12 @@ describe('Homematic Plugin (index)', function () {
         let ccp = s.getCharacteristic(Characteristic.CurrentPosition)
         assert.ok(ccp, 'Characteristic.CurrentPosition not found in Blind %s', ac.name)
         ccp.getValue(function (context, value) {
-          assert.equal(value, 25)
+          assert.strict.equal(value, 25)
         })
         let ctp = s.getCharacteristic(Characteristic.TargetPosition)
         assert.ok(ctp, 'Characteristic.TargetPosition not found in Blind %s', ac.name)
         ctp.getValue(function (context, value) {
-          assert.equal(value, 25)
+          assert.strict.equal(value, 25)
         })
         // Note get emits will not work in simulator because set on channel 3 will not set the same value on channel 4 (there is the getter)
       })

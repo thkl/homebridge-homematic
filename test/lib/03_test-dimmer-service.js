@@ -15,7 +15,7 @@ describe('Homematic Plugin (index)', function () {
   let datapath = path.join(__dirname, 'data', 'data_test_dimmer.json')
   let data = fs.readFileSync(datapath).toString()
   let that = this
-  var config = {ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data}
+  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
   var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
@@ -35,7 +35,7 @@ describe('Homematic Plugin (index)', function () {
   describe('Homebridge Platform Dimmer Service Test', function () {
     it('check accessory build', function (done) {
       assert.ok(that.accessories, 'Did not find any accessories!')
-      assert.equal(that.accessories.length, 3)
+      assert.strict.equal(that.accessories.length, 3)
       done()
     })
 
@@ -51,17 +51,17 @@ describe('Homematic Plugin (index)', function () {
         let cc = s.getCharacteristic(Characteristic.On)
         assert.ok(cc, 'Characteristic.On not found in testdimmer %s', ac.name)
         cc.getValue(function (context, value) {
-          assert.equal(value, true, 'Dimmer set to 100% On should be true')
+          assert.strict.equal(value, true, 'Dimmer set to 100% On should be true')
         })
 
         let cl = s.getCharacteristic(Characteristic.Brightness)
         assert.ok(cl, 'Characteristic.Brightness not found in testdimmer %s', ac.name)
         cl.getValue(function (context, value) {
-          assert.equal(value, 100)
+          assert.strict.equal(value, 100)
         })
 
         cl.emit('get', function (context, result) {
-          assert.equal(result, 100, 'get logic result should be 100')
+          assert.strict.equal(result, 100, 'get logic result should be 100')
         })
       })
       done()
@@ -79,17 +79,17 @@ describe('Homematic Plugin (index)', function () {
         let cc = s.getCharacteristic(Characteristic.On)
         assert.ok(cc, 'Characteristic.On not found in testdimmer %s', ac.name)
         cc.getValue(function (context, value) {
-          assert.equal(value, false, 'Dimmer set to 0% On should be true')
+          assert.strict.equal(value, false, 'Dimmer set to 0% On should be true')
         })
 
         let cl = s.getCharacteristic(Characteristic.Brightness)
         assert.ok(cl, 'Characteristic.Brightness not found in testdimmer %s', ac.name)
         cl.getValue(function (context, value) {
-          assert.equal(value, 0)
+          assert.strict.equal(value, 0)
         })
 
         cl.emit('get', function (context, result) {
-          assert.equal(result, 0, 'get logic result should be 0')
+          assert.strict.equal(result, 0, 'get logic result should be 0')
         })
       })
       done()
@@ -106,7 +106,7 @@ describe('Homematic Plugin (index)', function () {
         ac.delayOnSet = 0
         cb.emit('set', 50, function () {
           let res = platform.homebridge.values[ac.adress + '.LEVEL']
-          assert.equal(res, 0.5)
+          assert.strict.equal(res, 0.5)
         })
       })
       done()

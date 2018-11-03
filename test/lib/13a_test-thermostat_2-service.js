@@ -15,7 +15,7 @@ describe('Homematic Plugin (index)', function () {
   let datapath = path.join(__dirname, 'data', 'data_test_wall_thermostat.json')
   let data = fs.readFileSync(datapath).toString()
   let that = this
-  var config = {ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data}
+  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
   var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
@@ -35,7 +35,7 @@ describe('Homematic Plugin (index)', function () {
   describe('Homebridge Platform Wall Thermostat Service Test', function () {
     it('test accessory build', function (done) {
       assert.ok(that.accessories, 'Did not find any accessories!')
-      assert.equal(that.accessories.length, 1)
+      assert.strict.equal(that.accessories.length, 1)
       done()
     })
 
@@ -55,14 +55,14 @@ describe('Homematic Plugin (index)', function () {
           let cc = s.getCharacteristic(Characteristic.CurrentTemperature)
           assert.ok(cc, 'Characteristic.CurrentTemperature not found in Thermostat %s', ac.name)
           cc.getValue(function (context, value) {
-            assert.equal(value, testdegree)
+            assert.strict.equal(value, testdegree)
           })
           // Only check Humidity if there is a sensor
           if (ac.currentHumidityCharacteristic !== undefined) {
             let ch = s.getCharacteristic(Characteristic.CurrentRelativeHumidity)
             assert.ok(ch, 'Characteristic.CurrentRelativeHumidity not found in Thermometer %s', ac.name)
             ch.getValue(function (context, value) {
-              assert.equal(value, hum)
+              assert.strict.equal(value, hum)
             })
           }
         })
@@ -80,7 +80,7 @@ describe('Homematic Plugin (index)', function () {
         let cc = s.getCharacteristic(Characteristic.TargetTemperature)
         assert.ok(cc, 'Characteristic.TargetTemperature not found in Thermostat %s', ac.name)
         cc.getValue(function (context, value) {
-          assert.equal(value, 20, 'target temperature did not match 20 degrees')
+          assert.strict.equal(value, 20, 'target temperature did not match 20 degrees')
         })
       })
       done()
@@ -99,7 +99,7 @@ describe('Homematic Plugin (index)', function () {
         cc.emit('set', 17, function () {
           let dp = ac.adress + '.SET_TEMPERATURE'
           let res = platform.homebridge.values[dp]
-          assert.equal(res, 17, 'SET_TEMPERATURE shoud be at 17 degrees  is ' + res)
+          assert.strict.equal(res, 17, 'SET_TEMPERATURE shoud be at 17 degrees  is ' + res)
         })
       })
       done()
@@ -118,7 +118,7 @@ describe('Homematic Plugin (index)', function () {
         cc.emit('set', 17, function () {
           let dp = ac.adress + '.MANU_MODE'
           let res = platform.homebridge.values[dp]
-          assert.equal(res, 17, 'MANU_MODE shoud be at 17 degrees  is ' + res)
+          assert.strict.equal(res, 17, 'MANU_MODE shoud be at 17 degrees  is ' + res)
         })
       })
       done()

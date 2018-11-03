@@ -21,7 +21,7 @@ HomeMaticHomeKitThermometerService.prototype.createDeviceService = function (Ser
     .setProps({ minValue: -100 })
     .on('get', function (callback) {
       this.remoteGetValue('TEMPERATURE', function (value) {
-        that.addLogEntry({currentTemp: parseFloat(value)})
+        that.addLogEntry({ currentTemp: parseFloat(value) })
         if (callback) callback(null, value)
       })
     }.bind(this))
@@ -35,7 +35,7 @@ HomeMaticHomeKitThermometerService.prototype.createDeviceService = function (Ser
 HomeMaticHomeKitThermometerService.prototype.queryData = function () {
   var that = this
   this.query('TEMPERATURE', function (value) {
-    that.addLogEntry({currentTemp: parseFloat(value)})
+    that.addLogEntry({ currentTemp: parseFloat(value) })
     // create timer to query device every 10 minutes
     that.refreshTimer = setTimeout(function () { that.queryData() }, 10 * 60 * 1000)
   })
@@ -48,7 +48,7 @@ HomeMaticHomeKitThermometerService.prototype.shutdown = function () {
 HomeMaticHomeKitThermometerService.prototype.datapointEvent = function (dp, newValue) {
   if (this.isDataPointEvent(dp, 'TEMPERATURE')) {
     this.cctemp.updateValue(newValue, null)
-    this.addLogEntry({currentTemp: parseFloat(newValue)})
+    this.addLogEntry({ currentTemp: parseFloat(newValue) })
   }
 }
 

@@ -30,7 +30,7 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function () {
   var camera = this.getClazzConfigValue('camera', undefined)
   this.adrKey = this.getClazzConfigValue('address_key_event', undefined)
   var adrunlockactor = this.getClazzConfigValue('address_unlock_actor', undefined)
-  var cmdunlockactor = this.getClazzConfigValue('command_unlock_actor', {'on': true, 'off': false})
+  var cmdunlockactor = this.getClazzConfigValue('command_unlock_actor', { 'on': true, 'off': false })
   this.stdKey = this.getClazzConfigValue('state_key_event', undefined)
   var onTimeUnlock = this.getClazzConfigValue('ontime_unlock_actor', 5)
   var pir = this.getClazzConfigValue('pir', undefined)
@@ -48,7 +48,7 @@ HomeMaticHomeKitDoorBellVideoService.prototype.setup = function () {
   // check ffmpeg command
   var spawn = require('child_process').spawn
   try {
-    spawn('ffmpeg', ['-h'], {env: process.env})
+    spawn('ffmpeg', ['-h'], { env: process.env })
   } catch (e) {
     this.log.error(e)
     this.log.error('seems the ffmpeg command is not here')
@@ -233,7 +233,7 @@ HomeMaticHomeKitDoorBellVideoService.prototype.channelDatapointEvent = function 
 
       if (newValue === true) {
         this.log.info('Motion is true request a Screenshot')
-        this.cameraSource.handleSnapshotRequest({width: 640, height: 480}, function (context, imagebuffer) {
+        this.cameraSource.handleSnapshotRequest({ width: 640, height: 480 }, function (context, imagebuffer) {
           that.log.info('Motion Done a SnapShot')
           // Save
           if (that.drive !== undefined) {

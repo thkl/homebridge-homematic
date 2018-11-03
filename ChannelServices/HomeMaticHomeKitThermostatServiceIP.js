@@ -114,12 +114,12 @@ HomeMaticHomeKitIPThermostatService.prototype.queryData = function () {
   var that = this
   this.query('HUMIDITY', function (value) {
     that.cchum.updateValue(parseFloat(value), null)
-    that.addLogEntry({humidity: parseFloat(value)})
+    that.addLogEntry({ humidity: parseFloat(value) })
   })
 
   this.query('ACTUAL_TEMPERATURE', function (value) {
     that.cctemp.updateValue(parseFloat(value), null)
-    that.addLogEntry({currentTemp: parseFloat(value)})
+    that.addLogEntry({ currentTemp: parseFloat(value) })
   })
 
   // create timer to query device every 10 minutes
@@ -133,17 +133,17 @@ HomeMaticHomeKitIPThermostatService.prototype.shutdown = function () {
 HomeMaticHomeKitIPThermostatService.prototype.datapointEvent = function (dp, newValue) {
   if (this.isDataPointEvent(dp, 'ACTUAL_TEMPERATURE')) {
     this.cctemp.updateValue(parseFloat(newValue), null)
-    this.addLogEntry({currentTemp: parseFloat(newValue)})
+    this.addLogEntry({ currentTemp: parseFloat(newValue) })
   }
 
   if (this.isDataPointEvent(dp, 'HUMIDITY')) {
     this.cchum.updateValue(parseFloat(newValue), null)
-    this.addLogEntry({humidity: parseFloat(newValue)})
+    this.addLogEntry({ humidity: parseFloat(newValue) })
   }
 
   if (this.isDataPointEvent(dp, 'SET_POINT_TEMPERATURE')) {
     this.ttemp.updateValue(parseFloat(newValue), null)
-    this.addLogEntry({setTemp: parseFloat(newValue)})
+    this.addLogEntry({ setTemp: parseFloat(newValue) })
   }
 }
 
