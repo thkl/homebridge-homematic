@@ -17,7 +17,7 @@
   "dependencies": {
     "binrpc": "latest",
     "homematic-xmlrpc": ">=1.0.1",
-    "debug": "^3.1.0",
+    "debug": "^4.0.0",
     "request": "^2.65.0",
     "semver": "5.6.0",
     "moment": "^2.18.1",
