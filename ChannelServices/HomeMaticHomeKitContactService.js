@@ -251,17 +251,17 @@ HomeMaticHomeKitContactService.prototype.processContactState = function (newValu
 
 HomeMaticHomeKitContactService.prototype.processDoorState = function (newValue) {
   if (this.haz([this.cdoor, this.tdoor, this.sdoor])) {
-    switch (newValue) {
+    switch (newValue) {
       case false :
-        this.cdoor.updateValue(0, null)
-        this.tdoor.updateValue(0, null)
-        this.sdoor.updateValue(2, null)
-        break
+      this.cdoor.updateValue(0, null)
+      this.tdoor.updateValue(0, null)
+      this.sdoor.updateValue(2, null)
+      break;
       case true:
-        this.cdoor.updateValue(100, null)
-        this.tdoor.updateValue(100, null)
-        this.sdoor.updateValue(2, null)
-        break
+      this.cdoor.updateValue(100, null)
+      this.tdoor.updateValue(100, null)
+      this.sdoor.updateValue(2, null)
+      break;
     }
   }
 }
