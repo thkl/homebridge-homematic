@@ -264,12 +264,12 @@ HomeMaticHomeKitContactService.prototype.processContactState = function(newValue
 HomeMaticHomeKitContactService.prototype.processDoorState = function(newValue) {
   if (this.haz([this.cdoor,this.tdoor,this.sdoor])) {
     switch (newValue) {
-      case true :
+      case false :
       this.cdoor.updateValue(0,null)
       this.tdoor.updateValue(0,null)
       this.sdoor.updateValue(2,null)
       break;
-      case false:
+      case true:
       this.cdoor.updateValue(100,null)
       this.tdoor.updateValue(100,null)
       this.sdoor.updateValue(2,null)
