@@ -101,7 +101,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     this.cdoor = door.getCharacteristic(Characteristic.CurrentPosition);
     this.cdoor.on('get', function(callback) {
       that.query("STATE",function(value){
-        if (callback) callback(null,(value==true) ? 0:100);
+        if (callback) callback(null,(value==true) ? 100 : 0);
       });
     }.bind(this));
     this.cdoor.eventEnabled = true;
@@ -109,7 +109,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function(Service,
     this.tdoor = door.getCharacteristic(Characteristic.TargetPosition);
     this.tdoor.on('get', function(callback) {
       that.query("STATE",function(value){
-        if (callback) callback(null,(value==true) ? 0:100);
+        if (callback) callback(null,(value==true) ? 100 : 0);
       });
     }.bind(this))
 
