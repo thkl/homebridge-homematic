@@ -24,7 +24,7 @@
     "ip": "^1.1.3",
     "google-auth-library": "^1.6.1",
     "googleapis": "^34.0.0",
-    "fakegato-history": "0.5.2",
+    "fakegato-history": "0.5.3",
     "sprintf-js": "^1.0.3"
   },
   "devDependencies": {
