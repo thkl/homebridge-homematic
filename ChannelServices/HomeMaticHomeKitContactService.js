@@ -96,7 +96,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
     this.cdoor = door.getCharacteristic(Characteristic.CurrentPosition)
     this.cdoor.on('get', function (callback) {
       that.query('STATE', function (value) {
-        if (callback) callback(null, (value === true) ? 0 : 100)
+        if (callback) callback(null, (value === true) ? 100 : 0)
       })
     })
     this.cdoor.eventEnabled = true
@@ -104,7 +104,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
     this.tdoor = door.getCharacteristic(Characteristic.TargetPosition)
     this.tdoor.on('get', function (callback) {
       that.query('STATE', function (value) {
-        if (callback) callback(null, (value === true) ? 0 : 100)
+        if (callback) callback(null, (value === true) ? 100 : 0)
       })
     })
 
@@ -254,12 +254,12 @@ HomeMaticHomeKitContactService.prototype.processContactState = function (newValu
 HomeMaticHomeKitContactService.prototype.processDoorState = function (newValue) {
   if (this.haz([this.cdoor, this.tdoor, this.sdoor])) {
     switch (newValue) {
-      case true :
+      case false :
         this.cdoor.updateValue(0, null)
         this.tdoor.updateValue(0, null)
         this.sdoor.updateValue(2, null)
         break
-      case false:
+      case true:
         this.cdoor.updateValue(100, null)
         this.tdoor.updateValue(100, null)
         this.sdoor.updateValue(2, null)
