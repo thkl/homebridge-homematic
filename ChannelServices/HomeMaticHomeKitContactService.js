@@ -89,9 +89,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
     })
 
     this.services.push(window)
-  } else
-
-  if (this.special === 'DOOR') {
+  } else if (this.special === 'DOOR') {
     var door = new Service.Door(this.name)
     this.cdoor = door.getCharacteristic(Characteristic.CurrentPosition)
     this.cdoor.on('get', function (callback) {
