@@ -266,19 +266,19 @@ HomeMaticHomeKitContactService.prototype.processDoorState = function (newValue) 
   }
 }
 
-HomeMaticHomeKitContactService.prototype.processWindowState = function(newValue) {
-  if (this.haz([this.cwindow,this.twindow,this.swindow])) {
-    switch (newValue) {
+HomeMaticHomeKitContactService.prototype.processWindowState = function (newValue) {
+  if (this.haz([this.cwindow, this.twindow, this.swindow])) {
+    switch (newValue) {
       case false :
-      this.cwindow.updateValue(0,null)
-      this.twindow.updateValue(0,null)
-      this.swindow.updateValue(2,null)
-      break;
+        this.cwindow.updateValue(0, null)
+        this.twindow.updateValue(0, null)
+        this.swindow.updateValue(2, null)
+        break
       case true :
-      this.cwindow.updateValue(100,null)
-      this.twindow.updateValue(100,null)
-      this.swindow.updateValue(2,null)
-      break;      
+        this.cwindow.updateValue(100, null)
+        this.twindow.updateValue(100, null)
+        this.swindow.updateValue(2, null)
+        break
     }
   } else {
     this.log.info("Something's missing")
@@ -290,7 +290,7 @@ HomeMaticHomeKitContactService.prototype.datapointEvent = function (dp, newValue
     this.addLogEntry({ status: (newValue === true) ? 1 : 0 })
     if (this.special === 'DOOR') {
       this.processDoorState(newValue)
-    } else if ( this.special == "WINDOW" ) {     
+    } else if (this.special === 'WINDOW') {
       this.processWindowState(newValue)
     } else {
       this.processContactState(newValue)

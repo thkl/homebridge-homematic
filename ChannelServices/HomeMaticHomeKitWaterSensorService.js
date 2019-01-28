@@ -12,7 +12,7 @@ util.inherits(HomeMaticHomeKitWaterSensorService, HomeKitGenericService)
 HomeMaticHomeKitWaterSensorService.prototype.createDeviceService = function (Service, Characteristic) {
   var that = this
   var leakSensor = new Service['LeakSensor'](this.name)
-  
+
   this.state = leakSensor.getCharacteristic(Characteristic.LeakDetected)
     .on('get', function (callback) {
       that.query('ALARMSTATE', function (value) {
