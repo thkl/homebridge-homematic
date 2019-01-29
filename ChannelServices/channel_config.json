@@ -317,9 +317,16 @@
 	  "type" : "POWERMETER_IGL",
 		"service" : "HomeMaticHomeKitEnergyCounterService"
 	},
-	{ "type":"HM-LC-Ja1PBU-FM:JALOUSIE", 
-	  "service": "HomeMaticHomeKitBlindService"
-	}
+	{
+		"type":"HM-LC-Ja1PBU-FM:JALOUSIE", 
+	  	"service": "HomeMaticHomeKitBlindService"
+	},
+
+
+	{
+        "type": "HmIP-SWD:WATER_DETECTION_TRANSMITTER",
+        "service": "HomeMaticHomeKitWaterSensorService"
+    }
 
 
 

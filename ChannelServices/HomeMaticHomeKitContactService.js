@@ -51,8 +51,8 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
 
   if (this.special === 'WINDOW') {
     var window = new Service.Window(this.name)
-    var cwindow = window.getCharacteristic(Characteristic.CurrentPosition)
-    cwindow.on('get', function (callback) {
+    this.cwindow = window.getCharacteristic(Characteristic.CurrentPosition)
+    this.cwindow.on('get', function (callback) {
       that.query('STATE', function (value) {
         if (callback) {
           var cbvalue = 0
@@ -62,11 +62,11 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       })
     })
 
-    this.currentStateCharacteristic['STATE'] = cwindow
-    cwindow.eventEnabled = true
+    this.currentStateCharacteristic['STATE'] = this.cwindow
+    this.cwindow.eventEnabled = true
 
-    var twindow = window.getCharacteristic(Characteristic.TargetPosition)
-    twindow.on('get', function (callback) {
+    this.twindow = window.getCharacteristic(Characteristic.TargetPosition)
+    this.twindow.on('get', function (callback) {
       that.query('STATE', function (value) {
         if (callback) {
           var cbvalue = 0
@@ -76,27 +76,25 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       })
     })
 
-    this.targetCharacteristic = twindow
+    this.targetCharacteristic = this.twindow
 
     this.addValueMapping('STATE', 0, 0)
     this.addValueMapping('STATE', 1, 100)
     this.addValueMapping('STATE', false, 0)
     this.addValueMapping('STATE', true, 100)
 
-    var swindow = window.getCharacteristic(Characteristic.PositionState)
-    swindow.on('get', function (callback) {
+    this.swindow = window.getCharacteristic(Characteristic.PositionState)
+    this.swindow.on('get', function (callback) {
       if (callback) callback(null, Characteristic.PositionState.STOPPED)
     })
 
     this.services.push(window)
-  } else
-
-  if (this.special === 'DOOR') {
+  } else if (this.special === 'DOOR') {
     var door = new Service.Door(this.name)
     this.cdoor = door.getCharacteristic(Characteristic.CurrentPosition)
     this.cdoor.on('get', function (callback) {
       that.query('STATE', function (value) {
-        if (callback) callback(null, (value === true) ? 0 : 100)
+        if (callback) callback(null, (value === true) ? 100 : 0)
       })
     })
     this.cdoor.eventEnabled = true
@@ -104,7 +102,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
     this.tdoor = door.getCharacteristic(Characteristic.TargetPosition)
     this.tdoor.on('get', function (callback) {
       that.query('STATE', function (value) {
-        if (callback) callback(null, (value === true) ? 0 : 100)
+        if (callback) callback(null, (value === true) ? 100 : 0)
       })
     })
 
@@ -254,12 +252,12 @@ HomeMaticHomeKitContactService.prototype.processContactState = function (newValu
 HomeMaticHomeKitContactService.prototype.processDoorState = function (newValue) {
   if (this.haz([this.cdoor, this.tdoor, this.sdoor])) {
     switch (newValue) {
-      case true :
+      case false :
         this.cdoor.updateValue(0, null)
         this.tdoor.updateValue(0, null)
         this.sdoor.updateValue(2, null)
         break
-      case false:
+      case true:
         this.cdoor.updateValue(100, null)
         this.tdoor.updateValue(100, null)
         this.sdoor.updateValue(2, null)
@@ -268,11 +266,32 @@ HomeMaticHomeKitContactService.prototype.processDoorState = function (newValue) 
   }
 }
 
+HomeMaticHomeKitContactService.prototype.processWindowState = function (newValue) {
+  if (this.haz([this.cwindow, this.twindow, this.swindow])) {
+    switch (newValue) {
+      case false :
+        this.cwindow.updateValue(0, null)
+        this.twindow.updateValue(0, null)
+        this.swindow.updateValue(2, null)
+        break
+      case true :
+        this.cwindow.updateValue(100, null)
+        this.twindow.updateValue(100, null)
+        this.swindow.updateValue(2, null)
+        break
+    }
+  } else {
+    this.log.info("Something's missing")
+  }
+}
+
 HomeMaticHomeKitContactService.prototype.datapointEvent = function (dp, newValue, channel) {
   if (this.isDataPointEvent(dp, 'STATE')) {
     this.addLogEntry({ status: (newValue === true) ? 1 : 0 })
     if (this.special === 'DOOR') {
       this.processDoorState(newValue)
+    } else if (this.special === 'WINDOW') {
+      this.processWindowState(newValue)
     } else {
       this.processContactState(newValue)
     }
