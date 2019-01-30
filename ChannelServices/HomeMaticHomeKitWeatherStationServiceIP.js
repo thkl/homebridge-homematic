@@ -126,7 +126,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
   var thermo = new Service['TemperatureSensor'](this.name)
   this.services.push(thermo)
 
-  var ctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
+  this.ctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
     .setProps({ minValue: -100 })
     .on('get', function (callback) {
       that.query('ACTUAL_TEMPERATURE', function (value) {
@@ -134,60 +134,60 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
       })
     })
 
-  this.setCurrentStateCharacteristic('ACTUAL_TEMPERATURE', ctemp)
-  ctemp.eventEnabled = true
+  this.setCurrentStateCharacteristic('ACTUAL_TEMPERATURE', this.ctemp)
+  this.ctemp.eventEnabled = true
 
   var humidity = new Service['HumiditySensor'](this.name)
   this.services.push(humidity)
 
-  var chum = humidity.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+  this.chum = humidity.getCharacteristic(Characteristic.CurrentRelativeHumidity)
     .on('get', function (callback) {
       that.query('HUMIDITY', function (value) {
         if (callback) callback(null, value)
       })
     })
 
-  this.setCurrentStateCharacteristic('HUMIDITY', chum)
-  chum.eventEnabled = true
+  this.setCurrentStateCharacteristic('HUMIDITY', this.chum)
+  this.chum.eventEnabled = true
 
   var brightness = new Service['LightSensor'](this.name)
   this.services.push(brightness)
 
-  var cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
+  this.cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
     .on('get', function (callback) {
       that.query('ILLUMINATION', function (value) {
         if (callback) callback(null, value)
       })
     })
 
-  this.setCurrentStateCharacteristic('ILLUMINATION', cbright)
-  cbright.eventEnabled = true
+  this.setCurrentStateCharacteristic('ILLUMINATION', this.cbright)
+  this.cbright.eventEnabled = true
 
   var sunshineduration = new Service['SunshineService'](this.name)
   this.services.push(sunshineduration)
 
-  var csunshineduration = sunshineduration.getCharacteristic(Characteristic.SunshineCharacteristic)
+  this.csunshineduration = sunshineduration.getCharacteristic(Characteristic.SunshineCharacteristic)
     .on('get', function (callback) {
       this.query('SUNSHINEDURATION', function (value) {
         if (callback) callback(null, value)
       })
     }.bind(this))
 
-  this.setCurrentStateCharacteristic('SUNSHINEDURATION', csunshineduration)
-  csunshineduration.eventEnabled = true
+  this.setCurrentStateCharacteristic('SUNSHINEDURATION', this.csunshineduration)
+  this.csunshineduration.eventEnabled = true
 
   var windspeed = new Service['WindSpeedService'](this.name)
   this.services.push(windspeed)
 
-  var cwindspeed = windspeed.getCharacteristic(Characteristic.WindSpeedCharacteristic)
+  this.cwindspeed = windspeed.getCharacteristic(Characteristic.WindSpeedCharacteristic)
     .on('get', function (callback) {
       this.query('WIND_SPEED', function (value) {
         if (callback) callback(null, value)
       })
     }.bind(this))
 
-  this.setCurrentStateCharacteristic('WIND_SPEED', cwindspeed)
-  cwindspeed.eventEnabled = true
+  this.setCurrentStateCharacteristic('WIND_SPEED', this.cwindspeed)
+  this.cwindspeed.eventEnabled = true
 
   // HmIP-SWO-PL - HmIP-SWO-B + RainSensor RainCountService
   if ((this.deviceType === 'HmIP-SWO-PL') || (this.deviceType === 'HmIP-SWO-PR')) {
@@ -204,18 +204,18 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
     this.setCurrentStateCharacteristic('RAINING', craining)
     craining.eventEnabled = true
 
-    var raincount = new Service['RainCountService'](this.name)
+    raincount = new Service['RainCountService'](this.name)
     this.services.push(raincount)
 
-    var craincount = raincount.getCharacteristic(Characteristic.RainCountCharacteristic)
+    this.craincount = raincount.getCharacteristic(Characteristic.RainCountCharacteristic)
       .on('get', function (callback) {
         this.query('RAIN_COUNTER', function (value) {
           if (callback) callback(null, value)
         })
       }.bind(this))
 
-    this.setCurrentStateCharacteristic('RAIN_COUNTER', craincount)
-    craincount.eventEnabled = true
+    this.setCurrentStateCharacteristic('RAIN_COUNTER', this.craincount)
+    this.craincount.eventEnabled = true
   }
 
   // HmIP-SWO-PR - HmIP-SWO-PL + WindDirectionService + WindRangeService
@@ -223,28 +223,28 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
     var winddirection = new Service['WindDirectionService'](this.name)
     this.services.push(winddirection)
 
-    var cwinddirection = winddirection.getCharacteristic(Characteristic.WindDirectionCharacteristic)
+    this.cwinddirection = winddirection.getCharacteristic(Characteristic.WindDirectionCharacteristic)
       .on('get', function (callback) {
         this.query('WIND_DIR', function (value) {
           if (callback) callback(null, value)
         })
       }.bind(this))
 
-    this.setCurrentStateCharacteristic('WIND_DIR', cwinddirection)
-    cwinddirection.eventEnabled = true
+    this.setCurrentStateCharacteristic('WIND_DIR', this.cwinddirection)
+    this.cwinddirection.eventEnabled = true
 
     var windrange = new Service['WindRangeService'](this.name)
     this.services.push(windrange)
 
-    var cwindrange = windrange.getCharacteristic(Characteristic.WindRangeCharacteristic)
+    this.cwindrange = windrange.getCharacteristic(Characteristic.WindRangeCharacteristic)
       .on('get', function (callback) {
         this.query('WIND_DIR_RANGE', function (value) {
           if (callback) callback(null, value)
         })
       }.bind(this))
 
-    this.setCurrentStateCharacteristic('WIND_DIR_RANGE', cwindrange)
-    cwindrange.eventEnabled = true
+    this.setCurrentStateCharacteristic('WIND_DIR_RANGE', this.cwindrange)
+    this.cwindrange.eventEnabled = true
   }
 
   this.queryData()
@@ -270,10 +270,36 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.queryData = function () {
 HomeMaticHomeKitWeatherStationServiceIP.prototype.datapointEvent = function (dp, newValue) {
   if (this.isDataPointEvent(dp, 'ACTUAL_TEMPERATURE')) {
     this.currentTemperature = parseFloat(newValue)
+    this.ctemp.updateValue(parseFloat(newValue), null)
   }
 
   if (this.isDataPointEvent(dp, 'HUMIDITY')) {
     this.currentHumidity = parseFloat(newValue)
+    this.chum.updateValue(parseFloat(newValue), null)
+  }
+
+  if (this.isDataPointEvent(dp, 'ILLUMINATION')) {
+    this.cbright.updateValue(parseFloat(newValue), null)
+  }
+
+  if (this.isDataPointEvent(dp, 'SUNSHINEDURATION')) {
+    this.csunshineduration.updateValue(parseFloat(newValue), null)
+  }
+
+  if (this.isDataPointEvent(dp, 'WIND_SPEED')) {
+    this.cwindspeed.updateValue(parseFloat(newValue), null)
+  }
+
+  if (this.isDataPointEvent(dp, 'RAIN_COUNTER')) {
+    this.craincount.updateValue(parseFloat(newValue), null)
+  }
+
+  if (this.isDataPointEvent(dp, 'WIND_DIR')) {
+    this.cwinddirection.updateValue(parseFloat(newValue), null)
+  }
+
+  if (this.isDataPointEvent(dp, 'WIND_DIR_RANGE')) {
+    this.cwindrange.updateValue(parseFloat(newValue), null)
   }
 
   // make this call a little less often
