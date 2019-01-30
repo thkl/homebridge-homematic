@@ -204,7 +204,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
     this.setCurrentStateCharacteristic('RAINING', craining)
     craining.eventEnabled = true
 
-    raincount = new Service['RainCountService'](this.name)
+    var raincount = new Service['RainCountService'](this.name)
     this.services.push(raincount)
 
     this.craincount = raincount.getCharacteristic(Characteristic.RainCountCharacteristic)
