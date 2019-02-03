@@ -88,6 +88,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       if (callback) callback(null, Characteristic.PositionState.STOPPED)
     })
 
+   	this.addLowBatCharacteristic(window, Characteristic)
     this.services.push(window)
   } else if (this.special === 'DOOR') {
     var door = new Service.Door(this.name)
@@ -124,6 +125,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       if (callback) callback(null, Characteristic.PositionState.STOPPED)
     })
 
+   	this.addLowBatCharacteristic(door, Characteristic)
     this.services.push(door)
     this.remoteGetValue('STATE', function (value) {
       that.processDoorState(value)
@@ -223,6 +225,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       this.addValueMapping('STATE', false, 0)
     }
 
+   	this.addLowBatCharacteristic(this.contact, Characteristic)
     this.services.push(this.contact)
   }
   this.remoteGetValue('STATE', function (value) {
