@@ -30,7 +30,7 @@
   "devDependencies": {
     "assert": "1.4.1",
     "chalk": "",
-    "mocha": "^5.0.4"
+    "mocha": "^6.0.0"
   },
   "scripts": {
     "test": "mocha"
