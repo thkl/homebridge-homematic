@@ -80,12 +80,14 @@ HomeMaticHomeKitGarageDoorOpenerService.prototype.datapointEvent = function (dp,
       case 0:
         this.log.debug('HmIP-MOD-TM sent Closed to Homekit')
         this.currentDoorState.updateValue(this.characteristic.CurrentDoorState.CLOSED, null)
+        this.targetDoorState.updateValue(this.characteristic.TargetDoorState.CLOSED, null)
         break
       case 1:
       case 2:
       case 3:
         this.log.debug('HmIP-MOD-TM sent open to Homekit')
         this.currentDoorState.updateValue(this.characteristic.CurrentDoorState.OPEN, null)
+        this.targetDoorState.updateValue(this.characteristic.TargetDoorState.OPEN, null)
         break
 
       default:
