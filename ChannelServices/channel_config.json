@@ -109,10 +109,6 @@
 	   "service": "HomeMaticHomeKitRGBWService"
 	},
 
-	{
-	   "type": "BLIND",
-	   "service": "HomeMaticHomeKitBlindService"
-	},
 
 	{
 	   "type": "HmIP-BROLL:SHUTTER_VIRTUAL_RECEIVER",
@@ -322,11 +318,22 @@
 	  	"service": "HomeMaticHomeKitBlindService"
 	},
 
+	{
+		"type":"HM-LC-Bl1-SM:BLIND", 
+	  	"service": "HomeMaticHomeKitBlindService"
+	},
+
+	
 
 	{
         "type": "HmIP-SWD:WATER_DETECTION_TRANSMITTER",
         "service": "HomeMaticHomeKitWaterSensorService"
-    }
+	 },
+
+	 {
+	   "type": "HmIP-MOD-TM:DOOR_RECEIVER",
+	   "service": "HomeMaticHomeKitGarageDoorOpenerService"
+	}
 
 
 

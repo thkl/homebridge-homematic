@@ -1,0 +1,39 @@
+{
+    "devices": [
+      {
+        "id": "1000",
+        "name": "TA1",
+        "address": "ADR1234567890",
+        "type": "HmIP-MOD-TM",
+        "channels": [
+          {
+            "cId": 1001,
+            "name": "TA1_0",
+            "intf": "HmIP-RF",
+            "address": "HmIP-RF.ADR1234567890:0",
+            "type": "MAINTENANCE",
+            "access": "255"
+          },
+          {
+            "cId": 1002,
+            "name": "TA1_0",
+            "intf": "HmIP-RF",
+            "address": "HmIP-RF.ADR1234567890:1",
+            "type": "DOOR_RECEIVER",
+            "access": "255"
+          },
+          {
+            "cId": 1003,
+            "name": "TA1_0",
+            "intf": "HmIP-RF",
+            "address": "HmIP-RF.ADR1234567890:2",
+            "type": "SIMPLE_SWITCH_RECEIVER",
+            "access": "255"
+          }
+        ]
+      }
+    ],
+    "subsection": [
+        1002
+    ]
+  }
