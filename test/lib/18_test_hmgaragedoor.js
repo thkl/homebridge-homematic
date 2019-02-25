@@ -43,7 +43,7 @@ describe('Homematic Plugin (index)', function () {
 
     it('test door open', function (done) {
       // send HmIP-RF.ADR1234567890:1.DOOR_RECEIVER a on Message
-      platform.xmlrpc.event(['HmIP-RF.', 'ADR1234567890:2', 'DOOR_STATE', 1])
+      platform.xmlrpc.event(['HmIP-RF.', 'ADR1234567890:1', 'DOOR_STATE', 1])
       // check
       that.accessories.map(ac => {
         let s = ac.get_Service(Service.GarageDoorOpener)

@@ -70,6 +70,14 @@ HomeMaticHomeKitGarageDoorOpenerService.prototype.createDeviceService = function
 
   this.currentDoorState.eventEnabled = true
   this.targetDoorState.eventEnabled = true
+  this.queryData()
+}
+
+HomeMaticHomeKitGarageDoorOpenerService.prototype.queryData = function () {
+  let that = this
+  that.query('DOOR_STATE', function (value) {
+    that.datapointEvent(that.channelnumber + ':DOOR_STATE', value)
+  })
 }
 
 HomeMaticHomeKitGarageDoorOpenerService.prototype.datapointEvent = function (dp, newValue) {
