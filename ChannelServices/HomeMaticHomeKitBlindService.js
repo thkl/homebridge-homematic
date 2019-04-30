@@ -145,7 +145,7 @@ HomeMaticHomeKitBlindService.prototype.processBlindLevel = function (newValue) {
 
 HomeMaticHomeKitBlindService.prototype.endWorking = function () {
   let that = this
-  this.remoteGetValue('4:LEVEL', function (newValue) {
+  this.remoteGetValue('LEVEL', function (newValue) {
     that.processBlindLevel(newValue)
   })
 }
