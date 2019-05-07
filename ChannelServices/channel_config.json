@@ -326,6 +326,10 @@
 	  	"service": "HomeMaticHomeKitBlindService"
 	},
 	{
+		"type":"HMW-LC-Bl1-DR:BLIND",
+		"service": "HomeMaticHomeKitBlindService"
+	},
+	{
         "type": "HmIP-SWD:WATER_DETECTION_TRANSMITTER",
         "service": "HomeMaticHomeKitWaterSensorService"
 	 },
