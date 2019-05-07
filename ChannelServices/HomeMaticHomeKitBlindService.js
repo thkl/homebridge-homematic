@@ -149,7 +149,7 @@ HomeMaticHomeKitBlindService.prototype.setFinalBlindLevel = function (value) {
 }
 
 HomeMaticHomeKitBlindService.prototype.datapointEvent = function (dp, value) {
-  this.log.debug('recieving event for %s: %s value: %s (%s)', this.adress, dp, value, typeof(value) )
+  this.log.debug('recieving event for %s: %s value: %s (%s)', this.adress, dp, value, typeof (value))
 
   if (this.isDataPointEvent(dp, 'INHIBIT')) {
     this.inhibit = value
@@ -195,33 +195,33 @@ HomeMaticHomeKitBlindService.prototype.datapointEvent = function (dp, value) {
 }
 
 HomeMaticHomeKitBlindService.prototype.updatePosition = function (value) {
-    // 0 = NONE (Standard)
-    // 1=UP
-    // 2=DOWN
-    // 3=UNDEFINED
-    switch (value) {
-      case 0:
-        this.pstate.updateValue(2, null)
-        break
-      case 1: // opening - INCREASING
-        this.pstate.updateValue(1, null)
-        // set target position to maximum, since we don't know when it stops
-        this.guessTargetPosition(100)
-        break
-      case 2: // closing - DECREASING
-        this.pstate.updateValue(0, null)
-        // same for closing
-        this.guessTargetPosition(0)
-        break
-      case 3:
-        this.pstate.updateValue(2, null)
-        break
-    }
+  // 0 = NONE (Standard)
+  // 1=UP
+  // 2=DOWN
+  // 3=UNDEFINED
+  switch (value) {
+    case 0:
+      this.pstate.updateValue(2, null)
+      break
+    case 1: // opening - INCREASING
+      this.pstate.updateValue(1, null)
+      // set target position to maximum, since we don't know when it stops
+      this.guessTargetPosition(100)
+      break
+    case 2: // closing - DECREASING
+      this.pstate.updateValue(0, null)
+      // same for closing
+      this.guessTargetPosition(0)
+      break
+    case 3:
+      this.pstate.updateValue(2, null)
+      break
+  }
 }
 
 HomeMaticHomeKitBlindService.prototype.guessTargetPosition = function (value) {
   // Only update Target position if it has not been set via homekit (see targetPos.on('set'))
-  if (this.targetLevel === undefined){
+  if (this.targetLevel === undefined) {
     this.targetPos.updateValue(value, null)
   }
 }
