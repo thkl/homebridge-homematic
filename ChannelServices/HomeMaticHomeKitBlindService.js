@@ -69,7 +69,7 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function (Service, 
         }, 1000)
       } else {
         this.targetLevel = value
-        this.eventupdate = false //whaat?
+        this.eventupdate = false // whaat?
         this.delayed('set', 'LEVEL', value, this.delayOnSet)
       }
       callback()
@@ -103,7 +103,7 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function (Service, 
       })
     })
 
-    // this.pstate.eventEnabled = true
+  // this.pstate.eventEnabled = true
 
   // only add if ObstructionDetected is used
   if (this.observeInhibit === true) {
@@ -122,7 +122,7 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function (Service, 
 }
 
 HomeMaticHomeKitBlindService.prototype.queryData = function (value) {
-  //trigger new event (datapointEvent)
+  // trigger new event (datapointEvent)
   this.remoteGetValue('LEVEL', () => {})
 
   if (this.observeInhibit === true) {
@@ -149,7 +149,7 @@ HomeMaticHomeKitBlindService.prototype.setFinalBlindLevel = function (value) {
 }
 
 HomeMaticHomeKitBlindService.prototype.datapointEvent = function (dp, value) {
-  this.log.debug('recieving event for %s: %s value: %s (%s)', this.adress, dp, value, typeof(value))
+  this.log.debug('recieving event for %s: %s value: %s (%s)', this.adress, dp, value, typeof(value) )
 
   if (this.isDataPointEvent(dp, 'INHIBIT')) {
     this.inhibit = value
