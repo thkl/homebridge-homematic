@@ -46,6 +46,7 @@ describe('Homematic Plugin (index)', function () {
 
     it('event test blind move to 0%', function (done) {
       platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'LEVEL', 0])
+      platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'DIRECTION', 0])
       that.accessories.map(ac => {
         let s = ac.get_Service(Service.WindowCovering)
         assert.ok(s, 'Service.WindowCovering not found in Blind %s', ac.name)
@@ -66,6 +67,7 @@ describe('Homematic Plugin (index)', function () {
 
     it('event test blind move to 100%', function (done) {
       platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'LEVEL', 1])
+      platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'DIRECTION', 1])
       // check
       that.accessories.map(ac => {
         let s = ac.get_Service(Service.WindowCovering)
