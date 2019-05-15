@@ -12,7 +12,7 @@ util.inherits(HomeMaticHomeKitBlindService, HomeKitGenericService)
 HomeMaticHomeKitBlindService.prototype.createDeviceService = function (Service, Characteristic) {
   var blind = new Service.WindowCovering(this.name)
   this.delayOnSet = 750
-  this.observeInhibit = this.getClazzConfigValue('observeInhibit', true)
+  this.observeInhibit = this.getClazzConfigValue('observeInhibit', false)
   this.inhibit = false
   this.minValueForClose = this.getClazzConfigValue('minValueForClose', 0)
   this.maxValueForOpen = this.getClazzConfigValue('maxValueForOpen', 100)
