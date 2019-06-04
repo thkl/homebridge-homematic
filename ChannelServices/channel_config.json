@@ -51,7 +51,7 @@
 
 	{
 	   "type": "SWITCH",
-	   "service": "HomeMaticHomeKitSwitchService"
+	   "service": "HomeMaticHomeKitOutletService"
 	},
 
 
@@ -62,8 +62,14 @@
 
 	{
 	   "type": "HM-LC-Sw1-FM:SWITCH",
-	   "service": "HomeMaticHomeKitSwitchService"
+	   "service": "HomeMaticHomeKitOutletService"
 	},
+
+	{
+	   "type": "HM-LC-Sw1-Pl:SWITCH",
+	   "service": "HomeMaticHomeKitOutletService"
+	},
+
 
 	{
 	   "type": "DIMMER",
