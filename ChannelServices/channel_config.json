@@ -334,6 +334,11 @@
 	 },
 
 	 {
+		 "type":"HmIP-BLS:DIMMER_VIRTUAL_RECEIVER",
+		 "service":"HomeMaticHomeKitBSLColorService"
+	 },
+	 
+	 {
 	   "type": "HmIP-MOD-TM:DOOR_RECEIVER",
 	   "service": "HomeMaticHomeKitGarageDoorOpenerService"
 	}
