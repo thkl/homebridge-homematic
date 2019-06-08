@@ -83,7 +83,7 @@
 		"type": "KEY_TRANSCEIVER",
 		"service": "HomeMaticHomeKitKeyService"
 	},
-	 
+
 	{
 	   "type": "VIRTUAL_KEY",
 	   "service": "HomeMaticHomeKitKeyService"
@@ -314,20 +314,21 @@
 		"service" : "HomeMaticHomeKitEnergyCounterService"
 	},
 	{
-		"type":"HM-LC-Ja1PBU-FM:JALOUSIE", 
+		"type":"HM-LC-Ja1PBU-FM:JALOUSIE",
 	  	"service": "HomeMaticHomeKitBlindService"
 	},
-
 	{
-		"type":"HM-LC-Bl1-SM:BLIND", 
+		"type":"HM-LC-Bl1-SM:BLIND",
 	  	"service": "HomeMaticHomeKitBlindService"
 	},
-
+	{
+		"type":"HM-LC-Bl1-FM:BLIND",
+	  	"service": "HomeMaticHomeKitBlindService"
+	},
 	{
 		"type":"HMW-LC-Bl1-DR:BLIND",
 		"service": "HomeMaticHomeKitBlindService"
 	},
-
 	{
         "type": "HmIP-SWD:WATER_DETECTION_TRANSMITTER",
         "service": "HomeMaticHomeKitWaterSensorService"
