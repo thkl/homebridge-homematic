@@ -1,5 +1,7 @@
 'use strict'
 
+// (you have to add Channel 8 and 12 of HmIP-BSL
+
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
 var util = require('util')
 
@@ -11,8 +13,8 @@ util.inherits(HomeMaticHomeKitBSLColorService, HomeKitGenericService)
 
 HomeMaticHomeKitBSLColorService.prototype.createDeviceService = function (Service, Characteristic) {
   var that = this
-  // BLACK , BLUE, GREEN ,TURQUOISE ,RED ,PURPLE ,YELLOW ,WHITE 
-  this.colorTable = {'0':-1,'1':246,'2':111,'3':176,'4':0,'5':319,'6':49 ,'7':361}
+  // BLACK , BLUE, GREEN ,TURQUOISE ,RED ,PURPLE ,YELLOW ,WHITE
+  this.colorTable = { '0': -1, '1': 246, '2': 111, '3': 176, '4': 0, '5': 319, '6': 49, '7': 361 }
   var lightbulb = new Service.Lightbulb(this.name)
   this.services.push(lightbulb)
 
@@ -23,7 +25,7 @@ HomeMaticHomeKitBSLColorService.prototype.createDeviceService = function (Servic
         if (value === undefined) {
           value = 0
         }
-       that.state['LAST'] = value
+        that.state['LAST'] = value
         if (callback) callback(null, value > 0)
       })
     })
@@ -94,13 +96,12 @@ HomeMaticHomeKitBSLColorService.prototype.createDeviceService = function (Servic
     })
 
     .on('set', function (value, callback) {
-    
-      //Check the Color Table
+      // Check the Color Table
       Object.keys(that.colorTable).forEach(ccuColor => {
-        if (value == that.colorTable[ccuColor]) {
+        if (value === that.colorTable[ccuColor]) {
           that.delayed('set', 'COLOR', ccuColor, 100)
         }
-      });
+      })
 
       callback()
     })
