@@ -42,7 +42,6 @@ class HomeMaticHomeKitOutletService extends HomeKitGenericService {
       this.currentState = JSON.parse(value) // make sure the value is boolean
     })
 
-    this.log.warn('got  state: %s for %s', this._currentState, this.address)
     return this._currentState
   }
 
