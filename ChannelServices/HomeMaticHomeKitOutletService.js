@@ -25,14 +25,32 @@ class HomeMaticHomeKitOutletService extends HomeKitGenericService {
   }
 
   getState (callback) {
-    this.query('STATE', (value) => {
-      callback(null, JSON.parse(value)) // make sure the value is boolean
-    })
+    callback(null, this.currentState)
   }
 
   setState (value, callback) {
     this.command('set', 'STATE', value)
     callback()
+  }
+
+  get currentState () {
+    if (this._currentState !== undefined) {
+      return this._currentState
+    }
+    // no value found - get remote value
+    this.remoteGetValue('STATE', (value) => {
+      this.currentState = JSON.parse(value) // make sure the value is boolean
+    })
+
+    this.log.warn('got  state: %s for %s', this._currentState, this.address)
+    return this._currentState
+  }
+
+  set currentState (current) {
+    if (this._currentState !== current) {
+      this.onCharacteristic.updateValue(current)
+    }
+    this._currentState = current
   }
 
   event (address, dp, value) {
@@ -41,7 +59,7 @@ class HomeMaticHomeKitOutletService extends HomeKitGenericService {
     }
 
     if (dp === 'STATE') {
-      this.onCharacteristic.updateValue(value)
+      this.currentState = value
     }
   }
 }
