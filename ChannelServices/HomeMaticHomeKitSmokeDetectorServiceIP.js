@@ -36,6 +36,9 @@ HomeMaticHomeKitSmokeDetectorServiceIP.prototype.createDeviceService = function 
               if (callback) callback(null, false)
             }
             break
+          default:
+            if (callback) callback(null, false)
+            break
         }
       })
     })
