@@ -36,30 +36,18 @@ var HomeMaticRPC = function (log, ccuip, port, system, platform) {
       this.interface = 'BidCos-RF.'
       this.ccuport = 2001
 
-      // if (semver.lt(process.version, '4.5.0')) {
-      this.log.info('using xmprpc for communication with BidCos-RF')
-      this.rpc = xmlrpc
-      this.rpcInit = 'http://'
-      // } else {
-      //  this.log.info('using binrpc for communication with BidCos-RF')
-      //  this.rpc = binrpc
-      //  this.rpcInit = 'xmlrpc_bin://'
-      // }
-
-      break
+    this.log.info('using xmprpc for communication with BidCos-RF')
+    this.rpc = xmlrpc;
+    this.rpcInit = 'http://';
+    break;
 
     case 1 :
-      this.interface = 'BidCos-Wired.'
-      // if (semver.lt(process.version, '4.5.0')) {
-      this.log.info('using xmprpc for communication with BidCos-Wired')
-      this.rpc = xmlrpc
-      this.rpcInit = 'http://'
-      // } else {
-      //  this.rpc = binrpc
-      //  this.rpcInit = 'xmlrpc_bin://'
-      // }
-      this.ccuport = 2000
-      break
+    this.interface = 'BidCos-Wired.';
+    this.rpc = xmlrpc;
+    this.rpcInit = 'http://';
+    this.ccuport = 2000;
+    break;
+
 
     case 2 :
       this.interface = 'HmIP-RF.'
@@ -310,13 +298,13 @@ HomeMaticRPC.prototype.ccuWatchDog = function () {
   this.watchDogTimer = setTimeout(recall, 10000)
 }
 
-HomeMaticRPC.prototype.stop = function () {
-  this.log.info('Removing Event Server for Interface %s', this.interface)
-  this.client.methodCall('init', ['xmlrpc_bin://' + this.localIP + ':' + this.listeningPort], function (error, value) {
+HomeMaticRPC.prototype.stop = function() {
+  this.log.info('Removing Event Server for Interface %s', this.interface);
+  this.client.methodCall("init", [this.rpcInit + this.localIP + ':' + this.listeningPort], function(error, value) {
     if (error !== undefined) {
       this.log.error('Error while removing eventserver %s', error)
     }
-  })
+  });
 }
 
 // checks if the port is in use
