@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "assert": "1.5.0",
-    "chalk": "",
+    "chalk": "latest",
     "mocha": "^6.0.0"
   },
   "scripts": {
