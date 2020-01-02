@@ -35,6 +35,13 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
 
   }
 
+  /* CCU Values
+
+    0 = Off
+    1 = int
+    2 = ext
+    3 = off / blocked
+    */
   this.log.debug(JSON.stringify(this.characteristics))
 
   // Characteristic.SecuritySystemCurrentState and Characteristic.SecuritySystemTargetState
@@ -55,7 +62,7 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
         that.internalsirupdate = true
         switch (parseInt(value)) {
           case 0:
-            hkValue = Characteristic.SecuritySystemCurrentState.DISARMED
+            hkValue = Characteristic.SecuritySystemCurrentState.STAY_ARM
             break
           case 1:
             hkValue = Characteristic.SecuritySystemCurrentState.NIGHT_ARM
@@ -64,7 +71,7 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
             hkValue = Characteristic.SecuritySystemCurrentState.AWAY_ARM
             break
           case 3:
-            hkValue = Characteristic.SecuritySystemCurrentState.STAY_ARM
+            hkValue = Characteristic.SecuritySystemCurrentState.DISARM
             break
         }
 
@@ -82,7 +89,7 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
         var hkTValue = 0
         switch (parseInt(value)) {
           case 3:
-            hkTValue = that.characteristics['T_STAY_ARM']
+            hkTValue = that.characteristics['T_DISARM']
             break
           case 1:
             hkTValue = that.characteristics['T_NIGHT_ARM']
@@ -91,7 +98,7 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
             hkTValue = that.characteristics['T_AWAY_ARM']
             break
           case 0:
-            hkTValue = that.characteristics['T_DISARM']
+            hkTValue = that.characteristics['T_STAY_ARM']
             break
         }
         if (callback) {
@@ -105,7 +112,7 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
         var hmvalue = -1
         that.log.debug('Security System value change %s', value)
         switch (parseInt(value)) {
-          case Characteristic.SecuritySystemTargetState.DISARM:
+          case Characteristic.SecuritySystemTargetState.STAY_ARM:
             that.log.info('DISARMED send 0')
             hmvalue = 0
             break
@@ -120,7 +127,7 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
             hmvalue = 2
             break
 
-          case Characteristic.SecuritySystemTargetState.STAY_ARM:
+          case Characteristic.SecuritySystemTargetState.DISARM:
             that.log.info('STAY_ARM send 3')
             hmvalue = 3
             break
@@ -134,7 +141,7 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
                 that.log.debug('Response current state is %s', value)
                 switch (parseInt(value)) {
                   case 3:
-                    that.currentState.setValue(Characteristic.SecuritySystemCurrentState.STAY_ARM, null)
+                    that.currentState.setValue(Characteristic.SecuritySystemCurrentState.DISARMED, null)
                     break
                   case 1:
                     that.currentState.setValue(Characteristic.SecuritySystemCurrentState.NIGHT_ARM, null)
@@ -143,7 +150,7 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
                     that.currentState.setValue(Characteristic.SecuritySystemCurrentState.AWAY_ARM, null)
                     break
                   case 0:
-                    that.currentState.setValue(Characteristic.SecuritySystemCurrentState.DISARMED, null)
+                    that.currentState.setValue(Characteristic.SecuritySystemCurrentState.STAY_ARM, null)
                     break
                 }
               })
@@ -179,8 +186,8 @@ HomeMaticHomeKitSecuritySystem.prototype.datapointEvent = function (dp, newValue
     var tS
     switch (newValue) {
       case 0:
-        cS = this.characteristics['C_DISARMED']
-        tS = this.characteristics['T_DISARM']
+        cS = this.characteristics['C_STAY_ARM']
+        tS = this.characteristics['T_STAY_ARM']
         break
       case 1:
         cS = this.characteristics['C_NIGHT_ARM']
@@ -191,8 +198,8 @@ HomeMaticHomeKitSecuritySystem.prototype.datapointEvent = function (dp, newValue
         tS = this.characteristics['T_AWAY_ARM']
         break
       case 3:
-        cS = this.characteristics['C_STAY_ARM']
-        tS = this.characteristics['T_STAY_ARM']
+        cS = this.characteristics['C_DISARMED']
+        tS = this.characteristics['T_DISARM']
         break
     }
     this.currentState.setValue(cS, null)
