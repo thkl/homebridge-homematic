@@ -96,7 +96,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       that.query('STATE', function (value) {
         if (callback) callback(null, (value === true) ? 100 : 0)
       })
-    }.bind(this))
+    })
     this.cdoor.eventEnabled = true
 
     this.tdoor = door.getCharacteristic(Characteristic.TargetPosition)
@@ -104,7 +104,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       that.query('STATE', function (value) {
         if (callback) callback(null, (value === true) ? 100 : 0)
       })
-    }.bind(this))
+    })
 
       .on('set', function (value, callback) {
       // This is just a sensor so reset homekit data to ccu value after 1 second playtime
@@ -251,17 +251,17 @@ HomeMaticHomeKitContactService.prototype.processContactState = function (newValu
 
 HomeMaticHomeKitContactService.prototype.processDoorState = function (newValue) {
   if (this.haz([this.cdoor, this.tdoor, this.sdoor])) {
-    switch (newValue) {
+    switch (newValue) {
       case false :
-      this.cdoor.updateValue(0, null)
-      this.tdoor.updateValue(0, null)
-      this.sdoor.updateValue(2, null)
-      break;
+        this.cdoor.updateValue(0, null)
+        this.tdoor.updateValue(0, null)
+        this.sdoor.updateValue(2, null)
+        break
       case true:
-      this.cdoor.updateValue(100, null)
-      this.tdoor.updateValue(100, null)
-      this.sdoor.updateValue(2, null)
-      break;
+        this.cdoor.updateValue(100, null)
+        this.tdoor.updateValue(100, null)
+        this.sdoor.updateValue(2, null)
+        break
     }
   }
 }

@@ -36,18 +36,17 @@ var HomeMaticRPC = function (log, ccuip, port, system, platform) {
       this.interface = 'BidCos-RF.'
       this.ccuport = 2001
 
-    this.log.info('using xmprpc for communication with BidCos-RF')
-    this.rpc = xmlrpc;
-    this.rpcInit = 'http://';
-    break;
+      this.log.info('using xmprpc for communication with BidCos-RF')
+      this.rpc = xmlrpc
+      this.rpcInit = 'http://'
+      break
 
     case 1 :
-    this.interface = 'BidCos-Wired.';
-    this.rpc = xmlrpc;
-    this.rpcInit = 'http://';
-    this.ccuport = 2000;
-    break;
-
+      this.interface = 'BidCos-Wired.'
+      this.rpc = xmlrpc
+      this.rpcInit = 'http://'
+      this.ccuport = 2000
+      break
 
     case 2 :
       this.interface = 'HmIP-RF.'
@@ -298,13 +297,13 @@ HomeMaticRPC.prototype.ccuWatchDog = function () {
   this.watchDogTimer = setTimeout(recall, 10000)
 }
 
-HomeMaticRPC.prototype.stop = function() {
-  this.log.info('Removing Event Server for Interface %s', this.interface);
-  this.client.methodCall("init", [this.rpcInit + this.localIP + ':' + this.listeningPort], function(error, value) {
+HomeMaticRPC.prototype.stop = function () {
+  this.log.info('Removing Event Server for Interface %s', this.interface)
+  this.client.methodCall('init', [this.rpcInit + this.localIP + ':' + this.listeningPort], function (error, value) {
     if (error !== undefined) {
       this.log.error('Error while removing eventserver %s', error)
     }
-  });
+  })
 }
 
 // checks if the port is in use
