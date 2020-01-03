@@ -69,3 +69,9 @@ typings/
 # Serverless directories
 .serverless
 .vscode/*
+
+# IDE control files
+/.idea/
+*.ipr
+*.iws
+*.iml
