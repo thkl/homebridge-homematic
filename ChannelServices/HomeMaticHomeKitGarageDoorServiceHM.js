@@ -26,7 +26,7 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
   this.state_sensor_open = this.getClazzConfigValue('state_sensor_open', true)
 
   this.address_actor_open = this.getClazzConfigValue('address_actor_open', undefined)
-  // this.address_actor_close = this.getClazzConfigValue('address_actor_close',undefined)
+  this.address_actor_close = this.getClazzConfigValue('address_actor_close', undefined)
 
   this.delay_actor_open = this.getClazzConfigValue('delay_actor_open', 5)
   this.delay_actor_close = this.getClazzConfigValue('delay_actor_close', 5)
@@ -75,21 +75,21 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
       if ((that.address_sensor_close !== undefined) && (that.address_sensor_open !== undefined)) {
       // We have two contacts so ask for boath levels
 
-        that.remoteGetDataPointValue(that.address_sensor_close, function (pCloseValue) {
-          that.log.debug('get close value result is %s', pCloseValue)
-          that.remoteGetDataPointValue(that.address_sensor_open, function (pOpenValue) {
-            that.log.debug('get open value result is %s', pOpenValue)
+        that.remoteGetDataPointValue(that.address_sensor_close, function (closeValue) {
+          that.log.debug('get close value result is %s', closeValue)
+          that.remoteGetDataPointValue(that.address_sensor_open, function (openValue) {
+            that.log.debug('get open value result is %s', openValue)
 
-            if ((pCloseValue === that.state_sensor_close) && (pOpenValue !== that.state_sensor_open)) {
+            if ((closeValue === that.state_sensor_close) && (openValue !== that.state_sensor_open)) {
               returnValue = Characteristic.CurrentDoorState.CLOSED
               if (that.targetCommand) { that.targetDoorState.updateValue(that.characteristic.TargetDoorState.CLOSED, null) }
             }
 
-            if ((pCloseValue !== that.state_sensor_close) && (pOpenValue !== that.state_sensor_open)) {
+            if ((closeValue !== that.state_sensor_close) && (openValue !== that.state_sensor_open)) {
               returnValue = Characteristic.CurrentDoorState.OPENING // or closing its moving
             }
 
-            if ((pCloseValue !== that.state_sensor_close) && (pOpenValue === that.state_sensor_open)) {
+            if ((closeValue !== that.state_sensor_close) && (openValue === that.state_sensor_open)) {
               returnValue = Characteristic.CurrentDoorState.OPEN
               if (that.targetCommand) { that.targetDoorState.updateValue(that.characteristic.TargetDoorState.OPEN, null) }
             }
@@ -101,9 +101,9 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
 
       if ((that.address_sensor_close !== undefined) && (that.address_sensor_open === undefined)) {
       // There is only one contact
-        that.remoteGetDataPointValue(that.address_sensor_close, function (pCloseValue) {
-          that.log.debug('get close value result is %s', pCloseValue)
-          if (pCloseValue === that.state_sensor_close) {
+        that.remoteGetDataPointValue(that.address_sensor_close, function (closeValue) {
+          that.log.debug('get close value result is %s', closeValue)
+          if (closeValue === that.state_sensor_close) {
             returnValue = Characteristic.CurrentDoorState.CLOSED
           } else {
             returnValue = Characteristic.CurrentDoorState.OPEN
@@ -120,12 +120,29 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
       clearTimeout(this.requeryTimer)
 
       if ((that.address_actor_open !== undefined) && (that.address_actor_close === undefined)) {
-        // HmIP-MOD-HM.DOOR_COMMAND is one actor working with different values for OPEN ("on":1) AND CLOSE ("off":3)
+      // there is only one actor
+        if (value === Characteristic.TargetDoorState.OPEN) {
+          that.currentDoorState.updateValue(that.characteristic.CurrentDoorState.OPENING, null)
+        } else {
+          that.currentDoorState.updateValue(that.characteristic.CurrentDoorState.CLOSING, null)
+        }
+
+        that.sendActorMessage(that.address_actor_open, that.message_actor_open['on'])
+        that.sendActorMessage(that.address_actor_open, that.message_actor_open['off'], that.delay_actor_open)
+
+        that.requeryTimer = setTimeout(function () {
+        // reset Command Switch to override target
+          that.targetCommand = false
+          that.log.debug('garage door requery sensors ...')
+          that.querySensors()
+        }, 1000 * that.sensor_requery_time)
+      } else {
+      // there is a actor for every direction so
         if (value === Characteristic.TargetDoorState.OPEN) {
           that.currentDoorState.updateValue(that.characteristic.CurrentDoorState.OPENING, null)
 
           that.sendActorMessage(that.address_actor_open, that.message_actor_open['on'])
-          // HM that.sendActorMessage(that.address_actor_open,that.message_actor_open['off'],that.delay_actor_open)
+          that.sendActorMessage(that.address_actor_open, that.message_actor_open['off'], that.delay_actor_open)
           // reset Command Switch to override target
           that.targetCommand = false
           that.requeryTimer = setTimeout(function () {
@@ -134,7 +151,8 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
           }, 1000 * that.sensor_requery_time)
         } else {
           that.currentDoorState.updateValue(that.characteristic.CurrentDoorState.CLOSING, null)
-          that.sendActorMessage(that.address_actor_open, that.message_actor_open['off'])
+          that.sendActorMessage(that.address_actor_close, that.message_actor_close['on'])
+          that.sendActorMessage(that.address_actor_close, that.message_actor_close['off'], that.delay_actor_close)
 
           // reset Command Switch to override target
           that.targetCommand = false

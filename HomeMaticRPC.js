@@ -36,15 +36,28 @@ var HomeMaticRPC = function (log, ccuip, port, system, platform) {
       this.interface = 'BidCos-RF.'
       this.ccuport = 2001
 
+      // if (semver.lt(process.version, '4.5.0')) {
       this.log.info('using xmprpc for communication with BidCos-RF')
       this.rpc = xmlrpc
       this.rpcInit = 'http://'
+      // } else {
+      //  this.log.info('using binrpc for communication with BidCos-RF')
+      //  this.rpc = binrpc
+      //  this.rpcInit = 'xmlrpc_bin://'
+      // }
+
       break
 
     case 1 :
       this.interface = 'BidCos-Wired.'
+      // if (semver.lt(process.version, '4.5.0')) {
+      this.log.info('using xmprpc for communication with BidCos-Wired')
       this.rpc = xmlrpc
       this.rpcInit = 'http://'
+      // } else {
+      //  this.rpc = binrpc
+      //  this.rpcInit = 'xmlrpc_bin://'
+      // }
       this.ccuport = 2000
       break
 
@@ -160,7 +173,7 @@ HomeMaticRPC.prototype.init = function () {
                     if ((accessory.adress === channel) ||
                   ((accessory.cadress !== undefined) && (accessory.cadress === channel)) ||
                   ((accessory.deviceAdress !== undefined) && (accessory.deviceAdress === deviceAdress))) {
-                      that.log.debug('Accessory %s found -> Send Event', accessory.name)
+                      that.log.debug('Accessory %s found -> Send Event with value %s', accessory.name, value)
                       accessory.event(channel, datapoint, value)
                     }
                   })
@@ -299,7 +312,7 @@ HomeMaticRPC.prototype.ccuWatchDog = function () {
 
 HomeMaticRPC.prototype.stop = function () {
   this.log.info('Removing Event Server for Interface %s', this.interface)
-  this.client.methodCall('init', [this.rpcInit + this.localIP + ':' + this.listeningPort], function (error, value) {
+  this.client.methodCall('init', ['xmlrpc_bin://' + this.localIP + ':' + this.listeningPort], function (error, value) {
     if (error !== undefined) {
       this.log.error('Error while removing eventserver %s', error)
     }
