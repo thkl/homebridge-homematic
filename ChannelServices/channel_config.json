@@ -80,6 +80,11 @@
 	},
 
 	{
+		"type": "KEY_TRANSCEIVER",
+		"service": "HomeMaticHomeKitKeyService"
+	},
+
+	{
 	   "type": "VIRTUAL_KEY",
 	   "service": "HomeMaticHomeKitKeyService"
 	},
@@ -104,10 +109,6 @@
 	   "service": "HomeMaticHomeKitRGBWService"
 	},
 
-	{
-	   "type": "BLIND",
-	   "service": "HomeMaticHomeKitBlindService"
-	},
 
 	{
 	   "type": "HmIP-BROLL:SHUTTER_VIRTUAL_RECEIVER",
@@ -312,8 +313,35 @@
 	  "type" : "POWERMETER_IGL",
 		"service" : "HomeMaticHomeKitEnergyCounterService"
 	},
-	{ "type":"HM-LC-Ja1PBU-FM:JALOUSIE", 
-	  "service": "HomeMaticHomeKitBlindService"
+	{
+		"type":"HM-LC-Ja1PBU-FM:JALOUSIE",
+	  	"service": "HomeMaticHomeKitBlindService"
+	},
+	{
+		"type":"HM-LC-Bl1-SM:BLIND",
+	  	"service": "HomeMaticHomeKitBlindService"
+	},
+	{
+		"type":"HM-LC-Bl1-FM:BLIND",
+	  	"service": "HomeMaticHomeKitBlindService"
+	},
+	{
+		"type":"HMW-LC-Bl1-DR:BLIND",
+		"service": "HomeMaticHomeKitBlindService"
+	},
+	{
+        "type": "HmIP-SWD:WATER_DETECTION_TRANSMITTER",
+        "service": "HomeMaticHomeKitWaterSensorService"
+	 },
+
+	 {
+		 "type":"HmIP-BLS:DIMMER_VIRTUAL_RECEIVER",
+		 "service":"HomeMaticHomeKitBSLColorService"
+	 },
+	 
+	 {
+	   "type": "HmIP-MOD-TM:DOOR_RECEIVER",
+	   "service": "HomeMaticHomeKitGarageDoorOpenerService"
 	}
 
 

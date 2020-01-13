@@ -1,9 +1,9 @@
-'use strict';
+'use strict'
 
-function Characteristic(hap, char) {
-    this.hap = hap;
-    this.name = char.name;
-    this.value = "";
+function Characteristic (hap, char) {
+  this.hap = hap
+  this.name = char.name
+  this.value = ''
 }
 
 // Known HomeKit formats
@@ -20,7 +20,7 @@ Characteristic.Formats = {
   UINT64: 'uint64',
   DATA: 'data', // unconfirmed
   TLV8: 'tlv8'
-};
+}
 
 // Known HomeKit unit types
 Characteristic.Units = {
@@ -30,7 +30,7 @@ Characteristic.Units = {
   ARC_DEGREE: 'arcdegrees',
   LUX: 'lux',
   SECONDS: 'seconds'
-};
+}
 
 // Known HomeKit permission types
 Characteristic.Perms = {
@@ -38,16 +38,14 @@ Characteristic.Perms = {
   WRITE: 'pw',
   NOTIFY: 'ev',
   HIDDEN: 'hd'
-};
+}
 
-
-var inherits = require('util').inherits;
-var EventEmitter = require('events').EventEmitter;
+var inherits = require('util').inherits
+var EventEmitter = require('events').EventEmitter
 
 module.exports = {
   Characteristic: Characteristic
-};
-
+}
 
 /**
  * Characteristic represents a particular typed variable that can be assigned to a Service. For instance, a
@@ -81,11 +79,11 @@ module.exports = {
  *        passed in by the initiator of this change (if known).
  */
 
-function Characteristic(displayName, UUID, props) {
-  this.displayName = displayName;
-  this.UUID = UUID;
-  this.iid = null; // assigned by our containing Service
-  this.value = null;
+function Characteristic (displayName, UUID, props) {
+  this.displayName = displayName
+  this.UUID = UUID
+  this.iid = null // assigned by our containing Service
+  this.value = null
   this.props = props || {
     format: null,
     unit: null,
@@ -93,10 +91,10 @@ function Characteristic(displayName, UUID, props) {
     maxValue: null,
     minStep: null,
     perms: []
-  };
+  }
 }
 
-inherits(Characteristic, EventEmitter);
+inherits(Characteristic, EventEmitter)
 
 // Known HomeKit formats
 Characteristic.Formats = {
@@ -112,7 +110,7 @@ Characteristic.Formats = {
   UINT64: 'uint64',
   DATA: 'data', // unconfirmed
   TLV8: 'tlv8'
-};
+}
 
 // Known HomeKit unit types
 Characteristic.Units = {
@@ -122,7 +120,7 @@ Characteristic.Units = {
   ARC_DEGREE: 'arcdegrees',
   LUX: 'lux',
   SECONDS: 'seconds'
-};
+}
 
 // Known HomeKit permission types
 Characteristic.Perms = {
@@ -130,7 +128,7 @@ Characteristic.Perms = {
   WRITE: 'pw',
   NOTIFY: 'ev',
   HIDDEN: 'hd'
-};
+}
 
 /**
  * Copies the given properties to our props member variable,
@@ -145,44 +143,41 @@ Characteristic.Perms = {
  *   perms: array of [Characteristic.Perms] like [Characteristic.Perms.READ, Characteristic.Perms.WRITE]
  * }
  */
-Characteristic.prototype.setProps = function(props) {
-  for (var key in (props || {}))
-    if (Object.prototype.hasOwnProperty.call(props, key))
-      this.props[key] = props[key];
-  return this;
-};
-
-Characteristic.prototype.getValue = function(callback, context) {
-  if (callback)
-    callback(null, this.value);
-};
-
-Characteristic.prototype.setValue = function(newValue, callback, context) {
-  this.value = newValue;
-  if (callback) callback();
-  return this; // for chaining
-};
-
-Characteristic.prototype.updateValue = function(newValue, callback, context) {
-  this.value = newValue;
-  if (callback) callback();
-  return this; // for chaining
-};
-
-
-Characteristic.prototype.getDefaultValue = function() {
-  switch (this.props.format) {
-    case Characteristic.Formats.BOOL: return false;
-    case Characteristic.Formats.STRING: return "";
-    case Characteristic.Formats.ARRAY: return []; // who knows!
-    case Characteristic.Formats.DICTIONARY: return {}; // who knows!
-    case Characteristic.Formats.DATA: return ""; // who knows!
-    case Characteristic.Formats.TLV8: return ""; // who knows!
-    default: return this.props.minValue || 0;
+Characteristic.prototype.setProps = function (props) {
+  for (var key in (props || {})) {
+    if (Object.prototype.hasOwnProperty.call(props, key)) { this.props[key] = props[key] }
   }
-};
+  return this
+}
 
+Characteristic.prototype.getValue = function (callback, context) {
+  if (callback) { callback(null, this.value) }
+}
+
+Characteristic.prototype.setValue = function (newValue, callback, context) {
+  this.value = newValue
+  if (callback) callback()
+  return this // for chaining
+}
+
+Characteristic.prototype.updateValue = function (newValue, callback, context) {
+  this.value = newValue
+  if (callback) callback()
+  return this // for chaining
+}
+
+Characteristic.prototype.getDefaultValue = function () {
+  switch (this.props.format) {
+    case Characteristic.Formats.BOOL: return false
+    case Characteristic.Formats.STRING: return ''
+    case Characteristic.Formats.ARRAY: return [] // who knows!
+    case Characteristic.Formats.DICTIONARY: return {} // who knows!
+    case Characteristic.Formats.DATA: return '' // who knows!
+    case Characteristic.Formats.TLV8: return '' // who knows!
+    default: return this.props.minValue || 0
+  }
+}
 
 module.exports = {
-	Characteristic: Characteristic
-};
+  Characteristic: Characteristic
+}

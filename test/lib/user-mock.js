@@ -1,8 +1,7 @@
-var path = require('path');
-var fs = require('fs');
-var os = require('os');
+'use strict'
 
-'use strict';
+var path = require('path')
+var os = require('os')
 
 module.exports = {
   User: User
@@ -13,35 +12,35 @@ module.exports = {
  */
 
 // global cached config
-var config;
+var config
 
 // optional custom storage path
-var customStoragePath;
+var customStoragePath
 
-function User() {
+function User () {
 }
 
-User.config = function() {
-  return config || (config = Config.load(User.configPath()));
+User.config = function () {
+  return config || (config = Config.load(User.configPath()))
 }
 
-User.storagePath = function() {
-  if (customStoragePath) return customStoragePath;
-  return path.join(os.homedir(), ".homebridge");
+User.storagePath = function () {
+  if (customStoragePath) return customStoragePath
+  return path.join(os.homedir(), '.homebridge')
 }
 
-User.configPath = function() {
-  return path.join(User.storagePath(), "config.json");
+User.configPath = function () {
+  return path.join(User.storagePath(), 'config.json')
 }
 
-User.persistPath = function() {
-  return path.join(User.storagePath(), "persist");
+User.persistPath = function () {
+  return path.join(User.storagePath(), 'persist')
 }
 
-User.cachedAccessoryPath = function() {
-  return path.join(User.storagePath(), "accessories");
+User.cachedAccessoryPath = function () {
+  return path.join(User.storagePath(), 'accessories')
 }
 
-User.setStoragePath = function(path) {
-  customStoragePath = path;
+User.setStoragePath = function (path) {
+  customStoragePath = path
 }

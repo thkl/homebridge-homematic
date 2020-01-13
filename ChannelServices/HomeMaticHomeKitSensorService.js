@@ -1,71 +1,62 @@
-'use strict';
+'use strict'
 
-var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService;
-var util = require("util");
+var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
+var util = require('util')
 
-
-function HomeMaticHomeKitSensorService(log,platform, id ,name, type ,adress,special, cfg, Service, Characteristic) {
-    HomeMaticHomeKitSensorService.super_.apply(this, arguments);
+function HomeMaticHomeKitSensorService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
+  HomeMaticHomeKitSensorService.super_.apply(this, arguments)
 }
 
-util.inherits(HomeMaticHomeKitSensorService, HomeKitGenericService);
+util.inherits(HomeMaticHomeKitSensorService, HomeKitGenericService)
 
+HomeMaticHomeKitSensorService.prototype.createDeviceService = function (Service, Characteristic) {
+  var that = this
 
-HomeMaticHomeKitSensorService.prototype.createDeviceService = function(Service, Characteristic) {
+  this.enableLoggingService('door')
 
-  var that=this
+  if (this.special === 'DOOR') {
+    var door = new Service['Door'](this.name)
+    var cdoor = door.getCharacteristic(Characteristic.CurrentDoorState)
 
-  this.enableLoggingService("door");
+    cdoor.on('get', function (callback) {
+      that.query('SENSOR', function (value) {
+        that.addLogEntry({ status: (value === true) ? 1 : 0 })
+        if (callback) callback(null, value)
+      })
+    })
 
-  if (this.special=="DOOR") {
+    this.currentStateCharacteristic['SENSOR'] = cdoor
+    cdoor.eventEnabled = true
 
-    var door = new Service["Door"](this.name);
-    var cdoor = door.getCharacteristic(Characteristic.CurrentDoorState);
-    
-    cdoor.on('get', function(callback) {
-    that.query("SENSOR",function(value){
-      that.addLogEntry({ status:(value==true)?1:0 });
-      if (callback) callback(null,value);
-    });
-    }.bind(this));
-    
-    
-    this.currentStateCharacteristic["SENSOR"] = cdoor;
-    cdoor.eventEnabled = true;
-    
-    this.addValueMapping("SENSOR",0,1);
-    this.addValueMapping("SENSOR",1,0);
+    this.addValueMapping('SENSOR', 0, 1)
+    this.addValueMapping('SENSOR', 1, 0)
 
-    this.addValueMapping("SENSOR",false,1);
-    this.addValueMapping("SENSOR",true,0);
+    this.addValueMapping('SENSOR', false, 1)
+    this.addValueMapping('SENSOR', true, 0)
 
-    this.services.push(door);
-
+    this.services.push(door)
   } else {
-
-    var contact = new Service["ContactSensor"](this.name);
+    var contact = new Service['ContactSensor'](this.name)
     var state = contact.getCharacteristic(Characteristic.ContactSensorState)
-    .on('get', function(callback) {
-    that.query("SENSOR",function(value){
-      that.addLogEntry({ status:(value==true)?1:0 });
-      callback(null,value);
-    });
-    }.bind(this));
-    
-    that.currentStateCharacteristic["SENSOR"] = state;
-    state.eventEnabled = true;
-    this.services.push(contact);
+      .on('get', function (callback) {
+        that.query('SENSOR', function (value) {
+          that.addLogEntry({ status: (value === true) ? 1 : 0 })
+          callback(null, value)
+        })
+      })
+
+    that.currentStateCharacteristic['SENSOR'] = state
+    state.eventEnabled = true
+    this.services.push(contact)
   }
 
-  this.remoteGetValue("SENSOR");
-
+  this.remoteGetValue('SENSOR')
 }
 
-HomeMaticHomeKitSensorService.prototype.datapointEvent= function(dp,newValue) {
-  if (dp=='SENSOR') {
-    this.addLogEntry({ status:(newValue==true)?1:0 });
+HomeMaticHomeKitSensorService.prototype.datapointEvent = function (dp, newValue) {
+  if (dp === 'SENSOR') {
+    this.addLogEntry({ status: (newValue === true) ? 1 : 0 })
   }
 }
 
-
-module.exports = HomeMaticHomeKitSensorService; 
+module.exports = HomeMaticHomeKitSensorService
