@@ -1,45 +1,44 @@
 {
-	"deviceinfo": [
-		{
-			  "type" : "HM-CC-TC",
-			  "filter": [
+	"deviceinfo": [{
+			"type": "HM-CC-TC",
+			"filter": [
 				"WEATHER"
 			]
 
 		},
 
 		{
-			  "type" : "HM-CC-VG-1",
-			  "filter": [
+			"type": "HM-CC-VG-1",
+			"filter": [
 				"SHUTTER_CONTACT"
 			]
 
 		},
 
 		{
-		     "type" : "HM-LC-RGBW-WM",
-		     "combine": {
-		     	"source": ":2",
-		     	"target": ":1"
-		     }
+			"type": "HM-LC-RGBW-WM",
+			"combine": {
+				"source": ":2",
+				"target": ":1"
+			}
 		},
 
 		{
-			"type"  : "HM-WDS100-C6-O-2",
+			"type": "HM-WDS100-C6-O-2",
 			"isWeatherStation": "true"
 		},
 		{
-			"type"  : "HmIP-BSM",
+			"type": "HmIP-BSM",
 			"meterChannel": "7",
 			"switchChannel": "4"
 		},
 		{
-			"type"  : "HmIP-FSM",
+			"type": "HmIP-FSM",
 			"meterChannel": "2",
 			"switchChannel": "5"
 		},
 		{
-			"type"  : "HMIP-PSM",
+			"type": "HMIP-PSM",
 			"meterChannel": "6",
 			"switchChannel": "3"
 		}
@@ -49,308 +48,308 @@
 
 	"channelconfig": [
 
-	{
-	   "type": "SWITCH",
-	   "service": "HomeMaticHomeKitSwitchService"
-	},
+		{
+			"type": "SWITCH",
+			"service": "HomeMaticHomeKitSwitchService"
+		},
 
 
-	{
-	   "type": "SWITCH_VIRTUAL_RECEIVER",
-	   "service": "HomeMaticHomeKitSwitchService"
-	},
+		{
+			"type": "SWITCH_VIRTUAL_RECEIVER",
+			"service": "HomeMaticHomeKitSwitchService"
+		},
 
-	{
-	   "type": "HM-LC-Sw1-FM:SWITCH",
-	   "service": "HomeMaticHomeKitSwitchService"
-	},
+		{
+			"type": "HM-LC-Sw1-FM:SWITCH",
+			"service": "HomeMaticHomeKitSwitchService"
+		},
 
-	{
-	   "type": "DIMMER",
-	   "service": "HomeMaticHomeKitDimmerService"
-	},
-	{
-	   "type": "VIRTUAL_DIMMER",
-	   "service": "HomeMaticHomeKitDimmerService"
-	},
+		{
+			"type": "DIMMER",
+			"service": "HomeMaticHomeKitDimmerService"
+		},
+		{
+			"type": "VIRTUAL_DIMMER",
+			"service": "HomeMaticHomeKitDimmerService"
+		},
 
-	{
-	   "type": "KEY",
-	   "service": "HomeMaticHomeKitKeyService"
-	},
+		{
+			"type": "KEY",
+			"service": "HomeMaticHomeKitKeyService"
+		},
 
-	{
-		"type": "KEY_TRANSCEIVER",
-		"service": "HomeMaticHomeKitKeyService"
-	},
+		{
+			"type": "KEY_TRANSCEIVER",
+			"service": "HomeMaticHomeKitKeyService"
+		},
 
-	{
-	   "type": "VIRTUAL_KEY",
-	   "service": "HomeMaticHomeKitKeyService"
-	},
+		{
+			"type": "VIRTUAL_KEY",
+			"service": "HomeMaticHomeKitKeyService"
+		},
 
-	{
-	   "type": "TILT_SENSOR",
-	   "service": "HomeMaticHomeKitContactService"
-	},
+		{
+			"type": "TILT_SENSOR",
+			"service": "HomeMaticHomeKitContactService"
+		},
 
-	{
-	   "type": "SHUTTER_CONTACT",
-	   "service": "HomeMaticHomeKitContactService"
-	},
+		{
+			"type": "SHUTTER_CONTACT",
+			"service": "HomeMaticHomeKitContactService"
+		},
 
-	{
-	   "type": "SHUTTER_CONTACT_TRANSCEIVER",
-	   "service": "HomeMaticHomeKitContactService"
-	},
+		{
+			"type": "SHUTTER_CONTACT_TRANSCEIVER",
+			"service": "HomeMaticHomeKitContactService"
+		},
 
-	{
-	   "type": "HM-LC-RGBW-WM:RGBW_COLOR",
-	   "service": "HomeMaticHomeKitRGBWService"
-	},
-
-
-	{
-	   "type": "HmIP-BROLL:SHUTTER_VIRTUAL_RECEIVER",
-	   "service": "HomeMaticHomeKitBlindServiceIP"
-	},
-
-	{
-	   "type": "HmIP-FROLL:SHUTTER_VIRTUAL_RECEIVER",
-	   "service": "HomeMaticHomeKitBlindServiceIP"
-	},
-
-	{
-	   "type": "HmIP-FDT:DIMMER_VIRTUAL_RECEIVER",
-	   "service": "HomeMaticHomeKitDimmerService"
-	},
-	{
-		 "type": "HmIP-BDT:DIMMER_VIRTUAL_RECEIVER",
-		 "service": "HomeMaticHomeKitDimmerService"
-	},
-	{
-		 "type": "HmIP-PDT:DIMMER_VIRTUAL_RECEIVER",
-		 "service": "HomeMaticHomeKitDimmerService"
-	},
-	{
-	   "type": "SENSOR",
-	   "service": "HomeMaticHomeKitSensorService"
-	},
-
-	{
-	   "type": "ROTARY_HANDLE_SENSOR",
-	   "service": "HomeMaticHomeKitRotaryHandleService"
-	},
-
-	{
-	   "type": "ROTARY_HANDLE_TRANSCEIVER",
-	   "service": "HomeMaticHomeKitRotaryHandleService"
-	},
-
-	{
-	   "type": "MOTION_DETECTOR",
-	   "service": "HomeMaticHomeKitMotionDetectorService"
-	},
-
-	{
-	   "type": "MOTIONDETECTOR_TRANSCEIVER",
-	   "service": "HomeMaticHomeKitMotionDetectorServiceIP"
-	},
-
-	{
-	   "type": "SMOKE_DETECTOR",
-	   "service": "HomeMaticHomeKitSmokeDetectorService"
-	},
-
-	{
-	   "type": "SMOKE_DETECTOR_TEAM",
-	   "service": "HomeMaticHomeKitSmokeDetectorService"
-	},
-
-	{
-	   "type": "SMOKE_DETECTOR_TEAM_V2",
-	   "service": "HomeMaticHomeKitSmokeDetectorService"
-	},
-
-	{
-	   "type": "HmIP-SWSD:SMOKE_DETECTOR",
-	   "service": "HomeMaticHomeKitSmokeDetectorServiceIP"
-	},
-
-	{
-	   "type": "KEYMATIC",
-	   "service": "HomeMaticHomeKitKeymaticService"
-	},
-
-	{
-	   "type": "WEATHER",
-	   "service": "HomeMaticHomeKitThermostatWeatherService"
-	},
-
-	{
-	   "type": "WEATHER_TRANSMIT",
-	   "service": "HomeMaticHomeKitThermostatWeatherService"
-	},
-	{
-	   "type": "HM-WDS100-C6-O:WEATHER",
-	   "service": "HomeMaticHomeKitWeatherStationService"
-	},
-	{
-	   "type": "HM-WDS100-C6-O-2:WEATHER",
-	   "service": "HomeMaticHomeKitWeatherStationService"
-	},
-
-	{
-	   "type": "LUXMETER",
-	   "service": "HomeMaticHomeKitLuxMeterService"
-	},
-
-	{
-	   "type": "RAINDETECTOR",
-	   "service": "HomeMaticHomeKitRaindetectorService"
-	},
-
-	{
-	   "type": "RAINDETECTOR_HEAT",
-	   "service": "HomeMaticHomeKitSwitchService"
-	},
-
-	{
-	   "type": "CLIMATECONTROL_REGULATOR",
-	   "service": "HomeMaticHomeKitThermostatService"
-	},
+		{
+			"type": "HM-LC-RGBW-WM:RGBW_COLOR",
+			"service": "HomeMaticHomeKitRGBWService"
+		},
 
 
-	{
-	   "type": "THERMALCONTROL_TRANSMIT",
-	   "service": "HomeMaticHomeKitThermalControlService"
-	},
+		{
+			"type": "HmIP-BROLL:SHUTTER_VIRTUAL_RECEIVER",
+			"service": "HomeMaticHomeKitBlindServiceIP"
+		},
 
-	{
-	   "type": "CLIMATECONTROL_RT_TRANSCEIVER",
-	   "service": "HomeMaticHomeKitThermalControlService"
-	},
+		{
+			"type": "HmIP-FROLL:SHUTTER_VIRTUAL_RECEIVER",
+			"service": "HomeMaticHomeKitBlindServiceIP"
+		},
+
+		{
+			"type": "HmIP-FDT:DIMMER_VIRTUAL_RECEIVER",
+			"service": "HomeMaticHomeKitDimmerService"
+		},
+		{
+			"type": "HmIP-BDT:DIMMER_VIRTUAL_RECEIVER",
+			"service": "HomeMaticHomeKitDimmerService"
+		},
+		{
+			"type": "HmIP-PDT:DIMMER_VIRTUAL_RECEIVER",
+			"service": "HomeMaticHomeKitDimmerService"
+		},
+		{
+			"type": "SENSOR",
+			"service": "HomeMaticHomeKitSensorService"
+		},
+
+		{
+			"type": "ROTARY_HANDLE_SENSOR",
+			"service": "HomeMaticHomeKitRotaryHandleService"
+		},
+
+		{
+			"type": "ROTARY_HANDLE_TRANSCEIVER",
+			"service": "HomeMaticHomeKitRotaryHandleService"
+		},
+
+		{
+			"type": "MOTION_DETECTOR",
+			"service": "HomeMaticHomeKitMotionDetectorService"
+		},
+
+		{
+			"type": "MOTIONDETECTOR_TRANSCEIVER",
+			"service": "HomeMaticHomeKitMotionDetectorServiceIP"
+		},
+
+		{
+			"type": "SMOKE_DETECTOR",
+			"service": "HomeMaticHomeKitSmokeDetectorService"
+		},
+
+		{
+			"type": "SMOKE_DETECTOR_TEAM",
+			"service": "HomeMaticHomeKitSmokeDetectorService"
+		},
+
+		{
+			"type": "SMOKE_DETECTOR_TEAM_V2",
+			"service": "HomeMaticHomeKitSmokeDetectorService"
+		},
+
+		{
+			"type": "HmIP-SWSD:SMOKE_DETECTOR",
+			"service": "HomeMaticHomeKitSmokeDetectorServiceIP"
+		},
+
+		{
+			"type": "KEYMATIC",
+			"service": "HomeMaticHomeKitKeymaticService"
+		},
+
+		{
+			"type": "WEATHER",
+			"service": "HomeMaticHomeKitThermostatWeatherService"
+		},
+
+		{
+			"type": "WEATHER_TRANSMIT",
+			"service": "HomeMaticHomeKitThermostatWeatherService"
+		},
+		{
+			"type": "HM-WDS100-C6-O:WEATHER",
+			"service": "HomeMaticHomeKitWeatherStationService"
+		},
+		{
+			"type": "HM-WDS100-C6-O-2:WEATHER",
+			"service": "HomeMaticHomeKitWeatherStationService"
+		},
+
+		{
+			"type": "LUXMETER",
+			"service": "HomeMaticHomeKitLuxMeterService"
+		},
+
+		{
+			"type": "RAINDETECTOR",
+			"service": "HomeMaticHomeKitRaindetectorService"
+		},
+
+		{
+			"type": "RAINDETECTOR_HEAT",
+			"service": "HomeMaticHomeKitSwitchService"
+		},
+
+		{
+			"type": "CLIMATECONTROL_REGULATOR",
+			"service": "HomeMaticHomeKitThermostatService"
+		},
 
 
-	{
-	   "type": "VARIABLE",
-	   "service": "HomeMaticHomeKitVariableService"
-	},
+		{
+			"type": "THERMALCONTROL_TRANSMIT",
+			"service": "HomeMaticHomeKitThermalControlService"
+		},
 
-	{
-	   "type": "PROGRAM_LAUNCHER",
-	   "service": "HomeMaticHomeKitProgramService"
-	},
-	{
-	   "type": "VARIABLE_UPDATE_TRIGGER",
-	   "service": "HomeMaticHomeKitVariableUpdaterService"
-	},
-	{
-	   "type": "HM-WDS30-T-O:WEATHER",
-	   "service": "HomeMaticHomeKitThermometerService"
-	},
-	{
-	   "type": "HM-WDS30-OT2-SM:WEATHER",
-	   "service": "HomeMaticHomeKitThermometerService"
-	},
-	{
-	   "type": "WINMATIC",
-	   "service": "HomeMaticHomeKitWinMaticService"
-	},
-	{
-	   "type": "HM-Sec-Sir-WM:ARMING",
-	   "service": "HomeMaticHomeKitSecuritySystem"
-	},
-
-	{
-	   "type": "HM-Sen-DB-PCB:KEY",
-	   "service": "HomeMaticHomeKitDoorBellMotionService"
-	},
+		{
+			"type": "CLIMATECONTROL_RT_TRANSCEIVER",
+			"service": "HomeMaticHomeKitThermalControlService"
+		},
 
 
-	{
-	   "type": "WATERDETECTIONSENSOR",
-	   "service": "HomeMaticHomeKitLeakSensorService"
-	},
-	{
-	   "type": "POWERMETER",
-	   "service": "HomeMaticHomeKitPowerMeterService"
-	},
-	{
-	   "type": "ENERGIE_METER_TRANSMITTER",
-	   "service": "HomeMaticHomeKitPowerMeterServiceIP"
-	},
+		{
+			"type": "VARIABLE",
+			"service": "HomeMaticHomeKitVariableService"
+		},
 
-	{
-	   "type": "HEATING_CLIMATECONTROL_TRANSCEIVER",
-	   "service": "HomeMaticHomeKitThermostatServiceIP"
-	},
-	{
-	   "type": "HmIP-SWO-B:WEATHER_TRANSMIT",
-	   "service": "HomeMaticHomeKitWeatherStationServiceIP"
-	},
-	{
-	   "type": "HmIP-SWO-PL:WEATHER_TRANSMIT",
-	   "service": "HomeMaticHomeKitWeatherStationServiceIP"
-	},
-	{
-	   "type": "HmIP-SWO-PR:WEATHER_TRANSMIT",
-	   "service": "HomeMaticHomeKitWeatherStationServiceIP"
-	},
-	{
-	   "type": "SENSOR_FOR_CARBON_DIOXIDE",
-	   "service": "HomeMaticHomeKitCarbonDioxideSensorService"
-	},
-	{
-	   "type" : "HmIP-BBL:BLIND_TRANSMITTER",
-	   "service": "HomeMaticHomeKitBlindSlatServiceIP"
-	},
-  {
-		"type": "HmIP-FBL:BLIND_VIRTUAL_RECEIVER",
-    "service": "HomeMaticHomeKitBlindSlatServiceIP"
-	},
-	{
-		"type" : "HmIP-SPI:PRESENCEDETECTOR_TRANSCEIVER",
-		"service" : "HomeMaticHomeKitPresenceDetectorServiceIP"
-	},
-	{
-	  "type" : "POWERMETER_IGL",
-		"service" : "HomeMaticHomeKitEnergyCounterService"
-	},
-	{
-		"type":"HM-LC-Ja1PBU-FM:JALOUSIE",
-	  	"service": "HomeMaticHomeKitBlindService"
-	},
-	{
-		"type":"HM-LC-Bl1-SM:BLIND",
-	  	"service": "HomeMaticHomeKitBlindService"
-	},
-	{
-		"type":"HM-LC-Bl1-FM:BLIND",
-	  	"service": "HomeMaticHomeKitBlindService"
-	},
-	{
-		"type":"HMW-LC-Bl1-DR:BLIND",
-		"service": "HomeMaticHomeKitBlindService"
-	},
-	{
-		"type":"HM-LC-Bl1PBU-FM:BLIND",
-		"service": "HomeMaticHomeKitBlindService"
-	}
-	{
-        "type": "HmIP-SWD:WATER_DETECTION_TRANSMITTER",
-        "service": "HomeMaticHomeKitWaterSensorService"
-	 },
+		{
+			"type": "PROGRAM_LAUNCHER",
+			"service": "HomeMaticHomeKitProgramService"
+		},
+		{
+			"type": "VARIABLE_UPDATE_TRIGGER",
+			"service": "HomeMaticHomeKitVariableUpdaterService"
+		},
+		{
+			"type": "HM-WDS30-T-O:WEATHER",
+			"service": "HomeMaticHomeKitThermometerService"
+		},
+		{
+			"type": "HM-WDS30-OT2-SM:WEATHER",
+			"service": "HomeMaticHomeKitThermometerService"
+		},
+		{
+			"type": "WINMATIC",
+			"service": "HomeMaticHomeKitWinMaticService"
+		},
+		{
+			"type": "HM-Sec-Sir-WM:ARMING",
+			"service": "HomeMaticHomeKitSecuritySystem"
+		},
 
-	 {
-		 "type":"HmIP-BLS:DIMMER_VIRTUAL_RECEIVER",
-		 "service":"HomeMaticHomeKitBSLColorService"
-	 },
-	 
-	 {
-	   "type": "HmIP-MOD-TM:DOOR_RECEIVER",
-	   "service": "HomeMaticHomeKitGarageDoorOpenerService"
-	}
+		{
+			"type": "HM-Sen-DB-PCB:KEY",
+			"service": "HomeMaticHomeKitDoorBellMotionService"
+		},
+
+
+		{
+			"type": "WATERDETECTIONSENSOR",
+			"service": "HomeMaticHomeKitLeakSensorService"
+		},
+		{
+			"type": "POWERMETER",
+			"service": "HomeMaticHomeKitPowerMeterService"
+		},
+		{
+			"type": "ENERGIE_METER_TRANSMITTER",
+			"service": "HomeMaticHomeKitPowerMeterServiceIP"
+		},
+
+		{
+			"type": "HEATING_CLIMATECONTROL_TRANSCEIVER",
+			"service": "HomeMaticHomeKitThermostatServiceIP"
+		},
+		{
+			"type": "HmIP-SWO-B:WEATHER_TRANSMIT",
+			"service": "HomeMaticHomeKitWeatherStationServiceIP"
+		},
+		{
+			"type": "HmIP-SWO-PL:WEATHER_TRANSMIT",
+			"service": "HomeMaticHomeKitWeatherStationServiceIP"
+		},
+		{
+			"type": "HmIP-SWO-PR:WEATHER_TRANSMIT",
+			"service": "HomeMaticHomeKitWeatherStationServiceIP"
+		},
+		{
+			"type": "SENSOR_FOR_CARBON_DIOXIDE",
+			"service": "HomeMaticHomeKitCarbonDioxideSensorService"
+		},
+		{
+			"type": "HmIP-BBL:BLIND_TRANSMITTER",
+			"service": "HomeMaticHomeKitBlindSlatServiceIP"
+		},
+		{
+			"type": "HmIP-FBL:BLIND_VIRTUAL_RECEIVER",
+			"service": "HomeMaticHomeKitBlindSlatServiceIP"
+		},
+		{
+			"type": "HmIP-SPI:PRESENCEDETECTOR_TRANSCEIVER",
+			"service": "HomeMaticHomeKitPresenceDetectorServiceIP"
+		},
+		{
+			"type": "POWERMETER_IGL",
+			"service": "HomeMaticHomeKitEnergyCounterService"
+		},
+		{
+			"type": "HM-LC-Ja1PBU-FM:JALOUSIE",
+			"service": "HomeMaticHomeKitBlindService"
+		},
+		{
+			"type": "HM-LC-Bl1-SM:BLIND",
+			"service": "HomeMaticHomeKitBlindService"
+		},
+		{
+			"type": "HM-LC-Bl1-FM:BLIND",
+			"service": "HomeMaticHomeKitBlindService"
+		},
+		{
+			"type": "HMW-LC-Bl1-DR:BLIND",
+			"service": "HomeMaticHomeKitBlindService"
+		},
+		{
+			"type": "HM-LC-Bl1PBU-FM:BLIND",
+			"service": "HomeMaticHomeKitBlindService"
+		},
+		{
+			"type": "HmIP-SWD:WATER_DETECTION_TRANSMITTER",
+			"service": "HomeMaticHomeKitWaterSensorService"
+		},
+
+		{
+			"type": "HmIP-BLS:DIMMER_VIRTUAL_RECEIVER",
+			"service": "HomeMaticHomeKitBSLColorService"
+		},
+
+		{
+			"type": "HmIP-MOD-TM:DOOR_RECEIVER",
+			"service": "HomeMaticHomeKitGarageDoorOpenerService"
+		}
 
 
 
