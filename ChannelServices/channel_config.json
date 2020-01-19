@@ -129,6 +129,10 @@
 		 "service": "HomeMaticHomeKitDimmerService"
 	},
 	{
+		 "type": "HmIP-PDT:DIMMER_VIRTUAL_RECEIVER",
+		 "service": "HomeMaticHomeKitDimmerService"
+	},
+	{
 	   "type": "SENSOR",
 	   "service": "HomeMaticHomeKitSensorService"
 	},
