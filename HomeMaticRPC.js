@@ -15,6 +15,7 @@ var HomeMaticRPC = function (log, ccuip, port, system, platform) {
   this.client = undefined
   this.stopping = false
   this.localIP = undefined
+  this.bindIP = undefined
   this.listeningPort = port
   this.lastMessage = 0
   this.watchDogTimer = undefined
@@ -83,16 +84,22 @@ var HomeMaticRPC = function (log, ccuip, port, system, platform) {
 HomeMaticRPC.prototype.init = function () {
   var that = this
 
-  var ip = this.platform.config.local_ip
-  if (ip === undefined) {
-    ip = this.getIPAddress()
-    if (ip === '0.0.0.0') {
+  var bindIP = this.platform.config.bind_ip
+  if (bindIP === undefined) {
+    bindIP = this.getIPAddress()
+    if (bindIP === '0.0.0.0') {
       that.log('Can not fetch IP')
       return
     }
   }
 
+  var ip = this.platform.config.local_ip
+  if (ip === undefined) {
+    ip = bindIP
+  }
+
   this.localIP = ip
+  this.bindIP = bindIP
 
   this.log.info('local ip used : %s. you may change that with local_ip parameter in config', ip)
 
@@ -100,7 +107,7 @@ HomeMaticRPC.prototype.init = function () {
     if (error === null) {
       if (inUse === false) {
         that.server = that.rpc.createServer({
-          host: that.localIP,
+          host: that.bindIP,
           port: that.listeningPort
         })
 
