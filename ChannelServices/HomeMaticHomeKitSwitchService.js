@@ -85,7 +85,7 @@ HomeMaticHomeKitSwitchService.prototype.addCoreSwitchFunctions = function (Servi
 
     .on('get', function (callback) {
       that.query('STATE', function (value) {
-        let hkState = ((value === '1') || (value === true) ||  (value === 'true') || (value === 1))
+        let hkState = ((value === '1') || (value === true) || (value === 'true') || (value === 1))
         that.log.info('Switch Get hm is %s will return %s', value, hkState)
         if (callback) callback(null, hkState)
       })
