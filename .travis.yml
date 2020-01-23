@@ -12,4 +12,4 @@ deploy:
   api_key:
     secure: $secret_access_key
   on:
-    branch: release
+    branch: master

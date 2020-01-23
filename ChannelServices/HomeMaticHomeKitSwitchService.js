@@ -68,8 +68,7 @@ HomeMaticHomeKitSwitchService.prototype.createProgrammService = function (Servic
     .on('set', function (value, callback) {
       if ((value === 1) || (value === true)) {
         that.log.debug('Launch Program ' + that.adress)
-        that.command('sendregacommand', '', 'var x=dom.GetObject("' + that.adress + '");if (x) {x.ProgramExecute();}', function () {
-        })
+        that.command('sendregacommand', '', 'var x=dom.GetObject("' + that.adress + '");if (x) {x.ProgramExecute();}', function () {})
 
         setTimeout(function () {
           that.c_isOn.setValue(0, null)
@@ -86,7 +85,9 @@ HomeMaticHomeKitSwitchService.prototype.addCoreSwitchFunctions = function (Servi
 
     .on('get', function (callback) {
       that.query('STATE', function (value) {
-        if (callback) callback(null, value)
+        let hkState = ((value === '1') || (value === true) ||  (value === 'true') || (value === 1))
+        that.log.info('Switch Get hm is %s will return %s', value, hkState)
+        if (callback) callback(null, hkState)
       })
     })
 
@@ -172,7 +173,9 @@ HomeMaticHomeKitSwitchService.prototype.createValveService = function (Service, 
     if (types[this.adress] !== undefined) {
       vtype = types[this.adress]
     }
-    if (vtype > 3) { vtype = 0 }
+    if (vtype > 3) {
+      vtype = 0
+    }
   }
 
   var valveType = this.service_item.getCharacteristic(Characteristic.ValveType)
@@ -193,7 +196,9 @@ HomeMaticHomeKitSwitchService.prototype.createValveService = function (Service, 
       that.log.debug('set Characteristic.SetDuration %s', value)
 
       let strPath = path.join(that.platform.localPath, that.adress) + '.json'
-      fs.writeFileSync(strPath, JSON.stringify({ duration: that.setDuration }))
+      fs.writeFileSync(strPath, JSON.stringify({
+        duration: that.setDuration
+      }))
 
       callback()
     })
@@ -281,7 +286,7 @@ HomeMaticHomeKitSwitchService.prototype.queryState = function () {
 HomeMaticHomeKitSwitchService.prototype.datapointEvent = function (dp, newValue) {
   if (dp === this.channelnumber + ':STATE') {
     let hmState = ((newValue === 'true') || (newValue === true)) ? 1 : 0
-
+    this.log.debug('Switch Event result %s hm %s', newValue, newValue)
     if (hmState === 0) {
       this.remainTime = 0
       if (this.c_timeRemain !== undefined) {
