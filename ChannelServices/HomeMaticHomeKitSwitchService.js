@@ -14,6 +14,7 @@ util.inherits(HomeMaticHomeKitSwitchService, HomeKitGenericService)
 HomeMaticHomeKitSwitchService.prototype.createDeviceService = function (Service, Characteristic) {
   let that = this
   this.ignoreWorking = true
+  this.usecache = false
   this.delayOnSet = 1000
 
   if (this.special === 'PROGRAM') {
@@ -86,7 +87,7 @@ HomeMaticHomeKitSwitchService.prototype.addCoreSwitchFunctions = function (Servi
     .on('get', function (callback) {
       that.query('STATE', function (value) {
         let hkState = ((value === '1') || (value === true) || (value === 'true') || (value === 1))
-        that.log.info('Switch Get hm is %s will return %s', value, hkState)
+        that.log.debug('Switch Get CCU is %s will return %s', value, hkState)
         if (callback) callback(null, hkState)
       })
     })
