@@ -17,6 +17,7 @@ HomeMaticHomeKitGarageDoorService.prototype.propagateServices = function (homebr
 
 HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Service, Characteristic) {
   let that = this
+  this.usecache = false
   this.characteristic = Characteristic
 
   this.address_sensor_close = this.getClazzConfigValue('address_sensor_close', undefined)
@@ -31,8 +32,14 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
   this.delay_actor_open = this.getClazzConfigValue('delay_actor_open', 5)
   this.delay_actor_close = this.getClazzConfigValue('delay_actor_close', 5)
 
-  this.message_actor_open = this.getClazzConfigValue('message_actor_open', { 'on': 1, 'off': 0 })
-  this.message_actor_close = this.getClazzConfigValue('message_actor_close', { 'on': 1, 'off': 0 })
+  this.message_actor_open = this.getClazzConfigValue('message_actor_open', {
+    'on': 1,
+    'off': 0
+  })
+  this.message_actor_close = this.getClazzConfigValue('message_actor_close', {
+    'on': 1,
+    'off': 0
+  })
 
   this.sensor_requery_time = this.getClazzConfigValue('sensor_requery_time', 30)
 
@@ -73,7 +80,7 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
       var returnValue = Characteristic.CurrentDoorState.STOPPED
 
       if ((that.address_sensor_close !== undefined) && (that.address_sensor_open !== undefined)) {
-      // We have two contacts so ask for boath levels
+        // We have two contacts so ask for boath levels
 
         that.remoteGetDataPointValue(that.address_sensor_close, function (closeValue) {
           that.log.debug('get close value result is %s', closeValue)
@@ -82,7 +89,9 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
 
             if ((closeValue === that.state_sensor_close) && (openValue !== that.state_sensor_open)) {
               returnValue = Characteristic.CurrentDoorState.CLOSED
-              if (that.targetCommand) { that.targetDoorState.updateValue(that.characteristic.TargetDoorState.CLOSED, null) }
+              if (that.targetCommand) {
+                that.targetDoorState.updateValue(that.characteristic.TargetDoorState.CLOSED, null)
+              }
             }
 
             if ((closeValue !== that.state_sensor_close) && (openValue !== that.state_sensor_open)) {
@@ -91,7 +100,9 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
 
             if ((closeValue !== that.state_sensor_close) && (openValue === that.state_sensor_open)) {
               returnValue = Characteristic.CurrentDoorState.OPEN
-              if (that.targetCommand) { that.targetDoorState.updateValue(that.characteristic.TargetDoorState.OPEN, null) }
+              if (that.targetCommand) {
+                that.targetDoorState.updateValue(that.characteristic.TargetDoorState.OPEN, null)
+              }
             }
 
             if (callback) callback(null, returnValue)
@@ -100,7 +111,7 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
       }
 
       if ((that.address_sensor_close !== undefined) && (that.address_sensor_open === undefined)) {
-      // There is only one contact
+        // There is only one contact
         that.remoteGetDataPointValue(that.address_sensor_close, function (closeValue) {
           that.log.debug('get close value result is %s', closeValue)
           if (closeValue === that.state_sensor_close) {
@@ -120,7 +131,7 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
       clearTimeout(this.requeryTimer)
 
       if ((that.address_actor_open !== undefined) && (that.address_actor_close === undefined)) {
-      // there is only one actor
+        // there is only one actor
         if (value === Characteristic.TargetDoorState.OPEN) {
           that.currentDoorState.updateValue(that.characteristic.CurrentDoorState.OPENING, null)
         } else {
@@ -131,13 +142,13 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
         that.sendActorMessage(that.address_actor_open, that.message_actor_open['off'], that.delay_actor_open)
 
         that.requeryTimer = setTimeout(function () {
-        // reset Command Switch to override target
+          // reset Command Switch to override target
           that.targetCommand = false
           that.log.debug('garage door requery sensors ...')
           that.querySensors()
         }, 1000 * that.sensor_requery_time)
       } else {
-      // there is a actor for every direction so
+        // there is a actor for every direction so
         if (value === Characteristic.TargetDoorState.OPEN) {
           that.currentDoorState.updateValue(that.characteristic.CurrentDoorState.OPENING, null)
 
@@ -230,7 +241,9 @@ HomeMaticHomeKitGarageDoorService.prototype.event = function (channel, dp, newVa
     if ((eventAddress === this.address_sensor_close) && (newValue !== this.state_sensor_close)) {
       // Sensor Close just opened so the door is moving to open position
       this.log.debug('close sensor set new target state %s', this.characteristic.TargetDoorState.OPEN)
-      if (this.targetCommand) { this.targetDoorState.updateValue(this.characteristic.TargetDoorState.OPEN) }
+      if (this.targetCommand) {
+        this.targetDoorState.updateValue(this.characteristic.TargetDoorState.OPEN)
+      }
       this.currentDoorState.updateValue(this.characteristic.CurrentDoorState.OPENING, null)
     }
 
@@ -244,7 +257,9 @@ HomeMaticHomeKitGarageDoorService.prototype.event = function (channel, dp, newVa
     if ((eventAddress === this.address_sensor_open) && (newValue !== this.state_sensor_open)) {
       // Sensor open just went to false so the door is moving to close position
       this.log.debug('open sensor set new target state %s', this.characteristic.TargetDoorState.CLOSED)
-      if (this.targetCommand) { this.targetDoorState.updateValue(this.characteristic.TargetDoorState.CLOSED) }
+      if (this.targetCommand) {
+        this.targetDoorState.updateValue(this.characteristic.TargetDoorState.CLOSED)
+      }
       this.currentDoorState.updateValue(this.characteristic.CurrentDoorState.CLOSING, null)
     }
   } else {
