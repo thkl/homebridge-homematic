@@ -84,10 +84,10 @@ var HomeMaticRPC = function (log, ccuip, port, system, platform) {
 HomeMaticRPC.prototype.init = function () {
   var that = this
 
-  var bind_ip = this.platform.config.bind_ip
-  if (bind_ip === undefined) {
-    bind_ip = this.getIPAddress()
-    if (bind_ip === '0.0.0.0') {
+  var bindIP = this.platform.config.bind_ip
+  if (bindIP === undefined) {
+    bindIP = this.getIPAddress()
+    if (bindIP === '0.0.0.0') {
       that.log('Can not fetch IP')
       return
     }
@@ -95,11 +95,11 @@ HomeMaticRPC.prototype.init = function () {
 
   var ip = this.platform.config.local_ip
   if (ip === undefined) {
-    ip = bind_ip
+    ip = bindIP
   }
 
   this.localIP = ip
-  this.bindIP = bind_ip
+  this.bindIP = bindIP
 
   this.log.info('local ip used : %s. you may change that with local_ip parameter in config', ip)
 
