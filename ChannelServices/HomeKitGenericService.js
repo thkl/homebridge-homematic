@@ -106,11 +106,11 @@ function HomeKitGenericService (log, platform, id, name, type, adress, special, 
 HomeKitGenericService.prototype = {
 
   /**
-   * link a datapoint to a characteristic
-   * @param  {[type]} key             Datapointname or channeladdress
-   * @param  {[type]} aCharacteristic Characteristic to link
-   * @return {[type]}
-   */
+     * link a datapoint to a characteristic
+     * @param  {[type]} key             Datapointname or channeladdress
+     * @param  {[type]} aCharacteristic Characteristic to link
+     * @return {[type]}
+     */
   setCurrentStateCharacteristic: function (key, aCharacteristic) {
     if (key.indexOf(':') === -1) {
       key = this.channelnumber + ':' + key
@@ -119,10 +119,10 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-   * returns a characteristic for a linked datapoint
-   * @param  {[type]} key Datapointname or channeladdress
-   * @return {[type]}     linked characteristic
-   */
+     * returns a characteristic for a linked datapoint
+     * @param  {[type]} key Datapointname or channeladdress
+     * @return {[type]}     linked characteristic
+     */
   getCurrentStateCharacteristic: function (key) {
     if (key.indexOf(':') === -1) {
       key = this.channelnumber + ':' + key
@@ -131,11 +131,11 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-   * Check if the Event was triggerd by a Datapointname
-   * @param  {[type]} dp_i    Eventkey
-   * @param  {[type]} dp_test Datapoint name (channel address will beautocompleted)
-   * @return {[type]}         true if the eventkey matches the datapoint name
-   */
+     * Check if the Event was triggerd by a Datapointname
+     * @param  {[type]} dp_i    Eventkey
+     * @param  {[type]} dp_test Datapoint name (channel address will beautocompleted)
+     * @return {[type]}         true if the eventkey matches the datapoint name
+     */
   isDataPointEvent: function (dPi, dPTest) {
     if (dPTest.indexOf(':') === -1) {
       dPTest = this.channelnumber + ':' + dPTest
@@ -144,10 +144,10 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-   * checks if a array contains a undefined element
-   * @param  {[type]} array
-   * @return {[type]}       returns true if all elements are defined
-   */
+     * checks if a array contains a undefined element
+     * @param  {[type]} array
+     * @return {[type]}       returns true if all elements are defined
+     */
   haz: function (array) {
     var result = true
     if (array) {
@@ -161,12 +161,12 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-   * Returns a stored value for a key specified for the current channel
-   *
-   * @param  {[type]} key          a key
-   * @param  {[type]} defaultValue value to return if there is no previously saved value
-   * @return {[type]}              the value
-   */
+     * Returns a stored value for a key specified for the current channel
+     *
+     * @param  {[type]} key          a key
+     * @param  {[type]} defaultValue value to return if there is no previously saved value
+     * @return {[type]}              the value
+     */
   getPersistentState: function (key, defaultValue) {
     if ((this.persistentStates !== undefined) && (this.persistentStates[key] !== undefined)) {
       return this.persistentStates[key]
@@ -176,11 +176,11 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-   * saves a value for a key persistent to disc
-   * @param  {[type]} key   the key
-   * @param  {[type]} value the value
-   * @return {[type]}
-   */
+     * saves a value for a key persistent to disc
+     * @param  {[type]} key   the key
+     * @param  {[type]} value the value
+     * @return {[type]}
+     */
   setPersistentState: function (key, value) {
     if (this.persistentStates === undefined) {
       this.log.debug('new store')
@@ -199,8 +199,8 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-  add FakeGato History object only if not in a testcase
-  **/
+                  add FakeGato History object only if not in a testcase
+                  **/
   enableLoggingService: function (type, disableTimer) {
     if (this.runsInTestMode === true) {
       this.log.debug('Skip Loging Service for %s because of testmode', this.displayName)
@@ -212,16 +212,21 @@ HomeKitGenericService.prototype = {
       this.log.debug('Adding Log Service for %s with type %s', this.displayName, type)
       var hostname = os.hostname()
       let filename = hostname + '_' + this.adress + '_persist.json'
-      this.loggingService = new FakeGatoHistoryService(type, this, { storage: 'fs', filename: filename, path: this.platform.localPath, disableTimer: disableTimer })
+      this.loggingService = new FakeGatoHistoryService(type, this, {
+        storage: 'fs',
+        filename: filename,
+        path: this.platform.localPath,
+        disableTimer: disableTimer
+      })
       this.services.push(this.loggingService)
     }
   },
 
   /**
-   * adds a characteristic to the current logging service
-   * @param  {[type]} aCharacteristic [description]
-   * @return {[type]}                 [description]
-   */
+     * adds a characteristic to the current logging service
+     * @param  {[type]} aCharacteristic [description]
+     * @return {[type]}                 [description]
+     */
   addLoggingCharacteristic: function (aCharacteristic) {
     if ((this.runsInTestMode === true) || (this.loggingService === undefined)) {
       this.log.debug('adding Characteristic skipped for %s because of testmode ', this.displayName)
@@ -231,10 +236,10 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-   * returns a characteristic from the current logging service
-   * @param  {[type]} aCharacteristic [description]
-   * @return {[type]}                 [description]
-   */
+     * returns a characteristic from the current logging service
+     * @param  {[type]} aCharacteristic [description]
+     * @return {[type]}                 [description]
+     */
   getLoggingCharacteristic: function (aCharacteristic) {
     if ((this.runsInTestMode === true) || (this.loggingService === undefined)) {
       this.log.debug('get Characteristic not available for %s because of testmode', this.displayName)
@@ -245,10 +250,10 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-   * adds a log entry
-   * @param  {[type]} data {key:value}
-   * @return {[type]}      [description]
-   */
+     * adds a log entry
+     * @param  {[type]} data {key:value}
+     * @return {[type]}      [description]
+     */
   addLogEntry: function (data) {
     // check if loggin is enabled
     if ((this.loggingService !== undefined) && (data !== undefined)) {
@@ -285,11 +290,11 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-   * returns a class configuration value by a key
-   * @param  {[type]} key          [description]
-   * @param  {[type]} defaultValue [description]
-   * @return {[type]}              [description]
-   */
+     * returns a class configuration value by a key
+     * @param  {[type]} key          [description]
+     * @param  {[type]} defaultValue [description]
+     * @return {[type]}              [description]
+     */
   getClazzConfigValue: function (key, defaultValue) {
     var result = defaultValue
     if (this.cfg !== undefined) {
@@ -301,11 +306,11 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-  * adds the low bat characteristic to the current service. this will also auto enable event listening for LOWBAT Events
-  * @param  {[type]} rootService    [description]
-  * @param  {[type]} Characteristic [description]
-  * @return {[type]}                [description]
-  */
+     * adds the low bat characteristic to the current service. this will also auto enable event listening for LOWBAT Events
+     * @param  {[type]} rootService    [description]
+     * @param  {[type]} Characteristic [description]
+     * @return {[type]}                [description]
+     */
   addLowBatCharacteristic: function (rootService, Characteristic) {
     var bat = rootService.getCharacteristic(Characteristic.StatusLowBattery)
 
@@ -320,12 +325,12 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-   * adds the sabotage characteristic to the current service. this will also auto enable evnent listening for .SABOTAGE and .ERROR_SABOTAGE
-   * @param  {[type]} rootService    [description]
-   * @param  {[type]} Characteristic [description]
-   * @param  {[type]} address        [description]
-   * @return {[type]}                [description]
-   */
+     * adds the sabotage characteristic to the current service. this will also auto enable evnent listening for .SABOTAGE and .ERROR_SABOTAGE
+     * @param  {[type]} rootService    [description]
+     * @param  {[type]} Characteristic [description]
+     * @param  {[type]} address        [description]
+     * @return {[type]}                [description]
+     */
   addTamperedCharacteristic: function (rootService, Characteristic, address) {
     var tampered = rootService.getCharacteristic(Characteristic.StatusTampered)
 
@@ -343,10 +348,10 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-   * set the current Service to readonly
-   * @param  {[type]} readOnly [description]
-   * @return {[type]}          [description]
-   */
+     * set the current Service to readonly
+     * @param  {[type]} readOnly [description]
+     * @return {[type]}          [description]
+     */
   setReadOnly: function (readOnly) {
     this.readOnly = readOnly
     if (readOnly === true) {
@@ -370,7 +375,9 @@ HomeKitGenericService.prototype = {
     var that = this
     if (that.usecache === false) {
       that.remoteGetValue(dp, function (value) {
-        if (callback !== undefined) { callback(value) }
+        if (callback !== undefined) {
+          callback(value)
+        }
       })
     } else
 
@@ -381,7 +388,9 @@ HomeKitGenericService.prototype = {
     } else {
       // this.log("Ask CCU");
       that.remoteGetValue(dp, function (value) {
-        if (callback !== undefined) { callback(value) }
+        if (callback !== undefined) {
+          callback(value)
+        }
       })
       // if (callback!=undefined){callback(0);}
     }
@@ -437,8 +446,12 @@ HomeKitGenericService.prototype = {
           return parseFloat(value)
 
         case 'bool':
-          if (value === true) { return 1 }
-          if (value === 'true') { return 1 }
+          if (value === true) {
+            return 1
+          }
+          if (value === 'true') {
+            return 1
+          }
           return 0
       }
     }
@@ -769,7 +782,9 @@ HomeKitGenericService.prototype = {
 
     if ((tp[1] === 'LEVEL') || (tp[1] === 'LEVEL_2')) {
       newValue = parseFloat(newValue) / 100
-      newValue = { 'explicitDouble': newValue }
+      newValue = {
+        'explicitDouble': newValue
+      }
     }
     if ((tp[1] === 'COLOR') && (this.type === 'RGBW_COLOR')) {
       newValue = Math.round((value / 360) * 199)
@@ -784,13 +799,17 @@ HomeKitGenericService.prototype = {
       var interf = this.intf
       that.log.debug('(Rpc) Send %s to %s at %s type %s', newValue, tp[1], tp[0], typeof newValue)
       that.platform.setValue(interf, tp[0], tp[1], newValue)
-      if (callback !== undefined) { callback() }
+      if (callback !== undefined) {
+        callback()
+      }
     }
 
     if (mode === 'setrega') {
       that.log.debug('(Rega) Send %s to %s at %s type %s', newValue, tp[1], tp[0], typeof newValue)
       that.platform.setRegaValue(tp[0], tp[1], newValue)
-      if (callback !== undefined) { callback() }
+      if (callback !== undefined) {
+        callback()
+      }
     }
 
     if (mode === 'sendregacommand') {
@@ -826,7 +845,11 @@ HomeKitGenericService.prototype = {
     for (var index in this.services) {
       var service = this.services[index]
 
-      if (typeof name === 'string' && (service.displayName === name || service.name === name || service.subtype === name)) { return service } else if (typeof name === 'function' && ((service instanceof name) || (name.UUID === service.UUID))) { return service }
+      if (typeof name === 'string' && (service.displayName === name || service.name === name || service.subtype === name)) {
+        return service
+      } else if (typeof name === 'function' && ((service instanceof name) || (name.UUID === service.UUID))) {
+        return service
+      }
     }
   },
 
@@ -844,6 +867,36 @@ HomeKitGenericService.prototype = {
     precision = Math.abs(precision)
 
     return Number(Math.sign(val) * (Math.round(Math.abs(val) + exponent + precision) + exponentNeg + precision))
+  },
+
+  didMatch: function (v1, v2) {
+    if (typeof v1 === typeof v2) {
+      return (v1 === v2)
+    }
+
+    if (((typeof v1 === 'number') && (typeof v2 === 'string')) || ((typeof v1 === 'string') && (typeof v2 === 'number'))) {
+      return parseFloat(v1) === parseFloat(v2)
+    }
+
+    if ((typeof v1 === 'boolean') && (typeof v2 === 'string')) {
+      if (v1 === true) {
+        return (v2.toLocaleLowerCase() === 'true')
+      }
+      if (v1 === false) {
+        return (v2.toLocaleLowerCase() === 'false')
+      }
+    }
+
+    if ((typeof v2 === 'boolean') && (typeof v1 === 'string')) {
+      if (v2 === true) {
+        return (v1.toLocaleLowerCase() === 'true')
+      }
+      if (v2 === false) {
+        return (v1.toLocaleLowerCase() === 'false')
+      }
+    }
+
+    return false
   }
 
 }
