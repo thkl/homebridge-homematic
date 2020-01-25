@@ -140,7 +140,10 @@ HomeMaticChannelLoader.prototype.getConfigOptions = function (type) {
   var options
   let coptions = this.platform.config[type]
   if (coptions) {
+    this.log.debug('Additional config found')
     options = coptions
+  } else {
+    this.log.debug('no additional config found for %s', type)
   }
   return options
 }
@@ -158,7 +161,10 @@ HomeMaticChannelLoader.prototype.getServiceClass = function (type) {
       }
     })
   }
-  return { 'class': serviceclass, 'options': serviceoptions }
+  return {
+    'class': serviceclass,
+    'options': serviceoptions
+  }
 }
 
 HomeMaticChannelLoader.prototype.internalConfig = function (customServices) {

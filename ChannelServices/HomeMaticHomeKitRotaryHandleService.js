@@ -20,26 +20,31 @@ HomeMaticHomeKitRotaryHandleService.prototype.propagateServices = function (home
 HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function (Service, Characteristic) {
   var that = this
 
-  this.enableLoggingService('door', false)
+  this.historyEnabled = this.getClazzConfigValue('enable_history', false)
 
-  this.timesOpened = this.getPersistentState('timesOpened', 0)
-  this.timeOpen = this.getPersistentState('timeOpen', 0)
-  this.timeClosed = this.getPersistentState('timeClosed', 0)
-  this.timeStamp = moment().unix()
+  if (this.historyEnabled === true) {
+    this.log.info('[RHS] Eve History is enabled')
+    this.enableLoggingService('door', false)
 
-  this.lastReset = this.getPersistentState('lastReset', undefined)
-  if (this.lastReset === undefined) {
-    // Set to now
-    this.lastReset = moment().unix() - epoch
-    this.setPersistentState('lastReset', this.lastReset)
-  }
+    this.timesOpened = this.getPersistentState('timesOpened', 0)
+    this.timeOpen = this.getPersistentState('timeOpen', 0)
+    this.timeClosed = this.getPersistentState('timeClosed', 0)
+    this.timeStamp = moment().unix()
 
-  this.lastOpen = this.getPersistentState('lastOpen', undefined)
-  if ((this.lastOpen === undefined) && (this.loggingService !== undefined)) {
-    // Set to now
-    this.lastOpen = moment().unix() - this.loggingService.getInitialTime()
-    this.setPersistentState('lastOpen', this.lastOpen)
-    this.log.debug('No LastOpen - set it to just now')
+    this.lastReset = this.getPersistentState('lastReset', undefined)
+    if (this.lastReset === undefined) {
+      // Set to now
+      this.lastReset = moment().unix() - epoch
+      this.setPersistentState('lastReset', this.lastReset)
+    }
+
+    this.lastOpen = this.getPersistentState('lastOpen', undefined)
+    if ((this.lastOpen === undefined) && (this.loggingService !== undefined)) {
+      // Set to now
+      this.lastOpen = moment().unix() - this.loggingService.getInitialTime()
+      this.setPersistentState('lastOpen', this.lastOpen)
+      this.log.debug('[RHS] No LastOpen - set it to just now')
+    }
   }
 
   if (this.special === 'WINDOW') {
@@ -84,7 +89,7 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function (Se
       .on('get', function (callback) {
         that.query('STATE', function (value) {
           if (callback) {
-            switch (value) {
+            switch (parseInt(value)) {
               case 0:
                 callback(null, 0)
                 break
@@ -105,8 +110,9 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function (Se
     this.swindow.on('get', function (callback) {
       if (callback) callback(null, Characteristic.PositionState.STOPPED)
     })
-
-    this.addEveStuff(window)
+    if (this.historyEnabled === true) {
+      this.addEveStuff(window)
+    }
     this.services.push(window)
   } else
 
@@ -116,7 +122,7 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function (Se
     this.cdoor.on('get', function (callback) {
       that.query('STATE', function (value) {
         if (callback) {
-          switch (value) {
+          switch (parseInt(value)) {
             case 0:
               callback(null, 0)
               break
@@ -134,6 +140,9 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function (Se
     })
 
     this.cdoor.eventEnabled = true
+    if (this.historyEnabled === true) {
+      this.addEveStuff(window)
+    }
     this.services.push(door)
   } else {
     var contact = new Service.ContactSensor(this.name)
@@ -141,19 +150,22 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function (Se
       .on('get', function (callback) {
         that.query('STATE', function (value) {
           if (callback) {
-            switch (value) {
+            let result = false
+            switch (parseInt(value)) {
               case 0:
-                callback(null, false)
+                result = false
                 break
               case 1:
-                callback(null, true)
+                result = true
                 break
               case 2:
-                callback(null, true)
+                result = true
                 break
               default:
-                callback(null, false)
+                result = false
             }
+            that.log.info('[RHS] Query HM result is %s return %s (%s)', value, result, typeof value)
+            callback(null, result)
           }
         })
       })
@@ -166,8 +178,9 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function (Se
     this.ccontact.eventEnabled = true
     this.addTamperedCharacteristic(contact, Characteristic)
     this.addLowBatCharacteristic(contact, Characteristic)
-
-    this.addEveStuff(contact)
+    if (this.historyEnabled === true) {
+      this.addEveStuff(contact)
+    }
     this.services.push(contact)
   }
 
@@ -190,7 +203,7 @@ HomeMaticHomeKitRotaryHandleService.prototype.addEveStuff = function (device) {
     rt.on('set', function (value, callback) {
       // only reset if its not equal the reset time we know
       if (value !== that.lastReset) {
-        that.log.debug('set ResetTotal called %s != last reset so do a reset', value)
+        that.log.debug('[RHS] set ResetTotal called %s != last reset so do a reset', value)
         that.timesOpened = 0
         that.lastReset = value
         that.setPersistentState('timesOpened', that.timesOpened)
@@ -200,7 +213,7 @@ HomeMaticHomeKitRotaryHandleService.prototype.addEveStuff = function (device) {
           that.CharacteristicTimesOpened.updateValue(that.timesOpened, null)
         }
       } else {
-        that.log.debug('set ResetTotal called %s its equal the last reset time so ignore', value)
+        that.log.debug('[RHS] set ResetTotal called %s its equal the last reset time so ignore', value)
       }
       if (callback) {
         callback()
@@ -208,7 +221,7 @@ HomeMaticHomeKitRotaryHandleService.prototype.addEveStuff = function (device) {
     }.bind(this))
 
       .on('get', function (callback) {
-        that.log.debug('get ResetTotal called %s', that.lastReset)
+        that.log.debug('[RHS] get ResetTotal called %s', that.lastReset)
         callback(null, that.lastReset)
       })
 
@@ -217,28 +230,28 @@ HomeMaticHomeKitRotaryHandleService.prototype.addEveStuff = function (device) {
 
   this.CharacteristicOpenDuration = device.getCharacteristic(eve.Characteristic.OpenDuration)
     .on('get', function (callback) {
-      that.log.debug('getOpenDuration')
+      that.log.debug('[RHS] getOpenDuration')
       callback(null, that.timeOpen)
     })
   this.CharacteristicOpenDuration.setValue(0)
 
   this.CharacteristicClosedDuration = device.getCharacteristic(eve.Characteristic.ClosedDuration)
     .on('get', function (callback) {
-      that.log.debug('getClosedDuration')
+      that.log.debug('[RHS] getClosedDuration')
       callback(null, that.timeClosed)
     })
   this.CharacteristicClosedDuration.setValue(0)
 
   this.CharacteristicLastOpen = device.getCharacteristic(eve.Characteristic.LastActivation)
     .on('get', function (callback) {
-      that.log.debug('getLastOpen will report %s', that.lastOpen)
+      that.log.debug('[RHS] getLastOpen will report %s', that.lastOpen)
       callback(null, that.lastOpen)
     })
   this.CharacteristicLastOpen.setValue(this.lastOpen)
 
   this.CharacteristicTimesOpened = device.getCharacteristic(eve.Characteristic.TimesOpened)
     .on('get', function (callback) {
-      that.log.debug('getTimesOpened will report %s', that.timesOpened)
+      that.log.debug('[RHS] getTimesOpened will report %s', that.timesOpened)
       callback(null, that.timesOpened)
     })
   this.CharacteristicTimesOpened.setValue(this.timesOpened)
@@ -247,7 +260,7 @@ HomeMaticHomeKitRotaryHandleService.prototype.addEveStuff = function (device) {
 HomeMaticHomeKitRotaryHandleService.prototype.processWindowSensorData = function (newValue) {
   if (this.special === 'WINDOW') {
     if (this.haz([this.cwindow, this.swindow, this.twindow])) {
-      switch (newValue) {
+      switch (parseInt(newValue)) {
         case 0:
           this.cwindow.updateValue(0, null)
           this.swindow.updateValue(2, null)
@@ -269,7 +282,7 @@ HomeMaticHomeKitRotaryHandleService.prototype.processWindowSensorData = function
 
   if (this.special === 'DOOR') {
     if (this.haz([this.cdoor])) {
-      switch (newValue) {
+      switch (parseInt(newValue)) {
         case 0:
           this.cdoor.updateValue(0, null)
           break
@@ -283,7 +296,7 @@ HomeMaticHomeKitRotaryHandleService.prototype.processWindowSensorData = function
     }
   } else {
     if (this.haz([this.ccontact])) {
-      switch (newValue) {
+      switch (parseInt(newValue)) {
         case 0:
           this.ccontact.updateValue(0, null)
           break
@@ -301,26 +314,27 @@ HomeMaticHomeKitRotaryHandleService.prototype.processWindowSensorData = function
 HomeMaticHomeKitRotaryHandleService.prototype.datapointEvent = function (dp, newValue) {
   // Chech sensors
   this.processWindowSensorData(newValue)
-
-  this.addLogEntry({
-    status: (newValue === 1) ? 1 : 0
-  })
-  let now = moment().unix()
-  if (newValue === 1) {
-    this.timeClosed = this.timeClosed + (moment().unix() - this.timeStamp)
-    this.timesOpened = this.timesOpened + 1
-    if (this.loggingService !== undefined) {
-      let firstLog = this.loggingService.getInitialTime()
-      this.lastOpen = moment().unix() - firstLog
-      this.CharacteristicLastOpen.updateValue(this.lastOpen, null)
-      this.setPersistentState('lastOpen', this.lastOpen)
+  if (this.historyEnabled === true) {
+    this.addLogEntry({
+      status: (newValue === 1) ? 1 : 0
+    })
+    let now = moment().unix()
+    if (newValue === 1) {
+      this.timeClosed = this.timeClosed + (moment().unix() - this.timeStamp)
+      this.timesOpened = this.timesOpened + 1
+      if (this.loggingService !== undefined) {
+        let firstLog = this.loggingService.getInitialTime()
+        this.lastOpen = moment().unix() - firstLog
+        this.CharacteristicLastOpen.updateValue(this.lastOpen, null)
+        this.setPersistentState('lastOpen', this.lastOpen)
+      }
+      this.CharacteristicTimesOpened.updateValue(this.timesOpened, null)
+      this.setPersistentState('timesOpened', this.timesOpened)
+    } else {
+      this.timeOpen = this.timeOpen + (moment().unix() - this.timeStamp)
     }
-    this.CharacteristicTimesOpened.updateValue(this.timesOpened, null)
-    this.setPersistentState('timesOpened', this.timesOpened)
-  } else {
-    this.timeOpen = this.timeOpen + (moment().unix() - this.timeStamp)
+    this.timeStamp = now
   }
-  this.timeStamp = now
 }
 
 module.exports = HomeMaticHomeKitRotaryHandleService

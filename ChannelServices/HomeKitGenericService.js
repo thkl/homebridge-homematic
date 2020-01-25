@@ -199,8 +199,8 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-                  add FakeGato History object only if not in a testcase
-                  **/
+                        add FakeGato History object only if not in a testcase
+                        **/
   enableLoggingService: function (type, disableTimer) {
     if (this.runsInTestMode === true) {
       this.log.debug('Skip Loging Service for %s because of testmode', this.displayName)
@@ -296,6 +296,8 @@ HomeKitGenericService.prototype = {
      * @return {[type]}              [description]
      */
   getClazzConfigValue: function (key, defaultValue) {
+    this.log.debug('Get Config value for %s', key)
+    this.log.debug('Config is %s', JSON.stringify(this.cfg))
     var result = defaultValue
     if (this.cfg !== undefined) {
       if (this.cfg[key] !== undefined) {
