@@ -166,7 +166,6 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
         // there is a actor for every direction so
         if (value === Characteristic.TargetDoorState.OPEN) {
           that.currentDoorState.updateValue(that.characteristic.CurrentDoorState.OPENING, null)
-
           that.sendActorMessage(that.address_actor_open, that.message_actor_open['on'])
           that.sendActorMessage(that.address_actor_open, that.message_actor_open['off'], that.delay_actor_open)
           // reset Command Switch to override target
@@ -197,10 +196,10 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
   this.platform.registerAdressForEventProcessingAtAccessory(this.address_sensor_open, this)
   // this is dirty shit .. ¯\_(ツ)_/¯  it works so we do not change that ...
   // query sensors at launch delayed by 60 seconds
-  setTimeout(function () {
+  this.inittimer = setTimeout(function () {
     that.log.debug('garage door inital query ...')
     that.querySensors()
-  }, 60000)
+  }, 30000)
 }
 
 HomeMaticHomeKitGarageDoorService.prototype.sendActorMessage = function (address, message, delay) {
@@ -243,18 +242,19 @@ HomeMaticHomeKitGarageDoorService.prototype.event = function (channel, dp, newVa
   let eventAddress = channel + '.' + dp
   // Kill requery timer
   clearTimeout(this.requeryTimer)
+  clearTimeout(this.inittimer)
 
   if ((this.address_sensor_close !== undefined) && (this.address_sensor_open !== undefined)) {
     // we have two sensors
     this.log.debug('Two Sensor Mode')
-    if ((eventAddress === this.address_sensor_close) && (newValue === this.state_sensor_close)) {
+    if ((eventAddress === this.address_sensor_close) && (this.didMatch(newValue, this.state_sensor_close))) {
       // Sensor Close said its closed
       this.log.debug('close sensor is %s set CurrentDoorState to close', newValue)
       this.currentDoorState.updateValue(this.characteristic.CurrentDoorState.CLOSED, null)
       this.targetCommand = false
     }
 
-    if ((eventAddress === this.address_sensor_close) && (newValue !== this.state_sensor_close)) {
+    if ((eventAddress === this.address_sensor_close) && (!(this.didMatch(newValue, this.state_sensor_close)))) {
       // Sensor Close just opened so the door is moving to open position
       this.log.debug('close sensor is %s set TargetDoorState to open CurrentDoorState to opening', newValue)
       if (this.targetCommand) {
@@ -263,14 +263,14 @@ HomeMaticHomeKitGarageDoorService.prototype.event = function (channel, dp, newVa
       this.currentDoorState.updateValue(this.characteristic.CurrentDoorState.OPENING, null)
     }
 
-    if ((eventAddress === this.address_sensor_open) && (newValue === this.state_sensor_open)) {
+    if ((eventAddress === this.address_sensor_open) && (this.didMatch(newValue, this.state_sensor_open))) {
       // Sensor Open said its open
       this.log.debug('open sensor is %s set CurrentDoorState to open', newValue)
       this.currentDoorState.updateValue(this.characteristic.CurrentDoorState.OPEN, null)
       this.targetCommand = false
     }
 
-    if ((eventAddress === this.address_sensor_open) && (newValue !== this.state_sensor_open)) {
+    if ((eventAddress === this.address_sensor_open) && (!(this.didMatch(newValue, this.state_sensor_open)))) {
       // Sensor open just went to false so the door is moving to close position
       this.log.debug('open sensor is %s set TargetDoorState to close CurrentDoorState to closing', newValue)
       if (this.targetCommand) {
@@ -284,13 +284,13 @@ HomeMaticHomeKitGarageDoorService.prototype.event = function (channel, dp, newVa
     if (eventAddress === this.address_sensor_close) {
       // first set a new target state but ony if the target was not set by homekit first
       if (this.targetCommand === false) {
-        let newState = (newValue === that.state_sensor_close) ? this.characteristic.TargetDoorState.CLOSED : this.characteristic.TargetDoorState.OPEN
+        let newState = (this.didMatch(newValue, that.state_sensor_close)) ? this.characteristic.TargetDoorState.CLOSED : this.characteristic.TargetDoorState.OPEN
         this.log.debug('Close sensor is %s set targetDoorState %s', newValue, newState)
         this.targetDoorState.updateValue(newState, null)
       }
       // wait one second cause we have a really fast going garage door
       setTimeout(function () {
-        let newState = (newValue === that.state_sensor_close) ? that.characteristic.CurrentDoorState.CLOSED : that.characteristic.CurrentDoorState.OPEN
+        let newState = (that.didMatch(newValue, that.state_sensor_close)) ? that.characteristic.CurrentDoorState.CLOSED : that.characteristic.CurrentDoorState.OPEN
         that.log.debug('timer fired close sensor is %s set new current state %s', newState, newState)
         that.currentDoorState.updateValue(newState, null)
       }, 1000)
@@ -298,13 +298,13 @@ HomeMaticHomeKitGarageDoorService.prototype.event = function (channel, dp, newVa
 
     if (eventAddress === this.address_sensor_open) {
       if (this.targetCommand === false) {
-        let newState = (newValue === this.state_sensor_open) ? that.characteristic.TargetDoorState.OPEN : this.characteristic.TargetDoorState.CLOSED
+        let newState = (this.didMatch(newValue, this.state_sensor_open)) ? that.characteristic.TargetDoorState.OPEN : this.characteristic.TargetDoorState.CLOSED
         this.log.debug('open sensor is %s set new target state %s', newValue, newState)
         this.targetDoorState.updateValue(newState, null)
       }
 
       setTimeout(function () {
-        let newState = (newValue === that.state_sensor_open) ? that.characteristic.CurrentDoorState.OPEN : that.characteristic.CurrentDoorState.CLOSED
+        let newState = (that.didMatch(newValue, that.state_sensor_open)) ? that.characteristic.CurrentDoorState.OPEN : that.characteristic.CurrentDoorState.CLOSED
         that.log.debug('fired open sensor is %s set new state %s', newValue, newState)
         that.currentDoorState.updateValue(newState, null)
       }, 1000)
