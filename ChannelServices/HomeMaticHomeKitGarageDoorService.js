@@ -244,8 +244,12 @@ HomeMaticHomeKitGarageDoorService.prototype.event = function (channel, dp, newVa
   this.log.debug('[GDS] garage event %s,%s,%s Target Command State %s', channel, dp, newValue, this.targetCommand)
   let eventAddress = channel + '.' + dp
   // Kill requery timer
+
   clearTimeout(this.requeryTimer)
-  clearTimeout(this.inittimer)
+
+  if ((eventAddress === this.address_sensor_close) || (eventAddress === this.address_sensor_open)) {
+    clearTimeout(this.inittimer)
+  }
 
   if ((this.address_sensor_close !== undefined) && (this.address_sensor_open !== undefined)) {
     // we have two sensors
@@ -288,13 +292,13 @@ HomeMaticHomeKitGarageDoorService.prototype.event = function (channel, dp, newVa
       // first set a new target state but ony if the target was not set by homekit first
       if (this.targetCommand === false) {
         let newState = (this.didMatch(newValue, that.state_sensor_close)) ? this.characteristic.TargetDoorState.CLOSED : this.characteristic.TargetDoorState.OPEN
-        this.log.debug('[GDS] Close sensor is %s set targetDoorState %s', newValue, newState)
+        this.log.debug('[GDS] Close sensor hm value is %s set targetDoorState %s', newValue, newState)
         this.targetDoorState.updateValue(newState, null)
       }
       // wait one second cause we have a really fast going garage door
       setTimeout(function () {
         let newState = (that.didMatch(newValue, that.state_sensor_close)) ? that.characteristic.CurrentDoorState.CLOSED : that.characteristic.CurrentDoorState.OPEN
-        that.log.debug('[GDS] timer fired close sensor is %s set new current state %s', newState, newState)
+        that.log.debug('[GDS] timer fired close sensor hm value is %s set new current state %s', newValue, newState)
         that.currentDoorState.updateValue(newState, null)
       }, 1000)
     }
@@ -302,13 +306,13 @@ HomeMaticHomeKitGarageDoorService.prototype.event = function (channel, dp, newVa
     if (eventAddress === this.address_sensor_open) {
       if (this.targetCommand === false) {
         let newState = (this.didMatch(newValue, this.state_sensor_open)) ? that.characteristic.TargetDoorState.OPEN : this.characteristic.TargetDoorState.CLOSED
-        this.log.debug('[GDS] open sensor is %s set new target state %s', newValue, newState)
+        this.log.debug('[GDS] open sensor hm value is %s set new target state %s', newValue, newState)
         this.targetDoorState.updateValue(newState, null)
       }
 
       setTimeout(function () {
         let newState = (that.didMatch(newValue, that.state_sensor_open)) ? that.characteristic.CurrentDoorState.OPEN : that.characteristic.CurrentDoorState.CLOSED
-        that.log.debug('[GDS] fired open sensor is %s set new state %s', newValue, newState)
+        that.log.debug('[GDS] fired open sensor hm value is %s set new state %s', newValue, newState)
         that.currentDoorState.updateValue(newState, null)
       }, 1000)
     }
