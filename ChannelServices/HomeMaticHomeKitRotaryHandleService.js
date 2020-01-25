@@ -19,6 +19,7 @@ HomeMaticHomeKitRotaryHandleService.prototype.propagateServices = function (home
 
 HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function (Service, Characteristic) {
   var that = this
+
   this.enableLoggingService('door', false)
 
   this.timesOpened = this.getPersistentState('timesOpened', 0)
@@ -104,6 +105,7 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function (Se
     this.swindow.on('get', function (callback) {
       if (callback) callback(null, Characteristic.PositionState.STOPPED)
     })
+
     this.addEveStuff(window)
     this.services.push(window)
   } else
@@ -141,24 +143,30 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function (Se
           if (callback) {
             switch (value) {
               case 0:
-                callback(null, 0)
+                callback(null, false)
                 break
               case 1:
-                callback(null, 1)
+                callback(null, true)
                 break
               case 2:
-                callback(null, 1)
+                callback(null, true)
                 break
               default:
-                callback(null, 0)
+                callback(null, false)
             }
           }
         })
       })
+    contact.getCharacteristic(Characteristic.StatusActive)
+      .on('get', function (callback) {
+        callback(null, true)
+      })
+    contact.getCharacteristic(Characteristic.StatusActive).setValue(true)
 
     this.ccontact.eventEnabled = true
     this.addTamperedCharacteristic(contact, Characteristic)
     this.addLowBatCharacteristic(contact, Characteristic)
+
     this.addEveStuff(contact)
     this.services.push(contact)
   }
@@ -293,6 +301,7 @@ HomeMaticHomeKitRotaryHandleService.prototype.processWindowSensorData = function
 HomeMaticHomeKitRotaryHandleService.prototype.datapointEvent = function (dp, newValue) {
   // Chech sensors
   this.processWindowSensorData(newValue)
+
   this.addLogEntry({
     status: (newValue === 1) ? 1 : 0
   })

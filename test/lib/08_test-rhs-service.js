@@ -15,7 +15,11 @@ describe('Homematic Plugin (index)', function () {
   let datapath = path.join(__dirname, 'data', 'data_test_rhs.json')
   let data = fs.readFileSync(datapath).toString()
   let that = this
-  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
+  var config = {
+    ccu_ip: '127.0.0.1',
+    subsection: 'HomeKit',
+    testdata: data
+  }
   var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
@@ -51,7 +55,7 @@ describe('Homematic Plugin (index)', function () {
           assert.strict.equal(value, 0)
         })
         cc.emit('get', function (context, result) {
-          assert.strict.equal(result, 0, 'get logic result should be 0')
+          assert.strict.equal(result, false, 'get logic result should be 0')
         })
       })
       done()
@@ -69,7 +73,7 @@ describe('Homematic Plugin (index)', function () {
           assert.strict.equal(value, 1)
         })
         cc.emit('get', function (context, result) {
-          assert.strict.equal(result, 1, 'get logic result should be 1')
+          assert.strict.equal(result, true, 'get logic result should be 1')
         })
       })
       done()
