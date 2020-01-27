@@ -1,3 +1,5 @@
+// ToDo Time based cache
+
 function HomeMaticCacheManager (log) {
   this.log = log
   this.log.info('[Cache] initalizing')
