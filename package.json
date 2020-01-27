@@ -31,10 +31,12 @@
     "assert": "1.5.0",
     "chalk": "latest",
     "mocha": "^6.0.0",
+    "release-it": "^12.4.3",
     "standard": "^12.0.1"
   },
   "scripts": {
-    "test": "standard && mocha"
+    "test": "standard && mocha",
+    "release": "release-it"
   },
   "standard": {
     "globals": [

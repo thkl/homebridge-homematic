@@ -33,7 +33,7 @@ var HomeMaticRPC = function (log, ccuip, port, system, platform) {
   }
 
   switch (system) {
-    case 0 :
+    case 0:
       this.interface = 'BidCos-RF.'
       this.ccuport = 2001
 
@@ -49,7 +49,7 @@ var HomeMaticRPC = function (log, ccuip, port, system, platform) {
 
       break
 
-    case 1 :
+    case 1:
       this.interface = 'BidCos-Wired.'
       // if (semver.lt(process.version, '4.5.0')) {
       this.log.info('using xmprpc for communication with BidCos-Wired')
@@ -62,14 +62,14 @@ var HomeMaticRPC = function (log, ccuip, port, system, platform) {
       this.ccuport = 2000
       break
 
-    case 2 :
+    case 2:
       this.interface = 'HmIP-RF.'
       this.rpc = xmlrpc
       this.ccuport = 2010
       this.rpcInit = 'http://'
       break
 
-    case 3 :
+    case 3:
       this.interface = 'VirtualDevices.'
       this.rpc = xmlrpc
       this.ccuport = 9292
@@ -112,7 +112,7 @@ HomeMaticRPC.prototype.init = function () {
         })
 
         that.server.on('NotFound', function (method, params) {
-        // that.log.debug("Method %s does not exist. - %s",method, JSON.stringify(params));
+          // that.log.debug("Method %s does not exist. - %s",method, JSON.stringify(params));
         })
 
         that.server.on('system.listMethods', function (err, params, callback) {
@@ -172,15 +172,15 @@ HomeMaticRPC.prototype.init = function () {
                   var value = params[3]
                   let address = that.interface + params[1] + '.' + params[2]
 
-                  that.log.debug('RPC event for %s %s with value %s', channel, datapoint, value)
+                  that.log.debug('RPC event for %s.%s with value %s', channel, datapoint, value)
 
                   that.platform.foundAccessories.map(function (accessory) {
                     var deviceAdress = channel.slice(0, channel.indexOf(':'))
 
                     if ((accessory.adress === channel) ||
-                  ((accessory.cadress !== undefined) && (accessory.cadress === channel)) ||
-                  ((accessory.deviceAdress !== undefined) && (accessory.deviceAdress === deviceAdress))) {
-                      that.log.debug('Accessory %s found -> Send Event with value %s', accessory.name, value)
+                                            ((accessory.cadress !== undefined) && (accessory.cadress === channel)) ||
+                                            ((accessory.deviceAdress !== undefined) && (accessory.deviceAdress === deviceAdress))) {
+                      that.log.debug('Accessory (%s) found -> Send Event with value %s', accessory.name, value)
                       accessory.event(channel, datapoint, value)
                     }
                   })
@@ -218,7 +218,9 @@ HomeMaticRPC.prototype.getIPAddress = function () {
     var iface = interfaces[devName]
     for (var i = 0; i < iface.length; i++) {
       var alias = iface[i]
-      if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal && (alias.address.indexOf('169.254.') === -1)) { return alias.address }
+      if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal && (alias.address.indexOf('169.254.') === -1)) {
+        return alias.address
+      }
     }
   }
   return '0.0.0.0'
@@ -238,8 +240,7 @@ HomeMaticRPC.prototype.getValue = function (channel, datapoint, callback) {
       that.log.debug('RPC getValue (%s %s) Response %s  | Errors: %s', channel, datapoint, JSON.stringify(value), error)
       callback(value)
     })
-  } else {
-  }
+  } else {}
 }
 
 HomeMaticRPC.prototype.setValue = function (channel, datapoint, value, callback) {
@@ -336,7 +337,9 @@ HomeMaticRPC.prototype.isPortTaken = function (port, fn) {
     fn(null, true)
   })
     .once('listening', function () {
-      tester.once('close', function () { fn(null, false) })
+      tester.once('close', function () {
+        fn(null, false)
+      })
         .close()
     }).listen(port)
 }

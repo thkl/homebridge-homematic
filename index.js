@@ -454,7 +454,9 @@ HomeMaticPlatform.prototype.setValue_rega = function (interf, channel, datapoint
   }
   this.log.debug('rega.setvalue %s.%s %s', adrchannel, datapoint, value)
   rega.setValue(adrchannel, datapoint, value)
-  if (callback !== undefined) { callback() }
+  if (callback !== undefined) {
+    callback()
+  }
 }
 
 HomeMaticPlatform.prototype.setValue = function (intf, channel, datapoint, value) {
@@ -691,9 +693,16 @@ HomeMaticPlatform.prototype.registerAdressForEventProcessingAtAccessory = functi
   if (address !== undefined) {
     this.log.debug('adding new address %s for processing events at %s', address, accessory.name)
     if (aFunction !== undefined) {
-      this.eventAdresses.push({ address: address, accessory: accessory, function: aFunction })
+      this.eventAdresses.push({
+        address: address,
+        accessory: accessory,
+        function: aFunction
+      })
     } else {
-      this.eventAdresses.push({ address: address, accessory: accessory })
+      this.eventAdresses.push({
+        address: address,
+        accessory: accessory
+      })
     }
   } else {
     this.log.warn('Address not given %s,%s,%s', address, accessory, aFunction)

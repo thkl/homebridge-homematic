@@ -56,7 +56,9 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       that.query('STATE', function (value) {
         if (callback) {
           var cbvalue = 0
-          if (value > 0) { cbvalue = 100 }
+          if (value > 0) {
+            cbvalue = 100
+          }
           callback(null, cbvalue)
         }
       })
@@ -70,7 +72,9 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       that.query('STATE', function (value) {
         if (callback) {
           var cbvalue = 0
-          if (value > 0) { cbvalue = 100 }
+          if (value > 0) {
+            cbvalue = 100
+          }
           callback(null, cbvalue)
         }
       })
@@ -107,7 +111,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
     })
 
       .on('set', function (value, callback) {
-      // This is just a sensor so reset homekit data to ccu value after 1 second playtime
+        // This is just a sensor so reset homekit data to ccu value after 1 second playtime
         setTimeout(function () {
           that.remoteGetValue('STATE', function (value) {
             that.processDoorState(value)
@@ -205,8 +209,11 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       .on('get', function (callback) {
         that.query('STATE', function (value) {
           if (reverse === true) {
-            that.log('Reverse from ' + value)
+            that.log.info('Reverse from ' + value)
+          } else {
+            that.log.info('Contact from ' + value)
           }
+
           callback(null, value)
         })
       })
@@ -252,7 +259,7 @@ HomeMaticHomeKitContactService.prototype.processContactState = function (newValu
 HomeMaticHomeKitContactService.prototype.processDoorState = function (newValue) {
   if (this.haz([this.cdoor, this.tdoor, this.sdoor])) {
     switch (newValue) {
-      case false :
+      case false:
         this.cdoor.updateValue(0, null)
         this.tdoor.updateValue(0, null)
         this.sdoor.updateValue(2, null)
@@ -269,12 +276,12 @@ HomeMaticHomeKitContactService.prototype.processDoorState = function (newValue) 
 HomeMaticHomeKitContactService.prototype.processWindowState = function (newValue) {
   if (this.haz([this.cwindow, this.twindow, this.swindow])) {
     switch (newValue) {
-      case false :
+      case false:
         this.cwindow.updateValue(0, null)
         this.twindow.updateValue(0, null)
         this.swindow.updateValue(2, null)
         break
-      case true :
+      case true:
         this.cwindow.updateValue(100, null)
         this.twindow.updateValue(100, null)
         this.swindow.updateValue(2, null)
@@ -287,7 +294,9 @@ HomeMaticHomeKitContactService.prototype.processWindowState = function (newValue
 
 HomeMaticHomeKitContactService.prototype.datapointEvent = function (dp, newValue, channel) {
   if (this.isDataPointEvent(dp, 'STATE')) {
-    this.addLogEntry({ status: (newValue === true) ? 1 : 0 })
+    this.addLogEntry({
+      status: (newValue === true) ? 1 : 0
+    })
     if (this.special === 'DOOR') {
       this.processDoorState(newValue)
     } else if (this.special === 'WINDOW') {
