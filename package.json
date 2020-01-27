@@ -67,5 +67,20 @@
     "index.js",
     "internalconfig.json",
     "package.json"
-  ]
+  ],
+  "auto-changelog": {
+    "startingCommit": "0a659bf6f555eba6efa1b7a3f5cb32c45e210a2b",
+    "template": "changelog-template.hbs"
+  },
+  "release-it": {
+    "hooks": {
+      "before:release": "npx auto-changelog --commit-limit false https://raw.githubusercontent.com/thkl/homebridge-homematic/master/changelog-template.hbs"
+    },
+    "git": {
+      "changelog": "npx auto-changelog --stdout --commit-limit false --unreleased --template https://raw.githubusercontent.com/thkl/homebridge-homematic/master/changelog-template.hbs"
+    },
+    "npm": {
+      "publish": false
+    }
+  }
 }
