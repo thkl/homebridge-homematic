@@ -120,11 +120,15 @@ HomeMaticHomeKitThermalControlService.prototype.createDeviceService = function (
     }.bind(this))
 
     .on('set', function (value, callback) {
-      if (that.state['CONTROL_MODE'] !== 1) {
-        that.delayed('set', 'MANU_MODE', { 'explicitDouble': value }, that.delayOnSet)
-        that.state['CONTROL_MODE'] = 1 // set to Manual Mode
+      if (that.getCache('CONTROL_MODE') !== 1) {
+        that.delayed('set', 'MANU_MODE', {
+          'explicitDouble': value
+        }, that.delayOnSet)
+        that.setCache('CONTROL_MODE', 1) // set to Manual Mode
       } else {
-        that.delayed('set', 'SET_TEMPERATURE', { 'explicitDouble': value }, that.delayOnSet)
+        that.delayed('set', 'SET_TEMPERATURE', {
+          'explicitDouble': value
+        }, that.delayOnSet)
       }
       callback()
     })
@@ -180,10 +184,16 @@ HomeMaticHomeKitThermalControlService.prototype.queryData = function () {
   this.remoteGetValue('SET_TEMPERATURE')
 
   if (this.currentTemperature > -255) {
-    this.addLogEntry({ temp: this.currentTemperature, pressure: 0, humidity: this.currentHumidity })
+    this.addLogEntry({
+      temp: this.currentTemperature,
+      pressure: 0,
+      humidity: this.currentHumidity
+    })
   }
   // create timer to query device every 10 minutes
-  this.refreshTimer = setTimeout(function () { that.queryData() }, 10 * 60 * 1000)
+  this.refreshTimer = setTimeout(function () {
+    that.queryData()
+  }, 10 * 60 * 1000)
 }
 
 HomeMaticHomeKitThermalControlService.prototype.shutdown = function () {

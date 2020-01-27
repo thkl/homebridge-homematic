@@ -30,7 +30,12 @@ function HomeKitGenericService (log, platform, id, name, type, adress, special, 
   }
 
   this.platform = platform
+
+  /** deprecate this */
   this.state = []
+
+  this.ccuCache = this.platform.cache
+
   this.eventupdate = false
   this.special = special
   this.currentStateCharacteristic = []
@@ -199,8 +204,8 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-                        add FakeGato History object only if not in a testcase
-                        **/
+                                                                            add FakeGato History object only if not in a testcase
+                                                                            **/
   enableLoggingService: function (type, disableTimer) {
     if (this.runsInTestMode === true) {
       this.log.debug('Skip Loging Service for %s because of testmode', this.displayName)
@@ -383,25 +388,35 @@ HomeKitGenericService.prototype = {
       })
     } else
 
-    if ((that.usecache === true) && (this.state[this.adress + '.' + dp] !== undefined) && (this.state[this.adress + '.' + dp] != null)) {
-      if (callback !== undefined) {
-        callback(this.state[this.adress + '.' + dp])
-      }
-    } else {
-      // this.log("Ask CCU");
-      that.remoteGetValue(dp, function (value) {
-        if (callback !== undefined) {
-          callback(value)
+    if (that.usecache === true) {
+      let cvalue = that.getCache(dp)
+      if (cvalue) {
+        if (callback) {
+          callback(cvalue)
         }
-      })
-      // if (callback!=undefined){callback(0);}
+      } else {
+        that.remoteGetValue(dp, function (value) {
+          that.setCache(dp, value)
+          if (callback !== undefined) {
+            callback(value)
+          }
+        })
+      }
     }
+  },
+
+  setCache: function (dp, value) {
+    this.ccuCache.doCache(this.adress + '.' + dp, value)
+  },
+
+  getCache: function (dp) {
+    return this.ccuCache.getValue(this.adress + '.' + dp)
   },
 
   cleanVirtualDevice: function (dp) {
     if (this.adress.indexOf('VirtualDevices.') > -1) {
       // Remove cached Date from Virtual Devices cause the do not update over rpc
-      this.state[dp] = undefined
+      this.ccuCache.deleteValue(this.adress + '.' + dp)
     }
     this.remoteGetValue(dp, function (value) {
 
@@ -409,8 +424,9 @@ HomeKitGenericService.prototype = {
   },
 
   dpvalue: function (dp, fallback) {
-    if (this.state[dp] !== undefined) {
-      return (this.state[dp])
+    let cvalue = this.getCache(dp)
+    if (cvalue !== undefined) {
+      return (cvalue)
     } else {
       return fallback
     }
@@ -743,11 +759,7 @@ HomeKitGenericService.prototype = {
         that.currentStateCharacteristic[dp].setValue(value, null)
         that.stateCharacteristicDidChange(that.currentStateCharacteristic[dp], value)
       }
-      if (this.usecache) {
-        this.state[dp] = value
-      } else {
-
-      }
+      this.ccuCache.doCache(dp, value)
     } else {
       that.log.debug('Skip update because of working flag (%s) or IsNull(%s)', that.isWorking, value)
     }

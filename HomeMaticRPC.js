@@ -138,8 +138,8 @@ HomeMaticRPC.prototype.init = function () {
           var datapoint = params[2]
           var value = params[3]
           let address = that.interface + params[1] + '.' + params[2]
-
           that.log.debug('RPC single event for %s %s with value %s', channel, datapoint, value)
+          that.platform.cache.doCache(address, value)
 
           that.platform.foundAccessories.map(function (accessory) {
             if ((accessory.adress === channel) || ((accessory.cadress !== undefined) && (accessory.cadress === channel))) {
@@ -173,6 +173,7 @@ HomeMaticRPC.prototype.init = function () {
                   let address = that.interface + params[1] + '.' + params[2]
 
                   that.log.debug('RPC event for %s.%s with value %s', channel, datapoint, value)
+                  that.platform.cache.doCache(address, value)
 
                   that.platform.foundAccessories.map(function (accessory) {
                     var deviceAdress = channel.slice(0, channel.indexOf(':'))

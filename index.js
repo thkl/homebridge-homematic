@@ -6,6 +6,7 @@ const HomeMaticRPCTestDriver = require('./HomeMaticRPCTestDriver.js').HomeMaticR
 const HomeMaticChannelLoader = require('./HomeMaticChannelLoader.js').HomeMaticChannelLoader
 const HomeMaticRegaRequest = require('./HomeMaticRegaRequest.js').HomeMaticRegaRequest
 const HomeMaticRegaRequestTestDriver = require('./HomeMaticRegaRequestTestDriver.js').HomeMaticRegaRequestTestDriver
+const HomeMaticCacheManager = require('./HomeMaticCacheManager.js').HomeMaticCacheManager
 
 // const inherits = require('util').inherits
 const path = require('path')
@@ -34,7 +35,7 @@ function HomeMaticPlatform (log, config, api) {
   this.localCache = path.join(_homebridge.user.storagePath(), 'ccu.json')
   this.localPath = _homebridge.user.storagePath()
   this.ccuIP = config.ccu_ip
-
+  this.cache = new HomeMaticCacheManager(log)
   if (api) {
     this.api = api
     if (api.version < 2.1) {
@@ -592,13 +593,27 @@ HomeMaticPlatform.prototype.sendRegaCommand = function (command, callback) {
 }
 
 HomeMaticPlatform.prototype.getValue_rega = function (interf, channel, datapoint, callback) {
-  let rega = this.createRegaRequest()
+  let that = this
+
   var adrchannel = channel
   // add the interface if not provided
   if (channel.indexOf(interf) === -1) {
     adrchannel = interf + '.' + channel
   }
-  rega.getValue(adrchannel, datapoint, callback)
+  let cValue = this.cache.getValue(adrchannel)
+  if (cValue) {
+    if (callback) {
+      callback(cValue)
+    }
+  } else {
+    let rega = this.createRegaRequest()
+    rega.getValue(adrchannel, datapoint, function (result) {
+      that.cache.doCache(adrchannel, result)
+      if (callback) {
+        callback(result)
+      }
+    })
+  }
 }
 
 HomeMaticPlatform.prototype.getValue = function (intf, channel, datapoint, callback) {

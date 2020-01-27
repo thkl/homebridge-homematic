@@ -26,20 +26,22 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function (Service,
         if (value === undefined) {
           value = 0
         }
-        that.state['LAST'] = value
+        that.setCache('LAST', value)
         if (callback) callback(null, value > 0)
       })
     })
 
     .on('set', function (value, callback) {
-      var lastLevel = that.state['LAST']
-      if (lastLevel === undefined) { lastLevel = -1 }
+      var lastLevel = that.getCache('LAST')
+      if (lastLevel === undefined) {
+        lastLevel = -1
+      }
       if (((value === true) || ((value === 1))) && ((lastLevel < 1))) {
         that.command('set', 'OLD_LEVEL', true)
-        that.state['LAST'] = undefined
+        that.setCache('LAST', undefined)
       } else
       if ((value === 0) || (value === false)) {
-        that.state['LAST'] = 0
+        that.setCache('LAST', 0)
         that.command('set', 'LEVEL', 0)
       } else
       if (((value === true) || ((value === 1))) && ((lastLevel > 0))) {
@@ -55,22 +57,28 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function (Service,
   this.brightness = lightbulb.getCharacteristic(Characteristic.Brightness)
     .on('get', function (callback) {
       that.query('LEVEL', function (value) {
-        that.state['LAST'] = (value)
-        if (callback) callback(null, value)
+        that.setCache('LAST', value)
+        if (callback) {
+          callback(null, value)
+        }
       })
     })
 
     .on('set', function (value, callback) {
-      var lastLevel = that.state['LAST']
+      var lastLevel = that.getCache('LAST')
       if (value !== lastLevel) {
         if (value === 0) {
           // set On State
-          if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) { that.onc.updateValue(false, null) }
+          if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) {
+            that.onc.updateValue(false, null)
+          }
         } else {
-          if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) { that.onc.updateValue(true, null) }
+          if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) {
+            that.onc.updateValue(true, null)
+          }
         }
         that.log.debug('Set Brightness of ' + that.adress + ' to ' + value + ' command. LastLevel is ' + lastLevel)
-        that.state['LAST'] = value
+        that.setCache('LAST', value)
         that.isWorking = true
         that.delayed('set', 'LEVEL', value, that.delayOnSet)
       }

@@ -73,7 +73,7 @@ HomeMaticRPCTestDriver.prototype.event = function (params, callback) {
   }
 
   this.log.debug('RPC Event %s (%s)', address, value)
-
+  this.platform.cache.doCache(address, value)
   this.platform.homebridge.values[address] = value
 
   this.log.debug('Ok here is the Event' + JSON.stringify(params))
@@ -119,8 +119,8 @@ HomeMaticRPCTestDriver.prototype.multicall = function (events, callback) {
             var deviceAdress = channel.slice(0, channel.indexOf(':'))
 
             if ((accessory.adress === channel) ||
-            ((accessory.cadress !== undefined) && (accessory.cadress === channel)) ||
-            ((accessory.deviceAdress !== undefined) && (accessory.deviceAdress === deviceAdress))) {
+                            ((accessory.cadress !== undefined) && (accessory.cadress === channel)) ||
+                            ((accessory.deviceAdress !== undefined) && (accessory.deviceAdress === deviceAdress))) {
               that.log.info('Accessory %s found -> Send Event', accessory.name)
               accessory.event(channel, datapoint, value)
             }

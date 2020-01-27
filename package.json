@@ -34,10 +34,18 @@
     "release-it": "^12.4.3",
     "standard": "^12.0.1"
   },
+
   "scripts": {
-    "test": "standard && mocha",
+    "test": "mocha",
     "release": "release-it"
   },
+
+  "mocha": {
+    "bail": true,
+    "reporter": "spec",
+    "recursive": true
+  },
+
   "standard": {
     "globals": [
       "describe",
@@ -64,6 +72,7 @@
     "HomeMaticRegaRequestTestDriver.js",
     "HomeMaticRPC.js",
     "HomeMaticRPCTestDriver.js",
+    "HomeMaticCacheManager.js",
     "index.js",
     "internalconfig.json",
     "package.json"

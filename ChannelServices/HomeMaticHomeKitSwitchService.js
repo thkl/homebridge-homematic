@@ -94,7 +94,7 @@ HomeMaticHomeKitSwitchService.prototype.addCoreSwitchFunctions = function (Servi
 
     .on('set', function (value, callback) {
       if (that.readOnly === false) {
-        var onTime = that.state['ON_TIME']
+        var onTime = that.getCache('ON_TIME')
         if ((onTime !== undefined) && (onTime > 0) && (value === 1)) {
           that.command('set', 'ON_TIME', onTime)
         }
@@ -123,7 +123,7 @@ HomeMaticHomeKitSwitchService.prototype.addCoreSwitchFunctions = function (Servi
 
   var onTime = new Characteristic('OnTime', 'CEA288AC-EAC5-447A-A2DD-D684E4517440', onTimeProperties)
     .on('set', function (value, callback) {
-      that.state['ON_TIME'] = value
+      that.setCache('ON_TIME', value)
       callback()
     })
 

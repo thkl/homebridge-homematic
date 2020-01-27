@@ -22,24 +22,24 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function (Service, C
           value = 0
         }
 
-        that.state['LAST'] = value
+        that.setCache('LAST', value)
         if (callback) callback(null, value > 0)
       })
     })
 
     .on('set', function (value, callback) {
-      var lastLevel = that.state['LAST']
+      var lastLevel = that.getCache('LAST')
       if (lastLevel === undefined) {
         lastLevel = -1
       }
 
       if (((value === true) || ((value === 1))) && ((lastLevel < 1))) {
-        that.state['LAST'] = 100
+        that.setCache('LAST', 100)
         that.command('set', '1:LEVEL', 100)
       } else
 
       if ((value === 0) || (value === false)) {
-        that.state['LAST'] = 0
+        that.setCache('LAST', 0)
         that.command('set', '1:LEVEL', 0)
       } else
 
@@ -56,22 +56,26 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function (Service, C
 
     .on('get', function (callback) {
       that.query('1:LEVEL', function (value) {
-        that.state['LAST'] = (value * 100)
+        that.setCache('LAST', (value * 100))
         if (callback) callback(null, value)
       })
     })
 
     .on('set', function (value, callback) {
-      var lastLevel = that.state['LAST']
+      var lastLevel = that.getCache('LAST')
       if (value !== lastLevel) {
         if (value === 0) {
           // set On State
-          if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) { this.onc.updateValue(false, null) }
+          if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) {
+            this.onc.updateValue(false, null)
+          }
         } else {
-          if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) { this.onc.updateValue(true, null) }
+          if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) {
+            this.onc.updateValue(true, null)
+          }
         }
 
-        that.state['LAST'] = value
+        that.setCache('LAST', value)
         that.isWorking = true
         that.delayed('set', '1:LEVEL', value, 5)
       }

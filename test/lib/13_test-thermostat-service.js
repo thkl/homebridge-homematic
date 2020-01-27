@@ -15,7 +15,11 @@ describe('Homematic Plugin (index)', function () {
   let datapath = path.join(__dirname, 'data', 'data_test_heater_thermostat.json')
   let data = fs.readFileSync(datapath).toString()
   let that = this
-  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
+  var config = {
+    ccu_ip: '127.0.0.1',
+    subsection: 'HomeKit',
+    testdata: data
+  }
   var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
@@ -92,7 +96,7 @@ describe('Homematic Plugin (index)', function () {
         // Set Delay to 0 sec for use with tests
         ac.delayOnSet = 0
         // We have to set ControlMode to 1 ... so the target Datapoint is SET_TEMPERATURE
-        ac.state['CONTROL_MODE'] = 1
+        ac.setCache('CONTROL_MODE', 1)
         assert.ok(s, 'Service.TemperatureSensor not found in Thermostat %s', ac.name)
         let cc = s.getCharacteristic(Characteristic.TargetTemperature)
         assert.ok(cc, 'Characteristic.TargetTemperature not found in Thermostat %s', ac.name)
@@ -111,7 +115,7 @@ describe('Homematic Plugin (index)', function () {
         // Set Delay to 0 sec for use with tests
         ac.delayOnSet = 0
         // We have to set ControlMode to 0 ... so the target Datapoint is MANU_MODE
-        ac.state['CONTROL_MODE'] = 0
+        ac.setCache('CONTROL_MODE', 0)
         assert.ok(s, 'Service.TemperatureSensor not found in Thermostat %s', ac.name)
         let cc = s.getCharacteristic(Characteristic.TargetTemperature)
         assert.ok(cc, 'Characteristic.TargetTemperature not found in Thermostat %s', ac.name)

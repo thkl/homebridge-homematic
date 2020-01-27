@@ -14,7 +14,16 @@ util.inherits(HomeMaticHomeKitBSLColorService, HomeKitGenericService)
 HomeMaticHomeKitBSLColorService.prototype.createDeviceService = function (Service, Characteristic) {
   var that = this
   // BLACK , BLUE, GREEN ,TURQUOISE ,RED ,PURPLE ,YELLOW ,WHITE
-  this.colorTable = { '0': -1, '1': 246, '2': 111, '3': 176, '4': 0, '5': 319, '6': 49, '7': 361 }
+  this.colorTable = {
+    '0': -1,
+    '1': 246,
+    '2': 111,
+    '3': 176,
+    '4': 0,
+    '5': 319,
+    '6': 49,
+    '7': 361
+  }
   var lightbulb = new Service.Lightbulb(this.name)
   this.services.push(lightbulb)
 
@@ -25,24 +34,24 @@ HomeMaticHomeKitBSLColorService.prototype.createDeviceService = function (Servic
         if (value === undefined) {
           value = 0
         }
-        that.state['LAST'] = value
+        this.setCache('LAST', value)
         if (callback) callback(null, value > 0)
       })
     })
 
     .on('set', function (value, callback) {
-      var lastLevel = that.state['LAST']
+      var lastLevel = that.getCache('LAST')
       if (lastLevel === undefined) {
         lastLevel = -1
       }
 
       if (((value === true) || ((value === 1))) && ((lastLevel < 1))) {
-        that.state['LAST'] = 100
+        that.setCache('LAST', 100)
         that.command('set', 'LEVEL', 100)
       } else
 
       if ((value === 0) || (value === false)) {
-        that.state['LAST'] = 0
+        that.setCache('LAST', 0)
         that.command('set', 'LEVEL', 0)
       } else
 
@@ -59,22 +68,26 @@ HomeMaticHomeKitBSLColorService.prototype.createDeviceService = function (Servic
 
     .on('get', function (callback) {
       that.query('LEVEL', function (value) {
-        that.state['LAST'] = (value * 100)
+        that.setCache('LAST', (value * 100))
         if (callback) callback(null, value)
       })
     })
 
     .on('set', function (value, callback) {
-      var lastLevel = that.state['LAST']
+      var lastLevel = that.getCache('LAST')
       if (value !== lastLevel) {
         if (value === 0) {
           // set On State
-          if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) { this.onc.updateValue(false, null) }
+          if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) {
+            this.onc.updateValue(false, null)
+          }
         } else {
-          if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) { this.onc.updateValue(true, null) }
+          if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) {
+            this.onc.updateValue(true, null)
+          }
         }
 
-        that.state['LAST'] = value
+        that.setCache('LAST', value)
         that.isWorking = true
         that.delayed('set', 'LEVEL', value, 5)
       }
