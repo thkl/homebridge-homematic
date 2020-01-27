@@ -6,10 +6,3 @@ cache:
   - node_modules
 install:
 - npm install
-deploy:
-  provider: npm
-  email: $email
-  api_key:
-    secure: $secret_access_key
-  on:
-    branch: master
