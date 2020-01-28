@@ -204,8 +204,8 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-                                                                                                                    add FakeGato History object only if not in a testcase
-                                                                                                                    **/
+                                                                                                                                add FakeGato History object only if not in a testcase
+                                                                                                                                **/
   enableLoggingService: function (type, disableTimer) {
     if (this.runsInTestMode === true) {
       this.log.debug('Skip Loging Service for %s because of testmode', this.displayName)
@@ -407,17 +407,20 @@ HomeKitGenericService.prototype = {
   },
 
   setCache: function (dp, value) {
-    this.ccuCache.doCache(this.adress + '.' + dp, value)
+    let tp = this.transformDatapoint(dp)
+    this.ccuCache.doCache(tp[0] + '.' + tp[1], value)
   },
 
   getCache: function (dp) {
-    return this.ccuCache.getValue(this.adress + '.' + dp)
+    let tp = this.transformDatapoint(dp)
+    return this.ccuCache.getValue(tp[0] + '.' + tp[1])
   },
 
   cleanVirtualDevice: function (dp) {
     if (this.adress.indexOf('VirtualDevices.') > -1) {
+      let tp = this.transformDatapoint(dp)
       // Remove cached Date from Virtual Devices cause the do not update over rpc
-      this.ccuCache.deleteValue(this.adress + '.' + dp)
+      this.ccuCache.deleteValue(tp[0] + '.' + tp[1])
     }
     this.remoteGetValue(dp, function (value) {
 
@@ -536,7 +539,7 @@ HomeKitGenericService.prototype = {
     var tp = this.transformDatapoint(dp)
     var interf = this.intf
     this.log.debug('[Generic] remoteGetValue Intf:%s, Adre:%s, Dp:%s', interf, tp[0], tp[1])
-    let dpadr = tp[0] + ':' + tp[1]
+    let dpadr = tp[0] + '.' + tp[1]
     that.platform.getValue(interf, tp[0], tp[1], function (newValue) {
       that.log.debug('[Generic] got value for %s (%s)', dpadr, newValue)
       if ((newValue !== undefined) && (newValue !== null)) {
@@ -716,10 +719,10 @@ HomeKitGenericService.prototype = {
         // now fetch the real adress of that channel and get the channelnumber
         // datapoints from such channels named  as channelnumber:datapoint ... (no better approach yet)
         chnl = channel.slice(channel.indexOf(':') + 1)
-        this.cache(this.adress + '.' + dp, newValue)
+        this.cache(tp[0] + '.' + tp[1], newValue)
         this.datapointEvent(chnl + '.' + dp, newValue, channel)
       } else {
-        this.cache(this.adress + '.' + dp, newValue)
+        this.cache(tp[0] + '.' + tp[1], newValue)
         this.datapointEvent(dp, newValue, channel)
       }
       this.channelDatapointEvent(channel, dp, newValue)
@@ -750,6 +753,7 @@ HomeKitGenericService.prototype = {
 
   cache: function (dp, value) {
     var that = this
+    this.log.debug('[Generic] cache %s (%s)', dp, value)
     // Check custom Mapping from HM to HomeKit
     var map = that.datapointMappings[dp]
     if (map !== undefined) {

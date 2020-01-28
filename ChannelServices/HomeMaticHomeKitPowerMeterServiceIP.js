@@ -136,7 +136,7 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function (Se
     that.queryData()
     that.log.debug('[PMS] Inital State Query %s.STATE', that.switchChannel)
     that.remoteGetValue(that.switchChannel + '.STATE')
-  }, 1000)
+  }, 500)
 }
 
 HomeMaticHomeKitPowerMeterServiceIP.prototype.shutdown = function () {
@@ -146,11 +146,8 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.shutdown = function () {
 HomeMaticHomeKitPowerMeterServiceIP.prototype.datapointEvent = function (dp, newValue) {
   this.log.debug('[PMS] Event %s (%s)', dp, newValue)
   if (dp === this.switchChannel + '.STATE') {
-    let hmState = ((newValue === 'true') || (newValue === true)) ? 1 : 0
-    this.log.debug('[PMS] Switch Event result %s', newValue)
-
     if (this.c_isOn !== undefined) {
-      this.c_isOn.updateValue(hmState, null)
+      this.c_isOn.updateValue((this.didMatch(newValue, true)) ? 1 : 0, null)
     }
   }
 }
