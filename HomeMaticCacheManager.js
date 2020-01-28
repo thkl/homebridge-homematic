@@ -20,7 +20,7 @@ HomeMaticCacheManager.prototype.doCache = function (address, value) {
 
   parts = address.split('.')
   if (parts.length !== 3) {
-    throw new Error('address missmatch ' + address)
+    return
   }
 
   this.log.debug('[Cache] write %s for %s', value, address)
