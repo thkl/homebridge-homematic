@@ -1,4 +1,3 @@
-
 'use strict'
 
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
@@ -10,8 +9,7 @@ function HomeMaticHomeKitGarageDoorOpenerService (log, platform, id, name, type,
 
 util.inherits(HomeMaticHomeKitGarageDoorOpenerService, HomeKitGenericService)
 
-HomeMaticHomeKitGarageDoorOpenerService.prototype.propagateServices = function (homebridge, Service, Characteristic) {
-}
+HomeMaticHomeKitGarageDoorOpenerService.prototype.propagateServices = function (homebridge, Service, Characteristic) {}
 
 HomeMaticHomeKitGarageDoorOpenerService.prototype.createDeviceService = function (Service, Characteristic) {
   let that = this
@@ -76,12 +74,12 @@ HomeMaticHomeKitGarageDoorOpenerService.prototype.createDeviceService = function
 HomeMaticHomeKitGarageDoorOpenerService.prototype.queryData = function () {
   let that = this
   that.query('DOOR_STATE', function (value) {
-    that.datapointEvent(that.channelnumber + ':DOOR_STATE', value)
+    that.datapointEvent(that.channelnumber + '.DOOR_STATE', value)
   })
 }
 
 HomeMaticHomeKitGarageDoorOpenerService.prototype.datapointEvent = function (dp, newValue) {
-  if (dp === this.channelnumber + ':DOOR_STATE') {
+  if (dp === this.channelnumber + '.DOOR_STATE') {
     this.log.debug('HmIP-MOD-TM ccu datapoint event %s', newValue)
 
     switch (newValue) {

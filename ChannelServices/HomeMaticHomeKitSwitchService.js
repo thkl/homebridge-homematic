@@ -285,7 +285,7 @@ HomeMaticHomeKitSwitchService.prototype.queryState = function () {
 }
 
 HomeMaticHomeKitSwitchService.prototype.datapointEvent = function (dp, newValue) {
-  if (dp === this.channelnumber + ':STATE') {
+  if (dp === this.channelnumber + '.STATE') {
     let hmState = ((newValue === 'true') || (newValue === true)) ? 1 : 0
     this.log.debug('Switch Event result %s hm %s', newValue, newValue)
     if (hmState === 0) {

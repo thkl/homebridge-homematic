@@ -18,7 +18,7 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function (Ser
 
     .on('get', function (callback) {
       that.log.info('get CurrentPosition')
-      that.query('4:LEVEL', function (value) {
+      that.query('4.LEVEL', function (value) {
         that.log.info('get CurrentPosition return %s', value)
         if (callback) callback(null, value)
       })
@@ -31,7 +31,7 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function (Ser
 
     .on('get', function (callback) {
       that.log.info('get TargetPosition ')
-      that.query('4:LEVEL', function (value) {
+      that.query('4.LEVEL', function (value) {
         that.log.info('get TargetPosition return %s', value)
         if (callback) {
           callback(null, value)
@@ -40,7 +40,7 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function (Ser
     })
 
     .on('set', function (value, callback) {
-      that.delayed('set', '4:LEVEL', value, 750)
+      that.delayed('set', '4.LEVEL', value, 750)
       callback()
     })
 
@@ -87,26 +87,26 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function (Ser
   this.addValueMapping('DIRECTION', 2, 1)
   this.addValueMapping('DIRECTION', 3, 2)
 
-  this.remoteGetValue('4:LEVEL')
+  this.remoteGetValue('4.LEVEL')
   this.remoteGetValue('DIRECTION')
 
   this.deviceAdress = this.adress.slice(0, this.adress.indexOf(':'))
 }
 
 HomeMaticHomeKitBlindSlatServiceIP.prototype.endWorking = function () {
-  this.remoteGetValue('4:LEVEL')
+  this.remoteGetValue('4.LEVEL')
 }
 
 HomeMaticHomeKitBlindSlatServiceIP.prototype.datapointEvent = function (dp, newValue) {
   let that = this
-  if ((dp === '4:PROCESS') && (newValue === 0)) {
-    this.remoteGetValue('4:LEVEL', function (value) {
+  if ((dp === '4.PROCESS') && (newValue === 0)) {
+    this.remoteGetValue('4.LEVEL', function (value) {
       that.currentPos.updateValue(value, null)
       that.targetPos.updateValue(value, null)
     })
   }
 
-  if (dp === '4:LEVEL_2') {
+  if (dp === '4.LEVEL_2') {
     let vl = -90 + (1.8 * (newValue * 100))
     that.cslat.updateValue(vl, null)
     that.tslat.updateValue(vl, null)

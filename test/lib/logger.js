@@ -32,7 +32,9 @@ Logger.prototype.setDebugEnabled = function (enabled) {
 }
 
 Logger.prototype.debug = function (msg) {
-  if (DEBUG_ENABLED) { this.log.apply(this, ['debug'].concat(Array.prototype.slice.call(arguments))) }
+  if (DEBUG_ENABLED) {
+    this.log.apply(this, ['debug'].concat(Array.prototype.slice.call(arguments)))
+  }
 }
 
 Logger.prototype.info = function (msg) {
@@ -62,7 +64,9 @@ Logger.prototype.log = function (level, msg) {
   }
 
   // prepend prefix if applicable
-  if (this.prefix) { msg = chalk.cyan('[' + this.prefix + ']') + ' ' + msg }
+  if (this.prefix) {
+    msg = chalk.cyan('[' + this.prefix + ']') + ' ' + msg
+  }
 
   // prepend timestamp
   var date = new Date()

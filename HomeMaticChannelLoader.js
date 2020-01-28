@@ -88,7 +88,9 @@ HomeMaticChannelLoader.prototype.loadChannelService = function (list, deviceType
 
       var accessory = new HKitService(log, platform, id, name, channelType, adress, special, cfg, Service, Characteristic, deviceType)
 
-      accessory.setReadOnly((access !== '255'))
+      if (accessory.grantAccess === undefined) {
+        accessory.setReadOnly((access !== '255'))
+      }
 
       accessory.serviceClassName = serviceclass
       // Only add if there are more than 1 Service (number 1 is the informationService)

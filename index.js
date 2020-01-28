@@ -600,7 +600,8 @@ HomeMaticPlatform.prototype.getValue_rega = function (interf, channel, datapoint
   if (channel.indexOf(interf) === -1) {
     adrchannel = interf + '.' + channel
   }
-  let cValue = this.cache.getValue(adrchannel)
+  this.log.debug('[Core] check cache %s.%s', adrchannel, datapoint)
+  let cValue = this.cache.getValue(adrchannel + '.' + datapoint)
   if (cValue) {
     if (callback) {
       callback(cValue)
@@ -608,7 +609,7 @@ HomeMaticPlatform.prototype.getValue_rega = function (interf, channel, datapoint
   } else {
     let rega = this.createRegaRequest()
     rega.getValue(adrchannel, datapoint, function (result) {
-      that.cache.doCache(adrchannel, result)
+      that.cache.doCache(adrchannel + '.' + datapoint, result)
       if (callback) {
         callback(result)
       }
@@ -620,7 +621,7 @@ HomeMaticPlatform.prototype.getValue = function (intf, channel, datapoint, callb
   if (channel !== undefined) {
     if (intf !== undefined) {
       let rpc = false
-      this.log.debug('platform getValue (%s) %s.%s', intf, channel, datapoint)
+      this.log.debug('[Core] getValue (%s) %s.%s', intf, channel, datapoint)
 
       if (intf === 'Variable') {
         var rega = this.createRegaRequest()
@@ -638,7 +639,7 @@ HomeMaticPlatform.prototype.getValue = function (intf, channel, datapoint, callb
       this.getValue_rega(intf, channel, datapoint, callback)
     }
   } else {
-    this.log.warn('unknow channel skipping ...')
+    this.log.warn('[Core] unknow channel skipping ...')
     if (callback) {
       callback(undefined)
     }

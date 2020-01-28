@@ -1,5 +1,12 @@
-Changelog for 0.0.206:
+Changelog for Unreleased:
 ======================
 
-- cleaning [`0a659bf`](https://github.com/thkl/homebridge-homematic/commit/0a659bf6f555eba6efa1b7a3f5cb32c45e210a2b)
-- Release 0.0.206 [`a4d612c`](https://github.com/thkl/homebridge-homematic/commit/a4d612cdc6228ef53a8d0581a9a5876a5bca926e)
+- worked on #511 [`b060c02`](https://github.com/thkl/homebridge-homematic/commit/b060c02e7f071119445e078c8ec2d7a297c6b5ce)
+- removed deployment from travis [`22a50c5`](https://github.com/thkl/homebridge-homematic/commit/22a50c5a323705dadf35c568d7ef5f11749e69ed)
+- #511 [`56cd8f1`](https://github.com/thkl/homebridge-homematic/commit/56cd8f11738e4dc2ba6d7e6d2dd72174062211a7)
+
+Changelog for 0.0.207:
+======================
+
+Changelog for 0.0.206:
+======================

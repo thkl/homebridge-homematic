@@ -26,7 +26,7 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function (Service
 
   this.currentPos = blind.getCharacteristic(Characteristic.CurrentPosition)
     .on('get', function (callback) {
-      that.query('4:LEVEL', function (value) {
+      that.query('4.LEVEL', function (value) {
         if (value < that.minValueForClose) {
           value = 0
         }
@@ -42,7 +42,7 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function (Service
   this.targetPos = blind.getCharacteristic(Characteristic.TargetPosition)
 
     .on('get', function (callback) {
-      that.query('4:LEVEL', function (value) {
+      that.query('4.LEVEL', function (value) {
         if (callback) {
           if (value < that.minValueForClose) {
             value = 0
@@ -56,7 +56,7 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function (Service
     })
 
     .on('set', function (value, callback) {
-      that.delayed('set', '4:LEVEL', value, that.delayOnSet)
+      that.delayed('set', '4.LEVEL', value, that.delayOnSet)
       if (callback !== undefined) {
         callback()
       }
@@ -80,36 +80,40 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function (Service
   pstate.eventEnabled = true
 
   /**
-  Parameter DIRECTION
-  0 = NONE (Standard)
-  1=UP
-  2=DOWN
-  3=UNDEFINED
-  */
+    Parameter DIRECTION
+    0 = NONE (Standard)
+    1=UP
+    2=DOWN
+    3=UNDEFINED
+    */
 
   /*
-  Characteristic.PositionState.DECREASING = 0;
-  Characteristic.PositionState.INCREASING = 1;
-  Characteristic.PositionState.STOPPED = 2;
-  */
+    Characteristic.PositionState.DECREASING = 0;
+    Characteristic.PositionState.INCREASING = 1;
+    Characteristic.PositionState.STOPPED = 2;
+    */
 
   this.addValueMapping('DIRECTION', 0, 2)
   this.addValueMapping('DIRECTION', 1, 0)
   this.addValueMapping('DIRECTION', 2, 1)
   this.addValueMapping('DIRECTION', 3, 2)
 
-  this.remoteGetValue('4:LEVEL', function (newValue) {
+  this.remoteGetValue('4.LEVEL', function (newValue) {
     that.processBlindLevel(newValue)
   })
 
   this.deviceAdress = this.adress.slice(0, this.adress.indexOf(':'))
 
-  this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ':3.LEVEL', this, function (newValue) { that.processBlindLevel(newValue) })
-  this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ':4.LEVEL', this, function (newValue) { that.processBlindLevel(newValue) })
+  this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ':3.LEVEL', this, function (newValue) {
+    that.processBlindLevel(newValue)
+  })
+  this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ':4.LEVEL', this, function (newValue) {
+    that.processBlindLevel(newValue)
+  })
 
   this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ':4:PROCESS', this, function (newValue) {
     if (newValue === 0) {
-      that.remoteGetValue('4:LEVEL', function (value) {
+      that.remoteGetValue('4.LEVEL', function (value) {
         that.processBlindLevel(value)
       })
     }
@@ -118,7 +122,7 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function (Service
 
 HomeMaticHomeKitBlindServiceIP.prototype.endWorking = function () {
   let that = this
-  this.remoteGetValue('4:LEVEL', function (newValue) {
+  this.remoteGetValue('4.LEVEL', function (newValue) {
     that.processBlindLevel(newValue)
   })
 }
@@ -126,19 +130,19 @@ HomeMaticHomeKitBlindServiceIP.prototype.endWorking = function () {
 HomeMaticHomeKitBlindServiceIP.prototype.datapointEvent = function (dp, newValue) {
   let that = this
 
-  if ((dp === '4:PROCESS') && (newValue === 0)) {
-    this.remoteGetValue('4:LEVEL', function (value) {
+  if ((dp === '4.PROCESS') && (newValue === 0)) {
+    this.remoteGetValue('4.LEVEL', function (value) {
       that.currentPos.updateValue(value, null)
       that.targetPos.updateValue(value, null)
     })
   }
 
-  if (dp === '4:LEVEL') {
+  if (dp === '4.LEVEL') {
     that.currentPos.updateValue(newValue, null)
     that.targetPos.updateValue(newValue, null)
   }
 
-  if (dp === '3:LEVEL') {
+  if (dp === '3.LEVEL') {
     that.currentPos.updateValue(newValue, null)
     that.targetPos.updateValue(newValue, null)
   }

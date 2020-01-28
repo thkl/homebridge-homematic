@@ -29,7 +29,7 @@ var HomeMaticRPC = function (log, ccuip, port, system, platform) {
   }
 
   if (semver.lt(process.version, '4.5.0')) {
-    this.log.warn('you are running an outdated node version. for now it may work but please update.')
+    this.log.warn('[RPC] you are running an outdated node version. for now it may work but please update.')
   }
 
   switch (system) {
@@ -38,7 +38,7 @@ var HomeMaticRPC = function (log, ccuip, port, system, platform) {
       this.ccuport = 2001
 
       // if (semver.lt(process.version, '4.5.0')) {
-      this.log.info('using xmprpc for communication with BidCos-RF')
+      this.log.info('[RPC] using xmprpc for communication with BidCos-RF')
       this.rpc = xmlrpc
       this.rpcInit = 'http://'
       // } else {
@@ -52,7 +52,7 @@ var HomeMaticRPC = function (log, ccuip, port, system, platform) {
     case 1:
       this.interface = 'BidCos-Wired.'
       // if (semver.lt(process.version, '4.5.0')) {
-      this.log.info('using xmprpc for communication with BidCos-Wired')
+      this.log.info('[RPC] using xmprpc for communication with BidCos-Wired')
       this.rpc = xmlrpc
       this.rpcInit = 'http://'
       // } else {
@@ -88,7 +88,7 @@ HomeMaticRPC.prototype.init = function () {
   if (bindIP === undefined) {
     bindIP = this.getIPAddress()
     if (bindIP === '0.0.0.0') {
-      that.log('Can not fetch IP')
+      that.log('[RPC] Can not fetch IP')
       return
     }
   }
@@ -101,7 +101,7 @@ HomeMaticRPC.prototype.init = function () {
   this.localIP = ip
   this.bindIP = bindIP
 
-  this.log.info('local ip used : %s. you may change that with local_ip parameter in config', ip)
+  this.log.info('[RPC] local ip used : %s. you may change that with local_ip parameter in config', ip)
 
   this.isPortTaken(this.listeningPort, function (error, inUse) {
     if (error === null) {
@@ -111,46 +111,46 @@ HomeMaticRPC.prototype.init = function () {
           port: that.listeningPort
         })
 
-        that.server.on('NotFound', function (method, params) {
+        that.server.on('[RPC] NotFound', function (method, params) {
           // that.log.debug("Method %s does not exist. - %s",method, JSON.stringify(params));
         })
 
         that.server.on('system.listMethods', function (err, params, callback) {
-          that.log.debug("Method call params for 'system.listMethods': %s (%s)", JSON.stringify(params), err)
+          that.log.debug("[RPC] Method call params for 'system.listMethods': %s (%s)", JSON.stringify(params), err)
           callback(null, ['event', 'system.listMethods', 'system.multicall'])
         })
 
         that.server.on('listDevices', function (err, params, callback) {
-          that.log.debug('rpc <- listDevices on %s - Zero Reply (%s)', that.interface, err)
+          that.log.debug('[RPC] <- listDevices on %s - Zero Reply (%s)', that.interface, err)
           callback(null, [])
         })
 
         that.server.on('newDevices', function (err, params, callback) {
-          that.log.debug('rpc <- newDevices on %s nobody is interested in newdevices ... (%s)', that.interface, err)
+          that.log.debug('[RPC] <- newDevices on %s nobody is interested in newdevices ... (%s)', that.interface, err)
           // we are not intrested in new devices cause we will fetch them at launch
           callback(null, [])
         })
 
         that.server.on('event', function (err, params, callback) {
-          that.log.debug('rpc <- event  on %s (%s)', that.interface, err)
+          that.log.debug('[RPC] <- event  on %s (%s)', that.interface, err)
           that.lastMessage = Math.floor((new Date()).getTime() / 1000)
           var channel = that.interface + params[1]
           var datapoint = params[2]
           var value = params[3]
           let address = that.interface + params[1] + '.' + params[2]
-          that.log.debug('RPC single event for %s %s with value %s', channel, datapoint, value)
+          that.log.debug('[RPC] single event for %s %s with value %s', channel, datapoint, value)
           that.platform.cache.doCache(address, value)
 
           that.platform.foundAccessories.map(function (accessory) {
             if ((accessory.adress === channel) || ((accessory.cadress !== undefined) && (accessory.cadress === channel))) {
-              that.log.debug('found accessory %s', accessory.adress)
+              that.log.debug('[RPC] found accessory %s', accessory.adress)
               accessory.event(channel, datapoint, value)
             }
           })
 
           that.platform.eventAdresses.map(function (tuple) {
             if (address === tuple.address) {
-              that.log.debug('found accessory %s run registred event', tuple.address)
+              that.log.debug('[RPC] found accessory %s run registred event', tuple.address)
               tuple.accessory.event(channel, datapoint, value, tuple.function)
             }
           })
@@ -159,7 +159,7 @@ HomeMaticRPC.prototype.init = function () {
         })
 
         that.server.on('system.multicall', function (err, params, callback) {
-          that.log.debug('rpc <- system.multicall on %s (%s)', that.interface, err)
+          that.log.debug('[RPC] <- system.multicall on %s (%s)', that.interface, err)
           that.lastMessage = Math.floor((new Date()).getTime() / 1000)
 
           params.map(function (events) {
@@ -172,7 +172,7 @@ HomeMaticRPC.prototype.init = function () {
                   var value = params[3]
                   let address = that.interface + params[1] + '.' + params[2]
 
-                  that.log.debug('RPC event for %s.%s with value %s', channel, datapoint, value)
+                  that.log.debug('[RPC] event for %s.%s with value %s', channel, datapoint, value)
                   that.platform.cache.doCache(address, value)
 
                   that.platform.foundAccessories.map(function (accessory) {
@@ -181,7 +181,7 @@ HomeMaticRPC.prototype.init = function () {
                     if ((accessory.adress === channel) ||
                                             ((accessory.cadress !== undefined) && (accessory.cadress === channel)) ||
                                             ((accessory.deviceAdress !== undefined) && (accessory.deviceAdress === deviceAdress))) {
-                      that.log.debug('Accessory (%s) found -> Send Event with value %s', accessory.name, value)
+                      that.log.debug('[RPC] Accessory (%s) found -> Send Event with value %s', accessory.name, value)
                       accessory.event(channel, datapoint, value)
                     }
                   })
@@ -236,9 +236,9 @@ HomeMaticRPC.prototype.getValue = function (channel, datapoint, callback) {
   if (channel.indexOf(that.interface) > -1) {
     channel = channel.substr(that.interface.length)
 
-    this.log.debug('RPC getValue Call for %s %s', channel, datapoint)
+    this.log.debug('[RPC] getValue Call for %s %s', channel, datapoint)
     this.client.methodCall('getValue', [channel, datapoint], function (error, value) {
-      that.log.debug('RPC getValue (%s %s) Response %s  | Errors: %s', channel, datapoint, JSON.stringify(value), error)
+      that.log.debug('[RPC] getValue (%s %s) Response %s  | Errors: %s', channel, datapoint, JSON.stringify(value), error)
       callback(value)
     })
   } else {}
@@ -246,7 +246,7 @@ HomeMaticRPC.prototype.getValue = function (channel, datapoint, callback) {
 
 HomeMaticRPC.prototype.setValue = function (channel, datapoint, value, callback) {
   var that = this
-  this.log.debug('XMLRpc setValue %s %s %s', channel, datapoint, value)
+  this.log.debug('[RPC] setValue %s %s %s', channel, datapoint, value)
   if (this.client === undefined) {
     this.log.error('client missing')
     return
@@ -260,10 +260,10 @@ HomeMaticRPC.prototype.setValue = function (channel, datapoint, value, callback)
   //  value = String(value);
   // }
 
-  this.log.debug('RPC setValue Call for %s %s Value %s Type %s', channel, datapoint, value, typeof value)
+  this.log.debug('[RPC] setValue Call for %s %s Value %s Type %s', channel, datapoint, value, typeof value)
 
   this.client.methodCall('setValue', [channel, datapoint, value], function (error, value) {
-    that.log.debug('RPC setValue (%s %s) Response %s Errors: %s', channel, datapoint, JSON.stringify(value), error)
+    that.log.debug('[RPC] setValue (%s %s) Response %s Errors: %s', channel, datapoint, JSON.stringify(value), error)
     if ((value !== undefined) && (value['faultCode'] !== undefined) && (callback !== undefined)) {
       callback(value['faultCode'], value)
     } else
@@ -277,17 +277,17 @@ HomeMaticRPC.prototype.connect = function () {
   var that = this
   this.lastMessage = Math.floor((new Date()).getTime() / 1000)
   var port = this.ccuport
-  this.log.info('Creating Local HTTP Client for CCU RPC Events')
+  this.log.info('[RPC] Creating Local HTTP Client for CCU RPC Events')
   this.client = that.rpc.createClient({
     host: this.ccuip,
     port: port,
     path: this.pathname,
     queueMaxLength: 100
   })
-  this.log.debug('CCU RPC Init Call on port %s for interface %s', port, this.interface)
+  this.log.debug('[RPC] CCU RPC Init Call on port %s for interface %s', port, this.interface)
   var command = this.rpcInit + this.localIP + ':' + this.listeningPort
   this.client.methodCall('init', [command, 'homebridge_' + this.interface], function (error, value) {
-    that.log.debug('CCU Response for init at %s with %s...Value (%s) Error : (%s)', that.interface, command, JSON.stringify(value), error)
+    that.log.debug('[RPC] CCU Response for init at %s with %s...Value (%s) Error : (%s)', that.interface, command, JSON.stringify(value), error)
     that.lastMessage = Math.floor((new Date()).getTime() / 1000)
   })
 
@@ -303,10 +303,10 @@ HomeMaticRPC.prototype.ccuWatchDog = function () {
     var now = Math.floor((new Date()).getTime() / 1000)
     var timeDiff = now - this.lastMessage
     if (timeDiff > that.watchDogTimeout) {
-      that.log.debug('Watchdog Trigger - Reinit Connection for %s after idle time of %s seconds', this.interface, timeDiff)
+      that.log.debug('[RPC] Watchdog Trigger - Reinit Connection for %s after idle time of %s seconds', this.interface, timeDiff)
       that.lastMessage = now
       that.client.methodCall('init', [this.rpcInit + this.localIP + ':' + this.listeningPort, 'homebridge_' + this.interface], function (error, value) {
-        that.log.debug('CCU Response ...Value (%s) Error : (%s)', JSON.stringify(value), error)
+        that.log.debug('[RPC] CCU Response ...Value (%s) Error : (%s)', JSON.stringify(value), error)
         that.lastMessage = Math.floor((new Date()).getTime() / 1000)
       })
     }
@@ -320,10 +320,10 @@ HomeMaticRPC.prototype.ccuWatchDog = function () {
 }
 
 HomeMaticRPC.prototype.stop = function () {
-  this.log.info('Removing Event Server for Interface %s', this.interface)
+  this.log.info('[RPC] Removing Event Server for Interface %s', this.interface)
   this.client.methodCall('init', ['xmlrpc_bin://' + this.localIP + ':' + this.listeningPort], function (error, value) {
     if (error !== undefined) {
-      this.log.error('Error while removing eventserver %s', error)
+      this.log.error('[RPC] Error while removing eventserver %s', error)
     }
   })
 }

@@ -2,18 +2,21 @@
 
 function HomeMaticCacheManager (log) {
   this.log = log
-  this.log.info('[Cache] initalizing')
+  this.log.debug('[Cache] initalizing')
   this.clearAll()
 }
 
 HomeMaticCacheManager.prototype.clearAll = function () {
   this.cache = {}
-  this.log.info('[Cache] cleared')
+  this.log.debug('[Cache] cleared')
 }
 
 HomeMaticCacheManager.prototype.doCache = function (address, value) {
-  this.log.debug('[Cache] write %s for %s', value, address)
-  this.cache[address] = value
+  let parts = address.split(':')
+  if (parts.length === 2) {
+    this.log.debug('[Cache] write %s for %s', value, address)
+    this.cache[address] = value
+  }
 }
 
 HomeMaticCacheManager.prototype.getValue = function (address) {

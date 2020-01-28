@@ -117,8 +117,8 @@ HomeKitGenericService.prototype = {
      * @return {[type]}
      */
   setCurrentStateCharacteristic: function (key, aCharacteristic) {
-    if (key.indexOf(':') === -1) {
-      key = this.channelnumber + ':' + key
+    if (key.indexOf('.') === -1) {
+      key = this.channelnumber + '.' + key
     }
     this.currentStateCharacteristic[key] = aCharacteristic
   },
@@ -129,8 +129,8 @@ HomeKitGenericService.prototype = {
      * @return {[type]}     linked characteristic
      */
   getCurrentStateCharacteristic: function (key) {
-    if (key.indexOf(':') === -1) {
-      key = this.channelnumber + ':' + key
+    if (key.indexOf('.') === -1) {
+      key = this.channelnumber + '.' + key
     }
     return this.currentStateCharacteristic[key]
   },
@@ -138,12 +138,12 @@ HomeKitGenericService.prototype = {
   /**
      * Check if the Event was triggerd by a Datapointname
      * @param  {[type]} dp_i    Eventkey
-     * @param  {[type]} dp_test Datapoint name (channel address will beautocompleted)
+     * @param  {[type]} dp_test Datapoint name (channel address will be autocompleted)
      * @return {[type]}         true if the eventkey matches the datapoint name
      */
   isDataPointEvent: function (dPi, dPTest) {
-    if (dPTest.indexOf(':') === -1) {
-      dPTest = this.channelnumber + ':' + dPTest
+    if (dPTest.indexOf('.') === -1) {
+      dPTest = this.channelnumber + '.' + dPTest
     }
     return (dPi === dPTest)
   },
@@ -204,8 +204,8 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-                                                                            add FakeGato History object only if not in a testcase
-                                                                            **/
+                                                                                                                    add FakeGato History object only if not in a testcase
+                                                                                                                    **/
   enableLoggingService: function (type, disableTimer) {
     if (this.runsInTestMode === true) {
       this.log.debug('Skip Loging Service for %s because of testmode', this.displayName)
@@ -362,7 +362,7 @@ HomeKitGenericService.prototype = {
   setReadOnly: function (readOnly) {
     this.readOnly = readOnly
     if (readOnly === true) {
-      this.log.debug('set %s to read only', this.name)
+      this.log.debug('[Generic] setReadOnly %s to read only', this.name)
     }
   },
 
@@ -380,6 +380,7 @@ HomeKitGenericService.prototype = {
   // Return current States
   query: function (dp, callback) {
     var that = this
+    this.log.debug('[Generic] query %s', dp)
     if (that.usecache === false) {
       that.remoteGetValue(dp, function (value) {
         if (callback !== undefined) {
@@ -534,7 +535,10 @@ HomeKitGenericService.prototype = {
     var that = this
     var tp = this.transformDatapoint(dp)
     var interf = this.intf
+    this.log.debug('[Generic] remoteGetValue Intf:%s, Adre:%s, Dp:%s', interf, tp[0], tp[1])
+    let dpadr = tp[0] + ':' + tp[1]
     that.platform.getValue(interf, tp[0], tp[1], function (newValue) {
+      that.log.debug('[Generic] got value for %s (%s)', dpadr, newValue)
       if ((newValue !== undefined) && (newValue !== null)) {
         if (tp[1] === 'LEVEL') {
           newValue = newValue * 100
@@ -551,7 +555,7 @@ HomeKitGenericService.prototype = {
         that.eventupdate = true
         // var ow = newValue;
         newValue = that.convertValue(dp, newValue)
-        that.cache(that.adress + '.' + dp, newValue)
+        that.cache(dpadr, newValue)
         that.eventupdate = false
       } else {
         // newValue = 0;
@@ -565,7 +569,7 @@ HomeKitGenericService.prototype = {
         if (parts.length > 1) {
           dp = parts[1]
         }
-        let address = that.adress + '.' + dp
+        let address = dpadr
         that.log.debug('remoteGetValue response; empty callback route via event for %s', address)
         // send a Event - we have to walk a extra round to get the enclosure function back
         that.platform.eventAdresses.map(function (tuple) {
@@ -671,7 +675,7 @@ HomeKitGenericService.prototype = {
         if (typeof optionalFunction === 'function') {
           optionalFunction.call(this, newValue)
         }
-        this.datapointEvent(chnl + ':' + dp, newValue, channel)
+        this.datapointEvent(chnl + '.' + dp, newValue, channel)
         return
       }
       if (tp[1] === 'PRESS_LONG') {
@@ -684,7 +688,7 @@ HomeKitGenericService.prototype = {
         if (typeof optionalFunction === 'function') {
           optionalFunction.call(this, newValue)
         }
-        this.datapointEvent(chnl + ':' + dp, newValue, channel)
+        this.datapointEvent(chnl + '.' + dp, newValue, channel)
         return
       }
 
@@ -713,7 +717,7 @@ HomeKitGenericService.prototype = {
         // datapoints from such channels named  as channelnumber:datapoint ... (no better approach yet)
         chnl = channel.slice(channel.indexOf(':') + 1)
         this.cache(this.adress + '.' + dp, newValue)
-        this.datapointEvent(chnl + ':' + dp, newValue, channel)
+        this.datapointEvent(chnl + '.' + dp, newValue, channel)
       } else {
         this.cache(this.adress + '.' + dp, newValue)
         this.datapointEvent(dp, newValue, channel)
@@ -832,11 +836,13 @@ HomeKitGenericService.prototype = {
   },
 
   transformDatapoint: function (dp) {
+    this.log.debug('[Generic] transformDatapoint %s', dp)
     if (dp) {
-      var pos = dp.indexOf(':')
+      var pos = dp.indexOf('.')
       if (pos === -1) {
         return [this.adress, dp]
       }
+
       var ndp = dp.substr(pos + 1, dp.length)
       var nadr = this.adress.substr(0, this.adress.indexOf(':'))
       var chnl = dp.substr(0, pos)

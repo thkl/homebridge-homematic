@@ -17,7 +17,7 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function (Service, C
   this.onc = lightbulb.getCharacteristic(Characteristic.On)
 
     .on('get', function (callback) {
-      that.query('1:LEVEL', function (value) {
+      that.query('1.LEVEL', function (value) {
         if (value === undefined) {
           value = 0
         }
@@ -35,18 +35,18 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function (Service, C
 
       if (((value === true) || ((value === 1))) && ((lastLevel < 1))) {
         that.setCache('LAST', 100)
-        that.command('set', '1:LEVEL', 100)
+        that.command('set', '1.LEVEL', 100)
       } else
 
       if ((value === 0) || (value === false)) {
         that.setCache('LAST', 0)
-        that.command('set', '1:LEVEL', 0)
+        that.command('set', '1.LEVEL', 0)
       } else
 
       if (((value === true) || ((value === 1))) && ((lastLevel > 0))) {
         // Do Nothing just skip the ON Command cause the Dimmer is on
       } else {
-        that.delayed('set', '1:LEVEL', lastLevel, 2)
+        that.delayed('set', '1.LEVEL', lastLevel, 2)
       }
 
       callback()
@@ -55,7 +55,7 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function (Service, C
   var brightness = lightbulb.getCharacteristic(Characteristic.Brightness)
 
     .on('get', function (callback) {
-      that.query('1:LEVEL', function (value) {
+      that.query('1.LEVEL', function (value) {
         that.setCache('LAST', (value * 100))
         if (callback) callback(null, value)
       })
@@ -77,20 +77,20 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function (Service, C
 
         that.setCache('LAST', value)
         that.isWorking = true
-        that.delayed('set', '1:LEVEL', value, 5)
+        that.delayed('set', '1.LEVEL', value, 5)
       }
       if (callback) callback()
     }.bind(this))
 
-  that.currentStateCharacteristic['1:LEVEL'] = brightness
+  that.currentStateCharacteristic['1.LEVEL'] = brightness
   brightness.eventEnabled = true
 
-  this.remoteGetValue('1:LEVEL')
+  this.remoteGetValue('1.LEVEL')
 
   var color = lightbulb.addCharacteristic(Characteristic.Hue)
 
     .on('get', function (callback) {
-      that.query('2:COLOR', function (value) {
+      that.query('2.COLOR', function (value) {
         if (callback) callback(null, value)
       })
     })
@@ -100,16 +100,16 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function (Service, C
         value = 361.809045226
       }
 
-      that.delayed('set', '2:COLOR', value, 100)
+      that.delayed('set', '2.COLOR', value, 100)
       callback()
     })
 
-  that.currentStateCharacteristic['2:COLOR'] = color
+  that.currentStateCharacteristic['2.COLOR'] = color
   color.eventEnabled = true
 
   lightbulb.addCharacteristic(Characteristic.Saturation)
     .on('get', function (callback) {
-      that.query('2:COLOR', function (value) {
+      that.query('2.COLOR', function (value) {
         var ret = (value === 200) ? 0 : 100
         callback(null, ret)
       })
@@ -118,16 +118,16 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function (Service, C
     .on('set', function (value, callback) {
       that.sat = value
       if (value < 10) {
-        that.delayed('set', '2:COLOR', 361.809045226, 100)
+        that.delayed('set', '2.COLOR', 361.809045226, 100)
       }
       callback()
     })
 
-  this.remoteGetValue('2:COLOR')
+  this.remoteGetValue('2.COLOR')
 }
 
 HomeMaticHomeKitRGBWService.prototype.endWorking = function () {
-  this.remoteGetValue('1:LEVEL')
+  this.remoteGetValue('1.LEVEL')
 }
 
 module.exports = HomeMaticHomeKitRGBWService

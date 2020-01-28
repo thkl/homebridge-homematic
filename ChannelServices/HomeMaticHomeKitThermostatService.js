@@ -21,7 +21,7 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function (Serv
 
   var mode = thermo.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
     .on('get', function (callback) {
-      self.query('2:SETPOINT', function (value) {
+      self.query('2.SETPOINT', function (value) {
         if (value < 6.0) {
           self.getCurrentStateCharacteristic('MODE').setValue(1, null)
           if (callback) callback(null, 0)
@@ -36,7 +36,7 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function (Serv
 
   var targetMode = thermo.getCharacteristic(Characteristic.TargetHeatingCoolingState)
     .on('get', function (callback) {
-      self.query('2:SETPOINT', function (value) {
+      self.query('2.SETPOINT', function (value) {
         if (value < 6.0) {
           if (callback) callback(null, 0)
         } else {
@@ -47,7 +47,7 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function (Serv
 
     .on('set', function (value, callback) {
       if (value === 0) {
-        self.command('setrega', '2:SETPOINT', 0)
+        self.command('setrega', '2.SETPOINT', 0)
         self.cleanVirtualDevice('SETPOINT')
       } else {
         self.cleanVirtualDevice('SETPOINT')
@@ -64,10 +64,14 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function (Serv
   })
 
   self.currentTempCharacteristic = thermo.getCharacteristic(Characteristic.CurrentTemperature)
-    .setProps({ minValue: -100 })
+    .setProps({
+      minValue: -100
+    })
     .on('get', function (callback) {
-      self.remoteGetValue('1:TEMPERATURE', function (value) {
-        self.addLogEntry({ currentTemp: parseFloat(value) })
+      self.remoteGetValue('1.TEMPERATURE', function (value) {
+        self.addLogEntry({
+          currentTemp: parseFloat(value)
+        })
         if (callback) callback(null, value)
       })
     })
@@ -76,8 +80,10 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function (Serv
 
   self.currentHumidityCharacteristic = thermo.getCharacteristic(Characteristic.CurrentRelativeHumidity)
     .on('get', function (callback) {
-      self.remoteGetValue('1:HUMIDITY', function (value) {
-        self.addLogEntry({ humidity: parseFloat(value) })
+      self.remoteGetValue('1.HUMIDITY', function (value) {
+        self.addLogEntry({
+          humidity: parseFloat(value)
+        })
         if (callback) callback(null, value)
       })
     })
@@ -85,25 +91,31 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function (Serv
   self.currentHumidityCharacteristic.eventEnabled = true
 
   self.TargetTemperatureCharacteristic = thermo.getCharacteristic(Characteristic.TargetTemperature)
-    .setProps({ minValue: 6.0, maxValue: 30.5, minStep: 0.1 })
+    .setProps({
+      minValue: 6.0,
+      maxValue: 30.5,
+      minStep: 0.1
+    })
     .on('get', function (callback) {
-      self.query('2:SETPOINT', function (value) {
+      self.query('2.SETPOINT', function (value) {
         if (value < 6) {
           value = 6
         }
         if (value > 30) {
           value = 30.5
         }
-        self.addLogEntry({ setTemp: parseFloat(value) })
+        self.addLogEntry({
+          setTemp: parseFloat(value)
+        })
         if (callback) callback(null, value)
       })
     })
 
     .on('set', function (value, callback) {
       if (value > 30) {
-        self.delayed('setrega', '2:SETPOINT', 100, self.delayOnSet)
+        self.delayed('setrega', '2.SETPOINT', 100, self.delayOnSet)
       } else {
-        self.delayed('setrega', '2:SETPOINT', value, self.delayOnSet)
+        self.delayed('setrega', '2.SETPOINT', value, self.delayOnSet)
       }
       callback()
     })
@@ -129,15 +141,21 @@ HomeMaticHomeKitThermostatService.prototype.createDeviceService = function (Serv
 
 HomeMaticHomeKitThermostatService.prototype.queryData = function () {
   let self = this
-  self.query('1:HUMIDITY', function (value) {
-    self.addLogEntry({ humidity: parseFloat(value) })
+  self.query('1.HUMIDITY', function (value) {
+    self.addLogEntry({
+      humidity: parseFloat(value)
+    })
   })
 
-  self.query('1:TEMPERATURE', function (value) {
-    self.addLogEntry({ currentTemp: parseFloat(value) })
+  self.query('1.TEMPERATURE', function (value) {
+    self.addLogEntry({
+      currentTemp: parseFloat(value)
+    })
   })
   // create timer to query device every 10 minutes
-  self.refreshTimer = setTimeout(function () { self.queryData() }, 10 * 60 * 1000)
+  self.refreshTimer = setTimeout(function () {
+    self.queryData()
+  }, 10 * 60 * 1000)
 }
 
 HomeMaticHomeKitThermostatService.prototype.shutdown = function () {
@@ -147,18 +165,25 @@ HomeMaticHomeKitThermostatService.prototype.shutdown = function () {
 
 HomeMaticHomeKitThermostatService.prototype.datapointEvent = function (dp, newValue) {
   let self = this
-  if (dp === '1:TEMPERATURE') {
-    self.addLogEntry({ currentTemp: parseFloat(newValue) })
+  this.log.debug('[LTS] datapointEvent %s (%s)', dp, newValue)
+  if (dp === '1.TEMPERATURE') {
+    self.addLogEntry({
+      currentTemp: parseFloat(newValue)
+    })
     this.currentTempCharacteristic.updateValue(parseFloat(newValue), null)
   }
 
-  if (dp === '1:HUMIDITY') {
-    self.addLogEntry({ currentTemp: parseFloat(newValue) })
+  if (dp === '1.HUMIDITY') {
+    self.addLogEntry({
+      currentTemp: parseFloat(newValue)
+    })
     self.currentHumidityCharacteristic.updateValue(parseFloat(newValue), null)
   }
 
-  if (dp === '2:SETPOINT') {
-    self.addLogEntry({ setTemp: parseFloat(newValue) })
+  if (dp === '2.SETPOINT') {
+    self.addLogEntry({
+      setTemp: parseFloat(newValue)
+    })
     self.TargetTemperatureCharacteristic.updateValue(parseFloat(newValue), null)
   }
 }

@@ -37,11 +37,11 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
 
   /* CCU Values
 
-    0 = Off
-    1 = int
-    2 = ext
-    3 = off / blocked
-    */
+      0 = Off
+      1 = int
+      2 = ext
+      3 = off / blocked
+      */
   this.log.debug(JSON.stringify(this.characteristics))
 
   // Characteristic.SecuritySystemCurrentState and Characteristic.SecuritySystemTargetState
@@ -56,7 +56,7 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
     })
 
     .on('get', function (callback) {
-      that.query('4:ARMSTATE', function (value) {
+      that.query('4.ARMSTATE', function (value) {
         var hkValue = 0
         // have to set target state also
         that.internalsirupdate = true
@@ -85,7 +85,7 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
   this.targetState = secsys.getCharacteristic(Characteristic.SecuritySystemTargetState)
 
     .on('get', function (callback) {
-      that.query('4:ARMSTATE', function (value) {
+      that.query('4.ARMSTATE', function (value) {
         var hkTValue = 0
         switch (parseInt(value)) {
           case 3:
@@ -134,10 +134,10 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
         }
 
         if (hmvalue !== -1) {
-          that.command('set', '4:ARMSTATE', hmvalue, function () {
+          that.command('set', '4.ARMSTATE', hmvalue, function () {
             setTimeout(function () {
               // wait for 1 second
-              that.remoteGetValue('4:ARMSTATE', function (value) {
+              that.remoteGetValue('4.ARMSTATE', function (value) {
                 that.log.debug('Response current state is %s', value)
                 switch (parseInt(value)) {
                   case 3:
@@ -162,7 +162,7 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
       if (callback) callback()
     })
 
-  this.remoteGetValue('4:ARMSTATE')
+  this.remoteGetValue('4.ARMSTATE')
   this.addTamperedCharacteristic(secsys, Characteristic)
   this.addLowBatCharacteristic(secsys, Characteristic)
 
@@ -170,11 +170,11 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
 }
 
 HomeMaticHomeKitSecuritySystem.prototype.endWorking = function () {
-  this.remoteGetValue('4:ARMSTATE')
+  this.remoteGetValue('4.ARMSTATE')
 }
 
 HomeMaticHomeKitSecuritySystem.prototype.datapointEvent = function (dp, newValue) {
-  if ((dp === '1:STATE') || (dp === '2:STATE') || (dp === '3:STATE')) {
+  if ((dp === '1.STATE') || (dp === '2.STATE') || (dp === '3.STATE')) {
     if (newValue === true) {
       this.currentState.setValue(4, null)
     }
