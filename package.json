@@ -79,7 +79,10 @@
   ],
   "auto-changelog": {
     "startingCommit": "0a659bf6f555eba6efa1b7a3f5cb32c45e210a2b",
-    "template": "changelog-template.hbs"
+    "template": "changelog-template.hbs",
+    "ignoreCommitPattern": "worked|no message",
+    "unreleased": true,
+    "issuePattern": "[Ff]ixed ([A-Z]+-\\d+)"
   },
   "release-it": {
     "hooks": {

@@ -204,8 +204,8 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-                                                                                                                                add FakeGato History object only if not in a testcase
-                                                                                                                                **/
+                                                                                                                                                  add FakeGato History object only if not in a testcase
+                                                                                                                                                  **/
   enableLoggingService: function (type, disableTimer) {
     if (this.runsInTestMode === true) {
       this.log.debug('Skip Loging Service for %s because of testmode', this.displayName)
@@ -416,6 +416,11 @@ HomeKitGenericService.prototype = {
     return this.ccuCache.getValue(tp[0] + '.' + tp[1])
   },
 
+  removeCache: function (dp) {
+    let tp = this.transformDatapoint(dp)
+    this.ccuCache.deleteValue(tp[0] + '.' + tp[1])
+  },
+
   cleanVirtualDevice: function (dp) {
     if (this.adress.indexOf('VirtualDevices.') > -1) {
       let tp = this.transformDatapoint(dp)
@@ -499,6 +504,8 @@ HomeKitGenericService.prototype = {
       callback(undefined)
       return
     }
+    // Kill cached value
+    that.removeCache(addressdatapoint)
     that.platform.getValue(parts[0], parts[0] + '.' + parts[1], parts[2], function (newValue) {
       if ((newValue !== undefined) && (newValue !== null)) {
 
@@ -753,6 +760,7 @@ HomeKitGenericService.prototype = {
 
   cache: function (dp, value) {
     var that = this
+
     this.log.debug('[Generic] cache %s (%s)', dp, value)
     // Check custom Mapping from HM to HomeKit
     var map = that.datapointMappings[dp]

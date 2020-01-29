@@ -136,7 +136,11 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
             returnValue = Characteristic.CurrentDoorState.OPEN
           }
           let parts = that.address_sensor_close.split('.')
-          that.event(parts[0] + '.' + parts[1], parts[2], parseInt(closeValue))
+          if (typeof value === 'number') {
+            that.event(parts[0] + '.' + parts[1], parts[2], parseInt(closeValue))
+          } else {
+            that.event(parts[0] + '.' + parts[1], parts[2], closeValue)
+          }
           if (callback) callback(null, returnValue)
         })
       }
@@ -225,7 +229,11 @@ HomeMaticHomeKitGarageDoorService.prototype.querySensors = function () {
     that.remoteGetDataPointValue(that.address_sensor_close, function (newValue) {
       that.log.debug('[GDS] result for close sensor %s', newValue)
       let parts = that.address_sensor_close.split('.')
-      that.event(parts[0] + '.' + parts[1], parts[2], parseInt(newValue))
+      if (typeof value === 'number') {
+        that.event(parts[0] + '.' + parts[1], parts[2], parseInt(newValue))
+      } else {
+        that.event(parts[0] + '.' + parts[1], parts[2], newValue)
+      }
     })
   }
 
@@ -233,12 +241,16 @@ HomeMaticHomeKitGarageDoorService.prototype.querySensors = function () {
     this.remoteGetDataPointValue(that.address_sensor_open, function (newValue) {
       that.log.debug('[GDS] result for open sensor %s', newValue)
       let parts = that.address_sensor_close.split('.')
-      that.event(parts[0] + '.' + parts[1], parts[2], parseInt(newValue))
+      if (typeof value === 'number') {
+        that.event(parts[0] + '.' + parts[1], parts[2], parseInt(newValue))
+      } else {
+        that.event(parts[0] + '.' + parts[1], parts[2], newValue)
+      }
     })
   }
 }
 
-HomeMaticHomeKitGarageDoorService.prototype.event = function (channel, dp, newValue) {
+HomeMaticHomeKitGarageDoorService.prototype.datapointEvent = function (channel, dp, newValue) {
   // Chech sensors
   let that = this
   this.log.debug('[GDS] garage event %s,%s,%s Target Command State %s', channel, dp, newValue, this.targetCommand)

@@ -39,6 +39,7 @@ HomeMaticCacheManager.prototype.getValue = function (address) {
 }
 
 HomeMaticCacheManager.prototype.deleteValue = function (address) {
+  this.log.debug('[Cache] remove %s', address)
   delete this.cache[address]
 }
 
