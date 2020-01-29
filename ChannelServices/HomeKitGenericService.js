@@ -204,8 +204,8 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-                                                                                                                                                  add FakeGato History object only if not in a testcase
-                                                                                                                                                  **/
+                                                                                                                                                        add FakeGato History object only if not in a testcase
+                                                                                                                                                        **/
   enableLoggingService: function (type, disableTimer) {
     if (this.runsInTestMode === true) {
       this.log.debug('Skip Loging Service for %s because of testmode', this.displayName)
@@ -926,6 +926,14 @@ HomeKitGenericService.prototype = {
       if (v2 === false) {
         return (v1.toLocaleLowerCase() === 'false')
       }
+    }
+
+    if ((typeof v1 === 'boolean') && (typeof v2 === 'number')) {
+      return (((v1 === true) && (v2 === 1)) || ((v1 === false) && (v2 === 0)))
+    }
+
+    if ((typeof v2 === 'boolean') && (typeof v1 === 'number')) {
+      return (((v2 === true) && (v1 === 1)) || ((v2 === false) && (v1 === 0)))
     }
 
     return false

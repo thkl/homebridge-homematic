@@ -721,7 +721,7 @@ HomeMaticPlatform.prototype.registerAdressForEventProcessingAtAccessory = functi
       })
     }
   } else {
-    this.log.warn('Address not given %s,%s,%s', address, accessory, aFunction)
+    this.log.warn('Address not given %s,%s,%s', address, accessory.name, aFunction)
   }
 }
 

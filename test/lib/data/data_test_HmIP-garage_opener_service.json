@@ -1,0 +1,75 @@
+{
+  "devices": [{
+      "id": "1000",
+      "name": "TA1",
+      "address": "ADR1234567890",
+      "type": "HmIP-SWDO-I",
+      "channels": [{
+          "cId": 1001,
+          "name": "TA1_0",
+          "intf": "HmIP-RF",
+          "address": "HmIP-RF.ADR1234567890:0",
+          "type": "MAINTENANCE",
+          "access": "255"
+        },
+        {
+          "cId": 1002,
+          "name": "TA1_0",
+          "intf": "HmIP-RF",
+          "address": "HmIP-RF.ADR1234567890:1",
+          "type": "SHUTTER_CONTACT_TRANSCEIVER",
+          "access": "255"
+        }
+      ]
+    },
+    {
+      "id": "1010",
+      "name": "TA2",
+      "address": "ADR1234567891",
+      "type": "HmIP-SWDO-I",
+      "channels": [{
+          "cId": 1011,
+          "name": "TA2_0",
+          "intf": "HmIP-RF",
+          "address": "HmIP-RF.ADR1234567891:0",
+          "type": "MAINTENANCE",
+          "access": "255"
+        },
+        {
+          "cId": 1012,
+          "name": "TA2_0",
+          "intf": "HmIP-RF",
+          "address": "HmIP-RF.ADR1234567891:1",
+          "type": "SHUTTER_CONTACT_TRANSCEIVER",
+          "access": "255"
+        }
+      ]
+    },
+    {
+      "id": "1020",
+      "name": "TA3",
+      "address": "ADR1234567892",
+      "type": "HmIP-FSM",
+      "channels": [{
+          "cId": 1021,
+          "name": "TA3_0",
+          "intf": "HmIP-RF",
+          "address": "HmIP-RF.ADR1234567892:0",
+          "type": "MAINTENANCE",
+          "access": "255"
+        },
+        {
+          "cId": 1022,
+          "name": "TA3_0",
+          "intf": "HmIP-RF",
+          "address": "HmIP-RF.ADR1234567892:3",
+          "type": "SWITCH_VIRTUAL_RECEIVER",
+          "access": "255"
+        }
+      ]
+    }
+  ],
+  "subsection": [
+
+  ]
+}

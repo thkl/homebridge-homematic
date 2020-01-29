@@ -45,13 +45,13 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
 
   // show configuration
   let twoSensorMode = ((this.address_sensor_close !== undefined) && (this.address_sensor_open !== undefined))
-  this.log.info('[GDS] Garage Door Config: %s sensor mode', twoSensorMode ? 'two' : 'one')
+  this.log.debug('[GDS] Garage Door Config: %s sensor mode', twoSensorMode ? 'two' : 'one')
   if (twoSensorMode) {
-    this.log.info('[GDS] Sensor open  is %s', this.address_sensor_open)
-    this.log.info('[GDS] Sensor open value is %s', this.state_sensor_open)
+    this.log.debug('[GDS] Sensor open  is %s', this.address_sensor_open)
+    this.log.debug('[GDS] Sensor open value is %s', this.state_sensor_open)
   }
-  this.log.info('[GDS] Sensor close  is %s', this.address_sensor_close)
-  this.log.info('[GDS] Sensor close value is %s', this.state_sensor_close)
+  this.log.debug('[GDS] Sensor close  is %s', this.address_sensor_close)
+  this.log.debug('[GDS] Sensor close value is %s', this.state_sensor_close)
 
   this.targetCommand = false
 
@@ -159,7 +159,6 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
         } else {
           that.currentDoorState.updateValue(that.characteristic.CurrentDoorState.CLOSING, null)
         }
-
         that.sendActorMessage(that.address_actor_open, that.message_actor_open['on'])
         that.sendActorMessage(that.address_actor_open, that.message_actor_open['off'], that.delay_actor_open)
 
@@ -200,7 +199,9 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
   this.currentDoorState.eventEnabled = true
   // register for status events
   this.platform.registerAdressForEventProcessingAtAccessory(this.address_sensor_close, this)
-  this.platform.registerAdressForEventProcessingAtAccessory(this.address_sensor_open, this)
+  if (this.address_sensor_open) {
+    this.platform.registerAdressForEventProcessingAtAccessory(this.address_sensor_open, this)
+  }
   // this is dirty shit .. ¯\_(ツ)_/¯  it works so we do not change that ...
   // query sensors at launch delayed by 60 seconds
   this.inittimer = setTimeout(function () {
@@ -250,10 +251,10 @@ HomeMaticHomeKitGarageDoorService.prototype.querySensors = function () {
   }
 }
 
-HomeMaticHomeKitGarageDoorService.prototype.datapointEvent = function (channel, dp, newValue) {
+HomeMaticHomeKitGarageDoorService.prototype.datapointEvent = function (dp, newValue, channel) {
   // Chech sensors
   let that = this
-  this.log.debug('[GDS] garage event %s,%s,%s Target Command State %s', channel, dp, newValue, this.targetCommand)
+  this.log.debug('[GDS] garage event CH:%s|DP:%s|NV:%s|TCS:%s', channel, dp, newValue, this.targetCommand)
   let eventAddress = channel + '.' + dp
   // Kill requery timer
 
@@ -301,9 +302,12 @@ HomeMaticHomeKitGarageDoorService.prototype.datapointEvent = function (channel, 
     this.log.debug('[GDS] One Sensor Mode Close is %s', that.state_sensor_close)
     // we only have one sensor if its the close sensor the door is closed on sensor true
     if (eventAddress === this.address_sensor_close) {
+      this.log.debug('[GDS] is sensor Close Event')
       // first set a new target state but ony if the target was not set by homekit first
       if (this.targetCommand === false) {
-        let newState = (this.didMatch(newValue, that.state_sensor_close)) ? this.characteristic.TargetDoorState.CLOSED : this.characteristic.TargetDoorState.OPEN
+        let match = this.didMatch(newValue, this.state_sensor_close)
+        let newState = (match) ? this.characteristic.TargetDoorState.CLOSED : this.characteristic.TargetDoorState.OPEN
+        this.log.debug('Check %s (%s) will match StateSensorClose %s (%s) - %s', newValue, typeof newValue, this.state_sensor_close, typeof this.state_sensor_close, match)
         this.log.debug('[GDS] Close sensor hm value is %s set targetDoorState %s', newValue, newState)
         this.targetDoorState.updateValue(newState, null)
       }
@@ -317,7 +321,8 @@ HomeMaticHomeKitGarageDoorService.prototype.datapointEvent = function (channel, 
 
     if (eventAddress === this.address_sensor_open) {
       if (this.targetCommand === false) {
-        let newState = (this.didMatch(newValue, this.state_sensor_open)) ? that.characteristic.TargetDoorState.OPEN : this.characteristic.TargetDoorState.CLOSED
+        let match = this.didMatch(newValue, this.state_sensor_open)
+        let newState = (match) ? this.characteristic.TargetDoorState.OPEN : this.characteristic.TargetDoorState.CLOSED
         this.log.debug('[GDS] open sensor hm value is %s set new target state %s', newValue, newState)
         this.targetDoorState.updateValue(newState, null)
       }
