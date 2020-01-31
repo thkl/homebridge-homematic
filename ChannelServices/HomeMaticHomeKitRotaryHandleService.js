@@ -23,7 +23,7 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function (Se
   this.historyEnabled = this.getClazzConfigValue('enable_history', false)
 
   if (this.historyEnabled === true) {
-    this.log.info('[RHS] Eve History is enabled')
+    this.log.debug('[RHS] Eve History is enabled')
     this.enableLoggingService('door', false)
 
     this.timesOpened = this.getPersistentState('timesOpened', 0)
@@ -164,7 +164,7 @@ HomeMaticHomeKitRotaryHandleService.prototype.createDeviceService = function (Se
               default:
                 result = false
             }
-            that.log.info('[RHS] Query HM result is %s return %s (%s)', value, result, typeof value)
+            that.log.debug('[RHS] Query HM result is %s return %s (%s)', value, result, typeof value)
             callback(null, result)
           }
         })

@@ -121,7 +121,7 @@ HomeMaticRPCTestDriver.prototype.multicall = function (events, callback) {
             if ((accessory.adress === channel) ||
                             ((accessory.cadress !== undefined) && (accessory.cadress === channel)) ||
                             ((accessory.deviceAdress !== undefined) && (accessory.deviceAdress === deviceAdress))) {
-              that.log.info('Accessory %s found -> Send Event', accessory.name)
+              that.log.debug('Accessory %s found -> Send Event', accessory.name)
               accessory.event(channel, datapoint, value)
             }
           })

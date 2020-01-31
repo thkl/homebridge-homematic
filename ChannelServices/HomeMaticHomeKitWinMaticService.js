@@ -67,7 +67,7 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function (Servic
 
 HomeMaticHomeKitWinMaticService.prototype.endWorking = function () {
   let that = this
-  this.log.info('WinMatic End Working')
+  this.log.debug('WinMatic End Working')
 
   if (this.shouldLock === true) {
     this.log.debug('WinMatic ShouldLock is set -> send -0.005')
