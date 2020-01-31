@@ -60,7 +60,7 @@ HomeMaticRegaRequest.prototype = {
   },
 
   getValue: function (channel, datapoint, callback) {
-    var script = 'var d = dom.GetObject("' + channel + '.' + datapoint + '");if (d){Write(d.State());}'
+    var script = 'var d = dom.GetObject("' + channel + '.' + datapoint + '");if (d){Write(d.Value());}'
     this.script(script, function (data) {
       if (data !== undefined) {
         callback(data)
