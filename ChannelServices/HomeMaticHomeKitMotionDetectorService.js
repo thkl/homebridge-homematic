@@ -37,7 +37,7 @@ HomeMaticHomeKitMotionDetectorService.prototype.createDeviceService = function (
   this.cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
     .on('get', function (callback) {
       that.query('BRIGHTNESS', function (value) {
-        if (callback) { callback(null, value / 10) } // dont know how to calculate lux from HM Values ...
+        if (callback) { callback(null, value) } // calculation lux from HM Values is done in HomeKitGenericService.js via ... Math.pow(10, (value/51))
       })
     })
 
@@ -62,7 +62,7 @@ HomeMaticHomeKitMotionDetectorService.prototype.createDeviceService = function (
   this.CharacteristicLastActivation.setValue(this.lastActivation)
 
   this.platform.registerAdressForEventProcessingAtAccessory(this.adress + '.BRIGHTNESS', this, function (newValue) {
-    that.cbright.updateValue(newValue / 10, null)
+    that.cbright.updateValue(newValue, null) // calculation lux from HM Values is done in HomeKitGenericService.js via ... Math.pow(10, (value/51))
   })
 
   this.platform.registerAdressForEventProcessingAtAccessory(this.adress + '.MOTION', this, function (newValue) {
