@@ -18,7 +18,7 @@ HomeMaticHomeKitSwitchService.prototype.createDeviceService = function (Service,
   this.delayOnSet = 1000
 
   if (this.special === 'PROGRAM') {
-    this.log.debug('Creating Program Service')
+    this.log.debug('[Switch Service] Creating Program Service')
     this.createProgrammService(Service, Characteristic)
   } else
 
@@ -68,7 +68,7 @@ HomeMaticHomeKitSwitchService.prototype.createProgrammService = function (Servic
 
     .on('set', function (value, callback) {
       if ((value === 1) || (value === true)) {
-        that.log.debug('Launch Program ' + that.adress)
+        that.log.debug('[Switch Service] Launch Program ' + that.adress)
         that.command('sendregacommand', '', 'var x=dom.GetObject("' + that.adress + '");if (x) {x.ProgramExecute();}', function () {})
 
         setTimeout(function () {
@@ -87,7 +87,7 @@ HomeMaticHomeKitSwitchService.prototype.addCoreSwitchFunctions = function (Servi
     .on('get', function (callback) {
       that.query('STATE', function (value) {
         let hkState = ((value === '1') || (value === true) || (value === 'true') || (value === 1))
-        that.log.debug('Switch Get CCU is %s will return %s', value, hkState)
+        that.log.debug('[Switch Service] (%s) Switch Get CCU is %s will return %s', that.adress, value, hkState)
         if (callback) callback(null, hkState)
       })
     })
@@ -106,7 +106,7 @@ HomeMaticHomeKitSwitchService.prototype.addCoreSwitchFunctions = function (Servi
           that.delayed('set', 'STATE', true)
         }
       } else {
-        that.log.debug('ignore Device is readonly')
+        that.log.debug('[Switch Service] ignore Device is readonly')
       }
 
       callback()
@@ -188,13 +188,13 @@ HomeMaticHomeKitSwitchService.prototype.createValveService = function (Service, 
 
   this.service_item.getCharacteristic(Characteristic.SetDuration)
     .on('get', function (callback) {
-      that.log.debug('get Characteristic.SetDuration')
+      that.log.debug('[Switch Service] get Characteristic.SetDuration')
       callback(null, that.setDuration)
     })
 
     .on('set', function (value, callback) {
       that.setDuration = value
-      that.log.debug('set Characteristic.SetDuration %s', value)
+      that.log.debug('[Switch Service] set Characteristic.SetDuration %s', value)
 
       let strPath = path.join(that.platform.localPath, that.adress) + '.json'
       fs.writeFileSync(strPath, JSON.stringify({
@@ -280,14 +280,16 @@ HomeMaticHomeKitSwitchService.prototype.queryState = function () {
   let that = this
   this.remoteGetValue('STATE', function (result) {
     let parts = that.adress.split('.')
+    that.log.debug('[Switch Service] trigger event for %s', parts[0] + '.' + parts[1] + '.STATE')
     that.event(parts[0] + '.' + parts[1], 'STATE', result)
   })
 }
 
 HomeMaticHomeKitSwitchService.prototype.datapointEvent = function (dp, newValue) {
+  this.log.debug('[Switch Service] Event %s vs %s', dp, this.channelnumber + '.STATE')
   if (dp === this.channelnumber + '.STATE') {
     let hmState = ((newValue === 'true') || (newValue === true)) ? 1 : 0
-    this.log.debug('Switch Event result %s hm %s', newValue, newValue)
+    this.log.debug('[Switch Service] Event result %s hm %s', newValue, newValue)
     if (hmState === 0) {
       this.remainTime = 0
       if (this.c_timeRemain !== undefined) {

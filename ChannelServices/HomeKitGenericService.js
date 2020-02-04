@@ -204,8 +204,8 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-                                                                                                                                                        add FakeGato History object only if not in a testcase
-                                                                                                                                                        **/
+                                                                                                                                                                                    add FakeGato History object only if not in a testcase
+                                                                                                                                                                                    **/
   enableLoggingService: function (type, disableTimer) {
     if (this.runsInTestMode === true) {
       this.log.debug('Skip Loging Service for %s because of testmode', this.displayName)
@@ -442,48 +442,58 @@ HomeKitGenericService.prototype = {
   },
 
   convertValue: function (dp, value) {
+    var result = value
     var char = this.currentStateCharacteristic[dp]
     if (char !== undefined) {
+      this.log.debug('[Generic] Format is:%s', char.props.format)
       switch (char.props.format) {
         case 'int':
         case 'uint8':
           if (value === 'true') {
-            return 1
-          }
+            result = 1
+          } else
 
           if (value === 'false') {
-            return 0
-          }
+            result = 0
+          } else
 
           if (value === true) {
-            return 1
-          }
+            result = 1
+          } else
 
           if (value === false) {
-            return 0
+            result = 0
+          } else {
+            result = parseInt(value)
           }
-
-          return parseInt(value)
-
+          break
         case 'uint16':
         case 'uint32':
-          return parseInt(value)
-
+          result = parseInt(value)
+          break
         case 'float':
-          return parseFloat(value)
-
+          result = parseFloat(value)
+          break
         case 'bool':
           if (value === true) {
-            return 1
-          }
+            result = 1
+          } else
           if (value === 'true') {
-            return 1
+            result = 1
+          } else
+          if (value === '1') {
+            result = 1
+          } else
+          if (value === 1) {
+            result = 1
+          } else {
+            result = 0
           }
-          return 0
+          break
       }
     }
-
-    return value
+    this.log.debug('[Generic] Convert %s for %s is %s', value, dp, result)
+    return result
   },
 
   remoteSetDatapointValue: function (addressdatapoint, value, callback) {
@@ -548,7 +558,7 @@ HomeKitGenericService.prototype = {
     this.log.debug('[Generic] remoteGetValue Intf:%s, Adre:%s, Dp:%s', interf, tp[0], tp[1])
     let dpadr = tp[0] + '.' + tp[1]
     that.platform.getValue(interf, tp[0], tp[1], function (newValue) {
-      that.log.debug('[Generic] got value for %s (%s)', dpadr, newValue)
+      that.log.debug('[Generic] got value for %s (Value:%s)', dpadr, newValue)
       if ((newValue !== undefined) && (newValue !== null)) {
         if (tp[1] === 'LEVEL') {
           newValue = newValue * 100
@@ -565,6 +575,7 @@ HomeKitGenericService.prototype = {
         that.eventupdate = true
         // var ow = newValue;
         newValue = that.convertValue(dp, newValue)
+        that.log.debug('[Generic] will cache %s for %s', newValue, dpadr)
         that.cache(dpadr, newValue)
         that.eventupdate = false
       } else {
@@ -573,6 +584,8 @@ HomeKitGenericService.prototype = {
       }
 
       if (callback !== undefined) {
+        that.log.debug('[Generic] run callback with %s', newValue)
+
         callback(newValue)
       } else {
         let parts = dp.split(':')

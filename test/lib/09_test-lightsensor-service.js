@@ -15,7 +15,11 @@ describe('Homematic Plugin (index)', function () {
   let datapath = path.join(__dirname, 'data', 'data_test_lightsensor.json')
   let data = fs.readFileSync(datapath).toString()
   let that = this
-  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
+  var config = {
+    ccu_ip: '127.0.0.1',
+    subsection: 'HomeKit',
+    testdata: data
+  }
   var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
@@ -48,7 +52,7 @@ describe('Homematic Plugin (index)', function () {
         let cc = s.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
         assert.ok(cc, 'Characteristic.CurrentAmbientLightLevel not found in lightsensor %s', ac.name)
         cc.getValue(function (context, value) {
-          assert.strict.equal(value, '25.00')
+          assert.strict.equal(value, 25)
         })
       })
       done()
@@ -63,7 +67,7 @@ describe('Homematic Plugin (index)', function () {
         let cc = s.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
         assert.ok(cc, 'Characteristic.CurrentAmbientLightLevel not found in lightsensor %s', ac.name)
         cc.getValue(function (context, value) {
-          assert.strict.equal(value, '100.00')
+          assert.strict.equal(value, 100.00)
         })
       })
       done()
