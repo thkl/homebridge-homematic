@@ -209,9 +209,9 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       .on('get', function (callback) {
         that.query('STATE', function (value) {
           if (reverse === true) {
-            that.log.info('Reverse from ' + value)
+            that.log.debug('Reverse from ' + value)
           } else {
-            that.log.info('Contact from ' + value)
+            that.log.debug('Contact from ' + value)
           }
 
           callback(null, value)
