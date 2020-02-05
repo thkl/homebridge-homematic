@@ -3,7 +3,7 @@
 // const request = require('request')
 const HomeMaticRPC = require('./HomeMaticRPC.js').HomeMaticRPC
 const HomeMaticRPCTestDriver = require('./HomeMaticRPCTestDriver.js').HomeMaticRPCTestDriver
-const HomeMaticChannelLoader = require('./HomeMaticChannelLoader.js').HomeMaticChannelLoader
+const HomeMaticServiceClassLoader = require('./HomeMaticServiceClassLoader.js').HomeMaticServiceClassLoader
 const HomeMaticRegaRequest = require('./HomeMaticRegaRequest.js').HomeMaticRegaRequest
 const HomeMaticRegaRequestTestDriver = require('./HomeMaticRegaRequestTestDriver.js').HomeMaticRegaRequestTestDriver
 const HomeMaticCacheManager = require('./HomeMaticCacheManager.js').HomeMaticCacheManager
@@ -170,9 +170,9 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
 
   this.log.debug('Fetching Homematic devices...')
   const internalconfig = this.internalConfig()
-  const channelLoader = new HomeMaticChannelLoader(this.log)
-  channelLoader.localPath = localPath
-  channelLoader.init(this.config.services)
+  const serviceclassLoader = new HomeMaticServiceClassLoader(this.log)
+  serviceclassLoader.localPath = localPath
+  serviceclassLoader.init(this.config.services)
 
   var json
   if (isInTest) {
@@ -182,7 +182,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
       json = {}
       this.log.error('Error (%s) while loading test data %s', e, this.config.testdata)
     }
-    this.buildaccesories(json, callback, internalconfig, channelLoader)
+    this.buildaccesories(json, callback, internalconfig, serviceclassLoader)
   } else {
     let script = 'string sDeviceId;string sChannelId;boolean df = true;Write(\'{"devices":[\');foreach(sDeviceId, root.Devices().EnumIDs()){object oDevice = dom.GetObject(sDeviceId);if(oDevice){var oInterface = dom.GetObject(oDevice.Interface());if(df) {df = false;} else { Write(\',\');}Write(\'{\');Write(\'"id": "\' # sDeviceId # \'",\');Write(\'"name": "\' # oDevice.Name() # \'",\');Write(\'"address": "\' # oDevice.Address() # \'",\');Write(\'"type": "\' # oDevice.HssType() # \'",\');Write(\'"channels": [\');boolean bcf = true;foreach(sChannelId, oDevice.Channels().EnumIDs()){object oChannel = dom.GetObject(sChannelId);if(bcf) {bcf = false;} else {Write(\',\');}Write(\'{\');Write(\'"cId": \' # sChannelId # \',\');Write(\'"name": "\' # oChannel.Name() # \'",\');if(oInterface){Write(\'"intf": "\' # oInterface.Name() # \'",\');Write(\'"address": "\' # oInterface.Name() #\'.\' # oChannel.Address() # \'",\');}Write(\'"type": "\' # oChannel.HssType() # \'",\');Write(\'"access": "\' # oChannel.UserAccessRights(iulOtherThanAdmin)# \'"\');Write(\'}\');}Write(\']}\');}}Write(\']\');'
 
@@ -242,7 +242,7 @@ HomeMaticPlatform.prototype.accessories = function (callback) {
           that.log.warn('Unable to load cached ccu data. giving up')
         }
       } // End json is not here but try local cache
-      this.buildaccesories(json, callback, internalconfig, channelLoader)
+      this.buildaccesories(json, callback, internalconfig, serviceclassLoader)
       this.checkUpdate()
     })
   }
