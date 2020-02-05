@@ -26,7 +26,7 @@ HomeMaticHomeKitLeakSensorService.prototype.createDeviceService = function (Serv
 }
 
 HomeMaticHomeKitLeakSensorService.prototype.datapointEvent = function (dp, newValue) {
-  this.log.info('[Leak Service] Event %s vs %s value is %s', dp, this.channelnumber + '.STATE', newValue)
+  this.log.debug('[Leak Service] Event %s vs %s value is %s', dp, this.channelnumber + '.STATE', newValue)
   if (dp === this.channelnumber + '.STATE') {
     switch (newValue) {
       case 0:
