@@ -80,9 +80,9 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function (Se
 
   this.c_isOn = outlet.getCharacteristic(Characteristic.On)
     .on('get', function (callback) {
-      that.log.debug('[PMS] Query %s', that.switchChannel + '.STATE')
+      that.log.debug('[PMS] Query %s:%s', that.deviceAdress, that.switchChannel + '.STATE')
       that.query(that.switchChannel + '.STATE', function (value) {
-        that.log.debug('[PMS] Queryresult for %s is %s', that.switchChannel + '.STATE', value)
+        that.log.debug('[PMS] Queryresult for %s:%s is %s', that.deviceAdress, that.switchChannel + '.STATE', value)
         if (callback) {
           if (that.didMatch(value, true)) {
             callback(null, 1)

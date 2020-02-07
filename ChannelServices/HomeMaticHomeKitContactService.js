@@ -39,7 +39,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
     // Set to now
     this.lastOpen = moment().unix() - this.loggingService.getInitialTime()
     this.setPersistentState('lastOpen', this.lastOpen)
-    this.log.debug('No LastOpen - set it to just now')
+    this.log.debug('[Contact] No LastOpen - set it to just now')
   }
 
   var reverse = false
@@ -133,7 +133,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       that.processDoorState(value)
     })
   } else {
-    this.log.debug('Creating a ContactSensor')
+    this.log.debug('[Contact] Creating a ContactSensor')
     this.contact = new Service.ContactSensor(this.name)
     this.contact.addOptionalCharacteristic(eve.Characteristic.TimesOpened)
     this.contact.addOptionalCharacteristic(eve.Characteristic.OpenDuration)
@@ -146,7 +146,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       rt.on('set', function (value, callback) {
         // only reset if its not equal the reset time we know
         if (value !== that.lastReset) {
-          that.log.debug('set ResetTotal called %s != last reset so do a reset', value)
+          that.log.debug('[Contact] set ResetTotal called %s != last reset so do a reset', value)
           that.timesOpened = 0
           that.lastReset = value
           that.setPersistentState('timesOpened', that.timesOpened)
@@ -156,7 +156,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
             that.CharacteristicTimesOpened.updateValue(that.timesOpened, null)
           }
         } else {
-          that.log.debug('set ResetTotal called %s its equal the last reset time so ignore', value)
+          that.log.debug('[Contact] set ResetTotal called %s its equal the last reset time so ignore', value)
         }
         if (callback) {
           callback()
@@ -164,7 +164,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       }.bind(this))
 
         .on('get', function (callback) {
-          that.log.debug('get ResetTotal called %s', that.lastReset)
+          that.log.debug('[Contact] get ResetTotal called %s', that.lastReset)
           callback(null, that.lastReset)
         })
 
@@ -179,28 +179,28 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
 
     this.CharacteristicOpenDuration = this.contact.getCharacteristic(eve.Characteristic.OpenDuration)
       .on('get', function (callback) {
-        that.log.debug('getOpenDuration')
+        that.log.debug('[Contact] getOpenDuration')
         callback(null, that.timeOpen)
       })
     this.CharacteristicOpenDuration.setValue(0)
 
     this.CharacteristicClosedDuration = this.contact.getCharacteristic(eve.Characteristic.ClosedDuration)
       .on('get', function (callback) {
-        that.log.debug('getClosedDuration')
+        that.log.debug('[Contact] getClosedDuration')
         callback(null, that.timeClosed)
       })
     this.CharacteristicClosedDuration.setValue(0)
 
     this.CharacteristicLastOpen = this.contact.getCharacteristic(eve.Characteristic.LastActivation)
       .on('get', function (callback) {
-        that.log.debug('getLastOpen will report %s', that.lastOpen)
+        that.log.debug('[Contact] getLastOpen will report %s', that.lastOpen)
         callback(null, that.lastOpen)
       })
     this.CharacteristicLastOpen.setValue(this.lastOpen)
 
     this.CharacteristicTimesOpened = this.contact.getCharacteristic(eve.Characteristic.TimesOpened)
       .on('get', function (callback) {
-        that.log.debug('getTimesOpened will report %s', that.timesOpened)
+        that.log.debug('[Contact] getTimesOpened will report %s', that.timesOpened)
         callback(null, that.timesOpened)
       })
     this.CharacteristicTimesOpened.setValue(this.timesOpened)
@@ -209,9 +209,9 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
       .on('get', function (callback) {
         that.query('STATE', function (value) {
           if (reverse === true) {
-            that.log.debug('Reverse from ' + value)
+            that.log.debug('[Contact] Reverse mode %s', value)
           } else {
-            that.log.debug('Contact from ' + value)
+            that.log.debug('[Contact] normal mode %s', value)
           }
 
           callback(null, value)
@@ -242,7 +242,7 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
 }
 
 HomeMaticHomeKitContactService.prototype.stateCharacteristicDidChange = function (characteristic, newValue) {
-  if (characteristic.displayName === 'Current Position') {
+  if (characteristic.displayName === '[Contact] Current Position') {
     // Set Target
     if (this.targetCharacteristic) {
       this.targetCharacteristic.setValue(newValue, null)
@@ -288,7 +288,7 @@ HomeMaticHomeKitContactService.prototype.processWindowState = function (newValue
         break
     }
   } else {
-    this.log.info("Something's missing")
+    this.log.info("[Contact] Something's missing")
   }
 }
 
