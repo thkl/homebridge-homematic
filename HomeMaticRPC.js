@@ -168,34 +168,35 @@ HomeMaticRPC.prototype.init = function () {
 }
 
 HomeMaticRPC.prototype.handleEvent = function (method, params) {
+  let that = this
   if ((method === 'event') && (params !== undefined)) {
-    var channel = this.interface + params[1]
+    var channel = that.interface + params[1]
     var datapoint = params[2]
     var value = params[3]
-    let address = this.interface + params[1] + '.' + params[2]
+    let address = that.interface + params[1] + '.' + params[2]
 
-    this.log.debug('[RPC] event for %s.%s with value %s', channel, datapoint, value)
-    this.platform.cache.doCache(address, value)
+    that.log.debug('[RPC] event for %s.%s with value %s', channel, datapoint, value)
+    that.platform.cache.doCache(address, value)
 
-    this.platform.foundAccessories.map(function (accessory) {
+    that.platform.foundAccessories.map(function (accessory) {
       var deviceAdress = channel.slice(0, channel.indexOf(':'))
       if (accessory.adress === channel) {
-        this.log.debug('[RPC] Accessory (%s) found by channeladress (%s) -> Send Event with value %s', accessory.name, channel, value)
+        that.log.debug('[RPC] Accessory (%s) found by channeladress (%s) -> Send Event with value %s', accessory.name, channel, value)
         accessory.event(channel, datapoint, value)
       } else
 
       if ((accessory.cadress !== undefined) && (accessory.cadress === channel)) {
-        this.log.debug('[RPC] Accessory (%s) found by accessory.cadress %s matches channel %s -> Send Event with value %s', accessory.name, accessory.cadress, channel, value)
+        that.log.debug('[RPC] Accessory (%s) found by accessory.cadress %s matches channel %s -> Send Event with value %s', accessory.name, accessory.cadress, channel, value)
         accessory.event(channel, datapoint, value)
       } else
 
       if ((accessory.deviceAdress !== undefined) && (accessory.deviceAdress === deviceAdress) && (accessory.isMultiChannel === true)) {
-        this.log.debug('[RPC] Accessory (%s) found -> by deviceadress %s matches %s Send Event with value %s', accessory.name, accessory.deviceAdress, deviceAdress, value)
+        that.log.debug('[RPC] Accessory (%s) found -> by deviceadress %s matches %s Send Event with value %s', accessory.name, accessory.deviceAdress, deviceAdress, value)
         accessory.event(channel, datapoint, value)
       }
     })
 
-    this.platform.eventAdresses.map(function (tuple) {
+    that.platform.eventAdresses.map(function (tuple) {
       if (address === tuple.address) {
         tuple.accessory.event(channel, datapoint, value, tuple.function)
       }
