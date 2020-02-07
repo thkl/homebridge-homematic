@@ -60,7 +60,9 @@ function HomeKitGenericService (log, platform, id, name, type, adress, special, 
   this.delayOnSet = 0
   this.runsInTestMode = (typeof global.it === 'function')
   this.persistentStates = {}
-
+  // will be false in Switches or so which are only one channel devices
+  // will fix https://github.com/thkl/homebridge-homematic/issues/485
+  this.isMultiChannel = true
   var that = this
 
   if (that.adress.indexOf('CUxD.') > -1) {
@@ -204,8 +206,8 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-                                                                                                                                                                                    add FakeGato History object only if not in a testcase
-                                                                                                                                                                                    **/
+                                                                                                                                                                                      add FakeGato History object only if not in a testcase
+                                                                                                                                                                                      **/
   enableLoggingService: function (type, disableTimer) {
     if (this.runsInTestMode === true) {
       this.log.debug('Skip Loging Service for %s because of testmode', this.displayName)

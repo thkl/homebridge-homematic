@@ -141,7 +141,7 @@ describe('Homematic Plugin (index)', function () {
 
     it('test different switch states in one device', function (done) {
       platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'STATE', false])
-      platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:2', 'STATE', true])
+      platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:2', 'STATE', false])
       let ac1 = that.accessories[0]
       let s1 = ac1.get_Service(Service.Lightbulb)
       assert.ok(s1, 'Service.Lightbulb not found in testswitch %s', ac1.name)
@@ -151,6 +151,8 @@ describe('Homematic Plugin (index)', function () {
         assert.strict.equal(result1, false)
       })
 
+      platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:2', 'STATE', true])
+
       let ac2 = that.accessories[1]
       let s2 = ac2.get_Service(Service.Lightbulb)
       assert.ok(s2, 'Service.Lightbulb not found in testswitch %s', ac2.name)
@@ -158,6 +160,10 @@ describe('Homematic Plugin (index)', function () {
       assert.ok(cc2, 'Characteristic.On not found in testswitch %s', ac2.name)
       cc2.emit('get', function (context, result2) {
         assert.strict.equal(result2, true)
+      })
+
+      cc1.emit('get', function (context, result1) {
+        assert.strict.equal(result1, false)
       })
 
       done()

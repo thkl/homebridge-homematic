@@ -177,11 +177,18 @@ HomeMaticRPC.prototype.init = function () {
 
                   that.platform.foundAccessories.map(function (accessory) {
                     var deviceAdress = channel.slice(0, channel.indexOf(':'))
+                    if (accessory.adress === channel) {
+                      that.log.debug('[RPC] Accessory (%s) found by channeladress (%s) -> Send Event with value %s', accessory.name, channel, value)
+                      accessory.event(channel, datapoint, value)
+                    } else
 
-                    if ((accessory.adress === channel) ||
-                                            ((accessory.cadress !== undefined) && (accessory.cadress === channel)) ||
-                                            ((accessory.deviceAdress !== undefined) && (accessory.deviceAdress === deviceAdress))) {
-                      that.log.debug('[RPC] Accessory (%s) found -> Send Event with value %s', accessory.name, value)
+                    if ((accessory.cadress !== undefined) && (accessory.cadress === channel)) {
+                      that.log.debug('[RPC] Accessory (%s) found by accessory.cadress %s matches channel %s -> Send Event with value %s', accessory.name, accessory.cadress, channel, value)
+                      accessory.event(channel, datapoint, value)
+                    } else
+
+                    if ((accessory.deviceAdress !== undefined) && (accessory.deviceAdress === deviceAdress) && (accessory.isMultiChannel === true)) {
+                      that.log.debug('[RPC] Accessory (%s) found -> by deviceadress %s matches %s Send Event with value %s', accessory.name, accessory.deviceAdress, deviceAdress, value)
                       accessory.event(channel, datapoint, value)
                     }
                   })
