@@ -132,30 +132,10 @@ HomeMaticRPC.prototype.init = function () {
         })
 
         that.server.on('event', function (err, params, callback) {
-          that.log.debug('[RPC] <- event  on %s (%s)', that.interface, err)
-          that.lastMessage = Math.floor((new Date()).getTime() / 1000)
-          var channel = that.interface + params[1]
-          var datapoint = params[2]
-          var value = params[3]
-          let address = that.interface + params[1] + '.' + params[2]
-          that.log.debug('[RPC] single event for %s %s with value %s', channel, datapoint, value)
-          that.platform.cache.doCache(address, value)
-
-          that.platform.foundAccessories.map(function (accessory) {
-            if ((accessory.adress === channel) || ((accessory.cadress !== undefined) && (accessory.cadress === channel))) {
-              that.log.debug('[RPC] found accessory %s', accessory.adress)
-              accessory.event(channel, datapoint, value)
-            }
-          })
-
-          that.platform.eventAdresses.map(function (tuple) {
-            if (address === tuple.address) {
-              that.log.debug('[RPC] found accessory %s run registred event', tuple.address)
-              tuple.accessory.event(channel, datapoint, value, tuple.function)
-            }
-          })
-
-          callback(null, [])
+          if (!err) {
+            that.handleEvent('event', params)
+          }
+          callback(err, [])
         })
 
         that.server.on('system.multicall', function (err, params, callback) {
@@ -165,47 +145,14 @@ HomeMaticRPC.prototype.init = function () {
           params.map(function (events) {
             try {
               events.map(function (event) {
-                if ((event['methodName'] === 'event') && (event['params'] !== undefined)) {
-                  var params = event['params']
-                  var channel = that.interface + params[1]
-                  var datapoint = params[2]
-                  var value = params[3]
-                  let address = that.interface + params[1] + '.' + params[2]
-
-                  that.log.debug('[RPC] event for %s.%s with value %s', channel, datapoint, value)
-                  that.platform.cache.doCache(address, value)
-
-                  that.platform.foundAccessories.map(function (accessory) {
-                    var deviceAdress = channel.slice(0, channel.indexOf(':'))
-                    if (accessory.adress === channel) {
-                      that.log.debug('[RPC] Accessory (%s) found by channeladress (%s) -> Send Event with value %s', accessory.name, channel, value)
-                      accessory.event(channel, datapoint, value)
-                    } else
-
-                    if ((accessory.cadress !== undefined) && (accessory.cadress === channel)) {
-                      that.log.debug('[RPC] Accessory (%s) found by accessory.cadress %s matches channel %s -> Send Event with value %s', accessory.name, accessory.cadress, channel, value)
-                      accessory.event(channel, datapoint, value)
-                    } else
-
-                    if ((accessory.deviceAdress !== undefined) && (accessory.deviceAdress === deviceAdress) && (accessory.isMultiChannel === true)) {
-                      that.log.debug('[RPC] Accessory (%s) found -> by deviceadress %s matches %s Send Event with value %s', accessory.name, accessory.deviceAdress, deviceAdress, value)
-                      accessory.event(channel, datapoint, value)
-                    }
-                  })
-
-                  that.platform.eventAdresses.map(function (tuple) {
-                    if (address === tuple.address) {
-                      tuple.accessory.event(channel, datapoint, value, tuple.function)
-                    }
-                  })
-                }
+                that.handleEvent(event['methodName'], event['params'])
               })
             } catch (err) {}
           })
           callback(null)
         })
 
-        that.log.info('RPC server for interface %s is listening on port %s.', that.interface, that.listeningPort)
+        that.log.info('[RPC] server for interface %s is listening on port %s.', that.interface, that.listeningPort)
         that.connect()
       } else {
         that.log.error('****************************************************************************************************************************')
@@ -218,6 +165,42 @@ HomeMaticRPC.prototype.init = function () {
       that.log.error('*  Error while checking ports')
     }
   })
+}
+
+HomeMaticRPC.prototype.handleEvent = function (method, params) {
+  if ((method === 'event') && (params !== undefined)) {
+    var channel = this.interface + params[1]
+    var datapoint = params[2]
+    var value = params[3]
+    let address = this.interface + params[1] + '.' + params[2]
+
+    this.log.debug('[RPC] event for %s.%s with value %s', channel, datapoint, value)
+    this.platform.cache.doCache(address, value)
+
+    this.platform.foundAccessories.map(function (accessory) {
+      var deviceAdress = channel.slice(0, channel.indexOf(':'))
+      if (accessory.adress === channel) {
+        this.log.debug('[RPC] Accessory (%s) found by channeladress (%s) -> Send Event with value %s', accessory.name, channel, value)
+        accessory.event(channel, datapoint, value)
+      } else
+
+      if ((accessory.cadress !== undefined) && (accessory.cadress === channel)) {
+        this.log.debug('[RPC] Accessory (%s) found by accessory.cadress %s matches channel %s -> Send Event with value %s', accessory.name, accessory.cadress, channel, value)
+        accessory.event(channel, datapoint, value)
+      } else
+
+      if ((accessory.deviceAdress !== undefined) && (accessory.deviceAdress === deviceAdress) && (accessory.isMultiChannel === true)) {
+        this.log.debug('[RPC] Accessory (%s) found -> by deviceadress %s matches %s Send Event with value %s', accessory.name, accessory.deviceAdress, deviceAdress, value)
+        accessory.event(channel, datapoint, value)
+      }
+    })
+
+    this.platform.eventAdresses.map(function (tuple) {
+      if (address === tuple.address) {
+        tuple.accessory.event(channel, datapoint, value, tuple.function)
+      }
+    })
+  }
 }
 
 HomeMaticRPC.prototype.getIPAddress = function () {
