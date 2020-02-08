@@ -58,9 +58,11 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function (Service,
 
   this.brightness = lightbulb.getCharacteristic(Characteristic.Brightness)
     .on('get', function (callback) {
+      that.log.debug('[DIMMER] getCharacteristic Brightness')
       that.query('LEVEL', function (value) {
         that.setCache('LAST', value)
         if (callback) {
+          that.log.debug('[DIMMER] getCharacteristic Brightness is %s', value)
           callback(null, value)
         }
       })
@@ -69,6 +71,7 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function (Service,
     .on('set', function (value, callback) {
       that.newLevel = value
       clearTimeout(that.timer)
+      that.log.debug('[DIMMER] setCharacteristic Brightness to %s', value)
       that.timer = setTimeout(function () {
         that.setDimmerLevel(that.newLevel)
       }, 500)
@@ -83,7 +86,7 @@ HomeMaticHomeKitDimmerService.prototype.createDeviceService = function (Service,
     if (newValue === true) {
       that.triggerWorkingTimer()
     } else {
-      that.ccuCache.deleteValue(that.adress + '.LEVEL')
+      that.removeCache('LEVEL')
       that.remoteGetValue('LEVEL', function (newValue) {
         that.processDimmerLevel(newValue)
       })
@@ -110,7 +113,7 @@ HomeMaticHomeKitDimmerService.prototype.triggerWorkingTimer = function () {
     // switch off working after one second
     // kill the cache and ask ccu for new level
     that.inhibitWhileWorking = false
-    that.ccuCache.deleteValue(that.adress + '.LEVEL')
+    that.removeCache('LEVEL')
     that.remoteGetValue('LEVEL', function (newValue) {
       that.processDimmerLevel(newValue)
     })

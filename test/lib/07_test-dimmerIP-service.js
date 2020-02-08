@@ -15,7 +15,11 @@ describe('Homematic Plugin (index)', function () {
   let datapath = path.join(__dirname, 'data', 'data_test_dimmerIP.json')
   let data = fs.readFileSync(datapath).toString()
   let that = this
-  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
+  var config = {
+    ccu_ip: '127.0.0.1',
+    subsection: 'HomeKit',
+    testdata: data
+  }
   var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
@@ -104,9 +108,12 @@ describe('Homematic Plugin (index)', function () {
         assert.ok(cb, 'Characteristic.Brightness not found in testdimmer %s', ac.name)
         // Set Delay to 0 sec for use with tests
         ac.delayOnSet = 0
+
         cb.emit('set', 50, function () {
-          let res = platform.homebridge.values[ac.adress + '.LEVEL']
-          assert.strict.equal(res, 0.5)
+          setTimeout(function () {
+            let res = platform.homebridge.values[ac.adress + '.LEVEL']
+            assert.strict.equal(res, 0.5)
+          }, 550)
         })
       })
       done()

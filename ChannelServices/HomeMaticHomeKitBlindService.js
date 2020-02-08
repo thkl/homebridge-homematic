@@ -21,11 +21,11 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function (Service, 
   this.targetLevel = undefined
 
   if (this.minValueForClose > 0) {
-    this.log.debug('there is a custom closed level of %s', this.minValueForClose)
+    this.log.debug('[BLIND] there is a custom closed level of %s', this.minValueForClose)
   }
 
   if (this.maxValueForOpen < 100) {
-    this.log.debug('there is a custom open level of %s', this.maxValueForOpen)
+    this.log.debug('[BLIND] there is a custom open level of %s', this.maxValueForOpen)
   }
 
   this.services.push(blind)
@@ -63,7 +63,7 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function (Service, 
       // if obstruction has been detected
       if ((this.observeInhibit === true) && (this.inhibit === true)) {
         // wait one second to resync data
-        this.log.debug('inhibit is true wait to resync')
+        this.log.debug('[BLIND] inhibit is true wait to resync')
         setTimeout(() => {
           this.queryData()
         }, 1000)
@@ -123,6 +123,8 @@ HomeMaticHomeKitBlindService.prototype.createDeviceService = function (Service, 
 
 HomeMaticHomeKitBlindService.prototype.queryData = function (value) {
   // trigger new event (datapointEvent)
+  // kill the cache first
+  this.removeCache('LEVEL')
   this.remoteGetValue('LEVEL', () => {})
 
   if (this.observeInhibit === true) {
@@ -149,7 +151,8 @@ HomeMaticHomeKitBlindService.prototype.setFinalBlindLevel = function (value) {
 }
 
 HomeMaticHomeKitBlindService.prototype.datapointEvent = function (dp, value) {
-  this.log.debug('recieving event for %s: %s value: %s (%s)', this.adress, dp, value, typeof (value))
+  let that = this
+  this.log.debug('[BLIND] recieving event for %s: %s value: %s (%s)', this.adress, dp, value, typeof (value))
 
   if (this.isDataPointEvent(dp, 'INHIBIT')) {
     this.inhibit = value
@@ -189,7 +192,11 @@ HomeMaticHomeKitBlindService.prototype.datapointEvent = function (dp, value) {
       //
     } else { // STOPPED - stop quering and set tagetPosition
       // clearInterval(this.currentLevelInterval);
-      this.setFinalBlindLevel(this.currentLevel)
+      this.removeCache('LEVEL')
+      this.remoteGetValue('LEVEL', function (newValue) {
+        that.currentLevel = newValue
+        that.setFinalBlindLevel(that.currentLevel)
+      })
     }
   }
 }
