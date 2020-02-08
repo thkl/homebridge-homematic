@@ -1,98 +1,98 @@
 {
-    "name": "homebridge-homematic",
-    "version": "0.0.210",
-    "description": "Homematic plugin for homebridge: https://github.com/nfarina/homebridge",
-    "license": "ISC",
-    "keywords": [
-        "homebridge-plugin"
+  "name": "homebridge-homematic",
+  "version": "0.0.211",
+  "description": "Homematic plugin for homebridge: https://github.com/nfarina/homebridge",
+  "license": "ISC",
+  "keywords": [
+    "homebridge-plugin"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/thkl/homebridge-homematic.git"
+  },
+  "engines": {
+    "node": ">=4.5.0",
+    "homebridge": ">=0.2.0"
+  },
+  "dependencies": {
+    "binrpc": "latest",
+    "homematic-xmlrpc": ">=1.0.1",
+    "debug": "^4.0.0",
+    "request": "2.88.0",
+    "semver": "7.0.0",
+    "moment": "^2.18.1",
+    "ip": "^1.1.3",
+    "google-auth-library": "5.8.0",
+    "googleapis": "43.0.0",
+    "fakegato-history": "0.5.6",
+    "sprintf-js": "^1.0.3"
+  },
+  "devDependencies": {
+    "assert": "1.5.0",
+    "chalk": "latest",
+    "mocha": "^7.0.1",
+    "release-it": "^12.4.3",
+    "standard": "^12.0.1"
+  },
+
+  "scripts": {
+    "test": "mocha",
+    "release": "release-it"
+  },
+
+  "mocha": {
+    "bail": true,
+    "reporter": "spec",
+    "recursive": true
+  },
+
+  "standard": {
+    "globals": [
+      "describe",
+      "context",
+      "before",
+      "beforeEach",
+      "after",
+      "afterEach",
+      "it",
+      "expect"
     ],
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/thkl/homebridge-homematic.git"
+    "ignore": [
+      "google_drive.js",
+      "characteristic-mock.js",
+      "user-mock.js"
+    ]
+  },
+  "files": [
+    "ChannelServices/",
+    "README.md",
+    "changelog",
+    "HomeMaticServiceClassLoader.js",
+    "HomeMaticRegaRequest.js",
+    "HomeMaticRegaRequestTestDriver.js",
+    "HomeMaticRPC.js",
+    "HomeMaticRPCTestDriver.js",
+    "HomeMaticCacheManager.js",
+    "index.js",
+    "internalconfig.json",
+    "package.json"
+  ],
+  "auto-changelog": {
+    "startingCommit": "0a659bf6f555eba6efa1b7a3f5cb32c45e210a2b",
+    "template": "changelog-template.hbs",
+    "ignoreCommitPattern": "worked|no message",
+    "unreleased": true,
+    "issuePattern": "[Ff]ixed ([A-Z]+-\\d+)"
+  },
+  "release-it": {
+    "hooks": {
+      "before:release": "npx auto-changelog --commit-limit false https://raw.githubusercontent.com/thkl/homebridge-homematic/master/changelog-template.hbs"
     },
-    "engines": {
-        "node": ">=4.5.0",
-        "homebridge": ">=0.2.0"
+    "git": {
+      "changelog": "npx auto-changelog --stdout --commit-limit false --unreleased --template https://raw.githubusercontent.com/thkl/homebridge-homematic/master/changelog-template.hbs"
     },
-    "dependencies": {
-        "binrpc": "latest",
-        "homematic-xmlrpc": ">=1.0.1",
-        "debug": "^4.0.0",
-        "request": "2.88.0",
-        "semver": "7.0.0",
-        "moment": "^2.18.1",
-        "ip": "^1.1.3",
-        "google-auth-library": "5.8.0",
-        "googleapis": "43.0.0",
-        "fakegato-history": "0.5.6",
-        "sprintf-js": "^1.0.3"
-    },
-    "devDependencies": {
-        "assert": "1.5.0",
-        "chalk": "latest",
-        "mocha": "^7.0.1",
-        "release-it": "^12.4.3",
-        "standard": "^12.0.1"
-    },
-
-    "scripts": {
-        "test": "mocha",
-        "release": "release-it"
-    },
-
-    "mocha": {
-        "bail": true,
-        "reporter": "spec",
-        "recursive": true
-    },
-
-    "standard": {
-        "globals": [
-            "describe",
-            "context",
-            "before",
-            "beforeEach",
-            "after",
-            "afterEach",
-            "it",
-            "expect"
-        ],
-        "ignore": [
-            "google_drive.js",
-            "characteristic-mock.js",
-            "user-mock.js"
-        ]
-    },
-    "files": [
-        "ChannelServices/",
-        "README.md",
-        "changelog",
-        "HomeMaticServiceClassLoader.js",
-        "HomeMaticRegaRequest.js",
-        "HomeMaticRegaRequestTestDriver.js",
-        "HomeMaticRPC.js",
-        "HomeMaticRPCTestDriver.js",
-        "HomeMaticCacheManager.js",
-        "index.js",
-        "internalconfig.json",
-        "package.json"
-    ],
-    "auto-changelog": {
-        "startingCommit": "0a659bf6f555eba6efa1b7a3f5cb32c45e210a2b",
-        "template": "changelog-template.hbs",
-        "ignoreCommitPattern": "worked|no message",
-        "unreleased": true,
-        "issuePattern": "[Ff]ixed ([A-Z]+-\\d+)"
-    },
-    "release-it": {
-        "hooks": {
-            "before:release": "npx auto-changelog --commit-limit false https://raw.githubusercontent.com/thkl/homebridge-homematic/master/changelog-template.hbs"
-        },
-        "git": {
-            "changelog": "npx auto-changelog --stdout --commit-limit false --unreleased --template https://raw.githubusercontent.com/thkl/homebridge-homematic/master/changelog-template.hbs"
-        },
-        "npm": {
-            "publish": false
-        }
+    "npm": {
+      "publish": false
     }
+  }
 }
