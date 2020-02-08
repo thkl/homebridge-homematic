@@ -67,7 +67,7 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function (Servic
 
 HomeMaticHomeKitWinMaticService.prototype.endWorking = function () {
   let that = this
-  this.log.debug('WinMatic End Working')
+  this.log.info('WinMatic End Working')
 
   if (this.shouldLock === true) {
     this.log.debug('WinMatic ShouldLock is set -> send -0.005')
@@ -76,7 +76,7 @@ HomeMaticHomeKitWinMaticService.prototype.endWorking = function () {
   }
 
   this.shouldLock = false
-
+  this.ccuCache.deleteValue(this.adress + '.LEVEL')
   this.remoteGetValue('LEVEL', function (value) {
     // -0.005 is locked -> ignore and set to closed
     if (value === -0.005) {
