@@ -1,6 +1,6 @@
 {
   "name": "homebridge-homematic",
-  "version": "0.0.211",
+  "version": "0.0.212",
   "description": "Homematic plugin for homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
   "keywords": [
@@ -34,18 +34,15 @@
     "release-it": "^12.4.3",
     "standard": "^12.0.1"
   },
-
   "scripts": {
     "test": "mocha",
     "release": "release-it"
   },
-
   "mocha": {
     "bail": true,
     "reporter": "spec",
     "recursive": true
   },
-
   "standard": {
     "globals": [
       "describe",
