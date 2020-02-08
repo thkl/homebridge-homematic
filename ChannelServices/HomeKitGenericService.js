@@ -60,7 +60,9 @@ function HomeKitGenericService (log, platform, id, name, type, adress, special, 
   this.delayOnSet = 0
   this.runsInTestMode = (typeof global.it === 'function')
   this.persistentStates = {}
-
+  // will be false in Switches or so which are only one channel devices
+  // will fix https://github.com/thkl/homebridge-homematic/issues/485
+  this.isMultiChannel = true
   var that = this
 
   if (that.adress.indexOf('CUxD.') > -1) {
@@ -91,17 +93,17 @@ function HomeKitGenericService (log, platform, id, name, type, adress, special, 
   // init old storage data
   if (this.deviceAdress !== undefined) {
     this.persistFile = path.join(this.platform.localPath, this.deviceAdress) + '.pstor'
-    this.log.debug('Pstore for %s is %s', this.deviceAdress, this.persistFile)
+    this.log.debug('[Generic] Pstore for %s is %s', this.deviceAdress, this.persistFile)
     if (fs.existsSync(this.persistFile)) {
       try {
         var buffer = fs.readFileSync(this.persistFile)
         this.persistentStates = JSON.parse(buffer.toString())
-        this.log.debug('loading previous data done %s', JSON.stringify(this.persistentStates))
+        this.log.debug('[Generic] loading previous data done %s', JSON.stringify(this.persistentStates))
       } catch (e) {
         this.log.error(e)
       }
     } else {
-      this.log.debug('File doesnt exists. Will create a new one on the first etry')
+      this.log.debug('[Generic] File doesnt exists. Will create a new one on the first etry')
     }
   }
 
@@ -188,7 +190,7 @@ HomeKitGenericService.prototype = {
      */
   setPersistentState: function (key, value) {
     if (this.persistentStates === undefined) {
-      this.log.debug('new store')
+      this.log.debug('[Generic] new store')
       this.persistentStates = {}
     }
     this.persistentStates[key] = value
@@ -204,17 +206,17 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-                                                                                                                                                                                    add FakeGato History object only if not in a testcase
-                                                                                                                                                                                    **/
+                                                                                                                                                                                                add FakeGato History object only if not in a testcase
+                                                                                                                                                                                                **/
   enableLoggingService: function (type, disableTimer) {
     if (this.runsInTestMode === true) {
-      this.log.debug('Skip Loging Service for %s because of testmode', this.displayName)
+      this.log.debug('[Generic] Skip Loging Service for %s because of testmode', this.displayName)
     } else {
       if (disableTimer === undefined) {
         disableTimer = true
       }
       var FakeGatoHistoryService = require('fakegato-history')(this.platform.homebridge)
-      this.log.debug('Adding Log Service for %s with type %s', this.displayName, type)
+      this.log.debug('[Generic] Adding Log Service for %s with type %s', this.displayName, type)
       var hostname = os.hostname()
       let filename = hostname + '_' + this.adress + '_persist.json'
       this.loggingService = new FakeGatoHistoryService(type, this, {
@@ -234,7 +236,7 @@ HomeKitGenericService.prototype = {
      */
   addLoggingCharacteristic: function (aCharacteristic) {
     if ((this.runsInTestMode === true) || (this.loggingService === undefined)) {
-      this.log.debug('adding Characteristic skipped for %s because of testmode ', this.displayName)
+      this.log.debug('[Generic] adding Characteristic skipped for %s because of testmode ', this.displayName)
     } else {
       this.loggingService.addOptionalCharacteristic(aCharacteristic)
     }
@@ -247,7 +249,7 @@ HomeKitGenericService.prototype = {
      */
   getLoggingCharacteristic: function (aCharacteristic) {
     if ((this.runsInTestMode === true) || (this.loggingService === undefined)) {
-      this.log.debug('get Characteristic not available for %s because of testmode', this.displayName)
+      this.log.debug('[Generic] get Characteristic not available for %s because of testmode', this.displayName)
       return undefined
     } else {
       return this.loggingService.getCharacteristic(aCharacteristic)
@@ -287,7 +289,7 @@ HomeKitGenericService.prototype = {
       }
 
       if (logChanges) {
-        this.log.debug('Saving log data for %s: %s', this.displayName, JSON.stringify(data))
+        this.log.debug('[Generic] Saving log data for %s: %s', this.displayName, JSON.stringify(data))
         this.loggingService.addEntry(data)
         this.lastLogEntry = data
       }
@@ -301,8 +303,8 @@ HomeKitGenericService.prototype = {
      * @return {[type]}              [description]
      */
   getClazzConfigValue: function (key, defaultValue) {
-    this.log.debug('Get Config value for %s', key)
-    this.log.debug('Config is %s', JSON.stringify(this.cfg))
+    this.log.debug('[Generic] Get Config value for %s', key)
+    this.log.debug('[Generic] Config is %s', JSON.stringify(this.cfg))
     var result = defaultValue
     if (this.cfg !== undefined) {
       if (this.cfg[key] !== undefined) {
@@ -325,7 +327,7 @@ HomeKitGenericService.prototype = {
       this.lowBatCharacteristic = bat
     } else {
       // not added by default -> create it
-      this.log.debug('added LowBat to %s', this.name)
+      this.log.debug('[Generic] added LowBat to %s', this.name)
       rootService.addOptionalCharacteristic(Characteristic.StatusLowBattery)
       this.lowBatCharacteristic = rootService.getCharacteristic(Characteristic.StatusLowBattery)
     }
@@ -345,7 +347,7 @@ HomeKitGenericService.prototype = {
       this.tamperedCharacteristic = tampered
     } else {
       // not added by default -> create it
-      this.log.debug('added Tampered to %s', this.name)
+      this.log.debug('[Generic] added Tampered to %s', this.name)
       rootService.addOptionalCharacteristic(Characteristic.StatusTampered)
       this.tamperedCharacteristic = rootService.getCharacteristic(Characteristic.StatusTampered)
     }
@@ -499,7 +501,7 @@ HomeKitGenericService.prototype = {
   remoteSetDatapointValue: function (addressdatapoint, value, callback) {
     let parts = addressdatapoint.split('.')
     if (parts.length !== 3) {
-      this.log.error('%s : Syntax error in device address', addressdatapoint)
+      this.log.error('[Generic] %s : Syntax error in device address', addressdatapoint)
       callback(undefined)
       return
     }
@@ -510,7 +512,7 @@ HomeKitGenericService.prototype = {
     var that = this
     let parts = addressdatapoint.split('.')
     if (parts.length !== 3) {
-      this.log.error('%s : Syntax error in device address', addressdatapoint)
+      this.log.error('[Generic] %s : Syntax error in device address', addressdatapoint)
       callback(undefined)
       return
     }
@@ -593,13 +595,13 @@ HomeKitGenericService.prototype = {
           dp = parts[1]
         }
         let address = dpadr
-        that.log.debug('remoteGetValue response; empty callback route via event for %s', address)
+        that.log.debug('[Generic] remoteGetValue response; empty callback route via event for %s', address)
         // send a Event - we have to walk a extra round to get the enclosure function back
         that.platform.eventAdresses.map(function (tuple) {
           if (address === tuple.address) {
-            that.log.debug('found accessory %s run registred event', tuple.address)
+            that.log.debug('[Generic] found accessory %s run registred event', tuple.address)
             let channel = that.deviceAdress + ':' + that.channelnumber
-            that.log.debug('Channel %s', channel)
+            that.log.debug('[Generic] Channel %s', channel)
             tuple.accessory.event(channel, dp, newValue, tuple.function)
           }
         })
@@ -608,24 +610,24 @@ HomeKitGenericService.prototype = {
   },
 
   isDatapointAddressValid: function (datapointAddress, acceptNull) {
-    this.log.debug('validate datapoint %s we %s accept nul', datapointAddress, acceptNull ? 'do' : 'do not')
+    this.log.debug('[Generic] validate datapoint %s we %s accept nul', datapointAddress, acceptNull ? 'do' : 'do not')
     if (datapointAddress !== undefined) {
       let parts = datapointAddress.split('.')
       // check we have 3 parts interface.address.name
       if (parts.length !== 3) {
-        this.log.error('%s is invalid not 3 parts', datapointAddress)
+        this.log.error('[Generic] %s is invalid not 3 parts', datapointAddress)
         return false
       }
       // check the address has a :
       if (parts[1].indexOf(':') === -1) {
-        this.log.error('%s is invalid %s does not contain a :', datapointAddress, parts[1])
+        this.log.error('[Generic] %s is invalid %s does not contain a :', datapointAddress, parts[1])
         return false
       }
       return true
     } else {
       // dp is undefined .. check if this is valid
       if (acceptNull === false) {
-        this.log.error('null is not a valid datapoint')
+        this.log.error('[Generic] null is not a valid datapoint')
       }
       return acceptNull
     }
@@ -748,7 +750,7 @@ HomeKitGenericService.prototype = {
       this.channelDatapointEvent(channel, dp, newValue)
       this.eventupdate = false
     } else {
-      this.log.warn('channel %s or dp %s is undefined', channel, dp)
+      this.log.warn('[Generic] channel %s or dp %s is undefined', channel, dp)
     }
   },
 
@@ -790,7 +792,7 @@ HomeKitGenericService.prototype = {
       }
       this.ccuCache.doCache(dp, value)
     } else {
-      that.log.debug('Skip update because of working flag (%s) or IsNull(%s)', that.isWorking, value)
+      that.log.debug('[Generic] Skip update because of working flag (%s) or IsNull(%s)', that.isWorking, value)
     }
   },
 
@@ -815,7 +817,7 @@ HomeKitGenericService.prototype = {
   },
 
   remoteSetDeviceValue: function (address, dp, value, callback) {
-    this.log.debug('(Rpc) Send ' + value + ' to Datapoint ' + dp + ' at ' + address)
+    this.log.debug('[Generic] (Rpc) Send ' + value + ' to Datapoint ' + dp + ' at ' + address)
     this.platform.setValue(undefined, address, dp, value)
   },
 
@@ -840,7 +842,10 @@ HomeKitGenericService.prototype = {
 
     if (mode === 'set') {
       var interf = this.intf
-      that.log.debug('(Rpc) Send %s to %s at %s type %s', newValue, tp[1], tp[0], typeof newValue)
+      that.log.debug('[Generic] Send %s to %s at %s type %s', newValue, tp[1], tp[0], typeof newValue)
+      // Kill cache value so we have to ask the interface afterwards
+      that.log.debug('[Generic] Kill Cache for %s', tp[1], tp[0])
+      that.ccuCache.deleteValue(tp[1] + tp[0])
       that.platform.setValue(interf, tp[0], tp[1], newValue)
       if (callback !== undefined) {
         callback()
@@ -848,7 +853,7 @@ HomeKitGenericService.prototype = {
     }
 
     if (mode === 'setrega') {
-      that.log.debug('(Rega) Send %s to %s at %s type %s', newValue, tp[1], tp[0], typeof newValue)
+      that.log.debug('[Generic] (Rega) Send %s to %s at %s type %s', newValue, tp[1], tp[0], typeof newValue)
       that.platform.setRegaValue(tp[0], tp[1], newValue)
       if (callback !== undefined) {
         callback()

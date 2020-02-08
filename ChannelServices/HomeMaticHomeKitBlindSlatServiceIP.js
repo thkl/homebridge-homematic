@@ -17,9 +17,9 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function (Ser
   this.currentPos = blind.getCharacteristic(Characteristic.CurrentPosition)
 
     .on('get', function (callback) {
-      that.log.info('get CurrentPosition')
+      that.log.debug('get CurrentPosition')
       that.query('4.LEVEL', function (value) {
-        that.log.info('get CurrentPosition return %s', value)
+        that.log.debug('get CurrentPosition return %s', value)
         if (callback) callback(null, value)
       })
     })
@@ -30,9 +30,9 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function (Ser
   this.targetPos = blind.getCharacteristic(Characteristic.TargetPosition)
 
     .on('get', function (callback) {
-      that.log.info('get TargetPosition ')
+      that.log.debug('get TargetPosition ')
       that.query('4.LEVEL', function (value) {
-        that.log.info('get TargetPosition return %s', value)
+        that.log.debug('get TargetPosition return %s', value)
         if (callback) {
           callback(null, value)
         }

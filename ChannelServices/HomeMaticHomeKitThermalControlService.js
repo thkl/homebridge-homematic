@@ -79,7 +79,7 @@ HomeMaticHomeKitThermalControlService.prototype.createDeviceService = function (
   this.currentTemperatureCharacteristic = this.thermostat.getCharacteristic(Characteristic.CurrentTemperature)
     .on('get', function (callback) {
       that.remoteGetValue('ACTUAL_TEMPERATURE', function (value) {
-        that.log.debug('Saving %s for %s', value, that.adress)
+        that.log.debug('[TCS] Saving %s for %s', value, that.adress)
         that.currentTemperature = parseFloat(value)
         if (callback) callback(null, parseFloat(value))
       })

@@ -15,6 +15,8 @@ HomeMaticHomeKitSwitchService.prototype.createDeviceService = function (Service,
   let that = this
   this.ignoreWorking = true
   this.usecache = false
+  // disable multi channel mode so HomeMaticRPC will not check device adress on events
+  this.isMultiChannel = false
   this.delayOnSet = 1000
 
   if (this.special === 'PROGRAM') {
