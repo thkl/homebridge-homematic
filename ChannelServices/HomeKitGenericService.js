@@ -144,10 +144,16 @@ HomeKitGenericService.prototype = {
      * @return {[type]}         true if the eventkey matches the datapoint name
      */
   isDataPointEvent: function (dPi, dPTest) {
+    if (dPi.indexOf('.') === -1) {
+      dPi = this.channelnumber + '.' + dPi
+    }
+
     if (dPTest.indexOf('.') === -1) {
       dPTest = this.channelnumber + '.' + dPTest
     }
-    return (dPi === dPTest)
+    this.log.debug('[Generic] isDataPointEvent check %s vs %s for channel', dPi, dPTest, this.channelnumber)
+    let result = (dPi === dPTest)
+    return result
   },
 
   /**
@@ -206,8 +212,8 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-                                                                                                                                                                                                                          add FakeGato History object only if not in a testcase
-                                                                                                                                                                                                                          **/
+                                                                                                                                                                                                                                        add FakeGato History object only if not in a testcase
+                                                                                                                                                                                                                                        **/
   enableLoggingService: function (type, disableTimer) {
     if (this.runsInTestMode === true) {
       this.log.debug('[Generic] Skip Loging Service for %s because of testmode', this.displayName)

@@ -18,26 +18,37 @@ HomeMaticHomeKitThermometerService.prototype.createDeviceService = function (Ser
   this.enableLoggingService('thermo')
 
   this.cctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
-    .setProps({ minValue: -100 })
+    .setProps({
+      minValue: -100
+    })
     .on('get', function (callback) {
       this.remoteGetValue('TEMPERATURE', function (value) {
-        that.addLogEntry({ currentTemp: parseFloat(value) })
+        that.addLogEntry({
+          currentTemp: parseFloat(value)
+        })
         if (callback) callback(null, value)
       })
     }.bind(this))
 
   this.setCurrentStateCharacteristic(this.channelnumber + ':TEMPERATURE', this.cctemp)
   this.eventEnabled = true
-
+  this.log.debug('[HKTS] initial query')
   this.queryData()
 }
 
 HomeMaticHomeKitThermometerService.prototype.queryData = function () {
   var that = this
+  this.log.debug('[HKTS] periodic measurement')
+  this.removeCache('TEMPERATURE')
   this.query('TEMPERATURE', function (value) {
-    that.addLogEntry({ currentTemp: parseFloat(value) })
+    that.addLogEntry({
+      currentTemp: parseFloat(value)
+    })
+    that.datapointEvent('TEMPERATURE', value)
     // create timer to query device every 10 minutes
-    that.refreshTimer = setTimeout(function () { that.queryData() }, 10 * 60 * 1000)
+    that.refreshTimer = setTimeout(function () {
+      that.queryData()
+    }, 10 * 60 * 1000)
   })
 }
 
@@ -47,8 +58,11 @@ HomeMaticHomeKitThermometerService.prototype.shutdown = function () {
 
 HomeMaticHomeKitThermometerService.prototype.datapointEvent = function (dp, newValue) {
   if (this.isDataPointEvent(dp, 'TEMPERATURE')) {
-    this.cctemp.updateValue(newValue, null)
-    this.addLogEntry({ currentTemp: parseFloat(newValue) })
+    this.log.debug('[HKTS] updateValue %s', newValue)
+    this.cctemp.updateValue(parseFloat(newValue), null)
+    this.addLogEntry({
+      currentTemp: parseFloat(newValue)
+    })
   }
 }
 

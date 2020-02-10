@@ -37,11 +37,11 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
 
   /* CCU Values
 
-                        0 = Off
-                        1 = int
-                        2 = ext
-                        3 = off / blocked
-                        */
+                          0 = Off
+                          1 = int
+                          2 = ext
+                          3 = off / blocked
+                          */
   this.log.debug(JSON.stringify(this.characteristics))
 
   // Characteristic.SecuritySystemCurrentState and Characteristic.SecuritySystemTargetState
@@ -183,7 +183,7 @@ HomeMaticHomeKitSecuritySystem.prototype.datapointEvent = function (dp, newValue
     }
   }
 
-  if (dp === '4.ARMSTATE') {
+  if (this.isDataPointEvent(dp, 'ARMSTATE')) {
     this.internalsirupdate = true
     var cS
     var tS
