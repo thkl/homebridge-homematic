@@ -470,9 +470,9 @@ HomeMaticPlatform.prototype.setValue = function (intf, channel, datapoint, value
         rpc = true
         this.log.debug('[Core] routing via rf xmlrpc')
         this.setValue_rf_rpc(channel, datapoint, value, function (error, result) {
-          if (error !== undefined) {
+          if ((error !== undefined) && (error !== null)) {
             // fall back to rega
-            that.log.debug('[Core] fallback routing via rega')
+            that.log.debug('[Core] fallback routing via rega due interface error %s', error)
             that.setValue_rega(intf, channel, datapoint, value)
           }
         })
@@ -484,9 +484,9 @@ HomeMaticPlatform.prototype.setValue = function (intf, channel, datapoint, value
           this.log.debug('[Core] routing via wired xmlrpc')
 
           this.setValue_wired_rpc(channel, datapoint, value, function (error, result) {
-            if (error !== undefined) {
+            if ((error !== undefined) && (error !== null)) {
               // fall back to rega
-              that.log.debug('[Core] fallback routing via rega')
+              that.log.debug('[Core] fallback routing via rega due interface error %s', error)
               that.setValue_rega(intf, channel, datapoint, value)
             }
           })
@@ -504,9 +504,9 @@ HomeMaticPlatform.prototype.setValue = function (intf, channel, datapoint, value
           this.log.debug('[Core] routing via wired virtual_rpc')
 
           this.setValue_virtual_rpc(channel, datapoint, value, function (error, result) {
-            if (error !== undefined) {
+            if ((error !== undefined) && (error !== null)) {
               // fall back to rega
-              that.log.debug('[Core] fallback routing via rega')
+              that.log.debug('[Core] fallback routing via rega due interface error %s', error)
               that.setValue_rega(intf, channel, datapoint, value)
             }
           })
@@ -524,9 +524,9 @@ HomeMaticPlatform.prototype.setValue = function (intf, channel, datapoint, value
           this.log.debug('[Core] routing via ip xmlrpc')
 
           this.setValue_hmip_rpc(channel, datapoint, value, function (error, result) {
-            if (error !== undefined) {
+            if ((error !== undefined) && (error !== null)) {
               // fall back to rega
-              that.log.debug('[Core] fallback routing via rega')
+              that.log.debug('[Core] fallback routing via rega due interface error %s', error)
               that.setValue_rega(intf, channel, datapoint, value)
             }
           })

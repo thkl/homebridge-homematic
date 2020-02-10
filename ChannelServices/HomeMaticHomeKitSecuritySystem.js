@@ -37,11 +37,11 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
 
   /* CCU Values
 
-      0 = Off
-      1 = int
-      2 = ext
-      3 = off / blocked
-      */
+                        0 = Off
+                        1 = int
+                        2 = ext
+                        3 = off / blocked
+                        */
   this.log.debug(JSON.stringify(this.characteristics))
 
   // Characteristic.SecuritySystemCurrentState and Characteristic.SecuritySystemTargetState
@@ -162,11 +162,13 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
       if (callback) callback()
     })
 
-  this.remoteGetValue('4.ARMSTATE')
   this.addTamperedCharacteristic(secsys, Characteristic)
   this.addLowBatCharacteristic(secsys, Characteristic)
-
   this.deviceAdress = this.adress.slice(0, this.adress.indexOf(':'))
+  this.log.debug('[HKSS] initial query')
+  this.remoteGetValue('4.ARMSTATE', function (newValue) {
+    that.datapointEvent('4.ARMSTATE', newValue)
+  })
 }
 
 HomeMaticHomeKitSecuritySystem.prototype.endWorking = function () {
@@ -174,13 +176,14 @@ HomeMaticHomeKitSecuritySystem.prototype.endWorking = function () {
 }
 
 HomeMaticHomeKitSecuritySystem.prototype.datapointEvent = function (dp, newValue) {
+  this.log.debug('[HKSS] datapointEvent %s with %s', dp, newValue)
   if ((dp === '1.STATE') || (dp === '2.STATE') || (dp === '3.STATE')) {
     if (newValue === true) {
       this.currentState.setValue(4, null)
     }
   }
 
-  if (dp === '4:ARMSTATE') {
+  if (dp === '4.ARMSTATE') {
     this.internalsirupdate = true
     var cS
     var tS
