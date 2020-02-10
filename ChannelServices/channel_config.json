@@ -92,7 +92,10 @@
 			"type": "TILT_SENSOR",
 			"service": "HomeMaticHomeKitContactService"
 		},
-
+		{
+			"type": "ACCELERATION_TRANSCEIVER",
+			"service": "HomeMaticHomeKitMotionDetectorServiceIP"
+		},
 		{
 			"type": "SHUTTER_CONTACT",
 			"service": "HomeMaticHomeKitContactService"
@@ -349,6 +352,14 @@
 		{
 			"type": "HmIP-MOD-TM:DOOR_RECEIVER",
 			"service": "HomeMaticHomeKitGarageDoorOpenerService"
+		},
+		{
+			"type": "HmIP-MOD-HO:DOOR_RECEIVER",
+			"service": "HomeMaticHomeKitGarageDoorOpenerService"
+		},
+		{
+			"type": "HmIP-STHO:CLIMATE_TRANSCEIVER",
+			"service": "HomeMaticHomeKitWeatherStationServiceIP"
 		}
 
 	]
