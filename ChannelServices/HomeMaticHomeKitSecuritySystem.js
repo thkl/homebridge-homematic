@@ -37,11 +37,11 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
 
   /* CCU Values
 
-                          0 = Off
-                          1 = int
-                          2 = ext
-                          3 = off / blocked
-                          */
+                                    0 = Off
+                                    1 = int
+                                    2 = ext
+                                    3 = off / blocked
+                                    */
   this.log.debug(JSON.stringify(this.characteristics))
 
   // Characteristic.SecuritySystemCurrentState and Characteristic.SecuritySystemTargetState
@@ -167,7 +167,8 @@ HomeMaticHomeKitSecuritySystem.prototype.createDeviceService = function (Service
   this.deviceAdress = this.adress.slice(0, this.adress.indexOf(':'))
   this.log.debug('[HKSS] initial query')
   this.remoteGetValue('4.ARMSTATE', function (newValue) {
-    that.datapointEvent('4.ARMSTATE', newValue)
+    that.log.debug('[HKSS] initial query result %s', newValue)
+    that.datapointEvent('ARMSTATE', newValue)
   })
 }
 
@@ -187,7 +188,7 @@ HomeMaticHomeKitSecuritySystem.prototype.datapointEvent = function (dp, newValue
     this.internalsirupdate = true
     var cS
     var tS
-    switch (newValue) {
+    switch (parseInt(newValue)) {
       case 0:
         cS = this.characteristics['C_STAY_ARM']
         tS = this.characteristics['T_STAY_ARM']
@@ -203,6 +204,9 @@ HomeMaticHomeKitSecuritySystem.prototype.datapointEvent = function (dp, newValue
       case 3:
         cS = this.characteristics['C_DISARMED']
         tS = this.characteristics['T_DISARM']
+        break
+      default:
+        this.log.warn('Unsupported ARMSTATE %s', newValue)
         break
     }
     this.currentState.setValue(cS, null)
