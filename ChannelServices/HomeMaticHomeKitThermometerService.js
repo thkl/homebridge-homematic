@@ -26,7 +26,7 @@ HomeMaticHomeKitThermometerService.prototype.createDeviceService = function (Ser
         that.addLogEntry({
           currentTemp: parseFloat(value)
         })
-        if (callback) callback(null, value)
+        if (callback) callback(null, parseFloat(value))
       })
     }.bind(this))
 
