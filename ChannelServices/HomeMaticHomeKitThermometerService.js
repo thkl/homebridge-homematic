@@ -12,6 +12,7 @@ util.inherits(HomeMaticHomeKitThermometerService, HomeKitGenericService)
 HomeMaticHomeKitThermometerService.prototype.createDeviceService = function (Service, Characteristic) {
   var that = this
   this.usecache = false
+  this.isMultiChannel = false
   var thermo = new Service.TemperatureSensor(this.name)
   this.services.push(thermo)
   // Enable log
