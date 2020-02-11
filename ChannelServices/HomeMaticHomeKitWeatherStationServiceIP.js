@@ -146,7 +146,9 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
   this.services.push(thermo)
 
   this.ctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
-    .setProps({ minValue: -100 })
+    .setProps({
+      minValue: -100
+    })
     .on('get', function (callback) {
       that.query('ACTUAL_TEMPERATURE', function (value) {
         if (callback) callback(null, value)
@@ -195,18 +197,20 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
   this.setCurrentStateCharacteristic('SUNSHINEDURATION', this.csunshineduration)
   this.csunshineduration.eventEnabled = true
 
-  var windspeed = new Service['WindSpeedService'](this.name)
-  this.services.push(windspeed)
+  if (this.deviceType === 'HmIP-SWO-B') {
+    var windspeed = new Service['WindSpeedService'](this.name)
+    this.services.push(windspeed)
 
-  this.cwindspeed = windspeed.getCharacteristic(Characteristic.WindSpeedCharacteristic)
-    .on('get', function (callback) {
-      this.query('WIND_SPEED', function (value) {
-        if (callback) callback(null, value)
-      })
-    }.bind(this))
+    this.cwindspeed = windspeed.getCharacteristic(Characteristic.WindSpeedCharacteristic)
+      .on('get', function (callback) {
+        this.query('WIND_SPEED', function (value) {
+          if (callback) callback(null, value)
+        })
+      }.bind(this))
 
-  this.setCurrentStateCharacteristic('WIND_SPEED', this.cwindspeed)
-  this.cwindspeed.eventEnabled = true
+    this.setCurrentStateCharacteristic('WIND_SPEED', this.cwindspeed)
+    this.cwindspeed.eventEnabled = true
+  }
 
   // HmIP-SWO-PL - HmIP-SWO-B + RainSensor RainCountService
   if ((this.deviceType === 'HmIP-SWO-PL') || (this.deviceType === 'HmIP-SWO-PR')) {
@@ -277,13 +281,19 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.queryData = function () {
     that.query('HUMIDITY', function (value) {
       that.currentHumidity = parseFloat(value)
       if ((that.currentTemperature > -255) && (that.currentHumidity > -255)) {
-        that.addLogEntry({ temp: that.currentTemperature, pressure: 0, humidity: that.currentHumidity })
+        that.addLogEntry({
+          temp: that.currentTemperature,
+          pressure: 0,
+          humidity: that.currentHumidity
+        })
       }
     })
   })
 
   // Timer: Query device every 10 minutes
-  setTimeout(function () { that.queryData() }, 10 * 60 * 1000)
+  setTimeout(function () {
+    that.queryData()
+  }, 10 * 60 * 1000)
 }
 
 HomeMaticHomeKitWeatherStationServiceIP.prototype.datapointEvent = function (dp, newValue) {
@@ -323,8 +333,12 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.datapointEvent = function (dp,
 
   // make this call a little less often
   if (((this.isDataPointEvent(dp, 'ACTUAL_TEMPERATURE')) || (this.isDataPointEvent(dp, 'HUMIDITY'))) &&
-   (this.currentTemperature > -255) && (this.currentHumidity > -255)) {
-    this.addLogEntry({ temp: this.currentTemperature, pressure: 0, humidity: this.currentHumidity })
+        (this.currentTemperature > -255) && (this.currentHumidity > -255)) {
+    this.addLogEntry({
+      temp: this.currentTemperature,
+      pressure: 0,
+      humidity: this.currentHumidity
+    })
   }
 }
 

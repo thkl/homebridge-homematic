@@ -40,7 +40,7 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function (Servic
   this.swindow.on('set', function (value, callback) {
     if (value === 0) {
       // Lock Window on Close Event
-      that.log.info('WinMatic set to 0 -> should lock')
+      that.log.info('[WinMatic] set to 0 -> should lock')
       that.shouldLock = true
     }
     that.command('setrega', 'SPEED', 1)
@@ -67,16 +67,16 @@ HomeMaticHomeKitWinMaticService.prototype.createDeviceService = function (Servic
 
 HomeMaticHomeKitWinMaticService.prototype.endWorking = function () {
   let that = this
-  this.log.debug('WinMatic End Working')
+  this.log.info('[WinMatic] End Working')
 
   if (this.shouldLock === true) {
-    this.log.debug('WinMatic ShouldLock is set -> send -0.005')
+    this.log.debug('[WinMatic] ShouldLock is set -> send -0.005')
     this.command('setrega', 'SPEED', 1)
     this.delayed('set', 'LEVEL', -0.5) // The core is dividing by 100 so to set -0.005 we have to set -0.5 ...
   }
 
   this.shouldLock = false
-
+  this.removeCache('LEVEL')
   this.remoteGetValue('LEVEL', function (value) {
     // -0.005 is locked -> ignore and set to closed
     if (value === -0.005) {

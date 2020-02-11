@@ -115,18 +115,23 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.createDeviceService = function (Se
     that.addLogEntry({
       power: parseInt(newValue)
     })
+    that.log.debug('[PMS] registerAdressForEventProcessingAtAccessory Event Power %s', newValue)
+
     that.power.updateValue(that.round(newValue, 2), null)
   })
 
   this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ':' + this.meterChannel + '.VOLTAGE', this, function (newValue) {
+    that.log.debug('[PMS] registerAdressForEventProcessingAtAccessory Event Voltage %s', newValue)
     that.voltage.updateValue(that.round(newValue, 2), null)
   })
 
   this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ':' + this.meterChannel + '.CURRENT', this, function (newValue) {
+    that.log.debug('[PMS] registerAdressForEventProcessingAtAccessory Event Current %s', newValue)
     that.current.updateValue(that.round((newValue / 1000), 2), null)
   })
 
   this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ':' + this.meterChannel + '.ENERGY_COUNTER', this, function (newValue) {
+    that.log.debug('[PMS] registerAdressForEventProcessingAtAccessory Event ENERGY_COUNTER %s', newValue)
     that.powerConsumption.updateValue((that.round((newValue / 1000), 2)), null)
   })
 
@@ -149,6 +154,9 @@ HomeMaticHomeKitPowerMeterServiceIP.prototype.datapointEvent = function (dp, new
     if (this.c_isOn !== undefined) {
       this.c_isOn.updateValue((this.didMatch(newValue, true)) ? 1 : 0, null)
     }
+  }
+  if (dp === this.switchChannel + '.POWER') {
+
   }
 }
 
