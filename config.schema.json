@@ -1,0 +1,45 @@
+{
+    "pluginAlias": "HomeMatic",
+    "pluginType": "platform",
+    "singular": true,
+    "headerDisplay": "Homebridge plugin for the Homematic CCUs",
+    "footerDisplay": "For a detailed description, see the [README](https://github.com/thkl/homebridge-homematic#readme) file.",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "name": {
+                "title": "Name",
+                "type": "string",
+                "default": "HomeMatic CCU",
+                "required": true
+            },
+            "ccu_ip": {
+                "title": "CCU IP",
+                "type": "string",
+                "description": "The IP Adress of your CCU"
+            },
+            "subsection": {
+                "title": "Subsection",
+                "type": "string",
+                "default": "Homekit",
+                "required": true,
+                "description": "All devices with this subsection will be polled from your ccu"
+            },
+            "enable_hmip": {
+                "title": "Enable HmIP Devices",
+                "type": "boolean",
+                "default": true
+            },
+            "enable_wired": {
+                "title": "Enable Wired Devices",
+                "type": "boolean",
+                "default": false
+            },
+            "ios10": {
+                "title": "HomeKit > IOS10",
+                "type": "boolean",
+                "default": true
+            }
+        }
+    }
+}

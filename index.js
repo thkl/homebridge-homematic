@@ -34,6 +34,7 @@ function HomeMaticPlatform (log, config, api) {
   this.config = config
   this.localCache = path.join(_homebridge.user.storagePath(), 'ccu.json')
   this.localPath = _homebridge.user.storagePath()
+  this.localHomematicConfig = path.join(this.localPath, 'homematic_config.json')
   this.ccuIP = config.ccu_ip
   this.cache = new HomeMaticCacheManager(log)
   if (api) {
@@ -46,6 +47,9 @@ function HomeMaticPlatform (log, config, api) {
   if (isInTest) {
 
   } else {
+    this.mergeConfig()
+    this.migrateConfig()
+
     // Silence the hello stuff in tests
     this.log.info('Homematic Plugin Version ' + this.getVersion())
     this.log.info('Plugin by thkl  https://github.com/thkl')
@@ -53,6 +57,7 @@ function HomeMaticPlatform (log, config, api) {
     this.log.info('Please report any issues to https://github.com/thkl/homebridge-homematic/issues')
     this.log.info('running in production mode')
     this.log.info('will connect to your ccu at %s', this.ccuIP)
+    this.log.warn('IMPORTANT !! Starting this version, your homematic custom configuration is located in %s', this.localHomematicConfig)
   }
 
   const test = this.createRegaRequest('PONG')
@@ -157,6 +162,34 @@ function HomeMaticPlatform (log, config, api) {
     this.xmlrpc = new HomeMaticRPCTestDriver(this.log, '127.0.0.1', 0, 0, this)
     this.xmlrpc.init()
   } // End init rpc stuff
+}
+
+HomeMaticPlatform.prototype.mergeConfig = function (callback) {
+  if (fs.existsSync(this.localHomematicConfig)) {
+    let that = this
+    let data = fs.readFileSync(this.localHomematicConfig).toString()
+    let myConfig = JSON.parse(data)
+    this.log.info('[Core] merging configurations')
+    Object.keys(myConfig).forEach(key => {
+      that.config[key] = myConfig[key]
+    })
+  }
+}
+
+HomeMaticPlatform.prototype.migrateConfig = function () {
+  // Save my Config once to a separate file
+  if (!fs.existsSync(this.localHomematicConfig)) {
+    let that = this
+    let keysNotToCopy = ['platform', 'name', 'ccu_ip', 'subsection']
+    let myConfig = {}
+    Object.keys(this.config).forEach(key => {
+      if (keysNotToCopy.indexOf(key) === -1) {
+        myConfig[key] = that.config[key]
+      }
+    })
+    this.log.info('[Core] Migrate configuration once to %s ...', this.localHomematicConfig)
+    fs.writeFileSync(this.localHomematicConfig, JSON.stringify(myConfig, null, 2))
+  }
 }
 
 HomeMaticPlatform.prototype.accessories = function (callback) {
@@ -744,17 +777,17 @@ HomeMaticPlatform.prototype.getVersion = function () {
 }
 
 HomeMaticPlatform.prototype.fetch_npmVersion = function (pck, callback) {
+  let that = this
   const exec = require('child_process').exec
   const cmd = 'npm view ' + pck + ' version'
-
   exec(cmd, (error, stdout, stderr) => {
     if (error === null) {
       let npmVersion = stdout
       npmVersion = npmVersion.replace('\n', '')
       callback(npmVersion)
     } else {
-      this.log.error(error)
-      let result = ''
+      this.log.error('Unable to fetch new versions')
+      let result = that.getVersion()
       callback(result)
     }
   })
