@@ -210,7 +210,7 @@ HomeMaticHomeKitWeatherStationServiceIP.prototype.createDeviceService = function
 
   // HmIP-SWO-PL - HmIP-SWO-B + RainSensor RainCountService
   if ((this.deviceType === 'HmIP-SWO-PL') || (this.deviceType === 'HmIP-SWO-PR')) {
-    var raining = new Service['IsRainingService']('Raining')
+    var raining = new Service['IsRainingService'](this.name)
     this.services.push(raining)
 
     var craining = raining.getCharacteristic(Characteristic.IsRainingCharacteristic)
