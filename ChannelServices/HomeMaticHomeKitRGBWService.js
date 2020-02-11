@@ -52,42 +52,46 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function (Service, C
       callback()
     })
 
-  var brightness = lightbulb.getCharacteristic(Characteristic.Brightness)
+  this.brightness = lightbulb.getCharacteristic(Characteristic.Brightness)
 
     .on('get', function (callback) {
       that.query('1.LEVEL', function (value) {
+        that.log.debug('[RGB] getLevel is %s', value)
         that.setCache('LAST', (value * 100))
+
         if (callback) callback(null, value)
       })
     })
 
     .on('set', function (value, callback) {
-      var lastLevel = that.getCache('LAST')
-      if (value !== lastLevel) {
-        if (value === 0) {
-          // set On State
-          if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) {
-            this.onc.updateValue(false, null)
+      that.newLevel = value
+      clearTimeout(that.timer)
+      that.timer = setTimeout(function () {
+        var lastLevel = that.getCache('LAST')
+        if (that.newLevel !== lastLevel) {
+          if (that.newLevel === 0) {
+            // set On State
+            if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) {
+              that.onc.updateValue(false, null)
+            }
+          } else {
+            if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) {
+              that.onc.updateValue(true, null)
+            }
           }
-        } else {
-          if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) {
-            this.onc.updateValue(true, null)
-          }
+          that.log.debug('[RGB] set new Level %s', that.newLevel)
+          that.isWorking = true
+          that.setCache('LAST', that.newLevel)
+          that.delayed('set', '1.LEVEL', that.newLevel, 5)
         }
+      }, 500)
 
-        that.setCache('LAST', value)
-        that.isWorking = true
-        that.delayed('set', '1.LEVEL', value, 5)
-      }
       if (callback) callback()
-    }.bind(this))
+    })
 
-  that.currentStateCharacteristic['1.LEVEL'] = brightness
-  brightness.eventEnabled = true
+  this.brightness.eventEnabled = true
 
-  this.remoteGetValue('1.LEVEL')
-
-  var color = lightbulb.addCharacteristic(Characteristic.Hue)
+  this.color = lightbulb.addCharacteristic(Characteristic.Hue)
 
     .on('get', function (callback) {
       that.query('2.COLOR', function (value) {
@@ -100,12 +104,12 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function (Service, C
         value = 361.809045226
       }
 
+      that.log.debug('[RGB] set Hue to %s', value)
       that.delayed('set', '2.COLOR', value, 100)
       callback()
     })
 
-  that.currentStateCharacteristic['2.COLOR'] = color
-  color.eventEnabled = true
+  this.color.eventEnabled = true
 
   lightbulb.addCharacteristic(Characteristic.Saturation)
     .on('get', function (callback) {
@@ -123,10 +127,45 @@ HomeMaticHomeKitRGBWService.prototype.createDeviceService = function (Service, C
       callback()
     })
 
-  this.remoteGetValue('2.COLOR')
+  this.log.debug('[RGB] Initial Query')
+
+  this.removeCache('1.LEVEL')
+  this.remoteGetValue('1.LEVEL', function (newValue) {
+    that.processDimmerLevel(newValue)
+  })
+
+  this.removeCache('2.COLOR')
+  this.remoteGetValue('2.COLOR', function (newValue) {
+    that.processColorValue(newValue)
+  })
+}
+
+HomeMaticHomeKitRGBWService.prototype.processDimmerLevel = function (newValue) {
+  this.log.debug('[RGB] processing level %s', newValue)
+  this.brightness.updateValue(newValue, null)
+  this.onc.updateValue((newValue > 0), null)
+}
+
+HomeMaticHomeKitRGBWService.prototype.processColorValue = function (newValue) {
+  this.log.debug('[RGB] processing color %s', newValue)
+  this.brightness.updateValue(newValue, null)
+  this.onc.updateValue((newValue > 0), null)
+}
+
+HomeMaticHomeKitRGBWService.prototype.datapointEvent = function (dp, value) {
+  this.log.debug('[RGB] recieving event for %s: %s value: %s (%s)', this.adress, dp, value, typeof (value))
+
+  if (this.isDataPointEvent(dp, 'LEVEL')) {
+    this.processDimmerLevel(value)
+  }
+
+  if (this.isDataPointEvent(dp, 'COLOE')) {
+    this.processColorValue(value)
+  }
 }
 
 HomeMaticHomeKitRGBWService.prototype.endWorking = function () {
+  this.removeCache('1.LEVEL')
   this.remoteGetValue('1.LEVEL')
 }
 

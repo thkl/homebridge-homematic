@@ -144,10 +144,16 @@ HomeKitGenericService.prototype = {
      * @return {[type]}         true if the eventkey matches the datapoint name
      */
   isDataPointEvent: function (dPi, dPTest) {
+    if (dPi.indexOf('.') === -1) {
+      dPi = this.channelnumber + '.' + dPi
+    }
+
     if (dPTest.indexOf('.') === -1) {
       dPTest = this.channelnumber + '.' + dPTest
     }
-    return (dPi === dPTest)
+    this.log.debug('[Generic] isDataPointEvent check %s vs %s for channel', dPi, dPTest, this.channelnumber)
+    let result = (dPi === dPTest)
+    return result
   },
 
   /**
@@ -206,8 +212,8 @@ HomeKitGenericService.prototype = {
   },
 
   /**
-                                                                                                                                                                                                add FakeGato History object only if not in a testcase
-                                                                                                                                                                                                **/
+                                                                                                                                                                                                                                        add FakeGato History object only if not in a testcase
+                                                                                                                                                                                                                                        **/
   enableLoggingService: function (type, disableTimer) {
     if (this.runsInTestMode === true) {
       this.log.debug('[Generic] Skip Loging Service for %s because of testmode', this.displayName)
@@ -742,9 +748,12 @@ HomeKitGenericService.prototype = {
         // datapoints from such channels named  as channelnumber:datapoint ... (no better approach yet)
         chnl = channel.slice(channel.indexOf(':') + 1)
         this.cache(tp[0] + '.' + tp[1], newValue)
+        this.log.debug('[Generic] datapointEvent %s with %s channel %s', chnl + '.' + dp, newValue, channel)
         this.datapointEvent(chnl + '.' + dp, newValue, channel)
       } else {
         this.cache(tp[0] + '.' + tp[1], newValue)
+        this.log.debug('[Generic] datapointEvent %s with %s channel %s', dp, newValue, channel)
+
         this.datapointEvent(dp, newValue, channel)
       }
       this.channelDatapointEvent(channel, dp, newValue)
@@ -842,10 +851,10 @@ HomeKitGenericService.prototype = {
 
     if (mode === 'set') {
       var interf = this.intf
-      that.log.debug('[Generic] Send %s to %s at %s type %s', newValue, tp[1], tp[0], typeof newValue)
+      that.log.debug('[Generic] Send %s to Datapoint:%s at %s type %s', JSON.stringify(newValue), tp[1], tp[0], typeof newValue)
       // Kill cache value so we have to ask the interface afterwards
-      that.log.debug('[Generic] Kill Cache for %s', tp[1], tp[0])
-      that.ccuCache.deleteValue(tp[1] + tp[0])
+      that.log.debug('[Generic] Kill Cache for %s.%s', tp[0], tp[1])
+      that.ccuCache.deleteValue(tp[0] + '.' + tp[1])
       that.platform.setValue(interf, tp[0], tp[1], newValue)
       if (callback !== undefined) {
         callback()
