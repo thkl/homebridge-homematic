@@ -24,7 +24,6 @@ HomeMaticHomeKitThermometerService.prototype.createDeviceService = function (Ser
     })
     .on('get', function (callback) {
       this.remoteGetValue('TEMPERATURE', function (value) {
-        that.log.info('getCharacteristic value is %s', value)
         let fval = parseFloat(value)
         that.addLogEntry({
           currentTemp: fval

@@ -30,16 +30,32 @@ Configuration sample:
             "platform": "HomeMatic",
             "name": "HomeMatic CCU",
             "ccu_ip": "192.168.0.100",
-            "filter_device":[],
-            "filter_channel":["BidCos-RF.KEQXXXXXXX:4", "BidCos-RF.LEQXXXXXXX:2"],
-            "outlets":[ "BidCos-RF.KEQXXXXXXX:4","BidCos-RF.IEQXXXXXXX:1"],
-            "doors":[],
-            "programs":[],
             "subsection":"Homekit"
         }   
     ]
 
 ```
+
+# Configuration Changes Version > 214
+Beginning of Version 0.0.214 other that the above configuration settings has been moved to a plugin own config file.
+So you are able to use the plugin settings in https://github.com/oznu/homebridge-config-ui-x#readme for the initial configuration.
+
+The file is located at the same path as your config.json and named homematic_config.json
+
+The plugin will copy your settings once to this file
+
+````
+{
+    "filter_device":[],
+    "filter_channel":["BidCos-RF.KEQXXXXXXX:4", "BidCos-RF.LEQXXXXXXX:2"],
+    "outlets":[ "BidCos-RF.KEQXXXXXXX:4","BidCos-RF.IEQXXXXXXX:1"],
+    "doors":[],
+    "programs":[]
+}
+```
+
+Please use the homematic_config.json to setup new stuff.
+
 
 
 **** BEGINNING OF VERSION 0.0.41 the selection of channels to use with HomeKit via a CCU Subsection is mandatory *****
@@ -49,7 +65,7 @@ Preselect all the Channels you want to import into Homekit by one Subsection at 
 Create a new Subsection (in the Sample named as Homekit) and put all the Channels in you want to import. Finally put the name of the subsection into your config.js
 
 Ports: the plugin will use local Port 9090 to communicate with the ccu rfd daemon. Port 9091 for wired and 9092 for hmip (if they are in use).
-If these ports are in use by other applications, you can change them by the following key in your config.json
+If these ports are in use by other applications, you can change them by the following key in your homematic_config.json
 
 ```
 "local_port":8080
@@ -60,7 +76,7 @@ In this case , please make sure that 8081 and 8082 are also available. You got t
 
 # Variables
 
-You may add binaray variables to Homekit by adding them into your config.json. They will show up as switches.
+You may add binaray variables to Homekit by adding them into your homematic_config.json. They will show up as switches.
 
 ```
 "variables":["VarName1","VarName2]
@@ -68,8 +84,8 @@ You may add binaray variables to Homekit by adding them into your config.json. T
 
 # Programs
 
-If you want to launch Homematic Programs you can also add them to config.json.
-There is a issue with ios10. The build in Home App doesnt handle custom Services so you have to add the ios10 flag in your config.json
+If you want to launch Homematic Programs you can also add them to homematic_config.json.
+There is a issue with ios10. The build in Home App doesnt handle custom Services so you have to add the ios10 flag in your homematic_config.json
 
 ```
 "programs":["ProgName1","ProgName2"],
@@ -116,7 +132,7 @@ The following HMIP Devices should work:
 * HmIP-SWO-PL
 * HmIP-SWO-PR
 
-Please setup HMIP by adding the following key to your config.json
+Please setup HMIP by adding the following key to your homematic_config.json
 
 ```
 "enable_hmip":"true"

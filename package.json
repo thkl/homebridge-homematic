@@ -1,6 +1,6 @@
 {
   "name": "homebridge-homematic",
-  "version": "0.0.215",
+  "version": "0.0.217",
   "description": "Homematic plugin for homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
   "keywords": [
@@ -63,7 +63,7 @@
   "files": [
     "ChannelServices/",
     "README.md",
-    "changelog",
+    "CHANGELOG.md",
     "HomeMaticServiceClassLoader.js",
     "HomeMaticRegaRequest.js",
     "HomeMaticRegaRequestTestDriver.js",
@@ -72,7 +72,8 @@
     "HomeMaticCacheManager.js",
     "index.js",
     "internalconfig.json",
-    "package.json"
+    "package.json",
+    "config.schema.json"
   ],
   "auto-changelog": {
     "startingCommit": "0a659bf6f555eba6efa1b7a3f5cb32c45e210a2b",
