@@ -12,6 +12,7 @@ util.inherits(HomeMaticHomeKitThermometerService, HomeKitGenericService)
 HomeMaticHomeKitThermometerService.prototype.createDeviceService = function (Service, Characteristic) {
   var that = this
   this.usecache = false
+  this.isMultiChannel = false
   var thermo = new Service.TemperatureSensor(this.name)
   this.services.push(thermo)
   // Enable log
@@ -23,14 +24,17 @@ HomeMaticHomeKitThermometerService.prototype.createDeviceService = function (Ser
     })
     .on('get', function (callback) {
       this.remoteGetValue('TEMPERATURE', function (value) {
+        that.log.info('getCharacteristic value is %s', value)
+        let fval = parseFloat(value)
         that.addLogEntry({
-          currentTemp: parseFloat(value)
+          currentTemp: fval
         })
-        if (callback) callback(null, parseFloat(value))
+        if (callback) callback(null, fval)
       })
     }.bind(this))
 
-  this.setCurrentStateCharacteristic(this.channelnumber + ':TEMPERATURE', this.cctemp)
+  let strId = this.channelnumber + ':TEMPERATURE'
+  this.log.info('Setup %s', strId)
   this.eventEnabled = true
   this.log.debug('[HKTS] initial query')
   this.queryData()
@@ -58,10 +62,11 @@ HomeMaticHomeKitThermometerService.prototype.shutdown = function () {
 
 HomeMaticHomeKitThermometerService.prototype.datapointEvent = function (dp, newValue) {
   if (this.isDataPointEvent(dp, 'TEMPERATURE')) {
-    this.log.debug('[HKTS] updateValue %s', newValue)
-    this.cctemp.updateValue(parseFloat(newValue), null)
+    this.log.debug('[HKTS] updateValue for with %s', newValue)
+    let fval = parseFloat(newValue)
+    this.cctemp.updateValue(fval, null)
     this.addLogEntry({
-      currentTemp: parseFloat(newValue)
+      currentTemp: fval
     })
   }
 }

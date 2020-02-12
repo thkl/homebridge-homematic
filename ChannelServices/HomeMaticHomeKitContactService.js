@@ -42,202 +42,214 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
     this.log.debug('[Contact] No LastOpen - set it to just now')
   }
 
-  var reverse = false
+  this.reverse = false
   if (this.cfg !== undefined) {
     if (this.cfg['reverse'] !== undefined) {
-      reverse = true
+      this.reverse = true
     }
   }
 
   if (this.special === 'WINDOW') {
-    var window = new Service.Window(this.name)
-    this.cwindow = window.getCharacteristic(Characteristic.CurrentPosition)
-    this.cwindow.on('get', function (callback) {
-      that.query('STATE', function (value) {
-        if (callback) {
-          var cbvalue = 0
-          if (value > 0) {
-            cbvalue = 100
-          }
-          callback(null, cbvalue)
-        }
-      })
-    })
+    this.createWindowAccessory(Service, Characteristic)
+  } else
 
-    this.currentStateCharacteristic['STATE'] = this.cwindow
-    this.cwindow.eventEnabled = true
-
-    this.twindow = window.getCharacteristic(Characteristic.TargetPosition)
-    this.twindow.on('get', function (callback) {
-      that.query('STATE', function (value) {
-        if (callback) {
-          var cbvalue = 0
-          if (value > 0) {
-            cbvalue = 100
-          }
-          callback(null, cbvalue)
-        }
-      })
-    })
-
-    this.targetCharacteristic = this.twindow
-
-    this.addValueMapping('STATE', 0, 0)
-    this.addValueMapping('STATE', 1, 100)
-    this.addValueMapping('STATE', false, 0)
-    this.addValueMapping('STATE', true, 100)
-
-    this.swindow = window.getCharacteristic(Characteristic.PositionState)
-    this.swindow.on('get', function (callback) {
-      if (callback) callback(null, Characteristic.PositionState.STOPPED)
-    })
-
-    this.services.push(window)
-  } else if (this.special === 'DOOR') {
-    var door = new Service.Door(this.name)
-    this.cdoor = door.getCharacteristic(Characteristic.CurrentPosition)
-    this.cdoor.on('get', function (callback) {
-      that.query('STATE', function (value) {
-        if (callback) callback(null, (value === true) ? 100 : 0)
-      })
-    })
-    this.cdoor.eventEnabled = true
-
-    this.tdoor = door.getCharacteristic(Characteristic.TargetPosition)
-    this.tdoor.on('get', function (callback) {
-      that.query('STATE', function (value) {
-        if (callback) callback(null, (value === true) ? 100 : 0)
-      })
-    })
-
-      .on('set', function (value, callback) {
-        // This is just a sensor so reset homekit data to ccu value after 1 second playtime
-        setTimeout(function () {
-          that.remoteGetValue('STATE', function (value) {
-            that.processDoorState(value)
-          })
-        }, 1000)
-
-        if (callback) {
-          callback()
-        }
-      })
-
-    this.sdoor = door.getCharacteristic(Characteristic.PositionState)
-    this.sdoor.on('get', function (callback) {
-      if (callback) callback(null, Characteristic.PositionState.STOPPED)
-    })
-
-    this.services.push(door)
-    this.remoteGetValue('STATE', function (value) {
-      that.processDoorState(value)
-    })
+  if (this.special === 'DOOR') {
+    this.createDoorAccessory(Service, Characteristic)
   } else {
-    this.log.debug('[Contact] Creating a ContactSensor')
-    this.contact = new Service.ContactSensor(this.name)
-    this.contact.addOptionalCharacteristic(eve.Characteristic.TimesOpened)
-    this.contact.addOptionalCharacteristic(eve.Characteristic.OpenDuration)
-    this.contact.addOptionalCharacteristic(eve.Characteristic.ClosedDuration)
-    this.contact.addOptionalCharacteristic(eve.Characteristic.LastActivation)
-    this.addLoggingCharacteristic(eve.Characteristic.ResetTotal)
-
-    var rt = this.getLoggingCharacteristic(eve.Characteristic.ResetTotal)
-    if (rt !== undefined) {
-      rt.on('set', function (value, callback) {
-        // only reset if its not equal the reset time we know
-        if (value !== that.lastReset) {
-          that.log.debug('[Contact] set ResetTotal called %s != last reset so do a reset', value)
-          that.timesOpened = 0
-          that.lastReset = value
-          that.setPersistentState('timesOpened', that.timesOpened)
-          this.setPersistentState('lastReset', that.lastReset)
-
-          if (that.CharacteristicTimesOpened) {
-            that.CharacteristicTimesOpened.updateValue(that.timesOpened, null)
-          }
-        } else {
-          that.log.debug('[Contact] set ResetTotal called %s its equal the last reset time so ignore', value)
-        }
-        if (callback) {
-          callback()
-        }
-      }.bind(this))
-
-        .on('get', function (callback) {
-          that.log.debug('[Contact] get ResetTotal called %s', that.lastReset)
-          callback(null, that.lastReset)
-        })
-
-      rt.setValue(this.lastReset)
-    }
-
-    this.contact.getCharacteristic(Characteristic.StatusActive)
-      .on('get', function (callback) {
-        callback(null, true)
-      })
-    this.contact.getCharacteristic(Characteristic.StatusActive).setValue(true)
-
-    this.CharacteristicOpenDuration = this.contact.getCharacteristic(eve.Characteristic.OpenDuration)
-      .on('get', function (callback) {
-        that.log.debug('[Contact] getOpenDuration')
-        callback(null, that.timeOpen)
-      })
-    this.CharacteristicOpenDuration.setValue(0)
-
-    this.CharacteristicClosedDuration = this.contact.getCharacteristic(eve.Characteristic.ClosedDuration)
-      .on('get', function (callback) {
-        that.log.debug('[Contact] getClosedDuration')
-        callback(null, that.timeClosed)
-      })
-    this.CharacteristicClosedDuration.setValue(0)
-
-    this.CharacteristicLastOpen = this.contact.getCharacteristic(eve.Characteristic.LastActivation)
-      .on('get', function (callback) {
-        that.log.debug('[Contact] getLastOpen will report %s', that.lastOpen)
-        callback(null, that.lastOpen)
-      })
-    this.CharacteristicLastOpen.setValue(this.lastOpen)
-
-    this.CharacteristicTimesOpened = this.contact.getCharacteristic(eve.Characteristic.TimesOpened)
-      .on('get', function (callback) {
-        that.log.debug('[Contact] getTimesOpened will report %s', that.timesOpened)
-        callback(null, that.timesOpened)
-      })
-    this.CharacteristicTimesOpened.setValue(this.timesOpened)
-
-    this.contactstate = this.contact.getCharacteristic(Characteristic.ContactSensorState)
-      .on('get', function (callback) {
-        that.query('STATE', function (value) {
-          if (reverse === true) {
-            that.log.debug('[Contact] Reverse mode %s', value)
-          } else {
-            that.log.debug('[Contact] normal mode %s', value)
-          }
-
-          callback(null, value)
-        })
-      })
-
-    this.contactstate.eventEnabled = true
-
-    if (reverse === true) {
-      this.addValueMapping('STATE', 1, 0)
-      this.addValueMapping('STATE', 0, 100)
-      this.addValueMapping('STATE', true, 0)
-      this.addValueMapping('STATE', false, 100)
-    } else {
-      this.addValueMapping('STATE', true, 1)
-      this.addValueMapping('STATE', false, 0)
-    }
-
-    this.services.push(this.contact)
+    this.createContactAccessory(Service, Characteristic)
   }
+}
+
+HomeMaticHomeKitContactService.prototype.createDoorAccessory = function (Service, Characteristic) {
+  let that = this
+  this.log.debug('[Contact] Creating a Door')
+  var door = new Service.Door(this.name)
+  this.cdoor = door.getCharacteristic(Characteristic.CurrentPosition)
+  this.cdoor.on('get', function (callback) {
+    that.query('STATE', function (value) {
+      if (callback) callback(null, (value === true) ? 100 : 0)
+    })
+  })
+  this.cdoor.eventEnabled = true
+
+  this.tdoor = door.getCharacteristic(Characteristic.TargetPosition)
+  this.tdoor.on('get', function (callback) {
+    that.query('STATE', function (value) {
+      if (callback) callback(null, (value === true) ? 100 : 0)
+    })
+  })
+
+    .on('set', function (value, callback) {
+      // This is just a sensor so reset homekit data to ccu value after 1 second playtime
+      setTimeout(function () {
+        that.remoteGetValue('STATE', function (value) {
+          that.processDoorState(value)
+        })
+      }, 1000)
+
+      if (callback) {
+        callback()
+      }
+    })
+
+  this.sdoor = door.getCharacteristic(Characteristic.PositionState)
+  this.sdoor.on('get', function (callback) {
+    if (callback) callback(null, Characteristic.PositionState.STOPPED)
+  })
+  this.log.debug('[Contact] Creating a ContactSensor')
+  this.services.push(door)
   this.remoteGetValue('STATE', function (value) {
-    if (that.special === 'DOOR') {
-      that.processDoorState(value)
-    } else {
-      that.processContactState(value)
-    }
+    that.processDoorState(value)
+  })
+}
+
+HomeMaticHomeKitContactService.prototype.createWindowAccessory = function (Service, Characteristic) {
+  let that = this
+  this.log.debug('[Contact] Creating a Window')
+  var window = new Service.Window(this.name)
+  this.cwindow = window.getCharacteristic(Characteristic.CurrentPosition)
+  this.cwindow.on('get', function (callback) {
+    that.query('STATE', function (value) {
+      if (callback) {
+        var cbvalue = 0
+        if (value > 0) {
+          cbvalue = 100
+        }
+        callback(null, cbvalue)
+      }
+    })
+  })
+
+  this.currentStateCharacteristic['STATE'] = this.cwindow
+  this.cwindow.eventEnabled = true
+
+  this.twindow = window.getCharacteristic(Characteristic.TargetPosition)
+  this.twindow.on('get', function (callback) {
+    that.query('STATE', function (value) {
+      if (callback) {
+        var cbvalue = 0
+        if (value > 0) {
+          cbvalue = 100
+        }
+        callback(null, cbvalue)
+      }
+    })
+  })
+
+  this.targetCharacteristic = this.twindow
+
+  this.addValueMapping('STATE', 0, 0)
+  this.addValueMapping('STATE', 1, 100)
+  this.addValueMapping('STATE', false, 0)
+  this.addValueMapping('STATE', true, 100)
+
+  this.swindow = window.getCharacteristic(Characteristic.PositionState)
+  this.swindow.on('get', function (callback) {
+    if (callback) callback(null, Characteristic.PositionState.STOPPED)
+  })
+
+  this.services.push(window)
+
+  this.remoteGetValue('STATE', function (value) {
+    that.processWindowState(value)
+  })
+}
+
+HomeMaticHomeKitContactService.prototype.createContactAccessory = function (Service, Characteristic) {
+  let that = this
+  this.log.debug('[Contact] Creating a ContactSensor')
+  this.contact = new Service.ContactSensor(this.name)
+  this.contact.addOptionalCharacteristic(eve.Characteristic.TimesOpened)
+  this.contact.addOptionalCharacteristic(eve.Characteristic.OpenDuration)
+  this.contact.addOptionalCharacteristic(eve.Characteristic.ClosedDuration)
+  this.contact.addOptionalCharacteristic(eve.Characteristic.LastActivation)
+  this.addLoggingCharacteristic(eve.Characteristic.ResetTotal)
+
+  var rt = this.getLoggingCharacteristic(eve.Characteristic.ResetTotal)
+  if (rt !== undefined) {
+    rt.on('set', function (value, callback) {
+      // only reset if its not equal the reset time we know
+      if (value !== that.lastReset) {
+        that.log.debug('[Contact] set ResetTotal called %s != last reset so do a reset', value)
+        that.timesOpened = 0
+        that.lastReset = value
+        that.setPersistentState('timesOpened', that.timesOpened)
+        this.setPersistentState('lastReset', that.lastReset)
+
+        if (that.CharacteristicTimesOpened) {
+          that.CharacteristicTimesOpened.updateValue(that.timesOpened, null)
+        }
+      } else {
+        that.log.debug('[Contact] set ResetTotal called %s its equal the last reset time so ignore', value)
+      }
+      if (callback) {
+        callback()
+      }
+    }.bind(this))
+
+      .on('get', function (callback) {
+        that.log.debug('[Contact] get ResetTotal called %s', that.lastReset)
+        callback(null, that.lastReset)
+      })
+
+    rt.setValue(this.lastReset)
+  }
+
+  this.contact.getCharacteristic(Characteristic.StatusActive)
+    .on('get', function (callback) {
+      callback(null, true)
+    })
+  this.contact.getCharacteristic(Characteristic.StatusActive).setValue(true)
+
+  this.CharacteristicOpenDuration = this.contact.getCharacteristic(eve.Characteristic.OpenDuration)
+    .on('get', function (callback) {
+      that.log.debug('[Contact] getOpenDuration')
+      callback(null, that.timeOpen)
+    })
+  this.CharacteristicOpenDuration.setValue(0)
+
+  this.CharacteristicClosedDuration = this.contact.getCharacteristic(eve.Characteristic.ClosedDuration)
+    .on('get', function (callback) {
+      that.log.debug('[Contact] getClosedDuration')
+      callback(null, that.timeClosed)
+    })
+  this.CharacteristicClosedDuration.setValue(0)
+
+  this.CharacteristicLastOpen = this.contact.getCharacteristic(eve.Characteristic.LastActivation)
+    .on('get', function (callback) {
+      that.log.debug('[Contact] getLastOpen will report %s', that.lastOpen)
+      callback(null, that.lastOpen)
+    })
+  this.CharacteristicLastOpen.setValue(this.lastOpen)
+
+  this.CharacteristicTimesOpened = this.contact.getCharacteristic(eve.Characteristic.TimesOpened)
+    .on('get', function (callback) {
+      that.log.debug('[Contact] getTimesOpened will report %s', that.timesOpened)
+      callback(null, that.timesOpened)
+    })
+  this.CharacteristicTimesOpened.setValue(this.timesOpened)
+
+  this.contactstate = this.contact.getCharacteristic(Characteristic.ContactSensorState)
+    .on('get', function (callback) {
+      that.query('STATE', function (value) {
+        if (that.reverse === true) {
+          that.log.debug('[Contact] Reverse mode %s', value)
+        } else {
+          that.log.debug('[Contact] normal mode %s', value)
+        }
+
+        callback(null, value)
+      })
+    })
+
+  this.contactstate.eventEnabled = true
+
+  this.services.push(this.contact)
+
+  this.log.debug('[Contact] Initial Query for Contact')
+
+  this.remoteGetValue('STATE', function (value) {
+    that.processContactState(value)
   })
 }
 
@@ -251,12 +263,21 @@ HomeMaticHomeKitContactService.prototype.stateCharacteristicDidChange = function
 }
 
 HomeMaticHomeKitContactService.prototype.processContactState = function (newValue) {
+  var result = 0
   if (this.contactstate !== undefined) {
-    this.contactstate.updateValue(newValue, null)
+    if (this.reverse === true) {
+      result = !(this.isTrue(newValue))
+    } else {
+      result = this.isTrue(newValue)
+    }
+    this.log.debug('[Contact] Update Contact State to %s', result)
+    this.contactstate.updateValue(result, null)
   }
 }
 
 HomeMaticHomeKitContactService.prototype.processDoorState = function (newValue) {
+  this.log.debug('[Contact] Update Door State')
+
   if (this.haz([this.cdoor, this.tdoor, this.sdoor])) {
     switch (newValue) {
       case false:
