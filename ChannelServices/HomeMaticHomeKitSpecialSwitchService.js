@@ -15,12 +15,13 @@ HomeMaticHomeKitSpecialSwitchService.prototype.createDeviceService = function (S
   // Lightbulb , Outlet , Switch , Fan
 
   this.switchtype = this.getClazzConfigValue('switchtype', 'Lightbulb')
-
+  let that = this
   // build interface and address
   let raw = channel.split(new RegExp('([a-z-]{1,}).([a-z0-9]{1,}):([0-9]{1,})', 'gmi'))
-  this.adress = raw[1] + '.' + raw[2] + ':' + raw[3]
-  this.interf = raw[1]
-  this.log.debug('Init Special Switch (%s) at Interface %s Adress %s Channel %s', this.switchtype, this.interf, this.adress, this.channel)
+  this.intf = raw[1]
+  this.channel = raw[3]
+  this.adress = this.intf + '.' + raw[2] + ':' + this.channel
+  this.log.debug('[SpecialSwitch] Init (%s) at Interface %s Adress %s Channel %s', this.switchtype, this.intf, this.adress, this.channel)
 
   switch (this.switchtype) { // hahaha
     case 'Fan':
@@ -53,7 +54,7 @@ HomeMaticHomeKitSpecialSwitchService.prototype.createDeviceService = function (S
   this.services.push(this.service)
 
   this.remoteGetValue('STATE', function (result) {
-
+    that.event(that.interf + '.' + that.adress, 'STATE', result)
   })
 }
 
@@ -62,7 +63,7 @@ HomeMaticHomeKitSpecialSwitchService.prototype.addisOnCharacteristic = function 
   this.onCharacteristic = this.service.getCharacteristic(characteristic)
     .on('get', function (callback) {
       that.query('STATE', function (value) {
-        let hmState = ((value === 'true') || (value === true)) ? 1 : 0
+        let hmState = that.isTrue(value) ? 1 : 0
         if (callback) callback(null, hmState)
       })
     })
@@ -70,7 +71,7 @@ HomeMaticHomeKitSpecialSwitchService.prototype.addisOnCharacteristic = function 
       let evtmp = that.eventupdate
       that.eventupdate = false
 
-      that.log.debug('Set Command %s', value)
+      that.log.debug('[SpecialSwitch] Set Command %s', value)
       that.command('setrega', 'STATE', (value === true), function () {
         that.eventupdate = evtmp
         if (callback) {
@@ -81,9 +82,9 @@ HomeMaticHomeKitSpecialSwitchService.prototype.addisOnCharacteristic = function 
 }
 
 HomeMaticHomeKitSpecialSwitchService.prototype.datapointEvent = function (dp, newValue) {
-  this.log.debug('Switch event %s with value %s', dp, newValue)
+  this.log.debug('[SpecialSwitch] Switch event %s with value %s', dp, newValue)
   if (dp === 'STATE') {
-    let hmState = !!(((newValue === 'true') || (newValue === true)))
+    let hmState = this.isTrue(newValue) ? 1 : 0
     this.onCharacteristic.updateValue(hmState, null)
   }
 }

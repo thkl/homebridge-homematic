@@ -210,7 +210,7 @@ HomeMaticHomeKitSwitchService.prototype.createValveService = function (Service, 
     .on('get', function (callback) {
       that.log.debug('get Active')
       that.query('STATE', function (value) {
-        let hmState = ((value === 'true') || (value === true)) ? 1 : 0
+        let hmState = that.isTrue(value) ? 1 : 0
         if (callback) callback(null, hmState)
       })
     })
@@ -243,7 +243,7 @@ HomeMaticHomeKitSwitchService.prototype.createValveService = function (Service, 
     .on('get', function (callback) {
       that.log.debug('get Active')
       that.query('STATE', function (value) {
-        let hmState = ((value === 'true') || (value === true)) ? 1 : 0
+        let hmState = that.isTrue(value) ? 1 : 0
         if (callback) callback(null, hmState)
       })
     })
@@ -290,8 +290,8 @@ HomeMaticHomeKitSwitchService.prototype.queryState = function () {
 HomeMaticHomeKitSwitchService.prototype.datapointEvent = function (dp, newValue) {
   this.log.debug('[Switch Service] Event %s vs %s', dp, this.channelnumber + '.STATE')
   if (dp === this.channelnumber + '.STATE') {
-    let hmState = ((newValue === 'true') || (newValue === true)) ? 1 : 0
-    this.log.debug('[Switch Service] Event result %s hm %s', newValue, newValue)
+    let hmState = this.isTrue(newValue) ? 1 : 0
+    this.log.debug('[Switch Service] Event result %s hm %s', newValue, hmState)
     if (hmState === 0) {
       this.remainTime = 0
       if (this.c_timeRemain !== undefined) {
