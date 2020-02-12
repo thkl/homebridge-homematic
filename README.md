@@ -176,5 +176,5 @@ Humidity sensor:
 "services": [
   { "type": "HmIP-STH:HEATING_CLIMATECONTROL_TRANSCEIVER",
     "service": "HomeMaticHomeKitThermostatWeatherServiceIP" }
-]
+] 
 ```
