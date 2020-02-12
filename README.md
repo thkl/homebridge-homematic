@@ -44,7 +44,7 @@ The file is located at the same path as your config.json and named homematic_con
 
 The plugin will copy your settings once to this file
 
-````
+```
 {
     "filter_device":[],
     "filter_channel":["BidCos-RF.KEQXXXXXXX:4", "BidCos-RF.LEQXXXXXXX:2"],
