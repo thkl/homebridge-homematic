@@ -1,8 +1,6 @@
 'use strict'
 
 const xmlrpc = require('homematic-xmlrpc')
-// const request = require('request')
-// const debug = require('debug')('HomeMaticRPC')
 const semver = require('semver')
 
 var HomeMaticRPC = function (log, ccuip, port, system, platform) {
