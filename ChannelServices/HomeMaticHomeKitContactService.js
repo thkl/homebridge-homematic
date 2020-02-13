@@ -19,9 +19,8 @@ HomeMaticHomeKitContactService.prototype.propagateServices = function (homebridg
 }
 
 HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service, Characteristic) {
-  var that = this
   this.enableLoggingService('door', false)
-
+  this.isMultiChannel = false // do not run into the multichannel issue #543
   this.timesOpened = this.getPersistentState('timesOpened', 0)
   this.timeOpen = this.getPersistentState('timeOpen', 0)
   this.timeClosed = this.getPersistentState('timeClosed', 0)
