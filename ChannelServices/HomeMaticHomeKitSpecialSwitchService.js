@@ -16,6 +16,7 @@ HomeMaticHomeKitSpecialSwitchService.prototype.createDeviceService = function (S
 
   this.switchtype = this.getClazzConfigValue('switchtype', 'Lightbulb')
   let that = this
+  this.isMultiChannel = false
   // build interface and address
   let raw = channel.split(new RegExp('([a-z-]{1,}).([a-z0-9]{1,}):([0-9]{1,})', 'gmi'))
   this.intf = raw[1]
