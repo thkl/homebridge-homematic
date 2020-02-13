@@ -32,8 +32,6 @@ HomeMaticHomeKitThermometerService.prototype.createDeviceService = function (Ser
       })
     }.bind(this))
 
-  let strId = this.channelnumber + ':TEMPERATURE'
-  this.log.info('Setup %s', strId)
   this.eventEnabled = true
   this.log.debug('[HKTS] initial query')
   this.queryData()

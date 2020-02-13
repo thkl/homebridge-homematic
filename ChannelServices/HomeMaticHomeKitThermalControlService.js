@@ -149,47 +149,41 @@ HomeMaticHomeKitThermalControlService.prototype.createDeviceService = function (
 
   // register all Datapoints for Events
   this.platform.registerAdressForEventProcessingAtAccessory(this.adress + '.ACTUAL_HUMIDITY', this, function (newValue) {
-    that.currentHumidity = parseFloat(newValue)
-    if (that.currentHumidityCharacteristic !== undefined) {
-      that.currentHumidityCharacteristic.updateValue(that.currentHumidity, null)
-    }
+    that.processChange('ACTUAL_HUMIDITY', newValue)
   })
 
   this.platform.registerAdressForEventProcessingAtAccessory(this.adress + '.CONTROL_MODE', this)
 
   this.platform.registerAdressForEventProcessingAtAccessory(this.adress + '.ACTUAL_TEMPERATURE', this, function (newValue) {
-    that.currentTemperature = parseFloat(newValue)
-    that.currentTemperatureCharacteristic.updateValue(that.currentTemperature, null)
+    that.processChange('ACTUAL_TEMPERATURE', newValue)
   })
 
   this.platform.registerAdressForEventProcessingAtAccessory(this.adress + '.SET_TEMPERATURE', this, function (newValue) {
-    if (parseFloat(newValue) === 4.5) {
-      that.targetMode.updateValue(0, null)
-      that.currentmode.updateValue(0, null)
-    } else {
-      that.targetMode.updateValue(1, null)
-      that.currentmode.updateValue(1, null)
-    }
-    that.targetTemperatureCharacteristic.updateValue(parseFloat(newValue), null)
+    that.processChange('SET_TEMPERATURE', newValue)
   })
 
   // Finally Run a query
+  this.log.debug('[TCS] initial query')
   this.queryData()
 }
 
 HomeMaticHomeKitThermalControlService.prototype.queryData = function () {
   var that = this
-  this.remoteGetValue('ACTUAL_TEMPERATURE')
-  this.remoteGetValue('ACTUAL_HUMIDITY')
-  this.remoteGetValue('SET_TEMPERATURE')
 
-  if (this.currentTemperature > -255) {
-    this.addLogEntry({
-      temp: this.currentTemperature,
-      pressure: 0,
-      humidity: this.currentHumidity
+  this.remoteGetValue('ACTUAL_TEMPERATURE', function (value) {
+    that.processChange('ACTUAL_TEMPERATURE', value)
+  })
+
+  if (this.currentHumidityCharacteristic) {
+    this.remoteGetValue('ACTUAL_HUMIDITY', function (value) {
+      that.processChange('ACTUAL_HUMIDITY', value)
     })
   }
+
+  this.remoteGetValue('SET_TEMPERATURE', function (value) {
+    that.processChange('SET_TEMPERATURE', value)
+  })
+
   // create timer to query device every 10 minutes
   this.refreshTimer = setTimeout(function () {
     that.queryData()
@@ -198,6 +192,42 @@ HomeMaticHomeKitThermalControlService.prototype.queryData = function () {
 
 HomeMaticHomeKitThermalControlService.prototype.shutdown = function () {
   clearTimeout(this.refreshTimer)
+}
+
+HomeMaticHomeKitThermalControlService.prototype.processChange = function (dp, newValue) {
+  this.log.debug('[TCS] processChange %s with %s', dp, newValue)
+  if (this.isDataPointEvent(dp, 'ACTUAL_TEMPERATURE')) {
+    this.log.debug('[TCS] set currentTemperature to %s', newValue)
+    this.currentTemperature = parseFloat(newValue)
+    this.currentTemperatureCharacteristic.updateValue(this.currentTemperature, null)
+  }
+
+  if (this.isDataPointEvent(dp, 'ACTUAL_HUMIDITY')) {
+    this.log.debug('[TCS] set currentHumidity to %s', newValue)
+    this.currentHumidity = parseFloat(newValue)
+    if (this.currentHumidityCharacteristic !== undefined) {
+      this.currentHumidityCharacteristic.updateValue(this.currentHumidity, null)
+    }
+  }
+  if (this.isDataPointEvent(dp, 'SET_TEMPERATURE')) {
+    this.log.debug('[TCS] set targetTemperature to %s', newValue)
+    if (parseFloat(newValue) === 4.5) {
+      this.targetMode.updateValue(0, null)
+      this.currentmode.updateValue(0, null)
+    } else {
+      this.targetMode.updateValue(1, null)
+      this.currentmode.updateValue(1, null)
+    }
+    this.targetTemperatureCharacteristic.updateValue(parseFloat(newValue), null)
+  }
+
+  if (this.currentTemperature > -255) {
+    this.addLogEntry({
+      temp: this.currentTemperature,
+      pressure: 0,
+      humidity: this.currentHumidity
+    })
+  }
 }
 
 module.exports = HomeMaticHomeKitThermalControlService
