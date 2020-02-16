@@ -22,8 +22,7 @@
                 "title": "CCU Port",
                 "type": "number",
                 "description": "The Port of your CCU where the REGA web proxy is listening to",
-                "default": 8181,
-                "required": true
+                "default": 8181
             },
             "subsection": {
                 "title": "Subsection",
