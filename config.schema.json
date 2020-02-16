@@ -18,6 +18,13 @@
                 "type": "string",
                 "description": "The IP Adress of your CCU"
             },
+            "ccu_port": {
+                "title": "CCU Port",
+                "type": "number",
+                "description": "The Port of your CCU where the REGA web proxy is listening to",
+                "default": 8181,
+                "required": true
+            },
             "subsection": {
                 "title": "Subsection",
                 "type": "string",

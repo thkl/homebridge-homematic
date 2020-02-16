@@ -36,6 +36,7 @@ function HomeMaticPlatform (log, config, api) {
   this.localPath = _homebridge.user.storagePath()
   this.localHomematicConfig = path.join(this.localPath, 'homematic_config.json')
   this.ccuIP = config.ccu_ip
+  this.ccuPort = config.ccu_port || 8181
   this.cache = new HomeMaticCacheManager(log)
   if (api) {
     this.api = api
@@ -56,7 +57,7 @@ function HomeMaticPlatform (log, config, api) {
     this.log.info('Homematic is a registered trademark of the EQ-3 AG')
     this.log.info('Please report any issues to https://github.com/thkl/homebridge-homematic/issues')
     this.log.info('running in production mode')
-    this.log.info('will connect to your ccu at %s', this.ccuIP)
+    this.log.info('will connect to your ccu at %s:%d', this.ccuIP, this.ccuPort)
     this.log.warn('IMPORTANT !! Starting this version, your homematic custom configuration is located in %s', this.localHomematicConfig)
   }
 
@@ -595,10 +596,10 @@ HomeMaticPlatform.prototype.setValue = function (intf, channel, datapoint, value
 HomeMaticPlatform.prototype.createRegaRequest = function (testreturn) {
   var rega
   if (isInTest) {
-    rega = new HomeMaticRegaRequestTestDriver(this.log, this.ccuIP)
+    rega = new HomeMaticRegaRequestTestDriver(this.log, this.ccuIP, this.ccuPort)
     rega.platform = this
   } else {
-    rega = new HomeMaticRegaRequest(this.log, this.ccuIP)
+    rega = new HomeMaticRegaRequest(this.log, this.ccuIP, this.ccuPort)
   }
   return rega
 }

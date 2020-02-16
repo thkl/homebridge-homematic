@@ -12,6 +12,7 @@ program
   .usage('[options]')
   .option('-A, --address [type]', 'set device address to fetch')
   .option('-C, --ccuip [type]', 'set ccuip ')
+  .option('-P, --ccuport [type]', 'set ccuport ')
   .parse(process.argv)
 
 console.info('')
@@ -31,6 +32,11 @@ if (typeof program.address === 'undefined') {
   process.exit(1)
 }
 
+if (typeof program.ccuport === 'undefined') {
+  console.warn('no device port given. Using 8181 by default.  --help for additional information')
+  program.ccuport = '8181';
+}
+
 let name = 'TA1'
 var script = 'string sDeviceId;string sChannelId;boolean df = true;'
 script = script + 'integer zl = 1000;integer czl=0;'
@@ -47,9 +53,9 @@ script = script + "Write('],\"subsection\":[1000]}');"
 
 script = script.replace('%s', program.address)
 
-console.info('Query CCU at %s', program.ccuip)
+console.info('Query CCU at %s:%s', program.ccuip, program.ccuport)
 
-let request = new HomeMaticRegaRequest(log, program.ccuip)
+let request = new HomeMaticRegaRequest(log, program.ccuip, program.ccuport)
 request.script(script, data => {
   // parse This
   console.info('Resonse from ccu is %s bytes', data.length)

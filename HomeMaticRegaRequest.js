@@ -2,9 +2,10 @@
 
 var http = require('http')
 
-function HomeMaticRegaRequest (log, ccuip) {
+function HomeMaticRegaRequest (log, ccuip, ccuPort) {
   this.log = log
   this.ccuIP = ccuip
+  this.ccuPort = ccuPort
   this.timeout = 120
 }
 
@@ -19,7 +20,7 @@ HomeMaticRegaRequest.prototype = {
 
     var postOptions = {
       host: this.ccuIP,
-      port: '8181',
+      port: this.ccuPort.toString(),
       path: '/tclrega.exe',
       method: 'POST',
       headers: {

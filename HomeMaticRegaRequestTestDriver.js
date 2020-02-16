@@ -1,8 +1,9 @@
 var isInTest = typeof global.it === 'function'
 
-function HomeMaticRegaRequestTestDriver (log, ccuip) {
+function HomeMaticRegaRequestTestDriver (log, ccuip, ccuPort) {
   this.log = log
   this.ccuIP = ccuip
+  this.ccuPort = ccuPort
   this.timeout = 120
   this.data = 0
   if (!isInTest) {
