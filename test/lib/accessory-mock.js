@@ -33,6 +33,9 @@ Accessory.prototype.getService = function (name) {
   }
 }
 
+Accessory.prototype.on = function (name, callback) {
+}
+
 module.exports = {
   Accessory: Accessory
 }

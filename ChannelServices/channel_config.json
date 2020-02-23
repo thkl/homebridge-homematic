@@ -1,20 +1,17 @@
 {
-	"deviceinfo": [{
+	"deviceinfo": [
+		{
 			"type": "HM-CC-TC",
 			"filter": [
 				"WEATHER"
 			]
-
 		},
-
 		{
 			"type": "HM-CC-VG-1",
 			"filter": [
 				"SHUTTER_CONTACT"
 			]
-
 		},
-
 		{
 			"type": "HM-LC-RGBW-WM",
 			"combine": {
@@ -22,7 +19,6 @@
 				"target": ":1"
 			}
 		},
-
 		{
 			"type": "HM-WDS100-C6-O-2",
 			"isWeatherStation": "true"
@@ -42,28 +38,20 @@
 			"meterChannel": "6",
 			"switchChannel": "3"
 		}
-
 	],
-
-
 	"channelconfig": [
-
 		{
 			"type": "SWITCH",
 			"service": "HomeMaticHomeKitSwitchService"
 		},
-
-
 		{
 			"type": "SWITCH_VIRTUAL_RECEIVER",
 			"service": "HomeMaticHomeKitSwitchService"
 		},
-
 		{
 			"type": "HM-LC-Sw1-FM:SWITCH",
 			"service": "HomeMaticHomeKitSwitchService"
 		},
-
 		{
 			"type": "DIMMER",
 			"service": "HomeMaticHomeKitDimmerService"
@@ -72,22 +60,18 @@
 			"type": "VIRTUAL_DIMMER",
 			"service": "HomeMaticHomeKitDimmerService"
 		},
-
 		{
 			"type": "KEY",
 			"service": "HomeMaticHomeKitKeyService"
 		},
-
 		{
 			"type": "KEY_TRANSCEIVER",
 			"service": "HomeMaticHomeKitKeyService"
 		},
-
 		{
 			"type": "VIRTUAL_KEY",
 			"service": "HomeMaticHomeKitKeyService"
 		},
-
 		{
 			"type": "TILT_SENSOR",
 			"service": "HomeMaticHomeKitContactService"
@@ -100,28 +84,22 @@
 			"type": "SHUTTER_CONTACT",
 			"service": "HomeMaticHomeKitContactService"
 		},
-
 		{
 			"type": "SHUTTER_CONTACT_TRANSCEIVER",
 			"service": "HomeMaticHomeKitContactService"
 		},
-
 		{
 			"type": "HM-LC-RGBW-WM:RGBW_COLOR",
 			"service": "HomeMaticHomeKitRGBWService"
 		},
-
-
 		{
 			"type": "HmIP-BROLL:SHUTTER_VIRTUAL_RECEIVER",
 			"service": "HomeMaticHomeKitBlindServiceIP"
 		},
-
 		{
 			"type": "HmIP-FROLL:SHUTTER_VIRTUAL_RECEIVER",
 			"service": "HomeMaticHomeKitBlindServiceIP"
 		},
-
 		{
 			"type": "HmIP-FDT:DIMMER_VIRTUAL_RECEIVER",
 			"service": "HomeMaticHomeKitDimmerService"
@@ -138,57 +116,46 @@
 			"type": "SENSOR",
 			"service": "HomeMaticHomeKitSensorService"
 		},
-
 		{
 			"type": "ROTARY_HANDLE_SENSOR",
 			"service": "HomeMaticHomeKitRotaryHandleService"
 		},
-
 		{
 			"type": "ROTARY_HANDLE_TRANSCEIVER",
 			"service": "HomeMaticHomeKitRotaryHandleService"
 		},
-
 		{
 			"type": "MOTION_DETECTOR",
 			"service": "HomeMaticHomeKitMotionDetectorService"
 		},
-
 		{
 			"type": "MOTIONDETECTOR_TRANSCEIVER",
 			"service": "HomeMaticHomeKitMotionDetectorServiceIP"
 		},
-
 		{
 			"type": "SMOKE_DETECTOR",
 			"service": "HomeMaticHomeKitSmokeDetectorService"
 		},
-
 		{
 			"type": "SMOKE_DETECTOR_TEAM",
 			"service": "HomeMaticHomeKitSmokeDetectorService"
 		},
-
 		{
 			"type": "SMOKE_DETECTOR_TEAM_V2",
 			"service": "HomeMaticHomeKitSmokeDetectorService"
 		},
-
 		{
 			"type": "HmIP-SWSD:SMOKE_DETECTOR",
 			"service": "HomeMaticHomeKitSmokeDetectorServiceIP"
 		},
-
 		{
 			"type": "KEYMATIC",
 			"service": "HomeMaticHomeKitKeymaticService"
 		},
-
 		{
 			"type": "WEATHER",
 			"service": "HomeMaticHomeKitThermostatWeatherService"
 		},
-
 		{
 			"type": "WEATHER_TRANSMIT",
 			"service": "HomeMaticHomeKitThermostatWeatherService"
@@ -201,44 +168,34 @@
 			"type": "HM-WDS100-C6-O-2:WEATHER",
 			"service": "HomeMaticHomeKitWeatherStationService"
 		},
-
 		{
 			"type": "LUXMETER",
 			"service": "HomeMaticHomeKitLuxMeterService"
 		},
-
 		{
 			"type": "RAINDETECTOR",
 			"service": "HomeMaticHomeKitRaindetectorService"
 		},
-
 		{
 			"type": "RAINDETECTOR_HEAT",
 			"service": "HomeMaticHomeKitSwitchService"
 		},
-
 		{
 			"type": "CLIMATECONTROL_REGULATOR",
 			"service": "HomeMaticHomeKitThermostatService"
 		},
-
-
 		{
 			"type": "THERMALCONTROL_TRANSMIT",
 			"service": "HomeMaticHomeKitThermalControlService"
 		},
-
 		{
 			"type": "CLIMATECONTROL_RT_TRANSCEIVER",
 			"service": "HomeMaticHomeKitThermalControlService"
 		},
-
-
 		{
 			"type": "VARIABLE",
 			"service": "HomeMaticHomeKitVariableService"
 		},
-
 		{
 			"type": "PROGRAM_LAUNCHER",
 			"service": "HomeMaticHomeKitProgramService"
@@ -263,13 +220,10 @@
 			"type": "HM-Sec-Sir-WM:ARMING",
 			"service": "HomeMaticHomeKitSecuritySystem"
 		},
-
 		{
 			"type": "HM-Sen-DB-PCB:KEY",
 			"service": "HomeMaticHomeKitDoorBellMotionService"
 		},
-
-
 		{
 			"type": "WATERDETECTIONSENSOR",
 			"service": "HomeMaticHomeKitLeakSensorService"
@@ -282,7 +236,6 @@
 			"type": "ENERGIE_METER_TRANSMITTER",
 			"service": "HomeMaticHomeKitPowerMeterServiceIP"
 		},
-
 		{
 			"type": "HEATING_CLIMATECONTROL_TRANSCEIVER",
 			"service": "HomeMaticHomeKitThermostatServiceIP"
@@ -343,12 +296,10 @@
 			"type": "HmIP-SWD:WATER_DETECTION_TRANSMITTER",
 			"service": "HomeMaticHomeKitWaterSensorService"
 		},
-
 		{
 			"type": "HmIP-BLS:DIMMER_VIRTUAL_RECEIVER",
 			"service": "HomeMaticHomeKitBSLColorService"
 		},
-
 		{
 			"type": "HmIP-MOD-TM:DOOR_RECEIVER",
 			"service": "HomeMaticHomeKitGarageDoorOpenerService"
@@ -361,6 +312,5 @@
 			"type": "HmIP-STHO:CLIMATE_TRANSCEIVER",
 			"service": "HomeMaticHomeKitWeatherStationServiceIP"
 		}
-
 	]
 }

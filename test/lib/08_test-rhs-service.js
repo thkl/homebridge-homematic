@@ -20,19 +20,22 @@ describe('Homematic Plugin (index)', function () {
     subsection: 'HomeKit',
     testdata: data
   }
-  var platform = new homebridgeMock.PlatformType(log, config)
+  var platform = new homebridgeMock.PlatformType(log, config, homebridgeMock)
 
   before(function () {
-    log.debug('Init Platform with Switch')
-    platform.accessories(function (acc) {
+    log.debug('Init Platform with RHS')
+    platform.homebridge.setCCUDummyValue('BidCos-RF.ABC1234560:1.STATE', 1)
+
+    platform.homebridge.fireHomeBridgeEvent('didFinishLaunching')
+    platform.homebridge.accessories(function (acc) {
       that.accessories = acc
     })
   })
 
   after(function () {
     log.debug('Shutdown Platform')
-    that.accessories.map(ac => {
-      ac.shutdown()
+    platform.homebridge.accessories(function (acc) {
+      that.accessories = acc
     })
   })
 
@@ -43,11 +46,29 @@ describe('Homematic Plugin (index)', function () {
       done()
     })
 
+    it('test initial values rhs must be open', function (done) {
+      let ac = that.accessories[0]
+      let s = ac.getService(Service.ContactSensor)
+      assert.ok(s, 'Service.ContactSensor not found in rhs %s', ac.name)
+      let cc = s.getCharacteristic(Characteristic.ContactSensorState)
+      assert.ok(cc, 'Characteristic.ContactSensorState not found in rhs %s', ac.name)
+      cc.getValue(function (context, value) {
+        assert.strict.equal(value, 1)
+      })
+      cc.emit('get', function (context, result) {
+        assert.strict.equal(result, true, 'get logic result should be true')
+      })
+
+      // Reset Value
+      platform.homebridge.setCCUDummyValue('BidCos-RF.ABC1234560:1.STATE', 0)
+      done()
+    })
+
     it('test RHS close', function (done) {
       platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'STATE', 0])
       // check
       that.accessories.map(ac => {
-        let s = ac.get_Service(Service.ContactSensor)
+        let s = ac.getService(Service.ContactSensor)
         assert.ok(s, 'Service.ContactSensor not found in rhs %s', ac.name)
         let cc = s.getCharacteristic(Characteristic.ContactSensorState)
         assert.ok(cc, 'Characteristic.ContactSensorState not found in rhs %s', ac.name)
@@ -65,7 +86,7 @@ describe('Homematic Plugin (index)', function () {
       platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'STATE', 1])
       // check
       that.accessories.map(ac => {
-        let s = ac.get_Service(Service.ContactSensor)
+        let s = ac.getService(Service.ContactSensor)
         assert.ok(s, 'Service.ContactSensor not found in rhs %s', ac.name)
         let cc = s.getCharacteristic(Characteristic.ContactSensorState)
         assert.ok(cc, 'Characteristic.ContactSensorState not found in rhs %s', ac.name)

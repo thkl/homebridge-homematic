@@ -1,61 +1,48 @@
 'use strict'
 
-var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
-var util = require('util')
+const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
 
-function HomeMaticHomeKitSensorService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
-  HomeMaticHomeKitSensorService.super_.apply(this, arguments)
-}
+class HomeMaticHomeKitSensorService extends HomeKitGenericService {
+  createDeviceService (Service, Characteristic) {
+    var self = this
 
-util.inherits(HomeMaticHomeKitSensorService, HomeKitGenericService)
+    this.enableLoggingService('door')
 
-HomeMaticHomeKitSensorService.prototype.createDeviceService = function (Service, Characteristic) {
-  var that = this
+    if (this.special === 'DOOR') {
+      var door = this.getService(Service.Door)
+      this.cDoor = door.getCharacteristic(Characteristic.CurrentDoorState)
 
-  this.enableLoggingService('door')
-
-  if (this.special === 'DOOR') {
-    var door = new Service['Door'](this.name)
-    var cdoor = door.getCharacteristic(Characteristic.CurrentDoorState)
-
-    cdoor.on('get', function (callback) {
-      that.query('SENSOR', function (value) {
-        that.addLogEntry({ status: (value === true) ? 1 : 0 })
-        if (callback) callback(null, value)
-      })
-    })
-
-    this.currentStateCharacteristic['SENSOR'] = cdoor
-    cdoor.eventEnabled = true
-
-    this.addValueMapping('SENSOR', 0, 1)
-    this.addValueMapping('SENSOR', 1, 0)
-
-    this.addValueMapping('SENSOR', false, 1)
-    this.addValueMapping('SENSOR', true, 0)
-
-    this.services.push(door)
-  } else {
-    var contact = new Service['ContactSensor'](this.name)
-    var state = contact.getCharacteristic(Characteristic.ContactSensorState)
-      .on('get', function (callback) {
-        that.query('SENSOR', function (value) {
-          that.addLogEntry({ status: (value === true) ? 1 : 0 })
-          callback(null, value)
+      this.cDoor.on('get', function (callback) {
+        self.query('SENSOR', function (value) {
+          self.addLogEntry({ status: self.isTrue(value) ? 1 : 0 })
+          if (callback) callback(null, value)
         })
       })
 
-    that.currentStateCharacteristic['SENSOR'] = state
-    state.eventEnabled = true
-    this.services.push(contact)
-  }
+      this.cDoor.eventEnabled = true
+    } else {
+      var contact = this.getService(Service.ContactSensor)
+      this.cContact = contact.getCharacteristic(Characteristic.ContactSensorState)
+        .on('get', function (callback) {
+          self.query('SENSOR', function (value) {
+            self.addLogEntry({ status: self.isTrue(value) ? 1 : 0 })
+            callback(null, value)
+          })
+        })
+      this.cContact.eventEnabled = true
+    }
 
-  this.remoteGetValue('SENSOR')
-}
-
-HomeMaticHomeKitSensorService.prototype.datapointEvent = function (dp, newValue) {
-  if (dp === 'SENSOR') {
-    this.addLogEntry({ status: (newValue === true) ? 1 : 0 })
+    let dpa = this.transformDatapoint('SENSOR')
+    this.platform.registeraddressForEventProcessingAtAccessory(dpa, self, function (newValue) {
+      self.log.debug('[Sensor] event %s', newValue)
+      self.addLogEntry({ status: self.isTrue(newValue) ? 1 : 0 })
+      if (self.cContact) {
+        self.cContact.updateValue(self.isTrue(newValue) ? 1 : 0, null)
+      }
+      if (self.cDoor) {
+        self.cDoor.updateValue(self.isTrue(newValue) ? 1 : 0, null)
+      }
+    })
   }
 }
 

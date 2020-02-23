@@ -1,0 +1,396 @@
+{
+    "HomeMaticHomeKitAirQualitySensorService": {
+        "ChannelType": [],
+        "Configuration": [],
+        "description": "Provides a Homekit air quality sensor. There are no additional settings."
+    },
+    "HomeMaticHomeKitSwitchService": {
+        "ChannelType": [
+            "SWITCH",
+            "SWITCH_VIRTUAL_RECEIVER",
+            "RAINDETECTOR_HEAT"
+        ],
+        "Configuration": [],
+        "description": "Provides a Homekit switch. There are no additional settings."
+    },
+    "HomeMaticHomeKitSpecialSwitchService": {
+        "ChannelType": [
+            "SWITCH",
+            "SWITCH_VIRTUAL_RECEIVER",
+            "RAINDETECTOR_HEAT",
+            "HM-SPECIAL-SWITCH"
+        ],
+        "description": "Provides a Homekit switch. You can choose from different styles.",
+        "Configuration": [
+            {
+                "switchtype": {
+                    "label": "Type",
+                    "control": "array",
+                    "values": [
+                        "Lightbulb",
+                        "Outlet",
+                        "Switch",
+                        "Fan"
+                    ],
+                    "hint": "Icon to use for this actor"
+                }
+            }
+        ]
+    },
+    "HomeMaticHomeKitDimmerService": {
+        "ChannelType": [
+            "DIMMER",
+            "VIRTUAL_DIMMER",
+            "HmIP-FDT:DIMMER_VIRTUAL_RECEIVER",
+            "HmIP-BDT:DIMMER_VIRTUAL_RECEIVER",
+            "HmIP-PDT:DIMMER_VIRTUAL_RECEIVER"
+        ],
+        "Configuration": [],
+        "description": "Provides a Homekit dimmer"
+    },
+    "HomeMaticHomeKitKeyService": {
+        "ChannelType": [
+            "KEY",
+            "KEY_TRANSCEIVER",
+            "VIRTUAL_KEY"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitContactService": {
+        "ChannelType": [
+            "TILT_SENSOR",
+            "SHUTTER_CONTACT",
+            "SHUTTER_CONTACT_TRANSCEIVER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitRGBWService": {
+        "ChannelType": [
+            "HM-LC-RGBW-WM:RGBW_COLOR"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitBlindServiceIP": {
+        "ChannelType": [
+            "HmIP-BROLL:SHUTTER_VIRTUAL_RECEIVER",
+            "HmIP-FROLL:SHUTTER_VIRTUAL_RECEIVER"
+        ],
+        "Configuration": [
+            {
+                "minValueForClose": {
+                    "label": "Min value",
+                    "control": "integer",
+                    "min": 0,
+                    "max": 100,
+                    "hint": "min value to show the shutter as close in homekit"
+                },
+                "maxValueForOpen": {
+                    "label": "Max value",
+                    "control": "integer",
+                    "min": 0,
+                    "max": 100,
+                    "hint": "max value to show the shutter as open in homekit"
+                }
+            }
+        ],
+        "description": ""
+    },
+    "HomeMaticHomeKitSensorService": {
+        "ChannelType": [
+            "SENSOR"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitRotaryHandleService": {
+        "ChannelType": [
+            "ROTARY_HANDLE_SENSOR",
+            "ROTARY_HANDLE_TRANSCEIVER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitMotionDetectorService": {
+        "ChannelType": [
+            "MOTION_DETECTOR"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitMotionDetectorServiceIP": {
+        "ChannelType": [
+            "ACCELERATION_TRANSCEIVER",
+            "MOTIONDETECTOR_TRANSCEIVER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitSmokeDetectorService": {
+        "ChannelType": [
+            "SMOKE_DETECTOR",
+            "SMOKE_DETECTOR_TEAM",
+            "SMOKE_DETECTOR_TEAM_V2",
+            "HmIP-SWSD:SMOKE_DETECTOR"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitKeymaticService": {
+        "ChannelType": [
+            "HomeMaticHomeKitKeymaticService"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitThermostatWeatherService": {
+        "ChannelType": [
+            "WEATHER",
+            "WEATHER_TRANSMIT"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitWeatherStationService": {
+        "ChannelType": [
+            "HM-WDS100-C6-O:WEATHER",
+            "HM-WDS100-C6-O-2:WEATHER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitWeatherStationServiceIP": {
+        "ChannelType": [
+            "HmIP-SWO-B:WEATHER_TRANSMIT",
+            "HmIP-SWO-PL:WEATHER_TRANSMIT",
+            "HmIP-SWO-PR:WEATHER_TRANSMI"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitLuxMeterService": {
+        "ChannelType": [
+            "LUXMETER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitRaindetectorService": {
+        "ChannelType": [
+            "RAINDETECTOR"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitThermostatService": {
+        "ChannelType": [
+            "CLIMATECONTROL_REGULATOR"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitThermostatServiceIP": {
+        "ChannelType": [
+            "HEATING_CLIMATECONTROL_TRANSCEIVER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitThermalControlService": {
+        "ChannelType": [
+            "THERMALCONTROL_TRANSMIT",
+            "CLIMATECONTROL_RT_TRANSCEIVER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitVariableService": {
+        "ChannelType": [
+            "VARIABLE"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitProgramService": {
+        "ChannelType": [
+            "PROGRAM_LAUNCHER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitVariableUpdaterService": {
+        "ChannelType": [
+            "VARIABLE_UPDATE_TRIGGER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitThermometerService": {
+        "ChannelType": [
+            "HM-WDS30-T-O:WEATHER",
+            "HM-WDS30-OT2-SM:WEATHER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitWinMaticService": {
+        "ChannelType": [
+            "WINMATIC"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitSecuritySystem": {
+        "ChannelType": [
+            "HM-Sec-Sir-WM:ARMING"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitDoorBellMotionService": {
+        "ChannelType": [
+            "HM-Sen-DB-PCB:KEY"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitLeakSensorService": {
+        "ChannelType": [
+            "WATERDETECTIONSENSOR",
+            "SHUTTER_CONTACT"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitPowerMeterService": {
+        "ChannelType": [
+            "POWERMETER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitPowerMeterServiceIP": {
+        "ChannelType": [
+            "ENERGIE_METER_TRANSMITTER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitCarbonDioxideSensorService": {
+        "ChannelType": [
+            "SENSOR_FOR_CARBON_DIOXIDE"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitBlindSlatServiceIP": {
+        "ChannelType": [
+            "HmIP-BBL:BLIND_TRANSMITTER",
+            "HmIP-FBL:BLIND_VIRTUAL_RECEIVER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitPresenceDetectorServiceIP": {
+        "ChannelType": [
+            "HmIP-SPI:PRESENCEDETECTOR_TRANSCEIVER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitEnergyCounterService": {
+        "ChannelType": [
+            "POWERMETER_IGL"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitBlindService": {
+        "ChannelType": [
+            "HM-LC-Ja1PBU-FM:JALOUSIE",
+            "HM-LC-Bl1-SM:BLIND",
+            "HM-LC-Bl1-FM:BLIND",
+            "HMW-LC-Bl1-DR:BLIND",
+            "HM-LC-Bl1PBU-FM:BLIND"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitWaterSensorService": {
+        "ChannelType": [
+            "HmIP-SWD:WATER_DETECTION_TRANSMITTER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitBSLColorService": {
+        "ChannelType": [
+            "HmIP-BLS:DIMMER_VIRTUAL_RECEIVER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitGarageDoorOpenerService": {
+        "ChannelType": [
+            "HmIP-MOD-TM:DOOR_RECEIVER",
+            "HmIP-MOD-HO:DOOR_RECEIVER"
+        ],
+        "Configuration": [],
+        "description": ""
+    },
+    "HomeMaticHomeKitDoorBellVideoService": {
+        "special": true,
+        "ChannelType": [],
+        "description": "",
+        "Configuration": [
+            {
+                "camera": {
+                    "control": "text",
+                    "hint": "url of your camera image"
+                }
+            },
+            {
+                "address_key_event": {
+                    "control": "text",
+                    "hint": "address of your bell button"
+                }
+            },
+            {
+                "address_unlock_actor": {
+                    "control": "text",
+                    "hint": "address of your door opener"
+                }
+            },
+            {
+                "command_unlock_actor": {
+                    "label": "command opener",
+                    "control": "boolean",
+                    "true": "on",
+                    "false": "off",
+                    "hint": "message to send to your door opener actor"
+                }
+            },
+            {
+                "state_key_event": {
+                    "control": "text"
+                }
+            },
+            {
+                "ontime_unlock_actor": {
+                    "label": "Hold time",
+                    "control": "integer",
+                    "min": 1,
+                    "max": 60,
+                    "hint": "seconds your door opener should be activated"
+                }
+            },
+            {
+                "pir": {
+                    "control": "text"
+                }
+            }
+        ]
+    }
+}

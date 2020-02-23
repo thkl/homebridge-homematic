@@ -1,47 +1,39 @@
 'use strict'
 
-var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
-var util = require('util')
+const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
 
-function HomeMaticHomeKitVariableService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
-  HomeMaticHomeKitVariableService.super_.apply(this, arguments)
-}
+class HomeMaticHomeKitVariableService extends HomeKitGenericService {
+  createDeviceService (Service, Characteristic) {
+    var self = this
+    this.usecache = false
+    this.ignoreWorking = true
 
-util.inherits(HomeMaticHomeKitVariableService, HomeKitGenericService)
+    var vservice = this.getService(Service.Switch)
 
-HomeMaticHomeKitVariableService.prototype.createDeviceService = function (Service, Characteristic) {
-  var that = this
-  this.usecache = false
-  this.ignoreWorking = true
+    this.cc = vservice.getCharacteristic(Characteristic.On)
 
-  var vservice = new Service['Switch'](this.name)
-  this.services.push(vservice)
-
-  var cc = vservice.getCharacteristic(Characteristic.On)
-
-    .on('get', function (callback) {
-      that.remoteGetValue('STATE', function (value) {
-        if (callback) callback(null, value)
-      })
-    })
-
-    .on('set', function (value, callback) {
-      that.log.debug('Variable %s set to %s', that.adress, value)
-      that.command('sendregacommand', '', 'var x=dom.GetObject("' + that.adress + '");if (x) {x.State(' + value + ');}', function () {
-        setTimeout(function () {
-          that.remoteGetValue('STATE')
-        }, 500)
+      .on('get', function (callback) {
+        self.remoteGetValue('STATE', function (value) {
+          if (callback) callback(null, value)
+        })
       })
 
-      callback()
+      .on('set', function (value, callback) {
+        self.log.debug('Variable %s set to %s', self.address, value)
+        self.command('sendregacommand', '', 'var x=dom.GetObject("' + self.address + '");if (x) {x.State(' + value + ');}', function () {
+          setTimeout(function () {
+            self.remoteGetValue('STATE')
+          }, 500)
+        })
+
+        callback()
+      })
+
+    this.cc.eventEnabled = true
+
+    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('STATE'), this, function (newValue) {
+      self.cc.updateValue(self.isTrue(newValue) ? 1 : 0, null)
     })
-
-  this.currentStateCharacteristic['STATE'] = cc
-  cc.eventEnabled = true
-
-  this.addValueMapping('STATE', false, 0)
-  this.addValueMapping('STATE', true, 1)
-  this.remoteGetValue('STATE')
+  }
 }
-
 module.exports = HomeMaticHomeKitVariableService

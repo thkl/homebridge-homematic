@@ -1,149 +1,134 @@
 'use strict'
 
-var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
-var util = require('util')
+const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
 
-function HomeMaticHomeKitIPThermostatService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
-  HomeMaticHomeKitIPThermostatService.super_.apply(this, arguments)
-}
+class HomeMaticHomeKitIPThermostatService extends HomeKitGenericService {
+  createDeviceService (Service, Characteristic) {
+    var self = this
+    this.usecache = false
+    var thermo = this.getService(Service.Thermostat)
+    this.enableLoggingService('thermo')
 
-util.inherits(HomeMaticHomeKitIPThermostatService, HomeKitGenericService)
+    this.currentMode = thermo.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
+      .on('get', function (callback) {
+        self.query('SET_POINT_TEMPERATURE', function (value) {
+          if (value < 6.0) {
+            self.getCurrentStateCharacteristic('CONTROL_MODE').setValue(1, null)
+            if (callback) callback(null, 0)
+          } else {
+            self.getCurrentStateCharacteristic('CONTROL_MODE').setValue(0, null)
+            if (callback) callback(null, 1)
+          }
+        })
+      })
 
-HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function (Service, Characteristic) {
-  var that = this
-  this.usecache = false
-  var thermo = new Service['Thermostat'](this.name)
-  this.services.push(thermo)
-  this.enableLoggingService('thermo')
+    this.currentMode.eventEnabled = true
 
-  var mode = thermo.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
-    .on('get', function (callback) {
-      that.query('SET_POINT_TEMPERATURE', function (value) {
-        if (value < 6.0) {
-          that.getCurrentStateCharacteristic('CONTROL_MODE').setValue(1, null)
-          if (callback) callback(null, 0)
+    this.targetMode = thermo.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+      .on('get', function (callback) {
+        self.query('SET_POINT_TEMPERATURE', function (value) {
+          if (value < 6.0) {
+            if (callback) callback(null, 0)
+          } else {
+            if (callback) callback(null, 1)
+          }
+        })
+      })
+
+      .on('set', function (value, callback) {
+        if (value === 0) {
+          this.command('setrega', 'SET_POINT_TEMPERATURE', 0)
+          this.cleanVirtualDevice('SET_POINT_TEMPERATURE')
         } else {
-          that.getCurrentStateCharacteristic('CONTROL_MODE').setValue(0, null)
-          if (callback) callback(null, 1)
+          this.cleanVirtualDevice('SET_POINT_TEMPERATURE')
         }
-      })
+        callback()
+      }.bind(this))
+
+    this.targetMode.setProps({
+      format: Characteristic.Formats.UINT8,
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.WRITE, Characteristic.Perms.NOTIFY],
+      maxValue: 1,
+      minValue: 0,
+      minStep: 1
     })
 
-  this.setCurrentStateCharacteristic('CONTROL_MODE', mode)
-  mode.eventEnabled = true
+    this.cctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
+      .setProps({ minValue: -100 })
+      .on('get', function (callback) {
+        this.remoteGetValue('ACTUAL_TEMPERATURE', function (value) {
+          if (callback) callback(null, value)
+        })
+      }.bind(this))
 
-  var targetMode = thermo.getCharacteristic(Characteristic.TargetHeatingCoolingState)
-    .on('get', function (callback) {
-      that.query('SET_POINT_TEMPERATURE', function (value) {
-        if (value < 6.0) {
-          if (callback) callback(null, 0)
-        } else {
-          if (callback) callback(null, 1)
-        }
+    this.cctemp.eventEnabled = true
+
+    this.cchum = thermo.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+      .on('get', function (callback) {
+        this.remoteGetValue('HUMIDITY', function (value) {
+          if (callback) callback(null, value)
+        })
+      }.bind(this))
+
+    this.cchum.eventEnabled = true
+
+    this.ttemp = thermo.getCharacteristic(Characteristic.TargetTemperature)
+      .setProps({ minValue: 6.0, maxValue: 30.5, minStep: 0.1 })
+      .on('get', function (callback) {
+        this.query('SET_POINT_TEMPERATURE', function (value) {
+          if (value < 6) {
+            value = 6
+          }
+          if (value > 30) {
+            value = 30.5
+          }
+          if (callback) callback(null, value)
+        })
+      }.bind(this))
+
+      .on('set', function (value, callback) {
+        this.delayed('setrega', 'SET_POINT_TEMPERATURE', value, 500)
+        callback()
+      }.bind(this))
+
+    this.ttemp.eventEnabled = true
+
+    thermo.getCharacteristic(Characteristic.TemperatureDisplayUnits)
+      .on('get', function (callback) {
+        if (callback) callback(null, Characteristic.TemperatureDisplayUnits.CELSIUS)
       })
+
+    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('HUMIDITY'), this, function (newValue) {
+      self.cchum.updateValue(parseFloat(newValue), null)
+      self.addLogEntry({ humidity: parseFloat(newValue) })
     })
 
-    .on('set', function (value, callback) {
-      if (value === 0) {
-        this.command('setrega', 'SET_POINT_TEMPERATURE', 0)
-        this.cleanVirtualDevice('SET_POINT_TEMPERATURE')
-      } else {
-        this.cleanVirtualDevice('SET_POINT_TEMPERATURE')
-      }
-      callback()
-    }.bind(this))
-
-  targetMode.setProps({
-    format: Characteristic.Formats.UINT8,
-    perms: [Characteristic.Perms.READ, Characteristic.Perms.WRITE, Characteristic.Perms.NOTIFY],
-    maxValue: 1,
-    minValue: 0,
-    minStep: 1
-  })
-
-  this.cctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
-    .setProps({ minValue: -100 })
-    .on('get', function (callback) {
-      this.remoteGetValue('ACTUAL_TEMPERATURE', function (value) {
-        if (callback) callback(null, value)
-      })
-    }.bind(this))
-
-  this.cctemp.eventEnabled = true
-
-  this.cchum = thermo.getCharacteristic(Characteristic.CurrentRelativeHumidity)
-    .on('get', function (callback) {
-      this.remoteGetValue('HUMIDITY', function (value) {
-        if (callback) callback(null, value)
-      })
-    }.bind(this))
-
-  this.cchum.eventEnabled = true
-
-  this.ttemp = thermo.getCharacteristic(Characteristic.TargetTemperature)
-    .setProps({ minValue: 6.0, maxValue: 30.5, minStep: 0.1 })
-    .on('get', function (callback) {
-      this.query('SET_POINT_TEMPERATURE', function (value) {
-        if (value < 6) {
-          value = 6
-        }
-        if (value > 30) {
-          value = 30.5
-        }
-        if (callback) callback(null, value)
-      })
-    }.bind(this))
-
-    .on('set', function (value, callback) {
-      this.delayed('setrega', 'SET_POINT_TEMPERATURE', value, 500)
-      callback()
-    }.bind(this))
-
-  this.ttemp.eventEnabled = true
-
-  thermo.getCharacteristic(Characteristic.TemperatureDisplayUnits)
-    .on('get', function (callback) {
-      if (callback) callback(null, Characteristic.TemperatureDisplayUnits.CELSIUS)
+    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('ACTUAL_TEMPERATURE'), this, function (newValue) {
+      self.cctemp.updateValue(parseFloat(newValue), null)
+      self.addLogEntry({ currentTemp: parseFloat(newValue) })
     })
 
-  this.remoteGetValue('SET_POINT_TEMPERATURE')
-  this.queryData()
-}
+    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('SET_POINT_TEMPERATURE'), this, function (newValue) {
+      self.ttemp.updateValue(parseFloat(newValue), null)
+      self.addLogEntry({ setTemp: parseFloat(newValue) })
+    })
 
-HomeMaticHomeKitIPThermostatService.prototype.queryData = function () {
-  var that = this
-  this.query('HUMIDITY', function (value) {
-    that.cchum.updateValue(parseFloat(value), null)
-    that.addLogEntry({ humidity: parseFloat(value) })
-  })
-
-  this.query('ACTUAL_TEMPERATURE', function (value) {
-    that.cctemp.updateValue(parseFloat(value), null)
-    that.addLogEntry({ currentTemp: parseFloat(value) })
-  })
-
-  // create timer to query device every 10 minutes
-  this.refreshTimer = setTimeout(function () { that.queryData() }, 10 * 60 * 1000)
-}
-
-HomeMaticHomeKitIPThermostatService.prototype.shutdown = function () {
-  clearTimeout(this.refreshTimer)
-}
-
-HomeMaticHomeKitIPThermostatService.prototype.datapointEvent = function (dp, newValue) {
-  if (this.isDataPointEvent(dp, 'ACTUAL_TEMPERATURE')) {
-    this.cctemp.updateValue(parseFloat(newValue), null)
-    this.addLogEntry({ currentTemp: parseFloat(newValue) })
+    this.queryData()
   }
 
-  if (this.isDataPointEvent(dp, 'HUMIDITY')) {
-    this.cchum.updateValue(parseFloat(newValue), null)
-    this.addLogEntry({ humidity: parseFloat(newValue) })
+  queryData () {
+    var self = this
+    this.removeCache('ACTUAL_TEMPERATURE')
+    this.removeCache('HUMIDITY')
+    this.remoteGetValue('HUMIDITY')
+    this.remoteGetValue('ACTUAL_TEMPERATURE')
+    // create timer to query device every 10 minutes
+    this.refreshTimer = setTimeout(function () { self.queryData() }, 10 * 60 * 1000)
   }
 
-  if (this.isDataPointEvent(dp, 'SET_POINT_TEMPERATURE')) {
-    this.ttemp.updateValue(parseFloat(newValue), null)
-    this.addLogEntry({ setTemp: parseFloat(newValue) })
+  shutdown () {
+    super.shutdown()
+    clearTimeout(this.refreshTimer)
   }
 }
 

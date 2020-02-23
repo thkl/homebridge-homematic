@@ -1,35 +1,26 @@
 'use strict'
 
-var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
-var util = require('util')
+const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
 
-function HomeMaticHomeKitLuxMeterService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
-  HomeMaticHomeKitLuxMeterService.super_.apply(this, arguments)
-}
+class HomeMaticHomeKitLuxMeterService extends HomeKitGenericService {
+  createDeviceService (Service, Characteristic) {
+    var self = this
 
-util.inherits(HomeMaticHomeKitLuxMeterService, HomeKitGenericService)
+    var lightSensor = this.getService(Service.LightSensor)
 
-HomeMaticHomeKitLuxMeterService.prototype.createDeviceService = function (Service, Characteristic) {
-  var that = this
-  
-  var lightSensor = new Service.LightSensor(this.name)
-  this.services.push(lightSensor)
-
-  this.cbright = lightSensor.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
-    .on('get', function (callback) {
-      that.query('LUX', function (value) {
-        if (callback) callback(null, value)
+    this.cbright = lightSensor.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
+      .on('get', function (callback) {
+        self.query('LUX', function (value) {
+          if (callback) callback(null, value)
+        })
       })
-    })
-    
-  this.setCurrentStateCharacteristic('LUX', this.cbright)
-  this.cbright.eventEnabled = true
-  
-}
 
-HomeMaticHomeKitLuxMeterService.prototype.datapointEvent = function (dp, newValue) {
-  if (this.isDataPointEvent(dp, 'LUX')) {
-    this.cbright.updateValue(parseFloat(newValue), null)
+    this.cbright.eventEnabled = true
+
+    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('LUX'), this, function (newValue) {
+      self.log.debug('[LMS] LUX event %s', newValue)
+      self.cbright.updateValue(parseFloat(newValue), null)
+    })
   }
 }
 

@@ -16,12 +16,16 @@ describe('Homematic Plugin (index)', function () {
   let data = fs.readFileSync(datapath).toString()
   let that = this
   var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
-  var platform = new homebridgeMock.PlatformType(log, config)
+  var platform = new homebridgeMock.PlatformType(log, config, homebridgeMock)
   eve = new EveHomeKitTypes(platform)
 
   before(function () {
     log.debug('Init Platform with Energy Counter')
-    platform.accessories(function (acc) {
+    platform.homebridge.setCCUDummyValue('BidCos-RF.ADR1234567890:2.VOLTAGE', 231)
+    platform.homebridge.setCCUDummyValue('BidCos-RF.ADR1234567890:2.CURRENT', 100)
+    platform.homebridge.setCCUDummyValue('BidCos-RF.ADR1234567890:2.POWER', 200)
+    platform.homebridge.fireHomeBridgeEvent('didFinishLaunching')
+    platform.homebridge.accessories(function (acc) {
       that.accessories = acc
     })
   })
@@ -29,7 +33,7 @@ describe('Homematic Plugin (index)', function () {
   after(function () {
     log.debug('Shutdown Platform')
     that.accessories.map(ac => {
-      ac.shutdown()
+      ac.appliance.shutdown()
     })
   })
 
@@ -40,6 +44,33 @@ describe('Homematic Plugin (index)', function () {
       done()
     })
 
+    it('initial test', function (done) {
+      // check
+      that.accessories.map(ac => {
+        let s = ac.getService(eve.Service.PowerMeterService)
+        assert.ok(s, 'Service.PowerMeterService not found in Energy Counter %s', ac.name)
+        let cp = s.getCharacteristic(eve.Characteristic.ElectricPower)
+        assert.ok(cp, 'Characteristic.ElectricPower not found in Energy Counter %s', ac.name)
+        cp.getValue(function (context, value) {
+          assert.strict.equal(value, 200, 'Power is ' + value + ' not 200')
+        })
+
+        let cc = s.getCharacteristic(eve.Characteristic.ElectricCurrent)
+        assert.ok(cc, 'Characteristic.ElectricCurrent not found in Energy Counter %s', ac.name)
+        cc.getValue(function (context, value) {
+          // Note there is a internal recalculation to amepere ccu sends milliamps
+          assert.strict.equal(value, 0.1, 'Current is ' + value + ' not 0.5A')
+        })
+
+        let cv = s.getCharacteristic(eve.Characteristic.Voltage)
+        assert.ok(cv, 'Characteristic.Voltage not found in Energy Counter %s', ac.name)
+        cv.getValue(function (context, value) {
+          assert.strict.equal(value, 231, 'Voltage is ' + value + ' not 230')
+        })
+      })
+      done()
+    })
+
     it('test set voltage to 230 v, current to 500 mA, power to 230 w', function (done) {
       platform.xmlrpc.event(['BidCos-RF', 'ADR1234567890:2', 'VOLTAGE', 230])
       platform.xmlrpc.event(['BidCos-RF', 'ADR1234567890:2', 'CURRENT', 500])
@@ -47,7 +78,7 @@ describe('Homematic Plugin (index)', function () {
 
       // check
       that.accessories.map(ac => {
-        let s = ac.get_Service(eve.Service.PowerMeterService)
+        let s = ac.getService(eve.Service.PowerMeterService)
         assert.ok(s, 'Service.PowerMeterService not found in Energy Counter %s', ac.name)
         let cp = s.getCharacteristic(eve.Characteristic.ElectricPower)
         assert.ok(cp, 'Characteristic.ElectricPower not found in Energy Counter %s', ac.name)

@@ -2,115 +2,157 @@
 
 const fs = require('fs')
 const path = require('path')
-var moment = require('moment')
-var os = require('os')
+const moment = require('moment')
+const os = require('os')
+const HomeMaticAddress = require(path.join(__dirname, '..', 'HomeMaticAddress.js'))
+// Switch to ES6 Style
+class HomeKitGenericService {
+  constructor (accessory, log, platform, id, name, type, address, special, cfg, Service, Characteristic, deviceType) {
+    log.debug('[Generic] constructor for %s with type %s', address, deviceType)
+    this.accessory = accessory
+    this.name = name
+    this.displayName = name
+    this.type = type
+    this.deviceType = deviceType
 
-function HomeKitGenericService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic, deviceType) {
-  this.name = name
-  this.displayName = name
-  this.type = type
-  this.deviceType = deviceType
-
-  if (adress === undefined) {
-    this.log.warn('Device Address for %s is undefined this will end up in a desaster', name)
-  }
-
-  this.adress = adress
-  this.deviceAdress = undefined
-  this.log = log
-
-  // Build Deviceadress
-  let parts = this.adress.split('.')
-  if (parts.length === 2) {
-    let serial = parts[1].split(':')
-    if (serial.length > 0) {
-      this.deviceAdress = parts[0] + '.' + serial[0]
-      this.channelnumber = serial[1]
+    if (address === undefined) {
+      log.warn('Device Address for %s is undefined this will end up in a desaster', name)
     }
-  }
 
-  this.platform = platform
+    this.address = address
+    this.deviceaddress = undefined
+    this.log = log
 
-  /** deprecate this */
-  this.state = []
+    // Build Deviceaddress
 
-  this.ccuCache = this.platform.cache
-
-  this.eventupdate = false
-  this.special = special
-  this.currentStateCharacteristic = []
-  this.datapointMappings = []
-  this.timer = []
-  this.services = []
-  this.usecache = true
-  this.cadress = undefined
-  this.cfg = cfg
-  this.isWorking = false
-  this.ignoreWorking = false // ignores the working=true flag and sets the value every time an event happends
-  this.myDataPointName = undefined
-  this.i_characteristic = {}
-  this.intf = cfg['interface']
-  this.datapointvaluefactors = {}
-  this.readOnly = false
-  this.lowBat = false
-  this.lowBatCharacteristic = undefined
-  this.accessoryName = this.name
-  this.tampered = false
-  this.tamperedCharacteristic = undefined
-  this.delayOnSet = 0
-  this.runsInTestMode = (typeof global.it === 'function')
-  this.persistentStates = {}
-  // will be false in Switches or so which are only one channel devices
-  // will fix https://github.com/thkl/homebridge-homematic/issues/485
-  this.isMultiChannel = true
-  var that = this
-
-  if (that.adress.indexOf('CUxD.') > -1) {
-    this.usecache = false
-  }
-
-  if ((cfg !== undefined) && (cfg['combine'] !== undefined)) {
-    var src = cfg['combine']['source']
-    var trg = cfg['combine']['target']
-    if (this.adress.indexOf(src) > -1) {
-      this.cadress = this.adress.replace(src, trg)
-    }
-  }
-
-  var informationService = new Service.AccessoryInformation()
-
-  informationService
-    .setCharacteristic(Characteristic.Manufacturer, 'EQ-3')
-    .setCharacteristic(Characteristic.Model, this.type)
-    .setCharacteristic(Characteristic.Name, this.name)
-    .setCharacteristic(Characteristic.SerialNumber, this.adress)
-  this.services.push(informationService)
-
-  if (this.propagateServices !== undefined) {
-    this.propagateServices(platform, Service, Characteristic)
-  }
-
-  // init old storage data
-  if (this.deviceAdress !== undefined) {
-    this.persistFile = path.join(this.platform.localPath, this.deviceAdress) + '.pstor'
-    this.log.debug('[Generic] Pstore for %s is %s', this.deviceAdress, this.persistFile)
-    if (fs.existsSync(this.persistFile)) {
-      try {
-        var buffer = fs.readFileSync(this.persistFile)
-        this.persistentStates = JSON.parse(buffer.toString())
-        this.log.debug('[Generic] loading previous data done %s', JSON.stringify(this.persistentStates))
-      } catch (e) {
-        this.log.error(e)
-      }
+    let rgx = /([a-zA-Z0-9-]{1,}).([a-zA-Z0-9-]{1,}):([0-9]{1,})/g
+    let parts = rgx.exec(address)
+    if ((parts) && (parts.length > 3)) {
+      this.intf = parts[1]
+      this.serial = parts[2]
+      this.channelnumber = parts[3]
+      this.deviceaddress = this.intf + '.' + this.serial
     } else {
-      this.log.debug('[Generic] File doesnt exists. Will create a new one on the first etry')
+      this.log.warn('Unable to parse device address %s so nothing will work for %s', address, name)
+    }
+
+    this.platform = platform
+    this.ccuManager = platform.homematicCCU
+    /** deprecate this */
+    this.state = []
+    this.eventupdate = false
+    this.special = special
+    this.currentStateCharacteristic = []
+    this.datapointMappings = []
+    this.homeMaticDatapoints = []
+    this.timer = []
+    this.services = []
+    this.usecache = true
+    this.caddress = undefined
+    this.cfg = cfg
+    this.isWorking = false
+    this.ignoreWorking = false // ignores the working=true flag and sets the value every time an event happends
+    this.myDataPointName = undefined
+    this.i_characteristic = {}
+    this.intf = cfg['interface']
+    this.datapointvaluefactors = {}
+    this.readOnly = false
+    this.lowBat = false
+    this.lowBatCharacteristic = undefined
+    this.accessoryName = this.name
+    this.tampered = false
+    this.tamperedCharacteristic = undefined
+    this.delayOnSet = 0
+    this.runsInTestMode = (typeof global.it === 'function')
+    this.persistentStates = {}
+    // will be false in Switches or so which are only one channel devices
+    // will fix https://github.com/thkl/homebridge-homematic/issues/485
+    this.isMultiChannel = true
+    var self = this
+
+    if (self.address.indexOf('CUxD.') > -1) {
+      this.usecache = false
+    }
+
+    if ((cfg !== undefined) && (cfg['combine'] !== undefined)) {
+      var src = cfg['combine']['source']
+      var trg = cfg['combine']['target']
+      if (this.address.indexOf(src) > -1) {
+        this.caddress = this.address.replace(src, trg)
+      }
+    }
+
+    this.informationService =
+      this.accessory.getService(Service.AccessoryInformation)
+
+    this.informationService
+      .setCharacteristic(Characteristic.Manufacturer, 'EQ-3')
+      .setCharacteristic(Characteristic.Model, this.type)
+      .setCharacteristic(Characteristic.Name, this.name)
+      .setCharacteristic(Characteristic.SerialNumber, this.address)
+
+    if (this.propagateServices !== undefined) {
+      this.propagateServices(platform, Service, Characteristic)
+    }
+
+    // init old storage data
+    if (this.deviceaddress !== undefined) {
+      this.persistFile = path.join(this.platform.localPath, this.deviceaddress) + '.pstor'
+      this.log.debug('[Generic] Pstore for %s is %s', this.deviceaddress, this.persistFile)
+      if (fs.existsSync(this.persistFile)) {
+        try {
+          var buffer = fs.readFileSync(this.persistFile)
+          this.persistentStates = JSON.parse(buffer.toString())
+        } catch (e) {
+          this.log.error(e)
+        }
+      } else {
+        this.log.debug('[Generic] File doesnt exists. Will create a new one on the first etry')
+      }
+    }
+
+    this.accessory.on('identify', this.callbackify(this.identify))
+    this.createDeviceService(Service, Characteristic)
+    this.serviceDidCreated()
+  }
+
+  getService (serviceType) {
+    if (this.accessory.getService(serviceType)) {
+      return this.accessory.getService(serviceType)
+    } else {
+      this.log.debug('[Generic] addService')
+      let result = this.accessory.addService(serviceType, this.name)
+      if (!result) {
+        this.log.warn('[Generic] unable to add service %s to accessory %s', serviceType, this.accessory.name)
+      }
+      return result
     }
   }
 
-  this.createDeviceService(Service, Characteristic)
-}
+  getCharacteristic (service, characteristicType) {
+    var result = service.getCharacteristic(characteristicType)
+    if (!result) {
+      result = service.addOptionalCharacteristic(characteristicType)
+    }
+    return result
+  }
 
-HomeKitGenericService.prototype = {
+  callbackify (fn) {
+    let self = this
+    return async (value, callback) => {
+      try {
+        let data = await fn.bind(this)(value)
+        callback(null, data)
+      } catch (err) {
+        self.log.error(err)
+        callback(err)
+      }
+    }
+  }
+
+  setCCUManager (ccuManager) {
+    this.ccuManager = ccuManager
+  }
 
   /**
      * link a datapoint to a characteristic
@@ -118,24 +160,24 @@ HomeKitGenericService.prototype = {
      * @param  {[type]} aCharacteristic Characteristic to link
      * @return {[type]}
      */
-  setCurrentStateCharacteristic: function (key, aCharacteristic) {
+  setCurrentStateCharacteristic (key, aCharacteristic) {
     if (key.indexOf('.') === -1) {
       key = this.channelnumber + '.' + key
     }
     this.currentStateCharacteristic[key] = aCharacteristic
-  },
+  }
 
   /**
      * returns a characteristic for a linked datapoint
      * @param  {[type]} key Datapointname or channeladdress
      * @return {[type]}     linked characteristic
      */
-  getCurrentStateCharacteristic: function (key) {
+  getCurrentStateCharacteristic (key) {
     if (key.indexOf('.') === -1) {
       key = this.channelnumber + '.' + key
     }
     return this.currentStateCharacteristic[key]
-  },
+  }
 
   /**
      * Check if the Event was triggerd by a Datapointname
@@ -143,35 +185,40 @@ HomeKitGenericService.prototype = {
      * @param  {[type]} dp_test Datapoint name (channel address will be autocompleted)
      * @return {[type]}         true if the eventkey matches the datapoint name
      */
-  isDataPointEvent: function (dPi, dPTest) {
-    if (dPi.indexOf('.') === -1) {
-      dPi = this.channelnumber + '.' + dPi
+  isDataPointEvent (dPi, dPTest) {
+    let dpHmTest1 = dPi
+    let dpHmTest2 = dPTest
+
+    if (typeof dPi === 'string') {
+      this.log.debug('[Generic] create new HMAddress from %s', dPi)
+      dpHmTest1 = this.transformDatapoint(dPi)
     }
 
-    if (dPTest.indexOf('.') === -1) {
-      dPTest = this.channelnumber + '.' + dPTest
+    if (typeof dPTest === 'string') {
+      this.log.debug('[Generic] create new HMAddress from %s', dPTest)
+      dpHmTest2 = this.transformDatapoint(dPTest)
     }
-    this.log.debug('[Generic] isDataPointEvent check %s vs %s for channel', dPi, dPTest, this.channelnumber)
-    let result = (dPi === dPTest)
-    return result
-  },
+
+    this.log.debug('[Generic] isDataPointEvent check %s vs %s', dpHmTest1.address(), dpHmTest2.address())
+    return dpHmTest1.match(dpHmTest2)
+  }
 
   /**
      * checks if a array contains a undefined element
      * @param  {[type]} array
      * @return {[type]}       returns true if all elements are defined
      */
-  haz: function (array) {
+  haz (array) {
     var result = true
     if (array) {
-      array.some(function (element) {
+      array.some(element => {
         if (element === undefined) {
           result = false
         }
       })
     }
     return result
-  },
+  }
 
   /**
      * Returns a stored value for a key specified for the current channel
@@ -180,13 +227,13 @@ HomeKitGenericService.prototype = {
      * @param  {[type]} defaultValue value to return if there is no previously saved value
      * @return {[type]}              the value
      */
-  getPersistentState: function (key, defaultValue) {
+  getPersistentState (key, defaultValue) {
     if ((this.persistentStates !== undefined) && (this.persistentStates[key] !== undefined)) {
       return this.persistentStates[key]
     } else {
       return defaultValue
     }
-  },
+  }
 
   /**
      * saves a value for a key persistent to disc
@@ -194,7 +241,7 @@ HomeKitGenericService.prototype = {
      * @param  {[type]} value the value
      * @return {[type]}
      */
-  setPersistentState: function (key, value) {
+  setPersistentState (key, value) {
     if (this.persistentStates === undefined) {
       this.log.debug('[Generic] new store')
       this.persistentStates = {}
@@ -209,12 +256,12 @@ HomeKitGenericService.prototype = {
         // just ignore
       }
     }
-  },
+  }
 
   /**
-                                                                                                                                                                                                                                                        add FakeGato History object only if not in a testcase
-                                                                                                                                                                                                                                                        **/
-  enableLoggingService: function (type, disableTimer) {
+  * add FakeGato History object only if not in a testcase
+  **/
+  enableLoggingService (type, disableTimer) {
     if (this.runsInTestMode === true) {
       this.log.debug('[Generic] Skip Loging Service for %s because of testmode', this.displayName)
     } else {
@@ -224,7 +271,7 @@ HomeKitGenericService.prototype = {
       var FakeGatoHistoryService = require('fakegato-history')(this.platform.homebridge)
       this.log.debug('[Generic] Adding Log Service for %s with type %s', this.displayName, type)
       var hostname = os.hostname()
-      let filename = hostname + '_' + this.adress + '_persist.json'
+      let filename = hostname + '_' + this.address + '_persist.json'
       this.loggingService = new FakeGatoHistoryService(type, this, {
         storage: 'fs',
         filename: filename,
@@ -233,41 +280,41 @@ HomeKitGenericService.prototype = {
       })
       this.services.push(this.loggingService)
     }
-  },
+  }
 
   /**
      * adds a characteristic to the current logging service
      * @param  {[type]} aCharacteristic [description]
      * @return {[type]}                 [description]
      */
-  addLoggingCharacteristic: function (aCharacteristic) {
+  addLoggingCharacteristic (aCharacteristic) {
     if ((this.runsInTestMode === true) || (this.loggingService === undefined)) {
       this.log.debug('[Generic] adding Characteristic skipped for %s because of testmode ', this.displayName)
     } else {
       this.loggingService.addOptionalCharacteristic(aCharacteristic)
     }
-  },
+  }
 
   /**
      * returns a characteristic from the current logging service
      * @param  {[type]} aCharacteristic [description]
      * @return {[type]}                 [description]
      */
-  getLoggingCharacteristic: function (aCharacteristic) {
+  getLoggingCharacteristic (aCharacteristic) {
     if ((this.runsInTestMode === true) || (this.loggingService === undefined)) {
       this.log.debug('[Generic] get Characteristic not available for %s because of testmode', this.displayName)
       return undefined
     } else {
       return this.loggingService.getCharacteristic(aCharacteristic)
     }
-  },
+  }
 
   /**
      * adds a log entry
      * @param  {[type]} data {key:value}
      * @return {[type]}      [description]
      */
-  addLogEntry: function (data) {
+  addLogEntry (data) {
     // check if loggin is enabled
     if ((this.loggingService !== undefined) && (data !== undefined)) {
       data.time = moment().unix()
@@ -275,21 +322,23 @@ HomeKitGenericService.prototype = {
       var logChanges = true
       // there is a previous logentry, let's compare...
       if (this.lastLogEntry !== undefined) {
+        this.log.debug('[Generic] addLogEntry lastLogEntry is  available')
         logChanges = false
         // compare data
-        var that = this
-        Object.keys(data).forEach(function (key) {
+        var self = this
+        Object.keys(data).forEach(key => {
           if (key === 'time') {
             return
           }
           // log changes if values differ
-          if (data[key] !== that.lastLogEntry[key]) {
+          if (data[key] !== self.lastLogEntry[key]) {
+            self.log.debug('[Generic] lastLogEntry is different')
             logChanges = true
           }
         })
         // log changes if last log entry is older than 7 minutes,
         // homematic usually sends updates evry 120-180 seconds
-        if ((data.time - that.lastLogEntry.time) > 7 * 60) {
+        if ((data.time - self.lastLogEntry.time) > 7 * 60) {
           logChanges = true
         }
       }
@@ -298,9 +347,11 @@ HomeKitGenericService.prototype = {
         this.log.debug('[Generic] Saving log data for %s: %s', this.displayName, JSON.stringify(data))
         this.loggingService.addEntry(data)
         this.lastLogEntry = data
+      } else {
+        this.log.debug('[Generic] log did not change %s', this.displayName)
       }
     }
-  },
+  }
 
   /**
      * returns a class configuration value by a key
@@ -308,7 +359,7 @@ HomeKitGenericService.prototype = {
      * @param  {[type]} defaultValue [description]
      * @return {[type]}              [description]
      */
-  getClazzConfigValue: function (key, defaultValue) {
+  getClazzConfigValue (key, defaultValue) {
     this.log.debug('[Generic] Get Config value for %s', key)
     this.log.debug('[Generic] Config is %s', JSON.stringify(this.cfg))
     var result = defaultValue
@@ -318,7 +369,7 @@ HomeKitGenericService.prototype = {
       }
     }
     return result
-  },
+  }
 
   /**
      * adds the low bat characteristic to the current service. this will also auto enable event listening for LOWBAT Events
@@ -326,7 +377,7 @@ HomeKitGenericService.prototype = {
      * @param  {[type]} Characteristic [description]
      * @return {[type]}                [description]
      */
-  addLowBatCharacteristic: function (rootService, Characteristic) {
+  addLowBatCharacteristic (rootService, Characteristic) {
     var bat = rootService.getCharacteristic(Characteristic.StatusLowBattery)
 
     if (bat !== undefined) {
@@ -337,16 +388,16 @@ HomeKitGenericService.prototype = {
       rootService.addOptionalCharacteristic(Characteristic.StatusLowBattery)
       this.lowBatCharacteristic = rootService.getCharacteristic(Characteristic.StatusLowBattery)
     }
-  },
+  }
 
   /**
-     * adds the sabotage characteristic to the current service. this will also auto enable evnent listening for .SABOTAGE and .ERROR_SABOTAGE
+     * adds the sabotage characteristic to the current service. this will also auto enable event listening for .SABOTAGE and .ERROR_SABOTAGE
      * @param  {[type]} rootService    [description]
      * @param  {[type]} Characteristic [description]
      * @param  {[type]} address        [description]
      * @return {[type]}                [description]
      */
-  addTamperedCharacteristic: function (rootService, Characteristic, address) {
+  addTamperedCharacteristic (rootService, Characteristic, address) {
     var tampered = rootService.getCharacteristic(Characteristic.StatusTampered)
 
     if (tampered !== undefined) {
@@ -358,98 +409,98 @@ HomeKitGenericService.prototype = {
       this.tamperedCharacteristic = rootService.getCharacteristic(Characteristic.StatusTampered)
     }
     if (address !== undefined) {
-      this.platform.registerAdressForEventProcessingAtAccessory(this.deviceAdress + ':' + address, this)
+      this.platform.registeraddressForEventProcessingAtAccessory(this.deviceaddress + ':' + address, this)
     }
-  },
+  }
 
   /**
      * set the current Service to readonly
      * @param  {[type]} readOnly [description]
      * @return {[type]}          [description]
      */
-  setReadOnly: function (readOnly) {
+  setReadOnly (readOnly) {
     this.readOnly = readOnly
     if (readOnly === true) {
       this.log.debug('[Generic] setReadOnly %s to read only', this.name)
     }
-  },
+  }
 
-  addValueMapping: function (dp, value, mappedvalue) {
+  addValueMapping (dp, value, mappedvalue) {
     if (this.datapointMappings[dp] === undefined) {
       this.datapointMappings[dp] = []
     }
     this.datapointMappings[dp][value] = mappedvalue
-  },
+  }
 
-  addValueFactor: function (dp, factor) {
+  addValueFactor (dp, factor) {
     this.datapointvaluefactors[dp] = factor
-  },
+  }
 
   // Return current States
-  query: function (dp, callback) {
-    var that = this
+  query (dp, callback) {
+    var self = this
     this.log.debug('[Generic] query %s', dp)
-    if (that.usecache === false) {
-      that.remoteGetValue(dp, function (value) {
+    if (self.usecache === false) {
+      self.remoteGetValue(dp, value => {
         if (callback !== undefined) {
           callback(value)
         }
       })
     } else
 
-    if (that.usecache === true) {
-      let cvalue = that.getCache(dp)
+    if (self.usecache === true) {
+      let cvalue = self.getCache(dp)
       if (cvalue) {
         if (callback) {
           callback(cvalue)
         }
       } else {
-        that.remoteGetValue(dp, function (value) {
-          that.setCache(dp, value)
+        self.remoteGetValue(dp, value => {
+          self.setCache(dp, value)
           if (callback !== undefined) {
             callback(value)
           }
         })
       }
     }
-  },
+  }
 
-  setCache: function (dp, value) {
+  setCache (dp, value) {
     let tp = this.transformDatapoint(dp)
-    this.ccuCache.doCache(tp[0] + '.' + tp[1], value)
-  },
+    this.ccuManager.doCache(tp.address(), value)
+  }
 
-  getCache: function (dp) {
+  getCache (dp) {
     let tp = this.transformDatapoint(dp)
-    return this.ccuCache.getValue(tp[0] + '.' + tp[1])
-  },
+    return this.ccuManager.getCache(tp.address())
+  }
 
-  removeCache: function (dp) {
+  removeCache (dp) {
     let tp = this.transformDatapoint(dp)
-    this.ccuCache.deleteValue(tp[0] + '.' + tp[1])
-  },
+    this.ccuManager.removeCache(tp.address())
+  }
 
-  cleanVirtualDevice: function (dp) {
-    if (this.adress.indexOf('VirtualDevices.') > -1) {
+  cleanVirtualDevice (dp) {
+    if (this.address.indexOf('VirtualDevices.') > -1) {
       let tp = this.transformDatapoint(dp)
       // Remove cached Date from Virtual Devices cause the do not update over rpc
-      this.ccuCache.deleteValue(tp[0] + '.' + tp[1])
+      this.removeCache(tp.address())
     }
-    this.remoteGetValue(dp, function (value) {
+    this.remoteGetValue(dp, value => {
 
     })
-  },
+  }
 
-  dpvalue: function (dp, fallback) {
+  dpvalue (dp, fallback) {
     let cvalue = this.getCache(dp)
     if (cvalue !== undefined) {
       return (cvalue)
     } else {
       return fallback
     }
-  },
+  }
 
-  convertValue: function (dp, value) {
+  convertValue (dp, value) {
     var result = value
     var char = this.currentStateCharacteristic[dp]
     if (char !== undefined) {
@@ -502,120 +553,115 @@ HomeKitGenericService.prototype = {
     }
     this.log.debug('[Generic] Convert %s for %s is %s', value, dp, result)
     return result
-  },
+  }
 
-  remoteSetDatapointValue: function (addressdatapoint, value, callback) {
-    let parts = addressdatapoint.split('.')
-    if (parts.length !== 3) {
+  remoteSetDatapointValue (addressdatapoint, value, callback) {
+    let tp = this.transformDatapoint(addressdatapoint)
+    if (tp.isValid()) {
+      this.log.debug('[Generic] remoteSetDatapointValue I:%s|D:%s|C:%s|:D%s  Value %s', tp.intf, tp.serial, tp.channelId, tp.dpName, value)
+      this.ccuManager.setValue(tp, value)
+      if (callback) {
+        callback()
+      }
+    } else {
+      this.log.error('[Generic] %s : Syntax error in device address', addressdatapoint)
+      if (callback) {
+        callback(undefined)
+      }
+    }
+  }
+
+  remoteGetDataPointValue (addressdatapoint, callback) {
+    var self = this
+    let tp = this.transformDatapoint(addressdatapoint)
+    if (tp.isValid()) {
+      // Kill cached value
+      self.removeCache(addressdatapoint)
+      self.ccuManager.getValue(parts[0], parts[0] + '.' + parts[1], parts[2], newValue => {
+        if ((newValue !== undefined) && (newValue !== null)) {
+
+        } else {
+          // newValue = 0;
+          newValue = self.convertValue(parts[2], 0)
+        }
+
+        if (callback !== undefined) {
+          callback(newValue)
+        }
+      })
+    } else {
       this.log.error('[Generic] %s : Syntax error in device address', addressdatapoint)
       callback(undefined)
-      return
     }
-    this.platform.setValue(parts[0], parts[1], parts[2], value)
-  },
+  }
 
-  remoteGetDataPointValue: function (addressdatapoint, callback) {
-    var that = this
-    let parts = addressdatapoint.split('.')
-    if (parts.length !== 3) {
-      this.log.error('[Generic] %s : Syntax error in device address', addressdatapoint)
-      callback(undefined)
-      return
-    }
-    // Kill cached value
-    that.removeCache(addressdatapoint)
-    that.platform.getValue(parts[0], parts[0] + '.' + parts[1], parts[2], function (newValue) {
-      if ((newValue !== undefined) && (newValue !== null)) {
-
-      } else {
-        // newValue = 0;
-        newValue = that.convertValue(parts[2], 0)
-      }
-
-      if (callback !== undefined) {
-        callback(newValue)
-      }
-    })
-  },
-
-  remoteGetDeviceValue: function (address, dp, callback) {
-    var that = this
+  remoteGetDeviceValue (address, dp, callback) {
+    var self = this
     var interf = this.intf
-    that.platform.getValue(interf, address, dp, function (newValue) {
+    self.ccuManager.getValue(interf, address, dp, newValue => {
       if ((newValue !== undefined) && (newValue !== null)) {
-        that.eventupdate = true
+        self.eventupdate = true
         // var ow = newValue;
-        newValue = that.convertValue(dp, newValue)
-        that.cache(this.adress + '.' + dp, newValue)
-        that.eventupdate = false
+        newValue = self.convertValue(dp, newValue)
+        self.cache(this.address + '.' + dp, newValue)
+        self.eventupdate = false
       } else {
         // newValue = 0;
-        newValue = that.convertValue(dp, 0)
+        newValue = self.convertValue(dp, 0)
       }
 
       if (callback !== undefined) {
         callback(newValue)
       }
     })
-  },
+  }
 
-  remoteGetValue: function (dp, callback) {
-    var that = this
+  remoteGetValue (dp, callback) {
+    var self = this
+    this.log.debug('[Generic] remoteGetValue %s', dp)
     var tp = this.transformDatapoint(dp)
-    var interf = this.intf
-    this.log.debug('[Generic] remoteGetValue Intf:%s, Adre:%s, Dp:%s', interf, tp[0], tp[1])
-    let dpadr = tp[0] + '.' + tp[1]
-    that.platform.getValue(interf, tp[0], tp[1], function (newValue) {
-      that.log.debug('[Generic] got value for %s (Value:%s)', dpadr, newValue)
-      if ((newValue !== undefined) && (newValue !== null)) {
-        if (tp[1] === 'LEVEL') {
-          newValue = newValue * 100
-        }
+    this.log.debug('[Generic] datapoint %s', tp.dpName)
+    this.log.debug('[Generic] remoteGetValue Intf:%s, Adre:%s, ChI:%s, Dp:%s', tp.intf, tp.serial, tp.channelId, tp.dpName)
 
-        if ((tp[1] === 'COLOR') && (that.type === 'RGBW_COLOR')) {
-          newValue = Math.round((newValue / 199) * 360)
-        }
-
-        if (tp[1] === 'BRIGHTNESS') {
-          newValue = Math.pow(10, (newValue / 51))
-        }
-
-        that.eventupdate = true
-        // var ow = newValue;
-        newValue = that.convertValue(dp, newValue)
-        that.log.debug('[Generic] will cache %s for %s', newValue, dpadr)
-        that.cache(dpadr, newValue)
-        that.eventupdate = false
-      } else {
-        // newValue = 0;
-        newValue = that.convertValue(dp, 0)
-      }
-
+    self.ccuManager.getValue(tp, newValue => {
+      self.log.debug('[Generic] got value for %s (Value:%s)', tp.address(), newValue)
       if (callback !== undefined) {
-        that.log.debug('[Generic] run callback with %s', newValue)
+        // we have a callback so we have to convert some stuff here cache the value
+        // and run the callback
+        if ((newValue !== undefined) && (newValue !== null)) {
+          var processedValue = newValue
 
+          if ((tp[1] === 'COLOR') && (self.type === 'RGBW_COLOR')) {
+            processedValue = Math.round((newValue / 199) * 360)
+          }
+
+          if (tp[1] === 'BRIGHTNESS') {
+            processedValue = Math.pow(10, (newValue / 51))
+          }
+
+          self.eventupdate = true
+          // var ow = newValue;
+          processedValue = self.convertValue(dp, processedValue)
+          self.log.debug('[Generic] will cache %s for %s', processedValue, tp.address())
+          self.cache(tp.address(), processedValue)
+          self.eventupdate = false
+        } else {
+          // newValue = 0;
+          processedValue = self.convertValue(dp, 0)
+        }
+        self.log.debug('[Generic] run callback with %s', newValue)
         callback(newValue)
       } else {
-        let parts = dp.split(':')
-        if (parts.length > 1) {
-          dp = parts[1]
-        }
-        let address = dpadr
-        that.log.debug('[Generic] remoteGetValue response; empty callback route via event for %s', address)
+        // otherwise we will fire datapoint change event
+        // the conversion will be done there
+        self.log.debug('[Generic] remoteGetValue response; empty callback route via event for %s:%s.%s value is %s', tp.serial, tp.channelId, tp.dpName, newValue)
         // send a Event - we have to walk a extra round to get the enclosure function back
-        that.platform.eventAdresses.map(function (tuple) {
-          if (address === tuple.address) {
-            that.log.debug('[Generic] found accessory %s run registred event', tuple.address)
-            let channel = that.deviceAdress + ':' + that.channelnumber
-            that.log.debug('[Generic] Channel %s', channel)
-            tuple.accessory.event(channel, dp, newValue, tuple.function)
-          }
-        })
+        self.platform.fireEvent(tp.intf, tp.serial, tp.channelId, tp.dpName, newValue)
       }
     })
-  },
+  }
 
-  isDatapointAddressValid: function (datapointAddress, acceptNull) {
+  isDatapointAddressValid (datapointAddress, acceptNull) {
     this.log.debug('[Generic] validate datapoint %s we %s accept nul', datapointAddress, acceptNull ? 'do' : 'do not')
     if (datapointAddress !== undefined) {
       let parts = datapointAddress.split('.')
@@ -637,63 +683,86 @@ HomeKitGenericService.prototype = {
       }
       return acceptNull
     }
-  },
+  }
 
-  endWorking: function () {
+  addHomeMaticDatapoint (dp) {
+    if ((typeof dp === 'object') && (dp.address())) {
+      this.homeMaticDatapoints.push(dp.address())
+    } else {
+      this.homeMaticDatapoints.push(dp)
+    }
+  }
 
-  },
+  endWorking () {
+
+  }
 
   // Event with complete channel and dp infos
-  channelDatapointEvent: function (channel, dp, newValue) {
+  channelDatapointEvent (channel, dp, newValue) {
     // just a stub
-  },
+  }
 
   // Event only with datapoint infos
-  datapointEvent: function (dp, newValue, channel) {
+  datapointEvent (dp, newValue, channel) {
 
-  },
+  }
 
-  event: function (channel, dp, newValue, optionalFunction) {
-    var that = this
+  createDeviceService (Service, Characteristic) {
+
+  }
+
+  serviceDidCreated () {
+    let self = this
+    this.homeMaticDatapoints.map(dp => {
+      self.log.debug('[Generic] serviceDidCreated Initial query for %s', dp)
+      self.remoteGetValue(dp)
+    })
+  }
+
+  event (dpadress, newValue, optionalFunction) {
+    this.log.debug('[Generic] event for %s with value %s', dpadress, newValue)
+    var self = this
     var targetChar
-    var chnl
 
-    if ((channel !== undefined) && (dp !== undefined)) {
-      var tp = this.transformDatapoint(dp)
+    if (dpadress !== undefined) {
+      var tp
+      // generate a homematic address if the input is a string
+      if (typeof dpadress === 'string') {
+        tp = this.transformDatapoint(dpadress)
+      } else {
+        tp = dpadress
+      }
 
-      if (tp[1] === 'LOWBAT') {
-        that.lowBat = newValue
-        if (that.lowBatCharacteristic !== undefined) {
-          that.lowBatCharacteristic.setValue(newValue)
+      if (tp.dpName === 'LOWBAT') {
+        self.lowBat = newValue
+        if (self.lowBatCharacteristic !== undefined) {
+          self.lowBatCharacteristic.setValue(newValue)
         }
       }
 
-      if ((tp[1] === 'ERROR_SABOTAGE') || (tp[1] === 'SABOTAGE')) {
-        that.tampered = ((newValue === 1) || (newValue === true))
-        if (that.tamperedCharacteristic !== undefined) {
-          that.tamperedCharacteristic.setValue(newValue)
+      if ((tp.dpName === 'ERROR_SABOTAGE') || (tp.dpName === 'SABOTAGE')) {
+        self.tampered = ((newValue === 1) || (newValue === true))
+        if (self.tamperedCharacteristic !== undefined) {
+          self.tamperedCharacteristic.setValue(newValue)
         }
       }
 
-      if (tp[1] === 'ERROR') {
-        that.tampered = (newValue === 7)
-        if (that.tamperedCharacteristic !== undefined) {
-          that.tamperedCharacteristic.setValue(newValue)
+      if (tp.dpName === 'ERROR') {
+        self.tampered = (newValue === 7)
+        if (self.tamperedCharacteristic !== undefined) {
+          self.tamperedCharacteristic.setValue(newValue)
         }
       }
 
-      if (tp[1] === 'LEVEL') {
-        newValue = newValue * 100
-      }
-      if ((tp[1] === 'COLOR') && (this.type === 'RGBW_COLOR')) {
+      if ((tp.dpName === 'COLOR') && (this.type === 'RGBW_COLOR')) {
         newValue = Math.round((newValue / 199) * 360)
       }
-      if (tp[1] === 'BRIGHTNESS') {
+      if (tp.dpName === 'BRIGHTNESS') {
         newValue = Math.pow(10, (newValue / 51))
       }
 
-      if (tp[1] === 'PRESS_SHORT') {
-        targetChar = that.currentStateCharacteristic[tp[1]]
+      if (tp.dpName === 'PRESS_SHORT') {
+        targetChar = self.currentStateCharacteristic[tp.dpName]
         if (targetChar !== undefined) {
           // The value property of ProgrammableSwitchEvent must be one of the following:
           // Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS = 0;
@@ -701,69 +770,66 @@ HomeKitGenericService.prototype = {
           // Characteristic.ProgrammableSwitchEvent.LONG_PRESS = 2;
           targetChar.setValue(0)
         }
-        chnl = channel.slice(channel.indexOf(':') + 1)
-        this.channelDatapointEvent(channel, dp, newValue)
+        this.channelDatapointEvent(dpadress, newValue)
         if (typeof optionalFunction === 'function') {
           optionalFunction.call(this, newValue)
         }
-        this.datapointEvent(chnl + '.' + dp, newValue, channel)
+        this.datapointEvent(tp, newValue)
         return
       }
-      if (tp[1] === 'PRESS_LONG') {
-        targetChar = that.currentStateCharacteristic[tp[1]]
+      if (tp.dpName === 'PRESS_LONG') {
+        targetChar = self.currentStateCharacteristic[tp.dpName]
         if (targetChar !== undefined) {
           targetChar.setValue(2)
         }
-        chnl = channel.slice(channel.indexOf(':') + 1)
-        this.channelDatapointEvent(channel, dp, newValue)
+        this.channelDatapointEvent(dpadress, newValue)
         if (typeof optionalFunction === 'function') {
           optionalFunction.call(this, newValue)
         }
-        this.datapointEvent(chnl + '.' + dp, newValue, channel)
+        this.datapointEvent(tp, newValue)
         return
       }
 
-      var factor = this.datapointvaluefactors[tp[1]]
+      var factor = this.datapointvaluefactors[tp.dpName]
 
       if (factor !== undefined) {
         newValue = newValue * factor
       }
 
-      if (dp === 'WORKING') {
-        if ((that.isWorking === true) && (newValue === false)) {
-          that.endWorking()
+      if (tp.dpName === 'WORKING') {
+        if ((self.isWorking === true) && (newValue === false)) {
+          self.endWorking()
         }
-        that.isWorking = newValue
+        self.isWorking = newValue
       }
       this.eventupdate = true
 
       if (typeof optionalFunction === 'function') {
+        this.log.debug('[Generic] we do have a registred event callback send %s to this one', newValue)
         optionalFunction.call(this, newValue)
       }
 
-      if ((this.cadress !== undefined) || (this.deviceAdress !== undefined)) {
-        // this is dirty shit. ok there is a config that will set the cadress to a defined channel
+      if ((this.caddress !== undefined) || (this.deviceaddress !== undefined)) {
+        // this is dirty shit. ok there is a config self will set the caddress to a defined channel
         // if there is an rpc event at this channel the event will be forward here.
-        // now fetch the real adress of that channel and get the channelnumber
+        // now fetch the real address of self channel and get the channelnumber
         // datapoints from such channels named  as channelnumber:datapoint ... (no better approach yet)
-        chnl = channel.slice(channel.indexOf(':') + 1)
-        this.cache(tp[0] + '.' + tp[1], newValue)
-        this.log.debug('[Generic] datapointEvent %s with %s channel %s', chnl + '.' + dp, newValue, channel)
-        this.datapointEvent(chnl + '.' + dp, newValue, channel)
+        this.cache(tp.address(), newValue)
+        this.log.debug('[Generic] datapointEvent on %s with Value:%s', tp.address(), newValue)
+        this.datapointEvent(tp, newValue)
       } else {
-        this.cache(tp[0] + '.' + tp[1], newValue)
-        this.log.debug('[Generic] datapointEvent %s with %s channel %s', dp, newValue, channel)
-
-        this.datapointEvent(dp, newValue, channel)
+        this.cache(tp.address(), newValue)
+        this.log.debug('[Generic] datapointEvent on %s with Value:%s', tp.address(), newValue)
+        this.datapointEvent(tp, newValue)
       }
-      this.channelDatapointEvent(channel, dp, newValue)
+      this.channelDatapointEvent(tp, newValue)
       this.eventupdate = false
     } else {
-      this.log.warn('[Generic] channel %s or dp %s is undefined', channel, dp)
+      this.log.warn('[Generic] address is undefined')
     }
-  },
+  }
 
-  mappedValue: function (dp, value) {
+  mappedValue (dp, value) {
     var result = value
     var map = this.datapointMappings[dp]
     if (map !== undefined) {
@@ -772,41 +838,42 @@ HomeKitGenericService.prototype = {
       }
     }
     return result
-  },
+  }
 
-  stateCharacteristicWillChange: function (characteristic, newValue) {
+  stateCharacteristicWillChange (characteristic, newValue) {
     // just a stub
-  },
+  }
 
-  stateCharacteristicDidChange: function (characteristic, newValue) {
+  stateCharacteristicDidChange (characteristic, newValue) {
     // just a stub
-  },
+  }
 
-  cache: function (dp, value) {
-    var that = this
+  cache (dp, value) {
+    var self = this
 
     this.log.debug('[Generic] cache %s (%s)', dp, value)
     // Check custom Mapping from HM to HomeKit
-    var map = that.datapointMappings[dp]
+    var map = self.datapointMappings[dp]
     if (map !== undefined) {
       if (map[value] !== undefined) {
         value = map[value]
       }
     }
-    if ((value !== undefined) && ((that.isWorking === false) || (that.ignoreWorking === true))) {
-      if (that.currentStateCharacteristic[dp] !== undefined) {
-        that.stateCharacteristicWillChange(that.currentStateCharacteristic[dp], value)
-        that.currentStateCharacteristic[dp].setValue(value, null)
-        that.stateCharacteristicDidChange(that.currentStateCharacteristic[dp], value)
+    if ((value !== undefined) && ((self.isWorking === false) || (self.ignoreWorking === true))) {
+      if (self.currentStateCharacteristic[dp] !== undefined) {
+        self.stateCharacteristicWillChange(self.currentStateCharacteristic[dp], value)
+        self.currentStateCharacteristic[dp].setValue(value, null)
+        self.stateCharacteristicDidChange(self.currentStateCharacteristic[dp], value)
       }
-      this.ccuCache.doCache(dp, value)
+      this.ccuManager.doCache(dp, value)
     } else {
-      that.log.debug('[Generic] Skip update because of working flag (%s) or IsNull(%s)', that.isWorking, value)
+      self.log.debug('[Generic] Skip update because of working flag (%s) or IsNull(%s)', self.isWorking, value)
     }
-  },
+  }
 
-  delayed: function (mode, dp, value, delay) {
-    let that = this
+  delayed (mode, dp, value, delay) {
+    this.log.debug('[Generic] delayed mode %s DP %s Value %s delay %s', mode, dp, value, delay)
+    let self = this
     if (this.eventupdate === true) {
       return
     }
@@ -816,108 +883,137 @@ HomeKitGenericService.prototype = {
         this.timer[dp] = undefined
       }
       this.timer[dp] = setTimeout(function () {
-        clearTimeout(that.timer[dp])
-        that.timer[dp] = undefined
-        that.command(mode, dp, value)
+        clearTimeout(self.timer[dp])
+        self.timer[dp] = undefined
+        self.command(mode, dp, value)
       }, delay || 100)
     } else {
-      that.command(mode, dp, value)
+      this.log.debug('[Generic] send command mode %s DP %s Value', mode, dp, value)
+      self.command(mode, dp, value)
     }
-  },
+  }
 
-  remoteSetDeviceValue: function (address, dp, value, callback) {
+  remoteSetDeviceValue (address, dp, value, callback) {
     this.log.debug('[Generic] (Rpc) Send ' + value + ' to Datapoint ' + dp + ' at ' + address)
-    this.platform.setValue(undefined, address, dp, value)
-  },
+    this.ccuManager.setValue(undefined, address, dp, value)
+  }
 
-  command: function (mode, dp, value, callback) {
+  command (mode, dp, value, callback) {
     var newValue = value
-    var tp = this.transformDatapoint(dp)
+    var self = this
 
-    if ((tp[1] === 'LEVEL') || (tp[1] === 'LEVEL_2')) {
-      newValue = parseFloat(newValue) / 100
-      newValue = {
-        'explicitDouble': newValue
+    if (mode === 'sendregacommand') {
+      // just send the command and ten return
+      self.ccuManager.runScript(newValue, callback)
+    } else {
+      var tp = this.transformDatapoint(dp)
+      if ((tp.dpName === 'LEVEL') || (tp.dpName === 'LEVEL_2')) {
+        newValue = parseFloat(newValue)
+        newValue = {
+          'explicitDouble': newValue
+        }
       }
-    }
-    if ((tp[1] === 'COLOR') && (this.type === 'RGBW_COLOR')) {
-      newValue = Math.round((value / 360) * 199)
+      if ((tp.dpName === 'COLOR') && (this.type === 'RGBW_COLOR')) {
+        newValue = Math.round((value / 360) * 199)
+      }
     }
 
     if (this.eventupdate === true) {
       return
     }
-    var that = this
 
     if (mode === 'set') {
-      var interf = this.intf
-      that.log.debug('[Generic] Send %s to Datapoint:%s at %s type %s', JSON.stringify(newValue), tp[1], tp[0], typeof newValue)
+      // var interf = this.intf
       // Kill cache value so we have to ask the interface afterwards
-      that.log.debug('[Generic] Kill Cache for %s.%s', tp[0], tp[1])
-      that.ccuCache.deleteValue(tp[0] + '.' + tp[1])
-      that.platform.setValue(interf, tp[0], tp[1], newValue)
+      self.log.debug('[Generic] Kill Cache for %s', tp.address())
+      self.ccuManager.removeCache(tp.address())
+      self.log.debug('[Generic] Send %s to Datapoint:%s type %s', JSON.stringify(newValue), tp.address(), typeof newValue)
+      self.ccuManager.setValue(tp, newValue)
       if (callback !== undefined) {
         callback()
       }
     }
 
     if (mode === 'setrega') {
-      that.log.debug('[Generic] (Rega) Send %s to %s at %s type %s', newValue, tp[1], tp[0], typeof newValue)
-      that.platform.setRegaValue(tp[0], tp[1], newValue)
+      self.log.debug('[Generic] (Rega) Send %s to %s type %s', newValue, tp.address(), typeof newValue)
+      self.ccuManager.setValue(tp, newValue)
       if (callback !== undefined) {
         callback()
       }
     }
+  }
 
-    if (mode === 'sendregacommand') {
-      that.platform.sendRegaCommand(newValue, callback)
-    }
-  },
-
-  transformDatapoint: function (dp) {
+  transformDatapoint (dp) {
     this.log.debug('[Generic] transformDatapoint %s', dp)
     if (dp) {
       var pos = dp.indexOf('.')
       if (pos === -1) {
-        return [this.adress, dp]
+        this.log.debug('[Generic] seems to be a single datapoint')
+        let result = new HomeMaticAddress(this.intf, this.serial, this.channelnumber, dp)
+        return result
       }
 
-      var ndp = dp.substr(pos + 1, dp.length)
-      var nadr = this.adress.substr(0, this.adress.indexOf(':'))
-      var chnl = dp.substr(0, pos)
-      nadr = nadr + ':' + chnl
-      return [nadr, ndp]
+      let rgx = /([a-zA-Z0-9-]{1,}).([a-zA-Z0-9-]{1,}):([0-9]{1,}).([a-zA-Z0-9-_]{1,})/g
+      let parts = rgx.exec(dp)
+      if ((parts) && (parts.length > 4)) {
+        let intf = parts[1]
+        let address = parts[2]
+        let chidx = parts[3]
+        let dpn = parts[4]
+        this.log.debug('[Generic] try I.A:C.D Format |I:%s|A:%s|C:%s|D:%s', intf, address, chidx, dpn)
+        return new HomeMaticAddress(intf, address, chidx, dpn)
+      } else {
+        // try format channel.dp
+        let rgx = /([0-9]{1,}).([a-zA-Z0-9-_]{1,})/g
+        let parts = rgx.exec(dp)
+        if ((parts) && (parts.length === 3)) {
+          let chidx = parts[1]
+          let dpn = parts[2]
+          this.log.debug('[Generic] match C.D Format |I:%s|A:%s|C:%s|D:%s', this.intf, this.serial, chidx, dpn)
+          return new HomeMaticAddress(this.intf, this.serial, chidx, dpn)
+        }
+      }
     } else {
-      return -1
+      throw new Error('[Generic] unable create HM Address from undefined Input')
     }
-  },
+  }
 
-  getServices: function () {
-    return this.services
-  },
+  getServices () {
+    return this.accessory.services
+  }
 
-  shutdown: function () {
+  shutdown () {
+    this.tidyUpAccessory()
+  }
 
-  },
-
-  identify: function (callback) {
-    this.log.info('Identify ' + this.name)
-    callback()
-  },
-
-  get_Service: function (name) {
-    for (var index in this.services) {
-      var service = this.services[index]
-
-      if (typeof name === 'string' && (service.displayName === name || service.name === name || service.subtype === name)) {
-        return service
-      } else if (typeof name === 'function' && ((service instanceof name) || (name.UUID === service.UUID))) {
-        return service
-      }
+  tidyUpCharacteristic (characteristic) {
+    if (characteristic) {
+      characteristic.removeAllListeners('get')
+      characteristic.removeAllListeners('set')
     }
-  },
+  }
 
-  round: function (val, precision) {
+  tidyUpService (service) {
+    let self = this
+    if (service) {
+      service.characteristics.map(characteristic => {
+        self.tidyUpCharacteristic(characteristic)
+      })
+    }
+  }
+
+  tidyUpAccessory () {
+    let self = this
+    this.accessory.services.map(service => {
+      self.tidyUpService(service)
+    })
+  }
+
+  identify (state) {
+    this.log.info('Identify %s (%s)', this.name, state)
+  }
+
+  round (val, precision) {
     if (typeof val !== 'number') {
       return val
     }
@@ -931,9 +1027,9 @@ HomeKitGenericService.prototype = {
     precision = Math.abs(precision)
 
     return Number(Math.sign(val) * (Math.round(Math.abs(val) + exponent + precision) + exponentNeg + precision))
-  },
+  }
 
-  isTrue: function (value) {
+  isTrue (value) {
     var result = false
     if ((typeof value === 'string') && (value.toLocaleLowerCase() === 'true')) {
       result = true
@@ -951,9 +1047,9 @@ HomeKitGenericService.prototype = {
     }
 
     return result
-  },
+  }
 
-  didMatch: function (v1, v2) {
+  didMatch (v1, v2) {
     if (typeof v1 === typeof v2) {
       return (v1 === v2)
     }
@@ -990,7 +1086,6 @@ HomeKitGenericService.prototype = {
 
     return false
   }
-
 }
 
 module.exports = {

@@ -1,22 +1,17 @@
 'use strict'
 
-var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
-var util = require('util')
+const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
 
-function HomeMaticHomeKitDummyService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
-  HomeMaticHomeKitDummyService.super_.apply(this, arguments)
-}
+class HomeMaticHomeKitDummyService extends HomeKitGenericService {
+  propagateServices (homebridge, Service, Characteristic) {
 
-util.inherits(HomeMaticHomeKitDummyService, HomeKitGenericService)
+    // Register new Characteristic or Services here
 
-HomeMaticHomeKitDummyService.prototype.propagateServices = function (homebridge, Service, Characteristic) {
+  }
 
-  // Register new Characteristic or Services here
-
-}
-
-HomeMaticHomeKitDummyService.prototype.createDeviceService = function (Service, Characteristic) {
-  // Fill Servicelogic here
+  createDeviceService (Service, Characteristic) {
+    // Fill Servicelogic here
+  }
 }
 
 module.exports = HomeMaticHomeKitDummyService

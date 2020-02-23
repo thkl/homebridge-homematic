@@ -1,9 +1,10 @@
 {
     "pluginAlias": "HomeMatic",
     "pluginType": "platform",
+    "dynamicSchemaVersion": 1,
     "singular": true,
     "headerDisplay": "Homebridge plugin for the Homematic CCUs",
-    "footerDisplay": "For a detailed description, see the [README](https://github.com/thkl/homebridge-homematic#readme) file.",
+    "footerDisplay": "For the complete configuration for this plugin please [click](http://{myHost}:8081/)",
     "schema": {
         "type": "object",
         "properties": {
@@ -16,7 +17,8 @@
             "ccu_ip": {
                 "title": "CCU IP",
                 "type": "string",
-                "description": "The IP Adress of your CCU"
+                "description": "The IP address of your CCU",
+                "required": true
             },
             "subsection": {
                 "title": "Subsection",

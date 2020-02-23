@@ -1,54 +1,44 @@
 'use strict'
 
-var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
-var util = require('util')
+const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
 
-function HomeMaticHomeKitThermometerService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
-  HomeMaticHomeKitThermometerService.super_.apply(this, arguments)
-}
+class HomeMaticHomeKitThermometerService extends HomeKitGenericService {
+  createDeviceService (Service, Characteristic) {
+    var self = this
+    this.usecache = false
+    var thermo = this.getService(Service.TemperatureSensor)
+    // Enable log
+    this.enableLoggingService('thermo')
 
-util.inherits(HomeMaticHomeKitThermometerService, HomeKitGenericService)
+    this.cctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
+      .setProps({ minValue: -100 })
+      .on('get', function (callback) {
+        this.remoteGetValue('TEMPERATURE', function (value) {
+          self.addLogEntry({ currentTemp: parseFloat(value) })
+          if (callback) callback(null, value)
+        })
+      }.bind(this))
 
-HomeMaticHomeKitThermometerService.prototype.createDeviceService = function (Service, Characteristic) {
-  var that = this
-  this.usecache = false
-  var thermo = new Service.TemperatureSensor(this.name)
-  this.services.push(thermo)
-  // Enable log
-  this.enableLoggingService('thermo')
+    this.eventEnabled = true
 
-  this.cctemp = thermo.getCharacteristic(Characteristic.CurrentTemperature)
-    .setProps({ minValue: -100 })
-    .on('get', function (callback) {
-      this.remoteGetValue('TEMPERATURE', function (value) {
-        that.addLogEntry({ currentTemp: parseFloat(value) })
-        if (callback) callback(null, value)
-      })
-    }.bind(this))
+    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('TEMPERATURE'), this, function (newValue) {
+      self.cctemp.updateValue(parseFloat(newValue), null)
+      self.addLogEntry({ currentTemp: parseFloat(newValue) })
+    })
 
-  this.setCurrentStateCharacteristic(this.channelnumber + ':TEMPERATURE', this.cctemp)
-  this.eventEnabled = true
+    this.queryData()
+  }
 
-  this.queryData()
-}
+  queryData () {
+    var self = this
+    this.removeCache('TEMPERATURE')
+    this.remoteGetValue('TEMPERATURE')
+    this.refreshTimer = setTimeout(function () { self.queryData() }, 10 * 60 * 1000)
+  }
 
-HomeMaticHomeKitThermometerService.prototype.queryData = function () {
-  var that = this
-  this.query('TEMPERATURE', function (value) {
-    that.addLogEntry({ currentTemp: parseFloat(value) })
-    // create timer to query device every 10 minutes
-    that.refreshTimer = setTimeout(function () { that.queryData() }, 10 * 60 * 1000)
-  })
-}
-
-HomeMaticHomeKitThermometerService.prototype.shutdown = function () {
-  clearTimeout(this.refreshTimer)
-}
-
-HomeMaticHomeKitThermometerService.prototype.datapointEvent = function (dp, newValue) {
-  if (this.isDataPointEvent(dp, 'TEMPERATURE')) {
-    this.cctemp.updateValue(newValue, null)
-    this.addLogEntry({ currentTemp: parseFloat(newValue) })
+  shutdown () {
+    super.shutdown()
+    clearTimeout(this.refreshTimer)
   }
 }
 

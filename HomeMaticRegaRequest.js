@@ -2,7 +2,7 @@
 
 var http = require('http')
 
-function HomeMaticRegaRequest (log, ccuip) {
+function HomeMaticRegaRequest(log, ccuip) {
   this.log = log
   this.ccuIP = ccuip
   this.timeout = 120
@@ -59,8 +59,8 @@ HomeMaticRegaRequest.prototype = {
     postReq.end()
   },
 
-  getValue: function (channel, datapoint, callback) {
-    var script = 'var d = dom.GetObject("' + channel + '.' + datapoint + '");if (d){Write(d.Value());}'
+  getValue: function (hmadr, callback) {
+    var script = 'var d = dom.GetObject("' + hmadr.address() + '");if (d){Write(d.Value());}'
     this.script(script, function (data) {
       if (data !== undefined) {
         callback(data)
@@ -68,7 +68,7 @@ HomeMaticRegaRequest.prototype = {
     })
   },
 
-  setValue: function (channel, datapoint, value) {
+  setValue: function (hmadr, value, callback) {
     // check explicitDouble
     if (typeof value === 'object') {
       let v = value['explicitDouble']
@@ -76,17 +76,21 @@ HomeMaticRegaRequest.prototype = {
         value = v
       }
     }
-    this.log.debug('Rega SetValue %s of %s.%s', value, channel, datapoint)
-    var script = 'var d = dom.GetObject("' + channel + '.' + datapoint + '");if (d){d.State("' + value + '");}'
+    this.log.debug('Rega SetValue %s of %s', value, hmadr.address())
+    var script = 'var d = dom.GetObject("' + hmadr.address() + '");if (d){d.State("' + value + '");}'
     this.script(script, function (data) {
-
+      if (callback) {
+        callback(data)
+      }
     })
   },
 
-  setVariable: function (channel, value) {
+  setVariable: function (channel, value, callback) {
     var script = 'var d = dom.GetObject("' + channel + '");if (d){d.State("' + value + '");}'
     this.script(script, function (data) {
-
+      if (callback) {
+        callback(data)
+      }
     })
   },
 

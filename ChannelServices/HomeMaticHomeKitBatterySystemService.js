@@ -1,70 +1,61 @@
 'use strict'
 
-var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
-var util = require('util')
-var sprintf = require('sprintf-js').sprintf
+const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
+const sprintf = require('sprintf-js').sprintf
 
-function HomeMaticHomeKitBatterySystemService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
-  HomeMaticHomeKitBatterySystemService.super_.apply(this, arguments)
-}
+class HomeMaticHomeKitBatterySystemService extends HomeKitGenericService {
+  createDeviceService (Service, Characteristic) {
+    var self = this
+    var trigger = this.getClazzConfigValue('trigger', undefined)
+    this.variable = this.getClazzConfigValue('variable', undefined)
+    this.level = 100
 
-util.inherits(HomeMaticHomeKitBatterySystemService, HomeKitGenericService)
+    if ((trigger !== undefined) && (this.variable !== undefined)) {
+      this.log.debug('Initialize variable based BatterySystemService on %s with trigger %s', this.variable, trigger)
+      var batsys = this.getService(Service.BatteryService)
 
-HomeMaticHomeKitBatterySystemService.prototype.createDeviceService = function (Service, Characteristic) {
-  var that = this
-  var trigger = this.getClazzConfigValue('trigger', undefined)
-  this.variable = this.getClazzConfigValue('variable', undefined)
-  this.level = 100
+      this.currentlevel = batsys.getCharacteristic(Characteristic.BatteryLevel)
+        .on('set', function (value, callback) {
+          if (callback) callback()
+        })
+        .on('get', function (callback) {
+          if (callback) {
+            callback(null, self.level)
+          }
+        })
 
-  if ((trigger !== undefined) && (this.variable !== undefined)) {
-    this.log.debug('Initialize variable based BatterySystemService on %s with trigger %s', this.variable, trigger)
-    var batsys = new Service.BatteryService(this.name)
-    this.services.push(batsys)
+      this.chargingState = batsys.getCharacteristic(Characteristic.ChargingState)
+        .on('get', function (callback) {
+          if (callback) {
+            callback(null, 0)
+          }
+        })
 
-    this.currentlevel = batsys.getCharacteristic(Characteristic.BatteryLevel)
-      .on('set', function (value, callback) {
-        if (callback) callback()
+      this.lowLevelState = batsys.getCharacteristic(Characteristic.StatusLowBattery)
+        .on('get', function (callback) {
+          if (callback) {
+            callback(null, 0)
+          }
+        })
+
+      // register for events at the trigger
+      this.platform.registeraddressForEventProcessingAtAccessory(trigger, this, function (newValue) {
+        // just reload the variable
+        self.reloadState()
       })
-      .on('get', function (callback) {
-        if (callback) {
-          callback(null, that.level)
-        }
-      })
+    } else {
+      this.log.warn('cannot initialize variable based BatterySystemService trigger and/or variable missed in config')
+    }
+  }
 
-    this.chargingState = batsys.getCharacteristic(Characteristic.ChargingState)
-      .on('get', function (callback) {
-        if (callback) {
-          callback(null, 0)
-        }
-      })
-
-    this.lowLevelState = batsys.getCharacteristic(Characteristic.StatusLowBattery)
-      .on('get', function (callback) {
-        if (callback) {
-          callback(null, 0)
-        }
-      })
-
-    // register for events at the trigger
-    this.platform.registerAdressForEventProcessingAtAccessory(trigger, this, function (newValue) {
-      // just reload the variable
-      that.reloadState()
+  reloadState () {
+    let self = this
+    let script = sprintf("Write(dom.GetObject('%s').State());", this.variable)
+    this.command('sendregacommand', '', script, function (result) {
+      self.level = result
+      self.log.debug('Level is %s', self.level)
+      self.currentlevel.updateValue(self.level, null)
     })
-    // initial loading
-    this.reloadState()
-  } else {
-    this.log.warn('cannot initialize variable based BatterySystemService trigger and/or variable missed in config')
   }
 }
-
-HomeMaticHomeKitBatterySystemService.prototype.reloadState = function () {
-  let that = this
-  let script = sprintf("Write(dom.GetObject('%s').State());", this.variable)
-  this.command('sendregacommand', '', script, function (result) {
-    that.level = result
-    that.log.debug('Level is %s', that.level)
-    that.currentlevel.updateValue(that.level, null)
-  })
-}
-
 module.exports = HomeMaticHomeKitBatterySystemService

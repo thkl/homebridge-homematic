@@ -16,13 +16,20 @@ describe('Homematic Plugin (index)', function () {
   let data = fs.readFileSync(datapath).toString()
   let that = this
   var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
-  var platform = new homebridgeMock.PlatformType(log, config)
+
+  var platform = new homebridgeMock.PlatformType(log, config, homebridgeMock)
+  this.randomInitValue = Math.random()
+  this.expInitValue = (that.randomInitValue * 100)
 
   before(function () {
+    platform.homebridge.setCCUDummyValue('HmIP-RF.ADR1234567890:4.LEVEL', that.randomInitValue)
+
     log.debug('Init Platform with IP Blind')
     // Change Platform to HmIP
+    platform.homebridge.fireHomeBridgeEvent('didFinishLaunching')
     platform.xmlrpc.interface = 'HmIP-RF.'
-    platform.accessories(function (acc) {
+    log.debug('Init Platform with Switch')
+    platform.homebridge.accessories(function (acc) {
       that.accessories = acc
     })
   })
@@ -30,16 +37,37 @@ describe('Homematic Plugin (index)', function () {
   after(function () {
     log.debug('Shutdown Platform')
     that.accessories.map(ac => {
-      ac.shutdown()
+      ac.appliance.shutdown()
     })
   })
 
   describe('Homebridge Platform Blind Service Test', function () {
     it('check accessory build', function (done) {
-      let cn = that.accessories[0].constructor.name
+      let cn = that.accessories[0].appliance.serviceClassName
       assert.strict.equal(cn, 'HomeMaticHomeKitBlindServiceIP')
       assert.ok(that.accessories, 'Did not find any accessories!')
       assert.strict.equal(that.accessories.length, 1)
+      done()
+    })
+
+    it('test initial values dimmer must be ' + that.expInitValue + '%', function (done) {
+      let ac = that.accessories[0]
+      let s = ac.getService(Service.WindowCovering)
+      assert.ok(s, 'Service.WindowCovering not found in %s', ac.name)
+      let cp = s.getCharacteristic(Characteristic.CurrentPosition)
+      assert.ok(cp, 'Characteristic.CurrentPosition not found in %s', ac.name)
+      cp.getValue(function (context, value) {
+        assert.strict.equal(value, that.expInitValue, 'Blind CurrentPosition must be ' + that.expInitValue + '%')
+      })
+
+      let ctp = s.getCharacteristic(Characteristic.TargetPosition)
+      assert.ok(ctp, 'Characteristic.TargetPosition not found in Blind %s', ac.name)
+      ctp.getValue(function (context, value) {
+        assert.strict.equal(value, that.expInitValue, 'Blind TargetPosition must be ' + that.expInitValue + '%')
+      })
+
+      // Reset Value
+      platform.xmlrpc.event(['HmIP-RF', 'ADR1234567890:4', 'LEVEL', 1])
       done()
     })
 
@@ -48,7 +76,7 @@ describe('Homematic Plugin (index)', function () {
       platform.xmlrpc.event(['HmIP-RF', 'ADR1234567890:4', 'LEVEL', 0])
       // check
       that.accessories.map(ac => {
-        let s = ac.get_Service(Service.WindowCovering)
+        let s = ac.getService(Service.WindowCovering)
         assert.ok(s, 'Service.WindowCovering not found in Blind %s', ac.name)
         let ccp = s.getCharacteristic(Characteristic.CurrentPosition)
         assert.ok(ccp, 'Characteristic.CurrentPosition not found in Blind %s', ac.name)
@@ -70,7 +98,7 @@ describe('Homematic Plugin (index)', function () {
       platform.xmlrpc.event(['HmIP-RF', 'ADR1234567890:4', 'LEVEL', 1])
       // check
       that.accessories.map(ac => {
-        let s = ac.get_Service(Service.WindowCovering)
+        let s = ac.getService(Service.WindowCovering)
         assert.ok(s, 'Service.WindowCovering not found in Blind %s', ac.name)
         let ccp = s.getCharacteristic(Characteristic.CurrentPosition)
         assert.ok(ccp, 'Characteristic.CurrentPosition not found in Blind %s', ac.name)
@@ -98,15 +126,15 @@ describe('Homematic Plugin (index)', function () {
       // HmIP-RF.ADR1234567890
       // check
       that.accessories.map(ac => {
-        let s = ac.get_Service(Service.WindowCovering)
+        let s = ac.getService(Service.WindowCovering)
         assert.ok(s, 'Service.WindowCovering not found in Blind %s', ac.name)
 
         let ctp = s.getCharacteristic(Characteristic.TargetPosition)
         assert.ok(ctp, 'Characteristic.TargetPosition not found in Blind %s', ac.name)
         // Set Delay to 0 sec for use with tests
-        ac.delayOnSet = 0
+        ac.appliance.delayOnSet = 0
         ctp.emit('set', 50, function () {
-          let res = platform.homebridge.values['HmIP-RF.ADR1234567890:4.LEVEL']
+          let res = platform.homebridge.getCCUDummyValue('HmIP-RF.ADR1234567890:4.LEVEL')
           assert.strict.equal(res, 0.5)
         })
       })
@@ -118,7 +146,7 @@ describe('Homematic Plugin (index)', function () {
       platform.xmlrpc.event(['HmIP-RF', 'ADR1234567890:3', 'LEVEL', 0.25])
       // check
       that.accessories.map(ac => {
-        let s = ac.get_Service(Service.WindowCovering)
+        let s = ac.getService(Service.WindowCovering)
         assert.ok(s, 'Service.WindowCovering not found in Blind %s', ac.name)
         let ccp = s.getCharacteristic(Characteristic.CurrentPosition)
         assert.ok(ccp, 'Characteristic.CurrentPosition not found in Blind %s', ac.name)

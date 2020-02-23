@@ -1,38 +1,23 @@
 'use strict'
 
-var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
-var util = require('util')
+const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
 
-function HomeMaticHomeKitWaterSensorService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
-  HomeMaticHomeKitWaterSensorService.super_.apply(this, arguments)
-}
+class HomeMaticHomeKitWaterSensorService extends HomeKitGenericService {
+  createDeviceService (Service, Characteristic) {
+    var that = this
+    var leakSensor = this.getService(Service.LeakSensor)
 
-util.inherits(HomeMaticHomeKitWaterSensorService, HomeKitGenericService)
-
-HomeMaticHomeKitWaterSensorService.prototype.createDeviceService = function (Service, Characteristic) {
-  var that = this
-  var leakSensor = new Service['LeakSensor'](this.name)
-
-  this.state = leakSensor.getCharacteristic(Characteristic.LeakDetected)
-    .on('get', function (callback) {
-      that.query('ALARMSTATE', function (value) {
-        if (callback) callback(null, value)
+    this.state = leakSensor.getCharacteristic(Characteristic.LeakDetected)
+      .on('get', function (callback) {
+        that.query('ALARMSTATE', function (value) {
+          if (callback) callback(null, value)
+        })
       })
-    })
-  this.currentStateCharacteristic['ALARMSTATE'] = this.state
-  this.state.eventEnabled = true
-  this.services.push(leakSensor)
-  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + '.ALARMSTATE', this)
-}
+    this.state.eventEnabled = true
 
-HomeMaticHomeKitWaterSensorService.prototype.datapointEvent = function (dp, newValue) {
-  let that = this
-  if (this.isDataPointEvent(dp, 'ALARMSTATE')) {
-    this.state.setValue(newValue, null)
-    this.log.debug('Set ALARMSTATE to ', newValue)
-    setTimeout(function () {
-      that.state.setValue(false, null)
-    }, 1000)
+    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('ALARMSTATE'), this, function (newValue) {
+      that.state.updateValue(that.isTrue(newValue) ? 1 : 0)
+    })
   }
 }
 
