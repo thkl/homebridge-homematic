@@ -56,7 +56,7 @@ class HomeMaticHomeKitRotaryHandleService extends HomeKitGenericService {
         break
     }
 
-    let dpa = this.transformDatapoint('STATE')
+    let dpa = this.buildHomeMaticAddress('STATE')
     this.platform.registeraddressForEventProcessingAtAccessory(dpa, self, function (newValue) {
       self.log.debug('[RHS] event %s', newValue)
       self.processWindowSensorData(newValue)

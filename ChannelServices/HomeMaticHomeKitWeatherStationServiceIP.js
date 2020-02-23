@@ -247,7 +247,7 @@ class HomeMaticHomeKitWeatherStationServiceIP extends HomeKitGenericService {
       this.characteristicWindRange.eventEnabled = true
     }
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('ACTUAL_TEMPERATURE'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('ACTUAL_TEMPERATURE'), this, function (newValue) {
       self.currentTemperature = parseFloat(newValue)
       self.currentTemperatureCharacteristic.updateValue(parseFloat(newValue), null)
       if ((self.currentTemperature > -255) && (self.currentHumidity > -255)) {
@@ -255,7 +255,7 @@ class HomeMaticHomeKitWeatherStationServiceIP extends HomeKitGenericService {
       }
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('HUMIDITY'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('HUMIDITY'), this, function (newValue) {
       self.currentHumidity = parseFloat(newValue)
       self.currentHumidityCharacteristic.updateValue(parseFloat(newValue), null)
       if ((self.currentTemperature > -255) && (self.currentHumidity > -255)) {
@@ -263,34 +263,34 @@ class HomeMaticHomeKitWeatherStationServiceIP extends HomeKitGenericService {
       }
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('ILLUMINATION'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('ILLUMINATION'), this, function (newValue) {
       self.currentBrightnessCharacteristic.updateValue(parseFloat(newValue), null)
     })
 
     if (this.characteristicRainCount) {
-      this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('RAIN_COUNTER'), this, function (newValue) {
+      this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('RAIN_COUNTER'), this, function (newValue) {
         self.characteristicRainCount.updateValue(parseFloat(newValue), null)
       })
     }
 
     if (this.characteristicIsRaining) {
-      this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('RAINING'), this, function (newValue) {
+      this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('RAINING'), this, function (newValue) {
         self.characteristicRain.updateValue(self.isTrue(newValue) ? 1 : 0)
       })
     }
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('WINDSPEED'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('WINDSPEED'), this, function (newValue) {
       self.characteristicWindspeed.updateValue(parseFloat(newValue), null)
     })
 
     if (this.characteristicWindDirection) {
-      this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('WIND_DIR'), this, function (newValue) {
+      this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('WIND_DIR'), this, function (newValue) {
         self.characteristicWindDirection.updateValue(parseInt(newValue), null)
       })
     }
 
     if (this.characteristicWindRange) {
-      this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('WIND_DIR_RANGE'), this, function (newValue) {
+      this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('WIND_DIR_RANGE'), this, function (newValue) {
         self.characteristicWindRange.updateValue(parseInt(newValue), null)
       })
     }

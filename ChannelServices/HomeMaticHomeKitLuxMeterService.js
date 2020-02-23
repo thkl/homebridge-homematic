@@ -17,7 +17,7 @@ class HomeMaticHomeKitLuxMeterService extends HomeKitGenericService {
 
     this.cbright.eventEnabled = true
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('LUX'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('LUX'), this, function (newValue) {
       self.log.debug('[LMS] LUX event %s', newValue)
       self.cbright.updateValue(parseFloat(newValue), null)
     })

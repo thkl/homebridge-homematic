@@ -1,6 +1,6 @@
 var isInTest = typeof global.it === 'function'
 
-function HomeMaticRegaRequestTestDriver(log, ccuip) {
+function HomeMaticRegaRequestTestDriver (log, ccuip) {
   this.log = log
   this.ccuIP = ccuip
   this.timeout = 120

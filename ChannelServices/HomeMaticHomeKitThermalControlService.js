@@ -134,17 +134,17 @@ class HomeMaticHomeKitThermalControlService extends HomeKitGenericService {
     }
 
     // register all Datapoints for Events
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('ACTUAL_HUMIDITY'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('ACTUAL_HUMIDITY'), this, function (newValue) {
       self.processChange('ACTUAL_HUMIDITY', newValue)
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('CONTROL_MODE'), this)
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('CONTROL_MODE'), this)
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('ACTUAL_TEMPERATURE'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('ACTUAL_TEMPERATURE'), this, function (newValue) {
       self.processChange('ACTUAL_TEMPERATURE', newValue)
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('SET_TEMPERATURE'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('SET_TEMPERATURE'), this, function (newValue) {
       self.processChange('SET_TEMPERATURE', newValue)
     })
 

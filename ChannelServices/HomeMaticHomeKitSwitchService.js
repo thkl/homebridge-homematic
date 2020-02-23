@@ -51,7 +51,7 @@ class HomeMaticHomeKitSwitchService extends HomeKitGenericService {
 
   registerEvents () {
     let self = this
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('STATE'), self, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('STATE'), self, function (newValue) {
       let hmState = this.isTrue(newValue) ? 1 : 0
       self.log.debug('[Switch Service] Event result %s hm %s', newValue, hmState)
       if (hmState === 0) {

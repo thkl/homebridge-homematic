@@ -97,14 +97,14 @@ class HomeMaticHomeKitBlindServiceIP extends HomeKitGenericService {
 
     this.deviceaddress = this.address.slice(0, this.address.indexOf(':'))
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('3.LEVEL'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('3.LEVEL'), this, function (newValue) {
       self.processBlindLevel(parseFloat(newValue) * 100)
     })
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('4.LEVEL'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('4.LEVEL'), this, function (newValue) {
       self.processBlindLevel(parseFloat(newValue) * 100)
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('4:PROCESS'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('4:PROCESS'), this, function (newValue) {
       if (newValue === 0) {
         self.removeCache('4.LEVEL')
         self.remoteGetValue('4.LEVEL')

@@ -55,7 +55,7 @@ class HomeMaticHomeKitValveService extends HomeKitGenericService {
         callback()
       })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('STATE'), self, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('STATE'), self, function (newValue) {
       let hmState = self.isTrue(newValue)
       self.valvestate = hmState
       let hkvalue = (hmState === true) ? 1 : 0

@@ -21,7 +21,7 @@ class HomeMaticHomeKitThermometerService extends HomeKitGenericService {
 
     this.eventEnabled = true
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('TEMPERATURE'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('TEMPERATURE'), this, function (newValue) {
       self.cctemp.updateValue(parseFloat(newValue), null)
       self.addLogEntry({ currentTemp: parseFloat(newValue) })
     })

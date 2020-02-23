@@ -92,7 +92,7 @@ class HomeMaticHomeKitPowerMeterService extends HomeKitGenericService {
 
     self.caddress = self.address.replace(':2', ':1')
 
-    self.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('POWER'), self, function (newValue) {
+    self.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('POWER'), self, function (newValue) {
       self.log.debug('[PMS] Event for POWER with %s. Save to HK', newValue)
       self.addLogEntry({
         power: parseInt(newValue)
@@ -100,19 +100,19 @@ class HomeMaticHomeKitPowerMeterService extends HomeKitGenericService {
       self.power.updateValue(self.round(newValue, 2), null)
     })
 
-    self.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('VOLTAGE'), self, function (newValue) {
+    self.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('VOLTAGE'), self, function (newValue) {
       self.voltage.updateValue(self.round(newValue, 2), null)
     })
 
-    self.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('CURRENT'), self, function (newValue) {
+    self.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('CURRENT'), self, function (newValue) {
       self.current.updateValue(self.round((newValue / 1000), 2), null)
     })
 
-    self.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('.ENERGY_COUNTER'), self, function (newValue) {
+    self.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('.ENERGY_COUNTER'), self, function (newValue) {
       self.powerConsumption.updateValue((self.round((newValue / 1000), 2)), null)
     })
 
-    self.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('1.STATE'), self, function (newValue) {
+    self.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('1.STATE'), self, function (newValue) {
       self.isOn.updateValue(self.isTrue(newValue), null)
     })
   }

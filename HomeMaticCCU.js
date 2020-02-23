@@ -66,7 +66,7 @@ class HomeMaticCCU {
     })
   }
 
-  setValue_rega (hmadr, value, callback) {
+  setValueRega (hmadr, value, callback) {
     let rega = this.createRegaRequest()
     this.log.debug('[CCUManager] rega.setvalue %s to ', value, hmadr.address())
     rega.setValue(hmadr, value)
@@ -91,8 +91,8 @@ class HomeMaticCCU {
     rega.script(script, callback)
   }
 
-  getValue_rega (hmadr, callback) {
-    this.log.debug('[CCUManager] getValue_rega I:%s|A:%s|C:%s|D:%s', hmadr.intf, hmadr.serial, hmadr.channelId, hmadr.dpName)
+  getValueRega (hmadr, callback) {
+    this.log.debug('[CCUManager] getValueRega I:%s|A:%s|C:%s|D:%s', hmadr.intf, hmadr.serial, hmadr.channelId, hmadr.dpName)
     let self = this
     this.log.debug('[CCUManager] check cache %s', hmadr.address())
     let cValue = this.cache.getValue(hmadr.address())
@@ -123,7 +123,7 @@ class HomeMaticCCU {
         return
       }
 
-      this.getValue_rega(hmadr, callback)
+      this.getValueRega(hmadr, callback)
     } else {
       this.log.warn('[CCUManager] unknow channel skipping ...')
       if (callback) {

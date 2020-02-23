@@ -76,7 +76,7 @@ class HomeMaticHomeKitDimmerService extends HomeKitGenericService {
       })
 
     this.brightness.eventEnabled = true
-    var dpa = this.transformDatapoint(this.workingDatapoint)
+    var dpa = this.buildHomeMaticAddress(this.workingDatapoint)
     this.log.debug('[DIMMER] registeraddressForEventProcessingAtAccessory working %s', dpa)
     this.platform.registeraddressForEventProcessingAtAccessory(dpa, this, function (newValue) {
       self.log.debug('[DIMMER] Working is %s', newValue)
@@ -91,7 +91,7 @@ class HomeMaticHomeKitDimmerService extends HomeKitGenericService {
       }
     })
 
-    dpa = this.transformDatapoint(this.dimmerLevelDatapoint)
+    dpa = this.buildHomeMaticAddress(this.dimmerLevelDatapoint)
     this.log.debug('[DIMMER] registeraddressForEventProcessingAtAccessory level %s', dpa)
     this.platform.registeraddressForEventProcessingAtAccessory(dpa, this, function (newValue) {
       if (!self.inhibitWhileWorking) {

@@ -33,7 +33,7 @@ class HomeMaticHomeKitThermostatWeatherService extends HomeKitGenericService {
 
     this.chum.eventEnabled = true
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('TEMPERATURE'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('TEMPERATURE'), this, function (newValue) {
       self.currentTemperature = parseFloat(newValue)
       self.ctemp.updateValue(parseFloat(newValue), null)
       if ((self.currentTemperature > -255) && (self.currentHumidity > -255)) {
@@ -41,7 +41,7 @@ class HomeMaticHomeKitThermostatWeatherService extends HomeKitGenericService {
       }
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('HUMIDITY'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('HUMIDITY'), this, function (newValue) {
       self.currentHumidity = parseFloat(newValue)
       self.chum.updateValue(parseFloat(newValue), null)
 

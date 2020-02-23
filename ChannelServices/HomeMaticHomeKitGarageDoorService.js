@@ -187,12 +187,12 @@ class HomeMaticHomeKitGarageDoorService extends HomeKitGenericService {
     this.currentDoorState.eventEnabled = true
     // register for status events
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint(this.address_sensor_close), this, function (newValue) {
-      self.datapointEvent(self.transformDatapoint(self.address_sensor_close), newValue)
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress(this.address_sensor_close), this, function (newValue) {
+      self.datapointEvent(self.buildHomeMaticAddress(self.address_sensor_close), newValue)
     })
     if (this.address_sensor_open) {
-      this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint(this.address_sensor_open), this, function (newValue) {
-        self.datapointEvent(self.transformDatapoint(self.address_sensor_open), newValue)
+      this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress(this.address_sensor_open), this, function (newValue) {
+        self.datapointEvent(self.buildHomeMaticAddress(self.address_sensor_open), newValue)
       })
     }
 

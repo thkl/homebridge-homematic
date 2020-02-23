@@ -27,7 +27,7 @@ class HomeMaticHomeKitCarbonDioxideSensorService extends HomeKitGenericService {
         })
       })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('STATE'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('STATE'), this, function (newValue) {
       self.log.debug('[CO2] remote Event with %s', newValue)
       self.processState(newValue)
     })

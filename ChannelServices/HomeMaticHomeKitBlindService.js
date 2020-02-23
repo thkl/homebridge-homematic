@@ -109,7 +109,7 @@ class HomeMaticHomeKitBlindService extends HomeKitGenericService {
           callback(null, this.inhibit)
         })
       this.obstruction.eventEnabled = true
-      this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('INHIBIT'), this, function (newValue) {
+      this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('INHIBIT'), this, function (newValue) {
         self.inhibit = self.isTrue(newValue)
         if (self.obstruction !== undefined) {
           self.obstruction.updateValue(self.isTrue(newValue), null)
@@ -117,17 +117,17 @@ class HomeMaticHomeKitBlindService extends HomeKitGenericService {
       })
     }
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('DIRECTION'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('DIRECTION'), this, function (newValue) {
       self.updatePosition(parseInt(newValue))
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('LEVEL'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('LEVEL'), this, function (newValue) {
       self.log.debug('[BLIND] set HomeKitValue to %s', newValue)
       self.currentLevel = (parseFloat(newValue) * 100)
       self.currentPos.updateValue(self.currentLevel, null)
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('WORKING'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('WORKING'), this, function (newValue) {
       // Working false will trigger a new remote query
       if (!self.isTrue(newValue)) {
         self.removeCache('LEVEL')

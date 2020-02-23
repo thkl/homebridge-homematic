@@ -191,12 +191,12 @@ class HomeKitGenericService {
 
     if (typeof dPi === 'string') {
       this.log.debug('[Generic] create new HMAddress from %s', dPi)
-      dpHmTest1 = this.transformDatapoint(dPi)
+      dpHmTest1 = this.buildHomeMaticAddress(dPi)
     }
 
     if (typeof dPTest === 'string') {
       this.log.debug('[Generic] create new HMAddress from %s', dPTest)
-      dpHmTest2 = this.transformDatapoint(dPTest)
+      dpHmTest2 = this.buildHomeMaticAddress(dPTest)
     }
 
     this.log.debug('[Generic] isDataPointEvent check %s vs %s', dpHmTest1.address(), dpHmTest2.address())
@@ -466,23 +466,23 @@ class HomeKitGenericService {
   }
 
   setCache (dp, value) {
-    let tp = this.transformDatapoint(dp)
+    let tp = this.buildHomeMaticAddress(dp)
     this.ccuManager.doCache(tp.address(), value)
   }
 
   getCache (dp) {
-    let tp = this.transformDatapoint(dp)
+    let tp = this.buildHomeMaticAddress(dp)
     return this.ccuManager.getCache(tp.address())
   }
 
   removeCache (dp) {
-    let tp = this.transformDatapoint(dp)
+    let tp = this.buildHomeMaticAddress(dp)
     this.ccuManager.removeCache(tp.address())
   }
 
   cleanVirtualDevice (dp) {
     if (this.address.indexOf('VirtualDevices.') > -1) {
-      let tp = this.transformDatapoint(dp)
+      let tp = this.buildHomeMaticAddress(dp)
       // Remove cached Date from Virtual Devices cause the do not update over rpc
       this.removeCache(tp.address())
     }
@@ -556,7 +556,7 @@ class HomeKitGenericService {
   }
 
   remoteSetDatapointValue (addressdatapoint, value, callback) {
-    let tp = this.transformDatapoint(addressdatapoint)
+    let tp = this.buildHomeMaticAddress(addressdatapoint)
     if (tp.isValid()) {
       this.log.debug('[Generic] remoteSetDatapointValue I:%s|D:%s|C:%s|:D%s  Value %s', tp.intf, tp.serial, tp.channelId, tp.dpName, value)
       this.ccuManager.setValue(tp, value)
@@ -573,16 +573,16 @@ class HomeKitGenericService {
 
   remoteGetDataPointValue (addressdatapoint, callback) {
     var self = this
-    let tp = this.transformDatapoint(addressdatapoint)
+    let tp = this.buildHomeMaticAddress(addressdatapoint)
     if (tp.isValid()) {
       // Kill cached value
       self.removeCache(addressdatapoint)
-      self.ccuManager.getValue(parts[0], parts[0] + '.' + parts[1], parts[2], newValue => {
+      self.ccuManager.getValue(tp, newValue => {
         if ((newValue !== undefined) && (newValue !== null)) {
 
         } else {
           // newValue = 0;
-          newValue = self.convertValue(parts[2], 0)
+          newValue = self.convertValue(tp.dpName, 0)
         }
 
         if (callback !== undefined) {
@@ -619,7 +619,7 @@ class HomeKitGenericService {
   remoteGetValue (dp, callback) {
     var self = this
     this.log.debug('[Generic] remoteGetValue %s', dp)
-    var tp = this.transformDatapoint(dp)
+    var tp = this.buildHomeMaticAddress(dp)
     this.log.debug('[Generic] datapoint %s', tp.dpName)
     this.log.debug('[Generic] remoteGetValue Intf:%s, Adre:%s, ChI:%s, Dp:%s', tp.intf, tp.serial, tp.channelId, tp.dpName)
 
@@ -728,7 +728,7 @@ class HomeKitGenericService {
       var tp
       // generate a homematic address if the input is a string
       if (typeof dpadress === 'string') {
-        tp = this.transformDatapoint(dpadress)
+        tp = this.buildHomeMaticAddress(dpadress)
       } else {
         tp = dpadress
       }
@@ -906,7 +906,7 @@ class HomeKitGenericService {
       // just send the command and ten return
       self.ccuManager.runScript(newValue, callback)
     } else {
-      var tp = this.transformDatapoint(dp)
+      var tp = this.buildHomeMaticAddress(dp)
       if ((tp.dpName === 'LEVEL') || (tp.dpName === 'LEVEL_2')) {
         newValue = parseFloat(newValue)
         newValue = {
@@ -943,8 +943,8 @@ class HomeKitGenericService {
     }
   }
 
-  transformDatapoint (dp) {
-    this.log.debug('[Generic] transformDatapoint %s', dp)
+  buildHomeMaticAddress (dp) {
+    this.log.debug('[Generic] buildHomeMaticAddress %s', dp)
     if (dp) {
       var pos = dp.indexOf('.')
       if (pos === -1) {

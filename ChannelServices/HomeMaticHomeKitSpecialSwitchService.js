@@ -47,7 +47,7 @@ class HomeMaticHomeKitSpecialSwitchService extends HomeKitGenericService {
         break
     }
 
-    let dpa = this.transformDatapoint('STATE')
+    let dpa = this.buildHomeMaticAddress('STATE')
     this.platform.registeraddressForEventProcessingAtAccessory(dpa, self, function (newValue) {
       let hmState = this.isTrue(newValue) ? 1 : 0
       this.onCharacteristic.updateValue(hmState, null)

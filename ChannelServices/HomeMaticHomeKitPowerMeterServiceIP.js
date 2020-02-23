@@ -106,7 +106,7 @@ class HomeMaticHomeKitPowerMeterServiceIP extends HomeKitGenericService {
 
     this.deviceaddress = this.address.slice(0, this.address.indexOf(':'))
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint(this.meterChannel + '.POWER'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress(this.meterChannel + '.POWER'), this, function (newValue) {
       self.addLogEntry({
         power: parseInt(newValue)
       })
@@ -115,22 +115,22 @@ class HomeMaticHomeKitPowerMeterServiceIP extends HomeKitGenericService {
       self.power.updateValue(self.round(newValue, 2), null)
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint(this.meterChannel + '.VOLTAGE'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress(this.meterChannel + '.VOLTAGE'), this, function (newValue) {
       self.log.debug('[PMSIP] registeraddressForEventProcessingAtAccessory Event Voltage %s', newValue)
       self.voltage.updateValue(self.round(newValue, 2), null)
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint(this.meterChannel + '.CURRENT'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress(this.meterChannel + '.CURRENT'), this, function (newValue) {
       self.log.debug('[PMSIP] registeraddressForEventProcessingAtAccessory Event Current %s', newValue)
       self.current.updateValue(self.round((newValue / 1000), 2), null)
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint(this.meterChannel + '.ENERGY_COUNTER'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress(this.meterChannel + '.ENERGY_COUNTER'), this, function (newValue) {
       self.log.debug('[PMSIP] registeraddressForEventProcessingAtAccessory Event ENERGY_COUNTER %s', newValue)
       self.powerConsumption.updateValue((self.round((newValue / 1000), 2)), null)
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint(this.switchChannel + '.STATE'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress(this.switchChannel + '.STATE'), this, function (newValue) {
       if (this.c_isOn !== undefined) {
         self.c_isOn.updateValue((self.didMatch(newValue, true)) ? 1 : 0, null)
       }

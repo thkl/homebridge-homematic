@@ -2,7 +2,7 @@
 
 const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
 class HomeMaticHomeKitSecuritySystem extends HomeKitGenericService {
-  createDeviceService(Service, Characteristic) {
+  createDeviceService (Service, Characteristic) {
     var self = this
     // Fill Servicelogic here
     var secsys = this.getService(Service.SecuritySystem)
@@ -154,7 +154,7 @@ class HomeMaticHomeKitSecuritySystem extends HomeKitGenericService {
     this.log.debug('[HKSS] initial query')
 
     // Register 3 Alarm Datapoints
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('1.STATE'), self, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('1.STATE'), self, function (newValue) {
       if (self.isTrue(newValue)) {
         self.currentState.setValue(4, null)
       } else {
@@ -162,7 +162,7 @@ class HomeMaticHomeKitSecuritySystem extends HomeKitGenericService {
       }
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('2.STATE'), self, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('2.STATE'), self, function (newValue) {
       if (self.isTrue(newValue)) {
         self.currentState.setValue(4, null)
       } else {
@@ -170,7 +170,7 @@ class HomeMaticHomeKitSecuritySystem extends HomeKitGenericService {
       }
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('3.STATE'), self, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('3.STATE'), self, function (newValue) {
       if (self.isTrue(newValue)) {
         self.currentState.setValue(4, null)
       } else {
@@ -178,7 +178,7 @@ class HomeMaticHomeKitSecuritySystem extends HomeKitGenericService {
       }
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('4.ARMSTATE'), self, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('4.ARMSTATE'), self, function (newValue) {
       self.log.debug('[HKSS] event %s', newValue)
       var cS
       var tS
@@ -209,7 +209,7 @@ class HomeMaticHomeKitSecuritySystem extends HomeKitGenericService {
       self.internalsirupdate = false
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('4.WORKING'), self, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('4.WORKING'), self, function (newValue) {
       if (!(self.isTrue(newValue))) {
         self.remoteGetValue('4.ARMSTATE')
       }

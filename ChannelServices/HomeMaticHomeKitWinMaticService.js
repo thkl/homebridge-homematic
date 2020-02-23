@@ -50,7 +50,7 @@ class HomeMaticHomeKitWinMaticService extends HomeKitGenericService {
       })
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('LEVEL'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('LEVEL'), this, function (newValue) {
       let value = parseFloat(newValue)
       if (value === -0.005) {
         value = 0
@@ -60,7 +60,7 @@ class HomeMaticHomeKitWinMaticService extends HomeKitGenericService {
       that.wpos.updateValue(2, null)
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('WORKING'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('WORKING'), this, function (newValue) {
       if (!that.isTrue(newValue)) {
         that.log.info('[WinMatic] End Working')
 

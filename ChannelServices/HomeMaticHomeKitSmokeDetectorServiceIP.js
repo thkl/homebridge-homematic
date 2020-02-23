@@ -36,7 +36,7 @@ class HomeMaticHomeKitSmokeDetectorServiceIP extends HomeKitGenericService {
         })
       })
 
-    let dpa = this.transformDatapoint('1.SMOKE_DETECTOR_ALARM_STATUS')
+    let dpa = this.buildHomeMaticAddress('1.SMOKE_DETECTOR_ALARM_STATUS')
     this.platform.registeraddressForEventProcessingAtAccessory(dpa, self, function (newValue) {
       switch (newValue) {
         case 0: // idle

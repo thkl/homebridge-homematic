@@ -15,7 +15,7 @@ class HomeMaticHomeKitWaterSensorService extends HomeKitGenericService {
       })
     this.state.eventEnabled = true
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('ALARMSTATE'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('ALARMSTATE'), this, function (newValue) {
       that.state.updateValue(that.isTrue(newValue) ? 1 : 0)
     })
   }

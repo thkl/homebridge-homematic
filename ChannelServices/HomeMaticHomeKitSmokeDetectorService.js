@@ -14,7 +14,7 @@ class HomeMaticHomeKitSmokeDetectorService extends HomeKitGenericService {
       })
     this.detectorstate.eventEnabled = true
 
-    let dpa = this.transformDatapoint('STATE')
+    let dpa = this.buildHomeMaticAddress('STATE')
     this.platform.registeraddressForEventProcessingAtAccessory(dpa, self, function (newValue) {
       self.log.debug('[SDS] event %s', newValue)
       self.detectorstate.updateValue(self.isTrue(newValue), null)

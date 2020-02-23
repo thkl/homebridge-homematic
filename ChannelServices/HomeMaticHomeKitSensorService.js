@@ -32,7 +32,7 @@ class HomeMaticHomeKitSensorService extends HomeKitGenericService {
       this.cContact.eventEnabled = true
     }
 
-    let dpa = this.transformDatapoint('SENSOR')
+    let dpa = this.buildHomeMaticAddress('SENSOR')
     this.platform.registeraddressForEventProcessingAtAccessory(dpa, self, function (newValue) {
       self.log.debug('[Sensor] event %s', newValue)
       self.addLogEntry({ status: self.isTrue(newValue) ? 1 : 0 })

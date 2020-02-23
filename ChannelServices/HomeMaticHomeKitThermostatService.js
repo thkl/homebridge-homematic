@@ -120,21 +120,21 @@ class HomeMaticHomeKitThermostatService extends HomeKitGenericService {
         if (callback) callback(null, Characteristic.TemperatureDisplayUnits.CELSIUS)
       })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('1.TEMPERATURE'), self, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('1.TEMPERATURE'), self, function (newValue) {
       self.addLogEntry({
         currentTemp: parseFloat(newValue)
       })
       self.currentTempCharacteristic.updateValue(parseFloat(newValue), null)
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('2.SETPOINT'), self, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('2.SETPOINT'), self, function (newValue) {
       self.addLogEntry({
         currentTemp: parseFloat(newValue)
       })
       self.TargetTemperatureCharacteristic.updateValue(parseFloat(newValue), null)
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('1.HUMIDITY'), self, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('1.HUMIDITY'), self, function (newValue) {
       self.addLogEntry({
         humidity: parseFloat(newValue)
       })

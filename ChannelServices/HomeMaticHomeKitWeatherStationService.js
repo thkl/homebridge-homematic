@@ -169,7 +169,7 @@ class HomeMaticHomeKitWeatherStationService extends HomeKitGenericService {
 
     this.characteristicWindRange.eventEnabled = true
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('TEMPERATURE'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('TEMPERATURE'), this, function (newValue) {
       self.currentTemperature = parseFloat(newValue)
       self.currentTemperatureCharacteristic.updateValue(parseFloat(newValue), null)
       if ((self.currentTemperature > -255) && (self.currentHumidity > -255)) {
@@ -177,7 +177,7 @@ class HomeMaticHomeKitWeatherStationService extends HomeKitGenericService {
       }
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('HUMIDITY'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('HUMIDITY'), this, function (newValue) {
       self.currentHumidity = parseFloat(newValue)
       self.currentHumidityCharacteristic.updateValue(parseFloat(newValue), null)
       if ((self.currentTemperature > -255) && (self.currentHumidity > -255)) {
@@ -185,23 +185,23 @@ class HomeMaticHomeKitWeatherStationService extends HomeKitGenericService {
       }
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('BRIGHTNESS'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('BRIGHTNESS'), this, function (newValue) {
       self.currentBrightnessCharacteristic.updateValue(parseFloat(newValue), null)
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('RAINING'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('RAINING'), this, function (newValue) {
       self.characteristicRain.updateValue(self.isTrue(newValue) ? 1 : 0)
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('WINDSPEED'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('WINDSPEED'), this, function (newValue) {
       self.characteristicWindspeed.updateValue(parseFloat(newValue), null)
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('WIND_DIRECTION'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('WIND_DIRECTION'), this, function (newValue) {
       self.characteristicWindDirection.updateValue(parseInt(newValue), null)
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.transformDatapoint('WIND_DIRECTION_RANGE'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('WIND_DIRECTION_RANGE'), this, function (newValue) {
       self.characteristicWindRange.updateValue(parseInt(newValue), null)
     })
 

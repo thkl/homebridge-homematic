@@ -29,8 +29,8 @@ describe('Homematic Plugin (index)', function () {
         var platform = new homebridgeMock.PlatformType(log, { ccu_ip: '127.0.0.1', subsection: 'HomeKit' }, homebridgeMock)
         platform.homebridge.fireHomeBridgeEvent('didFinishLaunching')
         let hmadr = new HomeMaticAddress('BidCos-RF.ABCD12345:1.STATE')
-        platform.homematicCCU.setValue_rega(hmadr, true)
-        platform.homematicCCU.getValue_rega(hmadr, function (value) {
+        platform.homematicCCU.setValueRega(hmadr, true)
+        platform.homematicCCU.getValueRega(hmadr, function (value) {
           assert.strict.equal(value, true)
         })
         done()
@@ -42,7 +42,7 @@ describe('Homematic Plugin (index)', function () {
         platform.homebridge.fireHomeBridgeEvent('didFinishLaunching')
         let hmadr = new HomeMaticAddress('BidCos-RF.ABCD12345:1.STATE')
 
-        platform.homematicCCU.setValue_rega(hmadr, true)
+        platform.homematicCCU.setValueRega(hmadr, true)
         platform.homematicCCU.getValue(hmadr, function (value) {
           assert.strict.equal(value, true)
         })

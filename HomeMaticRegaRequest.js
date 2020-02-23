@@ -2,7 +2,7 @@
 
 var http = require('http')
 
-function HomeMaticRegaRequest(log, ccuip) {
+function HomeMaticRegaRequest (log, ccuip) {
   this.log = log
   this.ccuIP = ccuip
   this.timeout = 120

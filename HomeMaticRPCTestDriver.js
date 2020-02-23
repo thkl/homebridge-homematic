@@ -119,15 +119,15 @@ HomeMaticRPCTestDriver.prototype.multicall = function (events, callback) {
               accessory.event(all, value)
             } else
 
-              if ((accessory.caddress !== undefined) && (accessory.caddress === channel)) {
-                that.log.debug('[RPC] Accessory (%s) found by accessory.caddress %s matches channel %s -> Send Event with value %s', accessory.name, accessory.caddress, channel, value)
-                accessory.event(all, value)
-              } else
+            if ((accessory.caddress !== undefined) && (accessory.caddress === channel)) {
+              that.log.debug('[RPC] Accessory (%s) found by accessory.caddress %s matches channel %s -> Send Event with value %s', accessory.name, accessory.caddress, channel, value)
+              accessory.event(all, value)
+            } else
 
-                if ((accessory.deviceaddress !== undefined) && (accessory.deviceaddress === deviceaddress) && (accessory.isMultiChannel === true)) {
-                  that.log.debug('[RPC] Accessory (%s) found -> by deviceaddress %s matches %s Send Event with value %s', accessory.name, accessory.deviceaddress, deviceaddress, value)
-                  accessory.event(all, value)
-                }
+            if ((accessory.deviceaddress !== undefined) && (accessory.deviceaddress === deviceaddress) && (accessory.isMultiChannel === true)) {
+              that.log.debug('[RPC] Accessory (%s) found -> by deviceaddress %s matches %s Send Event with value %s', accessory.name, accessory.deviceaddress, deviceaddress, value)
+              accessory.event(all, value)
+            }
           })
 
           that.platform.eventaddresses.map(function (tuple) {
