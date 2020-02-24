@@ -11,6 +11,7 @@ export class Application {
         dataType: 'json',
         url: '/api/',
         data: data,
+        method: 'POST',
         success: function (data) {
           resolve(data)
         },
@@ -49,7 +50,7 @@ export class Application {
         configurationItem.values.map(value => {
           let option = $('<option>')
           option.append(value)
-          if (value === currentValue) {
+          if (value === currentValue[controlName]) {
             option.attr('selected', 'selected')
           }
           control.append(option)
@@ -61,7 +62,7 @@ export class Application {
         control.value(currentValue)
         break
     }
-    control.attr('id', 'setting_' + controlName)
+    control.attr('id', 'service_setting_' + controlName)
     return control
   }
 
@@ -72,6 +73,34 @@ export class Application {
         parent.append(this.globalServiceList[serviceName].description)
       }
     })
+  }
+
+  showServiceSettings (parent, device, service) {
+    let self = this
+    parent.empty()
+    this.currentServiceSettings = this.settingsForDeviceAndService(device, service)
+    if (this.currentServiceSettings) {
+      this.currentServiceSettings.map(setting => {
+        Object.keys(setting).map(key => {
+          let setRow = $('<div>').addClass('row')
+          parent.append(setRow)
+          let cSetting = setting[key]
+
+          let ctrl = self.controlForConfigurationItem(key, cSetting, device.config)
+          if (ctrl) {
+            let oLbl = $('<div>').addClass('col-md-3')
+            if (cSetting.label) {
+              oLbl.append(cSetting.label)
+            } else
+            if (cSetting.hint) {
+              oLbl.append(cSetting.hint)
+            }
+            setRow.append(oLbl)
+            setRow.append($('<div>').addClass('col-md-8').append(ctrl))
+          }
+        })
+      })
+    }
   }
 
   showSettings (adr) {
@@ -88,6 +117,7 @@ export class Application {
       let c1 = $('<div>').addClass('col-md-3').append('Serviceclass')
       row.append(c1)
       let soption = $('<select>')
+      soption.attr('id', 'service_class')
       device.services.map(service => {
         let option = $('<option>').append(service.service)
         if (service.service === device.service) {
@@ -102,35 +132,49 @@ export class Application {
       let cD = $('<div>').addClass('col-md-12').addClass('settings_description').attr('id', 'settings_service_description')
       row.append(cD)
 
+      let optionContainer = $('<div>')
+      content.append(optionContainer)
+      soption.bind('change', function () {
+        let newService = soption.val()
+        self.showServiceDescription(cD, newService)
+        self.showServiceSettings(optionContainer, device, newService)
+      })
+
       self.showServiceDescription(cD, device.service)
-
-      let settings = this.settingsForDeviceAndService(device, device.service)
-      if (settings) {
-        settings.map(setting => {
-          Object.keys(setting).map(key => {
-            let setRow = $('<div>').addClass('row')
-            content.append(setRow)
-
-            let cSetting = setting[key]
-            let ctrl = self.controlForConfigurationItem(key, cSetting)
-            if (ctrl) {
-              let oLbl = $('<div>').addClass('col-md-3')
-              if (cSetting.label) {
-                oLbl.append(cSetting.label)
-              } else
-              if (cSetting.hint) {
-                oLbl.append(cSetting.hint)
-              }
-              setRow.append(oLbl)
-              setRow.append($('<div>').addClass('col-md-8').append(ctrl))
-            }
-          })
-        })
-      }
-
+      self.showServiceSettings(optionContainer, device, device.service)
+      $('#save_service').unbind()
+      $('#save_service').bind('click', function (e) {
+        self.saveSettings(device)
+      })
       $('#settings').modal({})
       $('#settings').draggable({
         handle: '.modal-header'
+      })
+    }
+  }
+
+  saveSettings (device) {
+    if (device) {
+      device.service = $('#service_class').val()
+
+      // loop thru currentServiceSettings
+      this.currentServiceSettings.map(setting => {
+        // get the value
+        Object.keys(setting).map(key => {
+          let setvalue = $('#service_setting_' + key).val()
+          device.config[key] = setvalue
+        })
+      })
+
+      let data = {
+        'address': device.address,
+        'service': device.service,
+        'config': device.config
+      }
+      this.makeApiRequest({ 'method': 'saveSettings', config: JSON.stringify(data) }).then(result => {
+        if (result === true) {
+          $('#settings').modal('hide')
+        }
       })
     }
   }

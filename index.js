@@ -56,6 +56,7 @@ class HomeMaticPlatform {
   finishedLaunching () {
     let self = this
     if (this.config) {
+      this.pluginConfig = this.config
       this.log.info('[Core] init HomeMatic Platform')
       this.localCache = path.join(this.homebridge.user.storagePath(), 'ccu.json')
       this.localPath = this.homebridge.user.storagePath()
@@ -152,7 +153,7 @@ class HomeMaticPlatform {
     this.buildAccessories()
   }
 
-  buildAccessories () {
+  buildAccessories (changedAppliance) {
     let self = this
     this.shutDownAppliances()
     this.invalidateAccessories()
@@ -171,7 +172,7 @@ class HomeMaticPlatform {
       } catch (e) {
         json = {}
       }
-      this.updateAccesories(json, internalconfig, serviceclassLoader)
+      this.updateAccesories(json, internalconfig, serviceclassLoader, changedAppliance)
     } else {
       this.log.debug('[Core] Local cache is set to %s', this.localCache)
       this.homematicCCU.fetchDevices(data => {
@@ -183,14 +184,15 @@ class HomeMaticPlatform {
           json = this.homematicCCU.loadCachedDevices()
         }
         this.log.debug('[Core] Building Accessories')
-        this.updateAccesories(json, internalconfig, serviceclassLoader)
+        this.updateAccesories(json, internalconfig, serviceclassLoader, changedAppliance)
       })
     }
   }
 
   /* TODO CLEAN UP THIS MESS */
 
-  updateAccesories (homematicObjects, internalconfig, serviceclassLoader) {
+  updateAccesories (homematicObjects, internalconfig, serviceclassLoader, changedAppliance) {
+    this.log.debug('[Core] updateAccesories changed : %s', changedAppliance)
     this.newAccessories = []
     let Service = this.homebridge.hap.Service
     let Characteristic = this.homebridge.hap.Characteristic
@@ -244,7 +246,17 @@ class HomeMaticPlatform {
 
               let uuid = UUID.generate(ch.address)
               self.log.debug('UUID for %s is %s', ch.address, uuid)
-              var hkAccessory = this.accessories[uuid]
+              var hkAccessory = self.accessories[uuid]
+
+              // if the appliance was changed remove the old accessory
+              self.log.debug('[core] check %s vs %s', ch.address, changedAppliance)
+              if ((hkAccessory) && (changedAppliance === ch.address)) {
+                self.log.debug('[Core] remove old accessory')
+                self.homebridge.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [hkAccessory])
+                self.accessories[uuid] = undefined
+                hkAccessory = undefined
+              }
+
               if (!hkAccessory) {
                 let name = ch.name.replace(/[.:#_()-]/g, ' ')
                 self.log.debug('[Core] Build a new Accessory with name %s', name)
@@ -444,7 +456,6 @@ class HomeMaticPlatform {
     process.env.UIX_CONFIG_PATH = this.homebridge.user.configPath()
     process.env.UIX_STORAGE_PATH = this.homebridge.user.storagePath()
     process.env.UIX_PLUGIN_NAME = this.config.name || PLUGIN_NAME
-
     this.configUI = childProcess.fork(path.resolve(__dirname, 'PluginConfigurationService'), null, {
       env: process.env
     })
@@ -459,7 +470,8 @@ class HomeMaticPlatform {
     if ((message) && (message.topic)) {
       switch (message.topic) {
         case 'reloadApplicances':
-          this.buildAccessories()
+          this.mergeConfig()
+          this.buildAccessories(message.changed)
           break
         case 'reconnectCCU':
           this.homematicCCU.reloadConfig()
@@ -508,6 +520,8 @@ class HomeMaticPlatform {
   mergeConfig (callback) {
     if (fs.existsSync(this.localHomematicConfig)) {
       let self = this
+      // use the stored plugin config and add the homematic_config.json stuff
+      self.config = self.pluginConfig
       let data = fs.readFileSync(this.localHomematicConfig).toString()
       let myConfig = JSON.parse(data)
       this.log.info('[Core] merging configurations')

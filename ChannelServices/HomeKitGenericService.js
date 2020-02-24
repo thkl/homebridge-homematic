@@ -9,111 +9,114 @@ const HomeMaticAddress = require(path.join(__dirname, '..', 'HomeMaticAddress.js
 class HomeKitGenericService {
   constructor (accessory, log, platform, id, name, type, address, special, cfg, Service, Characteristic, deviceType) {
     log.debug('[Generic] constructor for %s with type %s', address, deviceType)
-    this.accessory = accessory
-    this.name = name
-    this.displayName = name
-    this.type = type
-    this.deviceType = deviceType
-
-    if (address === undefined) {
-      log.warn('Device Address for %s is undefined this will end up in a desaster', name)
-    }
-
-    this.address = address
-    this.deviceaddress = undefined
     this.log = log
+    // only launch the complete stuff if there is a platform (we do need the classes also for validation of webservice config )
+    if (platform) {
+      this.accessory = accessory
+      this.name = name
+      this.displayName = name
+      this.type = type
+      this.deviceType = deviceType
 
-    // Build Deviceaddress
-
-    let rgx = /([a-zA-Z0-9-]{1,}).([a-zA-Z0-9-]{1,}):([0-9]{1,})/g
-    let parts = rgx.exec(address)
-    if ((parts) && (parts.length > 3)) {
-      this.intf = parts[1]
-      this.serial = parts[2]
-      this.channelnumber = parts[3]
-      this.deviceaddress = this.intf + '.' + this.serial
-    } else {
-      this.log.warn('Unable to parse device address %s so nothing will work for %s', address, name)
-    }
-
-    this.platform = platform
-    this.ccuManager = platform.homematicCCU
-    /** deprecate this */
-    this.state = []
-    this.eventupdate = false
-    this.special = special
-    this.currentStateCharacteristic = []
-    this.datapointMappings = []
-    this.homeMaticDatapoints = []
-    this.timer = []
-    this.services = []
-    this.usecache = true
-    this.caddress = undefined
-    this.cfg = cfg
-    this.isWorking = false
-    this.ignoreWorking = false // ignores the working=true flag and sets the value every time an event happends
-    this.myDataPointName = undefined
-    this.i_characteristic = {}
-    this.intf = cfg['interface']
-    this.datapointvaluefactors = {}
-    this.readOnly = false
-    this.lowBat = false
-    this.lowBatCharacteristic = undefined
-    this.accessoryName = this.name
-    this.tampered = false
-    this.tamperedCharacteristic = undefined
-    this.delayOnSet = 0
-    this.runsInTestMode = (typeof global.it === 'function')
-    this.persistentStates = {}
-    // will be false in Switches or so which are only one channel devices
-    // will fix https://github.com/thkl/homebridge-homematic/issues/485
-    this.isMultiChannel = true
-    var self = this
-
-    if (self.address.indexOf('CUxD.') > -1) {
-      this.usecache = false
-    }
-
-    if ((cfg !== undefined) && (cfg['combine'] !== undefined)) {
-      var src = cfg['combine']['source']
-      var trg = cfg['combine']['target']
-      if (this.address.indexOf(src) > -1) {
-        this.caddress = this.address.replace(src, trg)
+      if (address === undefined) {
+        log.warn('Device Address for %s is undefined this will end up in a desaster', name)
       }
-    }
 
-    this.informationService =
+      this.address = address
+      this.deviceaddress = undefined
+
+      // Build Deviceaddress
+
+      let rgx = /([a-zA-Z0-9-]{1,}).([a-zA-Z0-9-]{1,}):([0-9]{1,})/g
+      let parts = rgx.exec(address)
+      if ((parts) && (parts.length > 3)) {
+        this.intf = parts[1]
+        this.serial = parts[2]
+        this.channelnumber = parts[3]
+        this.deviceaddress = this.intf + '.' + this.serial
+      } else {
+        this.log.warn('Unable to parse device address %s so nothing will work for %s', address, name)
+      }
+
+      this.platform = platform
+      this.ccuManager = platform.homematicCCU
+      /** deprecate this */
+      this.state = []
+      this.eventupdate = false
+      this.special = special
+      this.currentStateCharacteristic = []
+      this.datapointMappings = []
+      this.homeMaticDatapoints = []
+      this.timer = []
+      this.services = []
+      this.usecache = true
+      this.caddress = undefined
+      this.cfg = cfg
+      this.isWorking = false
+      this.ignoreWorking = false // ignores the working=true flag and sets the value every time an event happends
+      this.myDataPointName = undefined
+      this.i_characteristic = {}
+      this.intf = cfg['interface']
+      this.datapointvaluefactors = {}
+      this.readOnly = false
+      this.lowBat = false
+      this.lowBatCharacteristic = undefined
+      this.accessoryName = this.name
+      this.tampered = false
+      this.tamperedCharacteristic = undefined
+      this.delayOnSet = 0
+      this.runsInTestMode = (typeof global.it === 'function')
+      this.persistentStates = {}
+      // will be false in Switches or so which are only one channel devices
+      // will fix https://github.com/thkl/homebridge-homematic/issues/485
+      this.isMultiChannel = true
+      var self = this
+
+      if (self.address.indexOf('CUxD.') > -1) {
+        this.usecache = false
+      }
+
+      if ((cfg !== undefined) && (cfg['combine'] !== undefined)) {
+        var src = cfg['combine']['source']
+        var trg = cfg['combine']['target']
+        if (this.address.indexOf(src) > -1) {
+          this.caddress = this.address.replace(src, trg)
+        }
+      }
+
+      this.informationService =
       this.accessory.getService(Service.AccessoryInformation)
 
-    this.informationService
-      .setCharacteristic(Characteristic.Manufacturer, 'EQ-3')
-      .setCharacteristic(Characteristic.Model, this.type)
-      .setCharacteristic(Characteristic.Name, this.name)
-      .setCharacteristic(Characteristic.SerialNumber, this.address)
+      this.informationService
+        .setCharacteristic(Characteristic.Manufacturer, 'EQ-3')
+        .setCharacteristic(Characteristic.Model, this.type)
+        .setCharacteristic(Characteristic.Name, this.name)
+        .setCharacteristic(Characteristic.SerialNumber, this.address)
 
-    if (this.propagateServices !== undefined) {
-      this.propagateServices(platform, Service, Characteristic)
-    }
-
-    // init old storage data
-    if (this.deviceaddress !== undefined) {
-      this.persistFile = path.join(this.platform.localPath, this.deviceaddress) + '.pstor'
-      this.log.debug('[Generic] Pstore for %s is %s', this.deviceaddress, this.persistFile)
-      if (fs.existsSync(this.persistFile)) {
-        try {
-          var buffer = fs.readFileSync(this.persistFile)
-          this.persistentStates = JSON.parse(buffer.toString())
-        } catch (e) {
-          this.log.error(e)
-        }
-      } else {
-        this.log.debug('[Generic] File doesnt exists. Will create a new one on the first etry')
+      if (this.propagateServices !== undefined) {
+        this.propagateServices(platform, Service, Characteristic)
       }
-    }
 
-    this.accessory.on('identify', this.callbackify(this.identify))
-    this.createDeviceService(Service, Characteristic)
-    this.serviceDidCreated()
+      // init old storage data
+      if (this.deviceaddress !== undefined) {
+        this.persistFile = path.join(this.platform.localPath, this.deviceaddress) + '.pstor'
+        this.log.debug('[Generic] Pstore for %s is %s', this.deviceaddress, this.persistFile)
+        if (fs.existsSync(this.persistFile)) {
+          try {
+            var buffer = fs.readFileSync(this.persistFile)
+            this.persistentStates = JSON.parse(buffer.toString())
+          } catch (e) {
+            this.log.error(e)
+          }
+        } else {
+          this.log.debug('[Generic] File doesnt exists. Will create a new one on the first etry')
+        }
+      }
+
+      this.accessory.on('identify', this.callbackify(this.identify))
+      this.createDeviceService(Service, Characteristic)
+      this.serviceDidCreated()
+    }
   }
 
   getService (serviceType) {
@@ -1085,6 +1088,15 @@ class HomeKitGenericService {
     }
 
     return false
+  }
+
+  // used for webConfig
+  validateConfig (configuration) {
+    return true
+  }
+
+  configItems () {
+    return []
   }
 }
 

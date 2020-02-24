@@ -28,7 +28,7 @@ function Logger (prefix) {
 }
 
 Logger.prototype.setDebugEnabled = function (enabled) {
-  DEBUG_ENABLED = true
+  DEBUG_ENABLED = enabled
 }
 
 Logger.prototype.debug = function (msg) {
