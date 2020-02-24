@@ -16,7 +16,19 @@ describe('Homematic Plugin (index)', function () {
   let data = fs.readFileSync(datapath).toString()
   let that = this
 
-  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data, valves: ['BidCos-RF.ABC1234560:1'] }
+  var config = { ccu_ip: '127.0.0.1',
+    subsection: 'HomeKit',
+    testdata: data,
+    services: [
+      {
+        'type': 'ABC1234560:1',
+        'service': 'HomeMaticHomeKitValveService',
+        'options': {
+          'valvetype': 'Shower head'
+        }
+      }
+    ]
+  }
   var platform = new homebridgeMock.PlatformType(log, config, homebridgeMock)
 
   before(function () {
@@ -42,7 +54,7 @@ describe('Homematic Plugin (index)', function () {
       // Check the correct type for AC1
       let ac = that.accessories[0]
       let s = ac.getService(Service.Valve)
-      assert.ok(s, '%s is not Service.Valve !', ac.name)
+      assert.ok(s, 'this is not Service.Valve !')
       // Check Initial Remain Time -> 0
       assert.strict.equal(ac.appliance.remainTime, 0, 'Time remain is not 0')
       done()

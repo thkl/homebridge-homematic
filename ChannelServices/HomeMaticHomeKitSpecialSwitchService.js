@@ -19,6 +19,7 @@ class HomeMaticHomeKitSpecialSwitchService extends HomeKitGenericService {
     this.address = this.intf + '.' + raw[2] + ':' + this.channel
     this.log.debug('[SpecialSwitch] Init (%s) at Interface %s address %s Channel %s', this.switchtype, this.intf, this.address, this.channel)
     */
+    this.log.debug('[SpSwitch] type is %s', this.switchtype)
     switch (this.switchtype) { // hahaha
       case 'Fan':
         this.service = this.getService(Service.Fan)
@@ -75,6 +76,18 @@ class HomeMaticHomeKitSpecialSwitchService extends HomeKitGenericService {
           }
         })
       })
+  }
+
+  validateConfig (configuration) {
+    // things to check
+    // switchtype has to be one of this items : 'Outlet', 'Lightbulb', 'Switch', 'Fan'
+    return ((configuration) &&
+    (configuration.switchtype) &&
+    (['Outlet', 'Lightbulb', 'Switch', 'Fan'].indexOf(configuration.switchtype) > -1))
+  }
+
+  configItems () {
+    return ['switchtype']
   }
 }
 

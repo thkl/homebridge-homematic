@@ -1,12 +1,9 @@
 'use strict'
 
-const path = require('path')
-const fs = require('fs')
 const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
 
 class HomeMaticHomeKitSwitchService extends HomeKitGenericService {
   createDeviceService (Service, Characteristic) {
-    let self = this
     this.ignoreWorking = true
     this.usecache = false
     // disable multi channel mode so HomeMaticRPC will not check device address on events
@@ -16,26 +13,6 @@ class HomeMaticHomeKitSwitchService extends HomeKitGenericService {
     if (this.special === 'PROGRAM') {
       this.log.debug('[Switch Service] Creating Program Service')
       this.createProgrammService(Service, Characteristic)
-    } else
-
-    if (this.special === 'VALVE') {
-      let strPath = path.join(this.platform.localPath, this.address) + '.json'
-      if (fs.existsSync(strPath)) {
-        let data = fs.readFileSync(strPath).toString()
-        if (data !== undefined) {
-          try {
-            var jData = JSON.parse(data)
-            this.setDuration = jData['duration']
-          } catch (e) {
-            this.setDuration = 0
-          }
-        } else {
-          this.setDuration = 0
-        }
-      }
-      self.remainTime = 0
-      this.createValveService(Service, Characteristic)
-      this.registerEvents()
     } else
 
     if (this.special === 'OUTLET') {
@@ -54,16 +31,6 @@ class HomeMaticHomeKitSwitchService extends HomeKitGenericService {
     this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('STATE'), self, function (newValue) {
       let hmState = this.isTrue(newValue) ? 1 : 0
       self.log.debug('[Switch Service] Event result %s hm %s', newValue, hmState)
-      if (hmState === 0) {
-        self.remainTime = 0
-        if (self.c_timeRemain !== undefined) {
-          self.c_timeRemain.updateValue(self.remainTime, null)
-        }
-      }
-
-      if (self.c_isActive !== undefined) {
-        self.c_isActive.updateValue(hmState, null)
-      }
 
       if (self.c_isOn !== undefined) {
         self.c_isOn.updateValue(hmState, null)
@@ -169,138 +136,9 @@ class HomeMaticHomeKitSwitchService extends HomeKitGenericService {
       })
   }
 
-  createValveService (Service, Characteristic) {
-    let self = this
-    this.service_item = this.getService(Service.Valve)
-    this.remainTime = -99
-
-    this.configured = this.service_item.getCharacteristic(Characteristic.IsConfigured)
-      .on('get', function (callback) {
-        callback(null, Characteristic.IsConfigured.CONFIGURED)
-      })
-
-    this.configured.updateValue(Characteristic.IsConfigured.CONFIGURED, null)
-
-    // Load ValveType from parameters #268
-    // Characteristic.ValveType.GENERIC_VALVE = 0;
-    // Characteristic.ValveType.IRRIGATION = 1;
-    // Characteristic.ValveType.SHOWER_HEAD = 2;
-    // Characteristic.ValveType.WATER_FAUCET = 3;
-    let types = this.getClazzConfigValue('types', undefined)
-    this.log.debug(types)
-    var vtype = Characteristic.ValveType.IRRIGATION
-    if (types !== undefined) {
-      if (types[this.address] !== undefined) {
-        vtype = types[this.address]
-      }
-      if (vtype > 3) {
-        vtype = 0
-      }
-    }
-
-    this.valveType = this.service_item.getCharacteristic(Characteristic.ValveType)
-      .on('get', function (callback) {
-        callback(null, vtype)
-      })
-
-    this.valveType.updateValue(vtype, null)
-
-    this.setDurationCharacteristic = this.service_item.getCharacteristic(Characteristic.SetDuration)
-      .on('get', function (callback) {
-        self.log.debug('[Switch Service] get Characteristic.SetDuration')
-        callback(null, self.setDuration)
-      })
-
-      .on('set', function (value, callback) {
-        self.setDuration = value
-        self.log.debug('[Switch Service] set Characteristic.SetDuration %s', value)
-
-        let strPath = path.join(self.platform.localPath, self.address) + '.json'
-        fs.writeFileSync(strPath, JSON.stringify({
-          duration: self.setDuration
-        }))
-
-        callback()
-      })
-
-    this.c_isActive = this.service_item.getCharacteristic(Characteristic.Active)
-      .on('get', function (callback) {
-        self.log.debug('get Active')
-        self.query('STATE', function (value) {
-          let hmState = self.isTrue(value) ? 1 : 0
-          if (callback) callback(null, hmState)
-        })
-      })
-
-      .on('set', function (value, callback) {
-        if (value === 0) {
-          self.command('setrega', 'STATE', 0)
-          self.remainTime = 0
-          clearTimeout(self.valveTimer)
-          callback()
-        } else {
-          self.remainTime = (self.setDuration) ? self.setDuration : 0
-          self.isInUse = 1
-          if (self.remainTime > 0) {
-            self.command('setrega', 'ON_TIME', self.remainTime, function () {
-              self.command('setrega', 'STATE', 1)
-              self.updateValveTimer()
-              callback()
-            })
-          } else {
-            self.command('setrega', 'STATE', 1)
-            callback()
-          }
-        }
-      })
-
-    this.c_isActive.updateValue(Characteristic.Active.ACTIVE, null)
-
-    this.c_isInUse = this.service_item.getCharacteristic(Characteristic.InUse)
-      .on('get', function (callback) {
-        self.log.debug('get Active')
-        self.query('STATE', function (value) {
-          let hmState = self.isTrue(value) ? 1 : 0
-          if (callback) callback(null, hmState)
-        })
-      })
-
-      .on('set', function (value, callback) {
-        self.isInUse = value
-        callback()
-      })
-
-    this.c_timeRemain = this.service_item.getCharacteristic(Characteristic.RemainingDuration)
-      .on('get', function (callback) {
-        callback(null, self.remainTime)
-      })
-  }
-
-  updateValveTimer () {
-    let self = this
-    if (this.remainTime === 0) {
-      return
-    }
-
-    this.remainTime = this.remainTime - 1
-    // SET OFF
-    if (this.remainTime === 0) {
-      self.command('setrega', 'STATE', 0)
-      clearTimeout(this.valveTimer)
-      self.remoteGetValue('STATE')
-    }
-    this.c_timeRemain.updateValue(this.remainTime, null)
-    this.valveTimer = setTimeout(function () {
-      self.updateValveTimer()
-    }, 1000)
-  }
-
   shutdown () {
     this.log.debug('[SWITCH] shutdown')
     super.shutdown()
-    HomeKitGenericService.prototype.shutdown.call(this)
-    clearTimeout(this.refreshTimer)
-    clearTimeout(this.valveTimer)
   }
 }
 

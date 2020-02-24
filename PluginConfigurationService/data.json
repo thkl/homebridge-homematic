@@ -37,6 +37,28 @@
             }
         ]
     },
+    "HomeMaticHomeKitValveService": {
+        "ChannelType": [
+            "SWITCH",
+            "SWITCH_VIRTUAL_RECEIVER"
+        ],
+        "description":"Provides a Homekit Valve for sprinklers or so",
+        "Configuration": [
+            {
+                "valvetype": {
+                    "label": "Type",
+                    "control": "array",
+                    "values": [
+                       "Generic valve",
+                       "Irrigation",
+                       "Shower head",
+                       "Water faucet"
+                    ],
+                    "hint": "Icon to use for this actor"
+                }
+            }
+        ]
+    },
     "HomeMaticHomeKitDimmerService": {
         "ChannelType": [
             "DIMMER",
