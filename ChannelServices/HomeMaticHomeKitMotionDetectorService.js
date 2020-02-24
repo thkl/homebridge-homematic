@@ -6,16 +6,22 @@ const EveHomeKitTypes = require('./EveHomeKitTypes.js')
 let eve
 
 class HomeMaticHomeKitMotionDetectorService extends HomeKitGenericService {
-  createDeviceService(Service, Characteristic) {
+  createDeviceService (Service, Characteristic) {
     var self = this
 
-    this.enableLoggingService('motion', false)
+    this.historyEnabled = this.getClazzConfigValue('enable_history', false)
+
+    if (this.historyEnabled === true) {
+      this.enableLoggingService('motion')
+    }
 
     var sensor = this.getService(Service.MotionSensor)
     this.state = sensor.getCharacteristic(Characteristic.MotionDetected)
       .on('get', function (callback) {
         self.query('MOTION', function (value) {
-          self.addLogEntry({ status: (value === true) ? 1 : 0 })
+          if ((self.historyEnabled === true) && (self.loggingService)) {
+            self.addLogEntry({ status: (value === true) ? 1 : 0 })
+          }
           if (callback) callback(null, value)
         })
       })
@@ -49,11 +55,11 @@ class HomeMaticHomeKitMotionDetectorService extends HomeKitGenericService {
       }.bind(this))
     this.CharacteristicLastActivation.setValue(this.lastActivation)
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.address + '.BRIGHTNESS', this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('BRIGHTNESS'), this, function (newValue) {
       self.cbright.updateValue(newValue, null) // calculation lux from HM Values is done in HomeKitGenericService.js via ... Math.pow(10, (value/51))
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.address + '.MOTION', this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('MOTION'), this, function (newValue) {
       self.state.updateValue(newValue, null)
       self.addLogEntry({ status: (newValue === true) ? 1 : 0 })
       if (newValue === true) {
@@ -65,6 +71,18 @@ class HomeMaticHomeKitMotionDetectorService extends HomeKitGenericService {
         }
       }
     })
+  }
+
+  validateConfig (configuration) {
+    // things to check
+    return ((configuration) &&
+    (configuration.enable_history) &&
+    ([true, false].indexOf(configuration.enable_history) > -1)
+    )
+  }
+
+  configItems () {
+    return ['enable_history']
   }
 }
 
