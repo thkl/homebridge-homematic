@@ -195,7 +195,6 @@ class HomeMaticHomeKitValveService extends HomeKitGenericService {
     super.shutdown()
     clearTimeout(this.valveTimer)
   }
-
   validateConfig (configuration) {
     // things to check
     // valvetype has to be one of this items : 'Generic valve', 'Irrigation', 'Shower head', 'Water faucet'

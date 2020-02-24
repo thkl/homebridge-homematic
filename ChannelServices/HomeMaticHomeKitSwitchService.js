@@ -6,6 +6,7 @@ class HomeMaticHomeKitSwitchService extends HomeKitGenericService {
   createDeviceService (Service, Characteristic) {
     this.ignoreWorking = true
     this.usecache = false
+
     // disable multi channel mode so HomeMaticRPC will not check device address on events
     this.isMultiChannel = false
     this.delayOnSet = 1000
@@ -13,17 +14,11 @@ class HomeMaticHomeKitSwitchService extends HomeKitGenericService {
     if (this.special === 'PROGRAM') {
       this.log.debug('[Switch Service] Creating Program Service')
       this.createProgrammService(Service, Characteristic)
-    } else
-
-    if (this.special === 'OUTLET') {
-      this.createOutletService(Service, Characteristic)
-      this.addCoreSwitchFunctions(Service, Characteristic)
-      this.registerEvents()
     } else {
       this.createLightBulbService(Service, Characteristic)
       this.addCoreSwitchFunctions(Service, Characteristic)
-      this.registerEvents()
     }
+    this.registerEvents()
   }
 
   registerEvents () {
@@ -96,6 +91,12 @@ class HomeMaticHomeKitSwitchService extends HomeKitGenericService {
             self.log.debug('[Switch Service] set on')
             self.delayed('set', 'STATE', true)
           }
+
+          if (self.historyEnabled === true) {
+            self.addLogEntry({
+              status: (self.isTrue(value)) ? 1 : 0
+            })
+          }
         } else {
           self.log.debug('[Switch Service] ignore Device is readonly')
         }
@@ -126,14 +127,6 @@ class HomeMaticHomeKitSwitchService extends HomeKitGenericService {
   createLightBulbService (Service, Characteristic) {
     this.log.debug('[Switch Service] createLightBulbService')
     this.service_item = this.getService(Service.Lightbulb)
-  }
-
-  createOutletService (Service, Characteristic) {
-    this.service_item = this.getService(Service.Outlet)
-    this.outletinuse = this.service_item.getCharacteristic(Characteristic.OutletInUse)
-      .on('get', function (callback) {
-        if (callback) callback(null, 1)
-      })
   }
 
   shutdown () {

@@ -10,8 +10,10 @@
             "SWITCH_VIRTUAL_RECEIVER",
             "RAINDETECTOR_HEAT"
         ],
-        "Configuration": [],
-        "description": "Provides a Homekit switch. There are no additional settings."
+        "Configuration": [
+            
+        ],
+        "description": "Provides a Homekit Lightbulb. There are no additional settings."
     },
     "HomeMaticHomeKitSpecialSwitchService": {
         "ChannelType": [
@@ -32,7 +34,14 @@
                         "Switch",
                         "Fan"
                     ],
-                    "hint": "Icon to use for this actor"
+                    "hint": "Subtype for this actor"
+                }
+            },
+            {
+                "enable_history": {
+                    "label": "Enable Eve History",
+                    "control": "boolean",
+                    "hint": "History only works for type Switch"
                 }
             }
         ]
@@ -54,7 +63,7 @@
                        "Shower head",
                        "Water faucet"
                     ],
-                    "hint": "Icon to use for this actor"
+                    "hint": "Subtype for this valve"
                 }
             }
         ]
@@ -147,7 +156,8 @@
             {
              "enable_history": {
                  "label": "Enable Eve History",
-                 "control": "boolean"
+                 "control": "boolean",
+                 "hint": "History will not work for type Contact"
              }
             }
         ],
@@ -157,7 +167,14 @@
         "ChannelType": [
             "MOTION_DETECTOR"
         ],
-        "Configuration": [],
+        "Configuration": [
+            {
+                "enable_history": {
+                    "label": "Enable Eve History",
+                    "control": "boolean"
+                }
+            }
+        ],
         "description": ""
     },
     "HomeMaticHomeKitMotionDetectorServiceIP": {
@@ -165,7 +182,14 @@
             "ACCELERATION_TRANSCEIVER",
             "MOTIONDETECTOR_TRANSCEIVER"
         ],
-        "Configuration": [],
+        "Configuration": [
+            {
+                "enable_history": {
+                    "label": "Enable Eve History",
+                    "control": "boolean"
+                }
+            }
+        ],
         "description": ""
     },
     "HomeMaticHomeKitSmokeDetectorService": {

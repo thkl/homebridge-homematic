@@ -96,15 +96,19 @@ export class Application {
 
           let ctrl = self.controlForConfigurationItem(key, cSetting, device.config)
           if (ctrl) {
-            let oLbl = $('<div>').addClass('col-md-3')
+            let oLbl = $('<div>').addClass('col-md-4')
             if (cSetting.label) {
               oLbl.append(cSetting.label)
-            } else
-            if (cSetting.hint) {
-              oLbl.append(cSetting.hint)
             }
             setRow.append(oLbl)
-            setRow.append($('<div>').addClass('col-md-8').append(ctrl))
+            setRow.append($('<div>').addClass('col-md-7').append(ctrl))
+            if (cSetting.hint) {
+              let hintRow = $('<div>').addClass('row')
+              let hintCell = $('<div>').addClass('col-md-12').addClass('settings_description')
+              hintCell.append(cSetting.hint)
+              hintRow.append(hintCell)
+              parent.append(hintRow)
+            }
           }
         })
       })
@@ -122,7 +126,7 @@ export class Application {
       // First show possible Services
       var row = $('<div>').addClass('row')
       content.append(row)
-      let c1 = $('<div>').addClass('col-md-3').append('Serviceclass')
+      let c1 = $('<div>').addClass('col-md-4').append('Serviceclass')
       row.append(c1)
       let soption = $('<select>')
       soption.attr('id', 'service_class')
@@ -133,7 +137,7 @@ export class Application {
         }
         soption.append(option)
       })
-      let c2 = $('<div>').addClass('col-md-8').append(soption)
+      let c2 = $('<div>').addClass('col-md-7').append(soption)
       row.append(c2)
       row = $('<div>').addClass('row')
       content.append(row)

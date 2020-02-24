@@ -89,7 +89,7 @@ class HomeMaticHomeKitRotaryHandleService extends HomeKitGenericService {
 
     this.cdoor.eventEnabled = true
     if (this.historyEnabled === true) {
-      this.addEveStuff(window)
+      this.addEveStuff(door)
     }
   }
 

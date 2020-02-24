@@ -11,6 +11,9 @@ class HomeMaticHomeKitSpecialSwitchService extends HomeKitGenericService {
     this.switchtype = this.getClazzConfigValue('switchtype', 'Lightbulb')
     let self = this
     this.isMultiChannel = false
+
+    this.historyEnabled = this.getClazzConfigValue('enable_history', false)
+
     // build interface and address
     /*
     let raw = channel.split(new RegExp('([a-z-]{1,}).([a-z0-9]{1,}):([0-9]{1,})', 'gmi'))
@@ -44,6 +47,9 @@ class HomeMaticHomeKitSpecialSwitchService extends HomeKitGenericService {
       case 'Switch':
         this.service = this.getService(Service.Switch)
         this.addisOnCharacteristic(Characteristic.On)
+        if (this.historyEnabled === true) {
+          this.enableLoggingService('switch', false)
+        }
 
         break
     }
@@ -52,6 +58,13 @@ class HomeMaticHomeKitSpecialSwitchService extends HomeKitGenericService {
     this.platform.registeraddressForEventProcessingAtAccessory(dpa, self, function (newValue) {
       let hmState = this.isTrue(newValue) ? 1 : 0
       this.onCharacteristic.updateValue(hmState, null)
+
+      if ((self.historyEnabled === true) && (self.loggingService)) {
+        self.log.debug('[Switch Service] add new log entry')
+        self.addLogEntry({
+          status: (self.isTrue(newValue)) ? 1 : 0
+        })
+      }
     })
   }
 
@@ -68,6 +81,12 @@ class HomeMaticHomeKitSpecialSwitchService extends HomeKitGenericService {
         let evtmp = self.eventupdate
         self.eventupdate = false
 
+        if ((self.historyEnabled === true) && (self.loggingService)) {
+          self.addLogEntry({
+            status: (self.isTrue(value)) ? 1 : 0
+          })
+        }
+
         self.log.debug('[SpecialSwitch] Set Command %s', value)
         self.command('setrega', 'STATE', (value === true), function () {
           self.eventupdate = evtmp
@@ -83,11 +102,14 @@ class HomeMaticHomeKitSpecialSwitchService extends HomeKitGenericService {
     // switchtype has to be one of this items : 'Outlet', 'Lightbulb', 'Switch', 'Fan'
     return ((configuration) &&
     (configuration.switchtype) &&
-    (['Outlet', 'Lightbulb', 'Switch', 'Fan'].indexOf(configuration.switchtype) > -1))
+    (['Outlet', 'Lightbulb', 'Switch', 'Fan'].indexOf(configuration.switchtype) > -1) &&
+    (configuration.enable_history) &&
+    ([true, false].indexOf(configuration.enable_history) > -1)
+    )
   }
 
   configItems () {
-    return ['switchtype']
+    return ['switchtype', 'enable_history']
   }
 }
 
