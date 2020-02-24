@@ -183,8 +183,9 @@ class HomeMaticPlatform {
         if ((json === undefined) && (self.localCache !== undefined)) {
           json = this.homematicCCU.loadCachedDevices()
         }
-        this.log.debug('[Core] Building Accessories')
+        this.log.info('[Core] Publishing Accessories')
         this.updateAccesories(json, internalconfig, serviceclassLoader, changedAppliance)
+        this.log.info('[Core] %s accessories published', Object.keys(this.accessories).length)
       })
     }
   }
@@ -229,19 +230,19 @@ class HomeMaticPlatform {
             if ((ch.address !== undefined) && (!isChannelFiltered)) {
               // Switch found
               // Check if marked as Outlet or Door
-              let special
+              let special // just here for historic reasons
               if ((self.outlets !== undefined) && (self.outlets.indexOf(ch.address) > -1)) {
-                special = 'OUTLET'
+                self.log.warn('[DEPRECATED] the use of the config.json OUTLET key is deprecated. please setup %s via webconfig', ch.address)
               }
               if ((self.doors !== undefined) && (self.doors.indexOf(ch.address) > -1)) {
-                special = 'DOOR'
+                self.log.warn('[DEPRECATED] the use of the config.json DOORS key is deprecated. please setup %s via webconfig', ch.address)
               }
               if ((self.windows !== undefined) && (self.windows.indexOf(ch.address) > -1)) {
-                special = 'WINDOW'
+                self.log.warn('[DEPRECATED] the use of the config.json WINDOW key is deprecated. please setup %s via webconfig', ch.address)
               }
 
               if ((self.valves !== undefined) && (self.valves.indexOf(ch.address) > -1)) {
-                special = 'VALVE'
+                self.log.warn('[DEPRECATED] the use of the config.json VALVE key is deprecated. please setup %s via webconfig', ch.address)
               }
 
               let uuid = UUID.generate(ch.address)

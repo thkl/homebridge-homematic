@@ -17,7 +17,7 @@ class HomeMaticCCU {
     this.timer = 0
     this.isInTest = isInTest
     if (this.isInTest === false) {
-      this.log.info('[CCUManager] Manager initialized at %s', this.ccuIP)
+      this.log.info('[CCUManager] Manager initialized at %s', this.config.ccu_ip)
     }
   }
 
