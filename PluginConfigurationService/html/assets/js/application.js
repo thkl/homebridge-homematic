@@ -59,7 +59,15 @@ export class Application {
       case 'text':
         control = $('<input>')
         control.attr('type', 'text')
-        control.value(currentValue)
+        control.val(currentValue)
+        break
+      case 'boolean':
+        control = $('<input>')
+        control.attr('type', 'checkbox')
+        if (currentValue[controlName] === true) {
+          control.attr('checked', 'checked')
+        }
+        control.val(true)
         break
     }
     control.attr('id', 'service_setting_' + controlName)
@@ -154,6 +162,7 @@ export class Application {
   }
 
   saveSettings (device) {
+    let self = this
     if (device) {
       device.service = $('#service_class').val()
 
@@ -161,7 +170,16 @@ export class Application {
       this.currentServiceSettings.map(setting => {
         // get the value
         Object.keys(setting).map(key => {
-          let setvalue = $('#service_setting_' + key).val()
+          let ctrl = setting[key].control
+          var setvalue
+          switch (ctrl) {
+            case 'boolean':
+              setvalue = $('#service_setting_' + key).prop('checked')
+              break
+            default:
+              setvalue = $('#service_setting_' + key).val()
+              break
+          }
           device.config[key] = setvalue
         })
       })
@@ -174,6 +192,9 @@ export class Application {
       this.makeApiRequest({ 'method': 'saveSettings', config: JSON.stringify(data) }).then(result => {
         if (result === true) {
           $('#settings').modal('hide')
+          setTimeout(function () {
+            self.queryServices()
+          }, 10000)
         }
       })
     }
@@ -257,7 +278,7 @@ export class Application {
 
         setTimeout(function () {
           self.queryServices()
-        }, 30000)
+        }, 10000)
       })
     })
   }

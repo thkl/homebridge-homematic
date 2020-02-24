@@ -252,6 +252,7 @@ class PluginConfigurationService {
           this.sendJSON(this.getSettings(adr), response)
           break
         case 'services':
+          this.loadServiceTemplates()
           this.sendJSON(this.serviceTemplates, response)
           break
         case 'saveSettings':
