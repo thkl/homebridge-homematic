@@ -132,7 +132,25 @@
             "ROTARY_HANDLE_SENSOR",
             "ROTARY_HANDLE_TRANSCEIVER"
         ],
-        "Configuration": [],
+        "Configuration": [
+           { "hk_type": {
+                "label": "Type",
+                "control": "array",
+                "values": [
+                   "CONTACT",
+                   "WINDOW",
+                   "DOOR"
+                ],
+                "hint": "SubType for this actor"
+                }
+            },
+            {
+             "enable_history": {
+                 "label": "Enable Eve History",
+                 "control": "boolean"
+             }
+            }
+        ],
         "description": ""
     },
     "HomeMaticHomeKitMotionDetectorService": {

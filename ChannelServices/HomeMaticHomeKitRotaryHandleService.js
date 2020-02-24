@@ -162,7 +162,7 @@ class HomeMaticHomeKitRotaryHandleService extends HomeKitGenericService {
     this.twindow = window.getCharacteristic(Characteristic.TargetPosition)
     this.twindow.on('set', function (value, callback) {
       // This is just a sensor so reset homekit data to ccu value after 1 second playtime
-      setTimeout(function () {
+      self.timer = setTimeout(function () {
         self.remoteGetValue('STATE', function (value) {
           self.processWindowSensorData(value)
         })
@@ -345,6 +345,24 @@ class HomeMaticHomeKitRotaryHandleService extends HomeKitGenericService {
       }
       this.timeStamp = now
     }
+  }
+
+  shutdown () {
+    super.shutdown()
+    clearTimeout(this.timer)
+  }
+
+  validateConfig (configuration) {
+    // things to check
+    return ((configuration) &&
+    (configuration.hk_type) &&
+    (configuration.enable_history) &&
+    ([true, false].indexOf(configuration.enable_history) > -1) &&
+    (['CONTACT', 'WINDOW', 'DOOR'].indexOf(configuration.hk_type) > -1))
+  }
+
+  configItems () {
+    return ['hk_type', 'enable_history']
   }
 }
 
