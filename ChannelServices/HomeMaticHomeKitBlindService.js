@@ -14,6 +14,7 @@ class HomeMaticHomeKitBlindService extends HomeKitGenericService {
     this.ignoreWorking = true
     this.currentLevel = 0
     this.targetLevel = undefined
+    this.isWorking = false
 
     if (this.minValueForClose > 0) {
       this.log.debug('[BLIND] there is a custom closed level of %s', this.minValueForClose)
@@ -25,15 +26,9 @@ class HomeMaticHomeKitBlindService extends HomeKitGenericService {
 
     this.currentPos = blind.getCharacteristic(Characteristic.CurrentPosition)
       .on('get', (callback) => {
-        this.query('LEVEL', (value) => {
+        self.query('LEVEL', (value) => {
+          value = self.processBlindLevel(value)
           self.log.debug('[BLIND] getCurrent Position %s', value)
-          value = (parseFloat(value) * 100)
-          if (value < this.minValueForClose) {
-            value = 0
-          }
-          if (value > this.maxValueForOpen) {
-            value = 100
-          }
           if (callback) callback(null, value)
         })
       })
@@ -42,39 +37,34 @@ class HomeMaticHomeKitBlindService extends HomeKitGenericService {
 
     this.targetPos = blind.getCharacteristic(Characteristic.TargetPosition)
       .on('get', (callback) => {
-        this.query('LEVEL', (value) => {
-          value = (parseFloat(value) * 100)
+        self.query('LEVEL', (value) => {
+          value = self.processBlindLevel(value)
           if (callback) {
-            if (value <= this.minValueForClose) {
-              value = 0
-            }
-            if (value >= this.maxValueForOpen) {
-              value = 100
-            }
+            self.log.debug('[BLIND] return %s as TargetPosition', value)
             callback(null, value)
           }
         })
       })
       .on('set', (value, callback) => {
         // if obstruction has been detected
-        if ((this.observeInhibit === true) && (this.inhibit === true)) {
+        if ((self.observeInhibit === true) && (self.inhibit === true)) {
           // wait one second to resync data
-          this.log.debug('[BLIND] inhibit is true wait to resync')
+          self.log.debug('[BLIND] inhibit is true wait to resync')
           clearTimeout(self.timer)
           self.timer = setTimeout(() => {
-            this.queryData()
+            self.queryData()
           }, 1000)
         } else {
-          this.targetLevel = value
-          this.eventupdate = false // whaat?
-          this.delayed('set', 'LEVEL', (parseFloat(value) / 100), this.delayOnSet)
+          self.targetLevel = value
+          self.eventupdate = false // whaat?
+          self.delayed('set', 'LEVEL', (parseFloat(value) / 100), self.delayOnSet)
         }
         callback()
       })
 
     this.pstate = blind.getCharacteristic(Characteristic.PositionState)
       .on('get', (callback) => {
-        this.query('DIRECTION', (value) => {
+        self.query('DIRECTION', (value) => {
           if (callback) {
             var result = 2
             if (value !== undefined) {
@@ -122,16 +112,25 @@ class HomeMaticHomeKitBlindService extends HomeKitGenericService {
     })
 
     this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('LEVEL'), this, function (newValue) {
-      self.log.debug('[BLIND] set HomeKitValue to %s', newValue)
-      self.currentLevel = (parseFloat(newValue) * 100)
-      self.currentPos.updateValue(self.currentLevel, null)
+      if (self.isWorking === false) {
+        self.log.debug('[BLIND] set final HomeKitValue to %s', newValue)
+        self.setFinalBlindLevel(newValue)
+      } else {
+        let lvl = self.processBlindLevel(newValue)
+        self.log.debug('[BLIND] set HomeKitValue to %s', lvl)
+        self.currentLevel = lvl
+        self.currentPos.updateValue(self.currentLevel, null)
+      }
     })
 
     this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('WORKING'), this, function (newValue) {
       // Working false will trigger a new remote query
       if (!self.isTrue(newValue)) {
+        self.isWorking = false
         self.removeCache('LEVEL')
         self.remoteGetValue('LEVEL')
+      } else {
+        self.isWorking = true
       }
     })
 
@@ -145,7 +144,7 @@ class HomeMaticHomeKitBlindService extends HomeKitGenericService {
     let self = this
     this.removeCache('LEVEL')
     this.remoteGetValue('LEVEL', (value) => {
-      value = (parseFloat(value) * 100)
+      value = self.processBlindLevel(value)
       self.currentPos.updateValue(value, null)
       self.targetPos.updateValue(value, null)
       self.targetLevel = undefined
@@ -158,17 +157,24 @@ class HomeMaticHomeKitBlindService extends HomeKitGenericService {
     }
   }
 
-  // https://github.com/thkl/homebridge-homematic/issues/208
-  // if there is a custom close level and the real level is below homekit will get the 0% ... and visevera for max level
-
-  setFinalBlindLevel (value) {
+  processBlindLevel (newValue) {
+    var value = parseFloat(newValue)
+    value = value * 100
     if (value < this.minValueForClose) {
       value = 0
     }
     if (value > this.maxValueForOpen) {
       value = 100
     }
+    this.log.debug('[BLIND] processLevel (%s) min (%s) max (%s) r (%s)', newValue, this.minValueForClose, this.maxValueForOpen, value)
+    return value
+  }
 
+  // https://github.com/thkl/homebridge-homematic/issues/208
+  // if there is a custom close level and the real level is below homekit will get the 0% ... and visevera for max level
+
+  setFinalBlindLevel (value) {
+    value = this.processBlindLevel(value)
     this.currentPos.updateValue(value, null)
     this.targetPos.updateValue(value, null)
     this.targetLevel = undefined

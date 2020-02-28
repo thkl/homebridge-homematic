@@ -15,7 +15,14 @@ describe('Homematic Plugin (index)', function () {
   let datapath = path.join(__dirname, 'data', 'data_test_blind.json')
   let data = fs.readFileSync(datapath).toString()
   let that = this
-  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data, 'HM-LC-Bl1-SM:BLIND': { 'observeInhibit': true } }
+  var config = { ccu_ip: '127.0.0.1',
+    subsection: 'HomeKit',
+    testdata: data,
+    'HM-LC-Bl1-SM:BLIND': {
+      'observeInhibit': true,
+      'minValueForClose': 3
+    }
+  }
   var platform = new homebridgeMock.PlatformType(log, config, homebridgeMock)
 
   before(function () {
@@ -151,6 +158,27 @@ describe('Homematic Plugin (index)', function () {
         ctp.emit('set', 50, function () {
           let res = platform.homebridge.getCCUDummyValue('BidCos-RF.ABC1234560:1.LEVEL')
           assert.strict.equal(res, 0, 'Blind was moved but set to inhibit')
+        })
+      })
+      done()
+    })
+
+    it('event test blind move to 1% should be closed', function (done) {
+      platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'LEVEL', 0.01])
+      platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'DIRECTION', 2]) // set direction to down cause the initial position was 75%
+      that.accessories.map(ac => {
+        let s = ac.getService(Service.WindowCovering)
+        assert.ok(s, 'Service.WindowCovering not found in Blind %s', ac.name)
+        let ccp = s.getCharacteristic(Characteristic.CurrentPosition)
+        assert.ok(ccp, 'Characteristic.CurrentPosition not found in Blind %s', ac.name)
+        ccp.getValue(function (context, value) {
+          assert.strict.equal(value, 0, 'CurrentPosition should be 0 is ' + value)
+        })
+
+        let ctp = s.getCharacteristic(Characteristic.TargetPosition)
+        assert.ok(ctp, 'Characteristic.TargetPosition not found in Blind %s', ac.name)
+        ctp.getValue(function (context, value) {
+          assert.strict.equal(value, 0, 'TargetPosition should be 0 is ' + value)
         })
       })
       done()
