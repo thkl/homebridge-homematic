@@ -223,5 +223,14 @@ class HomeMaticHomeKitBlindService extends HomeKitGenericService {
     super.shutdown()
     clearTimeout(this.timer)
   }
+
+  validateConfig (configuration) {
+    // things to check
+    return (configuration)
+  }
+
+  configItems () {
+    return ['observeInhibit', 'minValueForClose', 'maxValueForOpen']
+  }
 }
 module.exports = HomeMaticHomeKitBlindService

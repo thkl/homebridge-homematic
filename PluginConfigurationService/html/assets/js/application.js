@@ -57,9 +57,10 @@ export class Application {
         })
         break
       case 'text':
+        let vdefault = (configurationItem.default !== undefined) ? configurationItem.default : ''
         control = $('<input>')
         control.attr('type', 'text')
-        control.val(currentValue)
+        control.val((currentValue[controlName] !== undefined) ? currentValue[controlName] : vdefault)
         break
       case 'boolean':
         control = $('<input>')

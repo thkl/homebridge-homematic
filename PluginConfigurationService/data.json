@@ -379,7 +379,25 @@
             "HMW-LC-Bl1-DR:BLIND",
             "HM-LC-Bl1PBU-FM:BLIND"
         ],
-        "Configuration": [],
+        "Configuration": [
+            {
+                "observeInhibit": {
+                    "label": "Observe Inhibit Events",
+                    "control": "boolean"
+                },
+
+                "minValueForClose": {
+                    "label": "min value which will set HK to close",
+                    "control": "text",
+                    "default": 0
+                },
+                "maxValueForOpen": {
+                    "label": "max value which will set HK to open",
+                    "control": "text",
+                    "default": 100
+                }
+            }
+        ],
         "description": ""
     },
     "HomeMaticHomeKitWaterSensorService": {
