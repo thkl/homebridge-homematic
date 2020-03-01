@@ -32,12 +32,11 @@ class HomeMaticHomeKitProgramService extends HomeKitGenericService {
       .on('get', function (callback) {
         if (callback) callback(null, 0)
       })
-
       .on('set', function (value, callback) {
         self.log.debug('ProgramLaunchService Event %s', value)
         if ((value === 1) || (value === true)) {
           self.log.debug('Launch Program %s', self.address)
-          self.command('sendregacommand', '', 'var x=dom.GetObject("' + self.address + '");if (x) {x.ProgramExecute();}', function () {
+          self.command('sendregacommand', '', 'var x=dom.GetObject(ID_PROGRAMS).Get("' + self.address + '");if (x) {x.ProgramExecute();}', function () {
           })
 
           setTimeout(function () {

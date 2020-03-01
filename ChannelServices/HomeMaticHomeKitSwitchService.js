@@ -53,8 +53,8 @@ class HomeMaticHomeKitSwitchService extends HomeKitGenericService {
       .on('set', function (value, callback) {
         if ((value === 1) || (value === true)) {
           self.log.debug('[Switch Service] Launch Program ' + self.address)
-          self.command('sendregacommand', '', 'var x=dom.GetObject("' + self.address + '");if (x) {x.ProgramExecute();}', function () { })
-
+          self.command('sendregacommand', '', 'var x=dom.GetObject(ID_PROGRAMS).Get("' + self.address + '");if (x) {x.ProgramExecute();}', function () {
+          })
           setTimeout(function () {
             self.c_isOn.setValue(0, null)
           }, self.delayOnSet)
