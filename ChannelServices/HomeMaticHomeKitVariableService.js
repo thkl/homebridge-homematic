@@ -31,7 +31,8 @@ class HomeMaticHomeKitVariableService extends HomeKitGenericService {
 
     this.cc.eventEnabled = true
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('STATE'), this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('Var.' + self.address + ':1.STATE'), this, function (newValue) {
+      self.log.debug('[Variable] update %s to %s', self.address, newValue)
       self.cc.updateValue(self.isTrue(newValue) ? 1 : 0, null)
     })
   }

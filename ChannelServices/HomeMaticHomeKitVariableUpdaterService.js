@@ -39,7 +39,9 @@ class HomeMaticHomeKitVariableUpdaterService extends HomeKitGenericService {
         var vv = tmpvar.split('(---)')[1]
         if ((vn !== undefined) && (vv !== undefined)) {
           self.log.debug('Update variable %s with %s', vn, vv)
-          self.platform.remoteSetValue(vn, 'STATE', vv)
+          // send a message to the variable appliance
+
+          self.platform.fireEvent('Var', vn, 1, 'STATE', vv)
         }
       })
     })
