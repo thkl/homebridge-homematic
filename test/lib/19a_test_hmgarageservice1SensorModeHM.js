@@ -19,23 +19,24 @@ describe('Homematic Plugin (index)', function () {
     ccu_ip: '127.0.0.1',
     subsection: 'HomeKit',
     testdata: data,
-    services: [{
-      'type': 'HM-THKL-GARAGEDOOR',
-      'service': 'HomeMaticHomeKitGarageDoorService'
-    }],
-    special: [{
-      'name': 'Garage',
-      'type': 'HM-THKL-GARAGEDOOR',
-      'parameter': {
-        'address_sensor_close': 'BidCos-RF.ABC1234562:1.STATE',
-        'address_actor_open': 'BidCos-RF.ABC1234560:1.STATE',
-        'message_actor_open': {
-          'on': true,
-          'off': false
-        },
-        'delay_actor_open': 1,
-        'state_sensor_close': false
+    services: [
+      {
+        'type': 'Garage',
+        'service': 'HomeMaticHomeKitGarageDoorService',
+        'options': {
+          'address_sensor_close': 'BidCos-RF.ABC1234562:1.STATE',
+          'address_actor_open': 'BidCos-RF.ABC1234560:1.STATE',
+          'message_actor_open': {
+            'on': true,
+            'off': false
+          },
+          'delay_actor_open': 1,
+          'state_sensor_close': false
+        }
       }
+    ],
+    special: [{
+      'name': 'Garage'
     }]
   }
   var platform = new homebridgeMock.PlatformType(log, config, homebridgeMock)

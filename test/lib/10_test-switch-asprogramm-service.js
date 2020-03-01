@@ -49,7 +49,7 @@ describe('Homematic Plugin (index)', function () {
       assert.ok(ca, 'Characteristic.On not found in program %s', ac.name)
       ac.appliance.delayOnSet = 0
       ca.emit('set', 1, function () {
-        assert.strict.equal(platform.homebridge.values['lastScript'], 'var x=dom.GetObject("TestProgram");if (x) {x.ProgramExecute();}', 'Script was not sent')
+        assert.strict.equal(platform.homebridge.values['lastScript'], 'var x=dom.GetObject(ID_PROGRAMS).Get("TestProgram");if (x) {x.ProgramExecute();}', 'Script was not sent')
       })
       ac.delayOnSet = 0
       // Check reset of switch

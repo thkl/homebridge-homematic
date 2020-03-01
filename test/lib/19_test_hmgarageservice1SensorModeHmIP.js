@@ -20,13 +20,9 @@ describe('Homematic Plugin (index)', function () {
     subsection: 'HomeKit',
     testdata: data,
     services: [{
-      'type': 'HM-THKL-GARAGEDOOR',
-      'service': 'HomeMaticHomeKitGarageDoorService'
-    }],
-    special: [{
-      'name': 'Garage',
-      'type': 'HM-THKL-GARAGEDOOR',
-      'parameter': {
+      'type': 'Garage',
+      'service': 'HomeMaticHomeKitGarageDoorService',
+      'options': {
         'address_sensor_close': 'HmIP-RF.ADR1234567890:1.STATE',
         'address_actor_open': 'HmIP-RF.ADR1234567892:3.STATE',
         'message_actor_open': {
@@ -36,6 +32,9 @@ describe('Homematic Plugin (index)', function () {
         'delay_actor_open': 1,
         'state_sensor_close': 0
       }
+    }],
+    special: [{
+      'name': 'Garage'
     }]
   }
   var platform = new homebridgeMock.PlatformType(log, config, homebridgeMock)
