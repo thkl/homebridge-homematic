@@ -125,6 +125,7 @@ class HomeMaticPlatform {
     this.valves = this.config.valves
 
     this.variables = this.config.variables
+    this.serviceVariables = []
     this.specialdevices = this.config.special
     this.programs = this.config.programs
     this.subsection = this.config.subsection
@@ -156,6 +157,27 @@ class HomeMaticPlatform {
 
     this.homematicCCU.setSubsection(this.subsection)
     this.buildAccessories()
+  }
+
+  addServiceVariable (varName) {
+    let self = this
+    if (this.serviceVariables.indexOf(varName) === -1) {
+      this.log.debug('[Core] adding variable %s to global varupdater', varName)
+      this.serviceVariables.push(varName)
+      // loop thru all appliances and try to find the VARIABLE_UPDATE_TRIGGER
+      if (this.hmAppliances) {
+        this.hmAppliances.map(appliance => {
+          if (appliance.type === 'VARIABLE_UPDATE_TRIGGER') {
+            let vtc = self.variables
+            vtc = vtc.concat(self.serviceVariables)
+            self.log.debug('[Core] global variable updater found updating variable list to %s', JSON.stringify(vtc))
+            appliance.special = vtc
+          }
+        })
+      }
+    } else {
+      this.log.debug('[Core] varupdater haz %s yet', varName)
+    }
   }
 
   buildAccessories (changedAppliance) {
@@ -277,7 +299,9 @@ class HomeMaticPlatform {
               if ((self.vuc !== undefined) && (ch.type === 'VIRTUAL_KEY') && (ch.name === self.vuc)) {
                 self.log.debug('Channel ' + self.vuc + ' added as Variable Update Trigger')
                 ch.type = 'VARIABLE_UPDATE_TRIGGER'
-                serviceclassLoader.loadChannelService(hkAccessory, 'VARIABLE_UPDATE_TRIGGER', ch, self, self.variables, cfg, 255, Service, Characteristic)
+                let vtc = self.variables
+                vtc = vtc.concat(self.serviceVariables)
+                serviceclassLoader.loadChannelService(hkAccessory, 'VARIABLE_UPDATE_TRIGGER', ch, self, vtc, cfg, 255, Service, Characteristic)
                 hkAccessory.reachable = true
               } else {
                 serviceclassLoader.loadChannelService(hkAccessory, device.type, ch, self, special, cfg, ch.access, Service, Characteristic)
@@ -349,7 +373,7 @@ class HomeMaticPlatform {
         let name = specialdevice.name
         let type = specialdevice.type
 
-        if ((name !== undefined) && (type !== undefined)) {
+        if (name !== undefined) {
           let uuid = UUID.generate(name)
           hkAccessory = this.accessories[uuid]
           if (!hkAccessory) {
@@ -361,10 +385,15 @@ class HomeMaticPlatform {
 
           var ch = {}
           ch.type = type
-          ch.address = ''
+          ch.address = name
           ch.name = name
-          serviceclassLoader.loadChannelService(hkAccessory, ch.type, ch, self, '', specialdevice.parameter || {}, 255, Service, Characteristic)
+          serviceclassLoader.loadChannelService(hkAccessory, ch.type, ch, self, '', {}, 255, Service, Characteristic)
           hkAccessory.reachable = true
+
+          if (hkAccessory.appliance) {
+            hkAccessory.appliance.customService = true
+            self.hmAppliances.push(hkAccessory.appliance)
+          }
         }
       })
     }
@@ -504,7 +533,8 @@ class HomeMaticPlatform {
               service: appliance.serviceClassName,
               config: appliance.cfg,
               devicetype: appliance.deviceType,
-              channeltype: appliance.type
+              channeltype: appliance.type,
+              custom: appliance.customService
             })
           } else {
             self.log.warn('[Core] empty appliance found')

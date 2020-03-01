@@ -30,18 +30,21 @@ class HomeMaticHomeKitVariableUpdaterService extends HomeKitGenericService {
     let self = this
     var script = ''
     this.special.map(function (variable) {
-      script = script + "WriteLine('" + variable + "(---)'#dom.GetObject('" + variable + "').State());"
+      script = script + "WriteLine('" + variable + "(---)'#dom.GetObject(ID_SYSTEM_VARIABLES).Get('" + variable + "').State());"
     })
+    this.log.debug('[VarUpdater] will query %s', JSON.stringify(this.special))
     self.command('sendregacommand', '', script, function (result) {
       // Parse result an set all Variables
       result.split('\r\n').map(function (tmpvar) {
-        var vn = tmpvar.split('(---)')[0]
-        var vv = tmpvar.split('(---)')[1]
-        if ((vn !== undefined) && (vv !== undefined)) {
-          self.log.debug('Update variable %s with %s', vn, vv)
-          // send a message to the variable appliance
-
-          self.platform.fireEvent('Var', vn, 1, 'STATE', vv)
+        let vsplit = tmpvar.split('(---)')
+        if ((vsplit) && (vsplit.length > 1)) {
+          var vn = vsplit[0]
+          var vv = vsplit[1]
+          if ((vn !== undefined) && (vv !== undefined)) {
+            self.log.debug('[VarUpdater] Update variable %s with %s', vn, vv)
+            // send a message to the variable appliance
+            self.platform.fireEvent('Var', vn, 1, 'STATE', vv)
+          }
         }
       })
     })

@@ -24,9 +24,11 @@ HomeMaticServiceClassLoader.prototype.findServiceClass = function (type) {
     let serviceclass = sv.class
     // check if there are options for specific type
     if (sv.options === undefined) {
+      this.log.debug('[ServiceClassLoader] no buildIn Options')
       options = this.getOptions(type)
     } else {
       // if not use class dev options
+      this.log.debug('[ServiceClassLoader] buildIn Options %s', JSON.stringify(sv.options))
       options = sv.options
     }
     return {
@@ -40,7 +42,7 @@ HomeMaticServiceClassLoader.prototype.findServiceClass = function (type) {
 }
 
 HomeMaticServiceClassLoader.prototype.loadChannelService = function (accessory, deviceType, channel, platform, special, cfg, access, Service, Characteristic) {
-  var that = this
+  var self = this
   var channelType = channel.type
   var log = platform.log
   var id = channel.id
@@ -113,23 +115,29 @@ HomeMaticServiceClassLoader.prototype.loadChannelService = function (accessory, 
       // add Options
       if (options !== undefined) {
         if (cfg !== undefined) {
+          this.log.debug('[ServiceClassLoader] adding parameter options')
           Object.keys(options).map(key => {
-            cfg.key = options.key
+            self.log.debug('[ServiceClassLoader] adding %s for %s', options[key], key)
+            cfg[key] = options[key]
           })
         } else {
+          this.log.debug('[ServiceClassLoader] use parameter options')
           cfg = options
         }
       }
       if (cfg === undefined) {
+        this.log.debug('[ServiceClassLoader] build empty configuration')
         cfg = {}
       }
+
+      this.log.debug('[ServiceClassLoader] Configuration : %s', JSON.stringify(cfg))
 
       cfg['interface'] = channel.intf
 
       // Replace Chars in name https://github.com/thkl/homebridge-homematic/issues/56
 
       name = name.replace(/[.:#_()-]/g, ' ')
-      that.log.debug('[ServiceClassLoader] Service for %s:%s is %s', deviceType, channelType, serviceclass)
+      self.log.debug('[ServiceClassLoader] Service for %s:%s is %s', deviceType, channelType, serviceclass)
 
       let cfgOptions = this.getConfigOptions(deviceType + ':' + channelType)
       if (cfgOptions !== undefined) {
@@ -137,7 +145,11 @@ HomeMaticServiceClassLoader.prototype.loadChannelService = function (accessory, 
         Object.keys(cfgOptions).forEach(function (key) {
           cfg[key] = cfgOptions[key]
         })
+      } else {
+        this.log.debug('[ServiceClassLoader] no deprecated configuraton settings found')
       }
+
+      this.log.debug('[ServiceClassLoader] Configuration : %s', JSON.stringify(cfg))
 
       accessory.appliance = new HKitService(accessory, log, platform, id, name, channelType, address, special, cfg, Service, Characteristic, deviceType)
       // Copy the BidCos Address to the HomeKit Accessory
@@ -147,14 +159,15 @@ HomeMaticServiceClassLoader.prototype.loadChannelService = function (accessory, 
       }
 
       accessory.appliance.serviceClassName = serviceclass
+
       // Only add if there are more than 1 Service (number 1 is the informationService)
       // see https://github.com/thkl/homebridge-homematic/issues/234#issuecomment-375764819
       this.log.debug('[ServiceClassLoader] Number of Services in %s is %s', name, accessory.services.length)
     }
   } else {
-    that.log.warn('[ServiceClassLoader] There is no service for ' + deviceType + ':' + channelType)
+    self.log.warn('[ServiceClassLoader] There is no service for ' + deviceType + ':' + channelType)
   }
-  this.log.debug('[ServiceClassLoader] ============== End ====================')
+  this.log.debug('[ServiceClassLoader] == End == %s ==', accessory.appliance.serviceClassName)
 }
 
 HomeMaticServiceClassLoader.prototype.loadClass = function (serviceclass) {
