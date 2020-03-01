@@ -28,6 +28,9 @@ class PluginConfigurationService {
       '.mp4': 'video/mp4'
 
     }
+    this.programs = []
+    this.variables = []
+    this.pluginAccessories = []
     this.loadServiceTemplates()
   }
 
@@ -50,9 +53,19 @@ class PluginConfigurationService {
         case 'accessories':
           this.prepareAccessories(message.accessories)
           break
+
         case 'configuration':
           this.pluginConfig = message.configuration
           break
+
+        case 'programs':
+          this.programs = message.programs
+          break
+
+        case 'variables':
+          this.variables = message.variables
+          break
+
         default:
           break
       }
@@ -238,26 +251,121 @@ class PluginConfigurationService {
     return false
   }
 
+  saveNewVariable (newVariableName) {
+    var pluginHmConfig = this.loadMyConfig()
+    var variableList = pluginHmConfig['variables']
+    if (variableList === undefined) {
+      variableList = []
+    }
+
+    variableList.push(newVariableName)
+
+    pluginHmConfig['variables'] = variableList
+
+    this.saveMyConfig(pluginHmConfig)
+    let message = {
+      topic: 'reloadApplicances',
+      changed: newVariableName
+    }
+    this.process.send(message)
+    return true
+  }
+
+  saveNewProgram (newProgramName) {
+    var pluginHmConfig = this.loadMyConfig()
+    var programList = pluginHmConfig['programs']
+    if (programList === undefined) {
+      programList = []
+    }
+    programList.push(newProgramName)
+    pluginHmConfig['programs'] = programList
+    this.saveMyConfig(pluginHmConfig)
+    let message = {
+      topic: 'reloadApplicances',
+      changed: newProgramName
+    }
+    this.process.send(message)
+    return true
+  }
+
+  removeVariable (variableName) {
+    var pluginHmConfig = this.loadMyConfig()
+    var variableList = pluginHmConfig['variables']
+    if (variableList === undefined) {
+      variableList = []
+    }
+    logger.debug('List before %s', JSON.stringify(variableList))
+    variableList = variableList.filter(item => {
+      return (item !== variableName)
+    })
+    logger.debug('List after %s', JSON.stringify(variableList))
+
+    pluginHmConfig['variables'] = variableList
+
+    this.saveMyConfig(pluginHmConfig)
+    let message = {
+      topic: 'reloadApplicances',
+      changed: variableName
+    }
+    this.process.send(message)
+    return true
+  }
+
+  removeProgram (programName) {
+    var pluginHmConfig = this.loadMyConfig()
+    var programList = pluginHmConfig['programs']
+    if (programList === undefined) {
+      programList = []
+    }
+
+    programList = programList.filter(item => {
+      return (item !== programName)
+    })
+
+    pluginHmConfig['programs'] = programList
+
+    this.saveMyConfig(pluginHmConfig)
+    let message = {
+      topic: 'reloadApplicances',
+      changed: programName
+    }
+    this.process.send(message)
+    return true
+  }
+
   processApiCall (query, response) {
     if (query.method) {
       switch (query.method) {
         case 'devicelist':
           this.sendJSON(this.pluginAccessories, response)
           break
+
+        case 'programlist':
+          this.sendJSON(this.programs, response)
+          break
+
+        case 'variablelist':
+          this.sendJSON(this.variables, response)
+          break
+
         case 'ccu':
           this.sendJSON((this.pluginConfig) ? this.pluginConfig : {}, response)
           break
+
         case 'getSettings':
           let adr = query.adr
           this.sendJSON(this.getSettings(adr), response)
           break
+
         case 'services':
           this.loadServiceTemplates()
           this.sendJSON(this.serviceTemplates, response)
           break
+
         case 'saveSettings':
           this.sendJSON(this.saveSettings(query.config), response)
           break
+
         case 'reloadApplicances':
           let message = {
             topic: 'reloadApplicances'
@@ -265,6 +373,23 @@ class PluginConfigurationService {
           this.process.send(message)
           this.sendJSON({ 'result': true }, response)
           break
+
+        case 'newVariable':
+          this.sendJSON(this.saveNewVariable(query.name), response)
+          break
+
+        case 'newProgram':
+          this.sendJSON(this.saveNewProgram(query.name), response)
+          break
+
+        case 'removeProgram':
+          this.sendJSON(this.removeProgram(query.name), response)
+          break
+
+        case 'removeVariable':
+          this.sendJSON(this.removeVariable(query.name), response)
+          break
+
         default:
           break
       }

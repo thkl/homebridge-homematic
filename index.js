@@ -110,18 +110,8 @@ class HomeMaticPlatform {
     }
   }
 
-  setupHomeMaticManager () {
-    let self = this
-    this.homematicCCU = new HomeMaticCCU(this, isInTest)
-    this.homematicCCU.reloadConfig()
-    this.homematicCCU.pingCCU(data => {
-      if (!isInTest) {
-        self.log.info('if %s is PONG CCU is alive', data)
-      } else {
-
-      }
-    })
-
+  loadConfigurationItems () {
+    this.log.debug('[Core] loading configuration')
     // ** deprecate this **/
     this.filter_device = this.config.filter_device
     this.filter_channel = this.config.filter_channel
@@ -139,6 +129,21 @@ class HomeMaticPlatform {
     this.programs = this.config.programs
     this.subsection = this.config.subsection
     this.vuc = this.config.variable_update_trigger_channel
+  }
+
+  setupHomeMaticManager () {
+    let self = this
+    this.homematicCCU = new HomeMaticCCU(this, isInTest)
+    this.homematicCCU.reloadConfig()
+    this.homematicCCU.pingCCU(data => {
+      if (!isInTest) {
+        self.log.info('[Core] if %s is PONG CCU is alive', data)
+      } else {
+
+      }
+    })
+
+    this.loadConfigurationItems()
 
     if ((this.subsection === undefined) || (this.subsection === '')) {
       this.log.warn('Uuhhh. There is no value for the key subsection in config.json.')
@@ -472,7 +477,10 @@ class HomeMaticPlatform {
       switch (message.topic) {
         case 'reloadApplicances':
           this.mergeConfig()
+          this.loadConfigurationItems()
           this.buildAccessories(message.changed)
+          // send new Data to the configurator
+          this.publishAccessoriesToConfigurationServer()
           break
         case 'reconnectCCU':
           this.homematicCCU.reloadConfig()
@@ -505,6 +513,7 @@ class HomeMaticPlatform {
       } else {
         this.log.warn('[core] no appliances')
       }
+
       this.configUI.send({
         topic: 'configuration',
         configuration: self.config
@@ -514,13 +523,24 @@ class HomeMaticPlatform {
         topic: 'accessories',
         accessories: accessoriesToConfig
       })
+
+      // Publish programms
+      this.configUI.send({
+        topic: 'programs',
+        programs: self.programs
+      })
+
+      this.configUI.send({
+        topic: 'variables',
+        variables: self.variables
+      })
     }
   }
 
   /* merges my own config from file into global plugin config */
   mergeConfig (callback) {
+    let self = this
     if (fs.existsSync(this.localHomematicConfig)) {
-      let self = this
       // use the stored plugin config and add the homematic_config.json stuff
       self.config = self.pluginConfig
       let data = fs.readFileSync(this.localHomematicConfig).toString()

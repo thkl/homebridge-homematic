@@ -53,6 +53,7 @@ HomeMaticServiceClassLoader.prototype.loadChannelService = function (accessory, 
   var serviceclass
   var options
   var sv
+  this.log.debug('[ServiceClassLoader] ============== Init ====================')
   this.log.debug('[ServiceClassLoader] Init Classloader for device with address %s', address)
 
   // first try the address address comes as Interface.Serial:Channel
@@ -153,6 +154,7 @@ HomeMaticServiceClassLoader.prototype.loadChannelService = function (accessory, 
   } else {
     that.log.warn('[ServiceClassLoader] There is no service for ' + deviceType + ':' + channelType)
   }
+  this.log.debug('[ServiceClassLoader] ============== End ====================')
 }
 
 HomeMaticServiceClassLoader.prototype.loadClass = function (serviceclass) {

@@ -13,6 +13,7 @@ export class Application {
         data: data,
         method: 'POST',
         success: function (data) {
+          console.log('API Request Result' + data)
           resolve(data)
         },
         failure: function (error) {
@@ -236,6 +237,48 @@ export class Application {
     })
   }
 
+  queryProgramList () {
+    let self = this
+    this.makeApiRequest({ method: 'programlist' }).then(programList => {
+      if (programList) {
+        self.globalProgramList = programList
+        let hProgramList = $('#program_list')
+        hProgramList.empty()
+        programList.map(program => {
+          let hRow = $('<tr>')
+          hRow.append($('<td>').append(program))
+          let button = $('<button>').attr('type', 'submit').attr('class', 'btn btn-danger pull-left').append('Delete')
+          button.bind('click', function () {
+            self.deleteProgram(program)
+          })
+          hRow.append($('<td>').append(button))
+          hProgramList.append(hRow)
+        })
+      }
+    })
+  }
+
+  queryVariableList () {
+    let self = this
+    this.makeApiRequest({ method: 'variablelist' }).then(variableList => {
+      if (variableList) {
+        self.globalVariableList = variableList
+        let hVariableList = $('#variable_list')
+        hVariableList.empty()
+        variableList.map(variable => {
+          let hRow = $('<tr>')
+          hRow.append($('<td>').append(variable))
+          let button = $('<button>').attr('type', 'submit').attr('class', 'btn btn-danger pull-left').append('Delete')
+          button.bind('click', function () {
+            self.deleteVariable(variable)
+          })
+          hRow.append($('<td>').append(button))
+          hVariableList.append(hRow)
+        })
+      }
+    })
+  }
+
   queryInfo () {
     this.makeApiRequest({ method: 'ccu' }).then(info => {
       if (info) {
@@ -245,6 +288,66 @@ export class Application {
           window.open('http://' + info)
         })
       }
+    })
+  }
+
+  deleteProgram (program) {
+    let self = this
+    $('#deleleteItemName').html('Remove ' + program + ' from HomeKit ?')
+    $('#buttonDeleteItem').html('Remove program')
+    $('#buttonDeleteItem').unbind()
+    $('#buttonDeleteItem').bind('click', function (e) {
+      self.makeApiRequest({ method: 'removeProgram', name: program }).then(result => {
+        $('#dialogDeleteItem').modal('hide')
+        setTimeout(function () {
+          self.queryProgramList()
+        }, 2000)
+      })
+    })
+    $('#dialogDeleteItem').modal({})
+    $('#dialogDeleteItem').draggable({
+      handle: '.modal-header'
+    })
+  }
+
+  deleteVariable (variable) {
+    let self = this
+    $('#deleleteItemName').html('Remove ' + variable + ' from HomeKit ?')
+    $('#buttonDeleteItem').html('Remove variable')
+    $('#buttonDeleteItem').unbind()
+    $('#buttonDeleteItem').bind('click', function (e) {
+      self.makeApiRequest({ method: 'removeVariable', name: variable }).then(result => {
+        $('#dialogDeleteItem').modal('hide')
+        setTimeout(function () {
+          self.queryVariableList()
+        }, 2000)
+      })
+    })
+    $('#dialogDeleteItem').modal({})
+    $('#dialogDeleteItem').draggable({
+      handle: '.modal-header'
+    })
+  }
+
+  saveNewVariable () {
+    let self = this
+    let varname = $('#newItemName').val()
+    this.makeApiRequest({ method: 'newVariable', name: varname }).then(result => {
+      $('#newItemEditor').modal('hide')
+      setTimeout(function () {
+        self.queryVariableList()
+      }, 2000)
+    })
+  }
+
+  saveNewProgram () {
+    let self = this
+    let programName = $('#newItemName').val()
+    this.makeApiRequest({ method: 'newProgram', name: programName }).then(result => {
+      $('#newItemEditor').modal('hide')
+      setTimeout(function () {
+        self.queryProgramList()
+      }, 2000)
     })
   }
 
@@ -286,12 +389,40 @@ export class Application {
         }, 10000)
       })
     })
+
+    $('#buttonNewVariable').bind('click', function () {
+      $('#newItemTitle').html('New variable ...')
+      $('#saveNewItem').html('Save new variable')
+      $('#saveNewItem').unbind()
+      $('#saveNewItem').bind('click', function (e) {
+        self.saveNewVariable()
+      })
+      $('#newItemEditor').modal({})
+      $('#newItemEditor').draggable({
+        handle: '.modal-header'
+      })
+    })
+
+    $('#buttonNewProgram').bind('click', function () {
+      $('#newItemTitle').html('New program ...')
+      $('#saveNewItem').html('Save new program')
+      $('#saveNewItem').unbind()
+      $('#saveNewItem').bind('click', function (e) {
+        self.saveNewProgram()
+      })
+      $('#newItemEditor').modal({})
+      $('#newItemEditor').draggable({
+        handle: '.modal-header'
+      })
+    })
   }
 
   run () {
     // first query the devices
     this.queryServices()
     this.queryDeviceList()
+    this.queryProgramList()
+    this.queryVariableList()
     this.queryInfo()
     this.hookKeys()
   }

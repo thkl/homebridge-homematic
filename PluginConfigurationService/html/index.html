@@ -31,7 +31,19 @@
         href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
     <!-- CSS Files -->
-    <link href="./assets/css/material-dashboard.css?v=2.1.1" rel="stylesheet" />
+
+    <link
+      rel="stylesheet"
+      href="./assets/css/material-dashboard_dark.css"
+      media="screen and (prefers-color-scheme: dark)"
+    />
+
+    <link
+      rel="stylesheet"
+      href="./assets/css/material-dashboard_light.css"
+      media="screen and (prefers-color-scheme: light)"
+    />
+
     <link href="./assets/css/app.css" rel="stylesheet" />
 </head>
 
@@ -125,6 +137,54 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-lg-6 col-md-12">
+                            <div class="card">
+                                <div class="card-header card-header-info">
+                                    <h4 class="card-title">Programs</h4>
+                                </div>
+                                <div class="card-body table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="text-info">
+                                            <th>Program</th>
+                                            <th style="width: 20%;"></th>
+                                        </thead>
+                                        <tbody id="program_list">
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="stats">
+                                        <button class="btn btn-info pull-left" id="buttonNewProgram">New Programm</button>
+                                    </div>
+                                </div>
+                           </div>
+                        </div>
+                        <div class="col-lg-6 col-md-12">
+                            <div class="card">
+                                <div class="card-header card-header-info">
+                                    <h4 class="card-title">Variables</h4>
+                                </div>
+                                <div class="card-body table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="text-info">
+                                            <th>Variable</th>
+                                            <th style="width: 20%;"></th>
+                                        </thead>
+                                        <tbody id="variable_list">
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="stats">
+                                        <button class="btn btn-info pull-left" id="buttonNewVariable">New Variable</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <footer class="footer">
@@ -167,13 +227,66 @@
     </div>
 
 
+    <div class="modal fade" id="newItemEditor" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newItemTitle"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="settingsNewItem">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-12">
+                            Name
+                        </div>
+                        <div class="col-lg-9 col-md-12">
+                            <input type="text" name="newItemName" id="newItemName" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="saveNewItem" class="btn btn-primary">Save new Item</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="dialogDeleteItem" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-danger" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="deleleteItemName"></h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="py-3 text-center">
+                <i class="now-ui-icons ui-1_bell-53 ni-4x"></i>
+                <h4 class="heading mt-4" data-localize="Warning, there is no way back.">
+                  Warning, there is no way back.
+                </h4>
+              </div>
+              <br />
+            </div>
+            <div class="modal-footer">
+              <button id="buttonDeleteItem" type="button" class="btn btn-primary" data-localize='Delete'>Delete</button>
+              <button type="button" class="btn btn-link ml-auto" data-dismiss="modal"
+                data-localize='Covfefe'>Covfefe</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     <!--   Core JS Files   -->
     <script src="./assets/js/jquery.min.js"></script>
     <script src="./assets/js/jquery-ui.min.js"></script>
     <script src="./assets/js/popper.min.js"></script>
     <script src="./assets/js/bootstrap-material-design.min.js"></script>
     <script src="./assets/js/bootstrap-notify.js"></script>
-    <!--    <script src="./assets/js/material-dashboard.js?v=2.1.1" type="text/javascript"></script>-->
     <script type="module">
         import { Application } from './assets/js/application.js'
         new Application()
