@@ -97,11 +97,14 @@ HomeMaticRPC.prototype.init = function () {
     ip = bindIP
   }
 
+  let mac = this.getMac()
+  let matches = mac.match(/([0-9A-Fa-f]{2})/g)
+  this.sysID = ((matches) && (matches.length > 5)) ? (matches[4] + matches[5]) : 'AABB'
   this.localIP = ip
   this.bindIP = bindIP
 
   this.log.info('[RPC] local ip used : %s. you may change self with local_ip parameter in config', ip)
-
+  this.log.debug('[RPC] SystemID is %s', this.sysID)
   this.isPortTaken(this.listeningPort, function (error, inUse) {
     if (error === null) {
       if (inUse === false) {
@@ -208,6 +211,20 @@ HomeMaticRPC.prototype.handleEvent = function (method, params) {
   }
 }
 
+HomeMaticRPC.prototype.getMac = function () {
+  var interfaces = require('os').networkInterfaces()
+  for (var devName in interfaces) {
+    var iface = interfaces[devName]
+    for (var i = 0; i < iface.length; i++) {
+      var alias = iface[i]
+      if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal && (alias.address.indexOf('169.254.') === -1)) {
+        return alias.mac
+      }
+    }
+  }
+  return '00:11:22:33:44:55'
+}
+
 HomeMaticRPC.prototype.getIPAddress = function () {
   var interfaces = require('os').networkInterfaces()
   for (var devName in interfaces) {
@@ -281,7 +298,7 @@ HomeMaticRPC.prototype.connect = function () {
   })
   this.log.debug('[RPC] CCU RPC Init Call on port %s for interface %s', port, this.interface)
   var command = this.rpcInit + this.localIP + ':' + this.listeningPort
-  this.client.methodCall('init', [command, 'homebridge_' + this.interface], function (error, value) {
+  this.client.methodCall('init', [command, 'homebridge_' + this.sysID + '_' + this.interface], function (error, value) {
     self.log.debug('[RPC] CCU Response for init at %s with %s...Value (%s) Error : (%s)', self.interface, command, JSON.stringify(value), error)
     self.lastMessage = Math.floor((new Date()).getTime() / 1000)
   })
@@ -300,7 +317,7 @@ HomeMaticRPC.prototype.ccuWatchDog = function () {
     if (timeDiff > self.watchDogTimeout) {
       self.log.debug('[RPC] Watchdog Trigger - Reinit Connection for %s after idle time of %s seconds', this.interface, timeDiff)
       self.lastMessage = now
-      self.client.methodCall('init', [this.rpcInit + this.localIP + ':' + this.listeningPort, 'homebridge_' + this.interface], function (error, value) {
+      self.client.methodCall('init', [this.rpcInit + this.localIP + ':' + this.listeningPort, 'homebridge_' + this.sysID + '_' + this.interface], function (error, value) {
         self.log.debug('[RPC] CCU Response ...Value (%s) Error : (%s)', JSON.stringify(value), error)
         self.lastMessage = Math.floor((new Date()).getTime() / 1000)
       })
