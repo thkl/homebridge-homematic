@@ -52,7 +52,7 @@ describe('Homematic Plugin (index)', function () {
       done()
     })
 
-    it('test initial values dimmer must be ' + that.expInitValue + '%', function (done) {
+    it('test initial values dimmer must be random init value', function (done) {
       let ac = that.accessories[0]
       let s = ac.getService(Service.Lightbulb)
       assert.ok(s, 'Service.Lightbulb not found in %s', ac.name)

@@ -1,7 +1,6 @@
 'use strict'
 
 const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
-const inherits = require('util').inherits
 const EveHomeKitTypes = require('./EveHomeKitTypes.js')
 let eve
 

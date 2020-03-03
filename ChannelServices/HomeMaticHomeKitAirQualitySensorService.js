@@ -13,13 +13,9 @@ class HomeMaticHomeKitAirQualitySensorService extends HomeKitGenericService {
         })
       })
 
-    this.addValueMapping('STATE', 0, 0)
-    this.addValueMapping('STATE', 1, 1)
-    this.addValueMapping('STATE', 2, 1)
-
     this.addHomeMaticDatapoint('STATE')
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.address + '.STATE', this, function (newValue) {
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('STATE'), this, function (newValue) {
       self.log.debug('[AKS] State event %s', newValue)
       var hkresult = 0
       switch (newValue) {

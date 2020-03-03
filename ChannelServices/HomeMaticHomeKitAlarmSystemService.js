@@ -1,7 +1,6 @@
 'use strict'
 
 const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
-const util = require('util')
 const sprintf = require('sprintf-js').sprintf
 
 class HomeMaticHomeKitAlarmSystemService extends HomeKitGenericService {

@@ -50,7 +50,7 @@ describe('Homematic Plugin (index)', function () {
       done()
     })
 
-    it('test initial values dimmer must be ' + that.expInitValue + '%', function (done) {
+    it('test initial values dimmer must haz random init value', function (done) {
       let ac = that.accessories[0]
       let s = ac.getService(Service.WindowCovering)
       assert.ok(s, 'Service.WindowCovering not found in %s', ac.name)

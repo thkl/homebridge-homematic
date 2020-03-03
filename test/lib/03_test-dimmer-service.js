@@ -20,10 +20,10 @@ describe('Homematic Plugin (index)', function () {
     subsection: 'HomeKit',
     testdata: data
   }
-  this.randomInitValue = Math.random()
-  this.expInitValue = (that.randomInitValue * 100)
 
   var platform = new homebridgeMock.PlatformType(log, config, homebridgeMock)
+  this.randomInitValue = Math.random()
+  this.expInitValue = (that.randomInitValue * 100)
 
   before(function () {
     platform.homebridge.setCCUDummyValue('BidCos-RF.ABC1234560:1.LEVEL', that.randomInitValue)
@@ -50,7 +50,7 @@ describe('Homematic Plugin (index)', function () {
       done()
     })
 
-    it('test initial values dimmer must be ' + that.expInitValue + '%', function (done) {
+    it('test initial values dimmer must be random', function (done) {
       let ac = that.accessories[0]
       let s = ac.getService(Service.Lightbulb)
       assert.ok(s, 'Service.Lightbulb not found in %s', ac.name)
