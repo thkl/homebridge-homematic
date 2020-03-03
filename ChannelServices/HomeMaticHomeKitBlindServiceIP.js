@@ -120,15 +120,16 @@ class HomeMaticHomeKitBlindServiceIP extends HomeKitGenericService {
   // if there is a custom close level and the real level is below homekit will get the 0% ... and visevera for max level
 
   processBlindLevel (newValue) {
-    if (newValue <= this.minValueForClose) {
+    this.log.debug('[BLINDIP] level is %s', newValue)
+    if (parseFloat(newValue) <= this.minValueForClose) {
       newValue = 0
     }
-    if (newValue >= this.maxValueForOpen) {
+    if (parseFloat(newValue) >= this.maxValueForOpen) {
       newValue = 100
     }
 
-    this.currentPos.updateValue(newValue, null)
-    this.targetPos.updateValue(newValue, null)
+    this.currentPos.updateValue(parseFloat(newValue), null)
+    this.targetPos.updateValue(parseFloat(newValue), null)
   }
 }
 module.exports = HomeMaticHomeKitBlindServiceIP

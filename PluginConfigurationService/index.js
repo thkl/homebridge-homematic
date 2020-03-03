@@ -42,7 +42,11 @@ class PluginConfigurationService {
     let self = this
     this.pluginAccessories = []
     serverList.map(accessory => {
-      accessory.services = self.settingsForType(accessory.devicetype, accessory.channeltype)
+      if (accessory.custom === true) {
+        accessory.services = self.getCustomServiceData(accessory.service)
+      } else {
+        accessory.services = self.settingsForType(accessory.devicetype, accessory.channeltype)
+      }
       self.pluginAccessories.push(accessory)
     })
   }
@@ -197,7 +201,12 @@ class PluginConfigurationService {
       // remove the interface
       let rgx = /.([A-z0-9:]{6,})/
       let parts = rgx.exec(data.address)
-      let address = (parts.length > 1) ? parts[1] : data.address
+      var address
+      if (parts) {
+        address = (parts.length > 1) ? parts[1] : data.address
+      } else {
+        address = data.address
+      }
       var pluginHmConfig = this.loadMyConfig()
       // load the serviceclass and validate the configuration
       let ServiceClass = this.loadServiceClass(service)
@@ -232,6 +241,26 @@ class PluginConfigurationService {
             myServices.push(newServiceConfig)
 
             pluginHmConfig['services'] = myServices
+
+            // Check if its a special sevice
+            let serviceDev = this.serviceTemplates[service]
+            if ((serviceDev) && (serviceDev.special)) {
+              // load the special config setting
+              let spList = pluginHmConfig['special']
+              if (spList === undefined) {
+                spList = []
+              }
+              var found = false
+              spList.map(sv => {
+                if (sv.name === address) {
+                  found = true
+                }
+              })
+              if (found === false) {
+                spList.push({ name: address })
+              }
+              pluginHmConfig['special'] = spList
+            }
 
             this.saveMyConfig(pluginHmConfig)
             let message = {
@@ -410,9 +439,20 @@ class PluginConfigurationService {
     var result = []
     Object.keys(this.serviceTemplates).map(serviceKey => {
       let serviceData = this.serviceTemplates[serviceKey]
-      let channelTypes = serviceData['ChannelType']
+      let channelTypes = serviceData['channelType']
       if ((channelTypes.indexOf(channeltype) !== -1) || (channelTypes.indexOf(devicetype + ':' + channeltype) !== -1)) {
-        result.push({ service: serviceKey, configuration: serviceData.Configuration })
+        result.push({ service: serviceKey, configuration: serviceData.configuration })
+      }
+    })
+    return result
+  }
+
+  getCustomServiceData (serviceClass) {
+    var result = []
+    Object.keys(this.serviceTemplates).map(serviceKey => {
+      let serviceData = this.serviceTemplates[serviceKey]
+      if (serviceKey === serviceClass) {
+        result.push({ service: serviceKey, configuration: serviceData.configuration })
       }
     })
     return result

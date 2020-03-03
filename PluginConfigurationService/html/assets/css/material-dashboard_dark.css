@@ -11,8 +11,33 @@
 
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
+
+ 
  */
 /*     brand Colors              */
+
+.modal-danger .modal-title {
+  color: #fff;
+}
+
+.modal-danger .modal-header,
+.modal-danger .modal-footer {
+  border-color: rgba(255, 255, 255, .075);
+}
+
+.modal-danger .modal-content {
+  color: #fff;
+  background-color: #f5365c;
+}
+
+.modal-danger .modal-content .heading {
+  color: #fff;
+}
+
+.modal-danger .close>span:not(.sr-only) {
+  color: #fff;
+}
+
 .card {
   font-size: .875rem;
 }

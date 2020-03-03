@@ -1,26 +1,15 @@
 
+import { Network } from './network.js'
+import { UI, Dialog, Container, List, ListRow } from './ui.js'
+
 export class Application {
   constructor () {
+    this.network = new Network()
+    this.makeApiRequest = this.network.makeApiRequest
+    this.ui = new UI()
+
     this.run()
     this.globalServiceList = {}
-  }
-
-  makeApiRequest (data) {
-    return new Promise((resolve, reject) => {
-      $.ajax({
-        dataType: 'json',
-        url: '/api/',
-        data: data,
-        method: 'POST',
-        success: function (data) {
-          console.log('API Request Result' + data)
-          resolve(data)
-        },
-        failure: function (error) {
-          reject(error)
-        }
-      })
-    })
   }
 
   deviceWithAddress (adr) {
@@ -47,127 +36,129 @@ export class Application {
     var control
     switch (configurationItem.control) {
       case 'array':
-        control = $('<select>')
-        configurationItem.values.map(value => {
-          let option = $('<option>')
-          option.append(value)
-          if (value === currentValue[controlName]) {
-            option.attr('selected', 'selected')
-          }
-          control.append(option)
+        control = this.ui.labeledOptionList({
+          id: 'service_setting_' + controlName,
+          label: configurationItem.label,
+          options: configurationItem.values,
+          value: currentValue[controlName]
         })
         break
       case 'text':
+      case 'integer':
         let vdefault = (configurationItem.default !== undefined) ? configurationItem.default : ''
-        control = $('<input>')
-        control.attr('type', 'text')
-        control.val((currentValue[controlName] !== undefined) ? currentValue[controlName] : vdefault)
+        control = this.ui.labeledInputLine({
+          id: 'service_setting_' + controlName,
+          label: configurationItem.label,
+          value: currentValue[controlName] || vdefault
+        })
         break
       case 'boolean':
-        control = $('<input>')
-        control.attr('type', 'checkbox')
-        if (currentValue[controlName] === true) {
-          control.attr('checked', 'checked')
-        }
-        control.val(true)
+        control = this.ui.labeledCheckbox({
+          id: 'service_setting_' + controlName,
+          label: configurationItem.label,
+          value: currentValue[controlName]
+        })
         break
     }
-    control.attr('id', 'service_setting_' + controlName)
     return control
   }
 
-  showServiceDescription (parent, service) {
-    parent.empty()
+  getServiceDescription (service) {
+    var result
+    let self = this
     Object.keys(this.globalServiceList).map(serviceName => {
       if (serviceName === service) {
-        parent.append(this.globalServiceList[serviceName].description)
+        result = self.ui.descriptionRow(serviceName, this.globalServiceList[serviceName].description)
       }
     })
+    return result
   }
 
-  showServiceSettings (parent, device, service) {
+  getServiceSettings (device, service) {
     let self = this
-    parent.empty()
+    var items = []
     this.currentServiceSettings = this.settingsForDeviceAndService(device, service)
     if (this.currentServiceSettings) {
       this.currentServiceSettings.map(setting => {
         Object.keys(setting).map(key => {
-          let setRow = $('<div>').addClass('row')
-          parent.append(setRow)
           let cSetting = setting[key]
-
           let ctrl = self.controlForConfigurationItem(key, cSetting, device.config)
-          if (ctrl) {
-            let oLbl = $('<div>').addClass('col-md-4')
-            if (cSetting.label) {
-              oLbl.append(cSetting.label)
-            }
-            setRow.append(oLbl)
-            setRow.append($('<div>').addClass('col-md-7').append(ctrl))
-            if (cSetting.hint) {
-              let hintRow = $('<div>').addClass('row')
-              let hintCell = $('<div>').addClass('col-md-12').addClass('settings_description')
-              hintCell.append(cSetting.hint)
-              hintRow.append(hintCell)
-              parent.append(hintRow)
-            }
-          }
+          items.push(ctrl)
+          let desc = self.ui.descriptionRow('desc_' + key, cSetting.hint)
+          items.push(desc)
         })
       })
     }
+    return items
   }
 
   showSettings (adr) {
     let self = this
     let device = this.deviceWithAddress(adr)
     if (device) {
-      $('#settings_title').html('Settings for ' + device.name)
-
-      let content = $('#settings_content')
-      content.empty()
       // First show possible Services
-      var row = $('<div>').addClass('row')
-      content.append(row)
-      let c1 = $('<div>').addClass('col-md-4').append('Serviceclass')
-      row.append(c1)
-      let soption = $('<select>')
-      soption.attr('id', 'service_class')
+      var avClasses = []
       device.services.map(service => {
-        let option = $('<option>').append(service.service)
-        if (service.service === device.service) {
-          option.attr('selected', 'selected')
+        if ((service.special) && (service.special === true)) {
+          // Skip this
+        } else {
+          avClasses.push(service.service)
         }
-        soption.append(option)
       })
-      let c2 = $('<div>').addClass('col-md-7').append(soption)
-      row.append(c2)
-      row = $('<div>').addClass('row')
-      content.append(row)
-      let cD = $('<div>').addClass('col-md-12').addClass('settings_description').attr('id', 'settings_service_description')
-      row.append(cD)
 
-      let optionContainer = $('<div>')
-      content.append(optionContainer)
+      let scItem = self.ui.labeledOptionList({
+        id: 'service_class',
+        label: 'Serviceclass',
+        options: avClasses,
+        value: device.service
+      })
+
+      let container = new Container()
+      container.addItem('service_class_item', scItem)
+
+      let dialog = new Dialog({
+        dialogId: 'settings',
+        title: 'Settings for ' + device.name,
+        buttons: [
+          {
+            id: 'save',
+            label: 'Save settings',
+            isPrimary: true,
+            onClick: function (e) {
+              self.showNotification('top', 'center', 'info', 'autorenew', 'Please wait until your device was updated')
+
+              self.saveSettings(device, function () {
+                dialog.close()
+              })
+            }
+          },
+          {
+            isSecondary: true,
+            label: 'Cofeve',
+            dismiss: true
+          }
+        ]
+      })
+
+      container.addItem('service_class_description', self.getServiceDescription(device.service))
+      container.addItem('service_class_settings', self.getServiceSettings(device, device.service))
+
+      dialog.setBody(container.getItems())
+
+      dialog.open()
+
+      let soption = $('#service_class')
       soption.bind('change', function () {
         let newService = soption.val()
-        self.showServiceDescription(cD, newService)
-        self.showServiceSettings(optionContainer, device, newService)
-      })
-
-      self.showServiceDescription(cD, device.service)
-      self.showServiceSettings(optionContainer, device, device.service)
-      $('#save_service').unbind()
-      $('#save_service').bind('click', function (e) {
-        self.saveSettings(device)
-      })
-      $('#settings').modal({})
-      $('#settings').draggable({
-        handle: '.modal-header'
+        container.setItem('service_class_description', self.getServiceDescription(newService))
+        container.setItem('service_class_settings',
+          self.getServiceSettings(device, newService)
+        )
       })
     }
   }
 
-  saveSettings (device) {
+  saveSettings (device, callback) {
     let self = this
     if (device) {
       device.service = $('#service_class').val()
@@ -181,6 +172,9 @@ export class Application {
           switch (ctrl) {
             case 'boolean':
               setvalue = $('#service_setting_' + key).prop('checked')
+              break
+            case 'integer':
+              setvalue = parseInt($('#service_setting_' + key).val())
               break
             default:
               setvalue = $('#service_setting_' + key).val()
@@ -197,10 +191,12 @@ export class Application {
       }
       this.makeApiRequest({ 'method': 'saveSettings', config: JSON.stringify(data) }).then(result => {
         if (result === true) {
-          $('#settings').modal('hide')
           setTimeout(function () {
             self.queryServices()
           }, 10000)
+          if (callback) {
+            callback()
+          }
         }
       })
     }
@@ -212,27 +208,67 @@ export class Application {
       if (devicelist) {
         self.globalDeviceList = devicelist
         $('#cnt_mapped_devices').html(devicelist.length)
+
+        var list = new List('_device_list', [
+          { width: '30%', label: 'Name' },
+          { width: '30%', label: 'Address' },
+          { width: '30%', label: 'Serviceclass' },
+          { width: '10%', label: '' }
+        ])
+
+        var specialList = new List('_device_list_special', [
+          { width: '30%', label: 'Name' },
+          { width: '50%', label: 'Serviceclass' },
+          { width: '10%', label: '' },
+          { width: '10%', label: '' }
+        ])
+
+        devicelist.map(device => {
+          if (device.custom === true) {
+            let row = specialList.addRow()
+            row.addCell(device.name)
+            row.addCell(device.service)
+            if ((device.services.length > 1) || ((device.services[0]) && (device.services[0].configuration) && (device.services[0].configuration.length > 0))) {
+              let button = self.ui.button({
+                label: 'Settings',
+                onClick: function () { self.showSettings(device.address) }
+              })
+
+              row.addCell(button)
+            } else {
+              row.addCell(' - ')
+            }
+
+            row.addCell(self.ui.button({
+              label: 'Delete',
+              class: 'btn btn-danger pull-left',
+              onClick: function () { self.showSettings(device.address) }
+            }))
+          } else {
+            let row = list.addRow()
+            row.addCell(device.name)
+            row.addCell(device.address)
+            row.addCell(device.service)
+            if ((device.services.length > 1) || ((device.services[0]) && (device.services[0].configuration) && (device.services[0].configuration.length > 0))) {
+              let button = self.ui.button({
+                label: 'Settings',
+                onClick: function () { self.showSettings(device.address) }
+              })
+
+              row.addCell(button)
+            } else {
+              row.addCell(' - ')
+            }
+          }
+        })
+
         let hDeviceList = $('#device_list')
         hDeviceList.empty()
-        devicelist.map(device => {
-          let hRow = $('<tr>')
-          hRow.append($('<td>').append(device.name))
-          hRow.append($('<td>').append(device.address))
-          hRow.append($('<td>').append(device.service))
+        hDeviceList.append(list.getList())
 
-          // check config
-          if ((device.services.length > 1) || ((device.services[0]) && (device.services[0].configuration.length > 0))) {
-            let button = $('<button>').attr('type', 'submit').attr('class', 'btn btn-info pull-left').append('Settings')
-            button.bind('click', function () {
-              self.showSettings(device.address)
-            })
-            hRow.append($('<td>').append(button))
-          } else {
-            hRow.append($('<td>').append(' - '))
-          }
-
-          hDeviceList.append(hRow)
-        })
+        let hSpecialDeviceList = $('#device_list_special')
+        hSpecialDeviceList.empty()
+        hSpecialDeviceList.append(specialList.getList())
       }
     })
   }
@@ -244,16 +280,22 @@ export class Application {
         self.globalProgramList = programList
         let hProgramList = $('#program_list')
         hProgramList.empty()
+
+        let prList = new List('_program_list', [
+          { width: '80%', label: 'Program' },
+          { width: '20%', label: '' }
+        ])
+
         programList.map(program => {
-          let hRow = $('<tr>')
-          hRow.append($('<td>').append(program))
-          let button = $('<button>').attr('type', 'submit').attr('class', 'btn btn-danger pull-left').append('Delete')
-          button.bind('click', function () {
-            self.deleteProgram(program)
-          })
-          hRow.append($('<td>').append(button))
-          hProgramList.append(hRow)
+          let row = prList.addRow()
+          row.addCell(program)
+          row.addCell(self.ui.button({
+            label: 'Delete',
+            class: 'btn btn-danger pull-left',
+            onClick: function () { self.deleteProgram(program) }
+          }))
         })
+        hProgramList.append(prList.getList())
       }
     })
   }
@@ -265,16 +307,22 @@ export class Application {
         self.globalVariableList = variableList
         let hVariableList = $('#variable_list')
         hVariableList.empty()
+
+        let vrList = new List('_variable_list', [
+          { width: '80%', label: 'Variable' },
+          { width: '20%', label: '' }
+        ])
+
         variableList.map(variable => {
-          let hRow = $('<tr>')
-          hRow.append($('<td>').append(variable))
-          let button = $('<button>').attr('type', 'submit').attr('class', 'btn btn-danger pull-left').append('Delete')
-          button.bind('click', function () {
-            self.deleteVariable(variable)
-          })
-          hRow.append($('<td>').append(button))
-          hVariableList.append(hRow)
+          let row = vrList.addRow()
+          row.addCell(variable)
+          row.addCell(self.ui.button({
+            label: 'Delete',
+            class: 'btn btn-danger pull-left',
+            onClick: function () { self.deleteVariable(variable) }
+          }))
         })
+        hVariableList.append(vrList.getList())
       }
     })
   }
@@ -285,7 +333,7 @@ export class Application {
         $('#ccu_hostname').html(info.ccu_ip)
         $('#ccu_hostname').unbind()
         $('#ccu_hostname').bind('click', function () {
-          window.open('http://' + info)
+          window.open('http://' + info.ccu_ip)
         })
       }
     })
@@ -293,61 +341,149 @@ export class Application {
 
   deleteProgram (program) {
     let self = this
-    $('#deleleteItemName').html('Remove ' + program + ' from HomeKit ?')
-    $('#buttonDeleteItem').html('Remove program')
-    $('#buttonDeleteItem').unbind()
-    $('#buttonDeleteItem').bind('click', function (e) {
-      self.makeApiRequest({ method: 'removeProgram', name: program }).then(result => {
-        $('#dialogDeleteItem').modal('hide')
-        setTimeout(function () {
-          self.queryProgramList()
-        }, 2000)
-      })
+    let dialog = new Dialog({
+      dialogId: 'removeProgram',
+      dialogClass: 'modal-danger',
+      title: 'Remove ' + program + ' from HomeKit ?',
+      buttons: [
+        {
+          id: 'save',
+          label: 'Remove program',
+          isPrimary: true,
+          onClick: function (e) {
+            self.makeApiRequest({ method: 'removeProgram', name: program }).then(result => {
+              dialog.close()
+              setTimeout(function () {
+                self.queryProgramList()
+              }, 2000)
+            })
+          }
+        },
+        {
+          isSecondary: true,
+          label: 'Cofeve',
+          dismiss: true
+        }
+      ]
     })
-    $('#dialogDeleteItem').modal({})
-    $('#dialogDeleteItem').draggable({
-      handle: '.modal-header'
-    })
+    dialog.setBody('This will remove the program from Homekit.You may add ' + program + ' later again if you want.')
+    dialog.open()
   }
 
   deleteVariable (variable) {
     let self = this
-    $('#deleleteItemName').html('Remove ' + variable + ' from HomeKit ?')
-    $('#buttonDeleteItem').html('Remove variable')
-    $('#buttonDeleteItem').unbind()
-    $('#buttonDeleteItem').bind('click', function (e) {
-      self.makeApiRequest({ method: 'removeVariable', name: variable }).then(result => {
-        $('#dialogDeleteItem').modal('hide')
-        setTimeout(function () {
-          self.queryVariableList()
-        }, 2000)
-      })
+    let dialog = new Dialog({
+      dialogId: 'removeVariable',
+      dialogClass: 'modal-danger',
+      title: 'Remove ' + variable + ' from HomeKit ?',
+      buttons: [
+        {
+          id: 'save',
+          label: 'Remove variable',
+          isPrimary: true,
+          onClick: function (e) {
+            self.makeApiRequest({ method: 'removeVariable', name: variable }).then(result => {
+              dialog.close()
+              setTimeout(function () {
+                self.queryVariableList()
+              }, 2000)
+            })
+          }
+        },
+        {
+          isSecondary: true,
+          label: 'Cofeve',
+          dismiss: true
+        }
+      ]
     })
-    $('#dialogDeleteItem').modal({})
-    $('#dialogDeleteItem').draggable({
-      handle: '.modal-header'
-    })
+    dialog.setBody('This will remove the variable from Homekit.You may add ' + variable + ' later again if you want.')
+    dialog.open()
   }
 
-  saveNewVariable () {
+  openNewVariableDialog () {
     let self = this
-    let varname = $('#newItemName').val()
+    let dialog = new Dialog({
+      dialogId: 'newVariable',
+      title: 'New variable',
+      buttons: [
+        {
+          id: 'save',
+          label: 'Add new variable',
+          isPrimary: true,
+          onClick: function (e) {
+            self.saveNewVariable(function () {
+              dialog.close()
+            })
+          }
+        },
+        {
+          isSecondary: true,
+          label: 'Cofeve',
+          dismiss: true
+        }
+      ]
+    })
+    dialog.setBody(self.ui.labeledInputLine({
+      id: 'newItemName',
+      label: 'Name'
+    }))
+    dialog.open()
+  }
+
+  saveNewVariable (callback) {
+    let self = this
+    let varname = $('#newItemName_text').val()
     this.makeApiRequest({ method: 'newVariable', name: varname }).then(result => {
-      $('#newItemEditor').modal('hide')
       setTimeout(function () {
         self.queryVariableList()
       }, 2000)
+      if (callback) {
+        callback()
+      }
     })
   }
 
-  saveNewProgram () {
+  openNewProgramDialog () {
     let self = this
-    let programName = $('#newItemName').val()
+    let dialog = new Dialog({
+      dialogId: 'newProgram',
+      title: 'New program',
+      buttons: [
+        {
+          id: 'save',
+          label: 'Add new program',
+          isPrimary: true,
+          onClick: function (e) {
+            self.saveNewProgram(function () {
+              dialog.close()
+            })
+          }
+        },
+        {
+          isSecondary: true,
+          label: 'Cofeve',
+          dismiss: true
+        }
+      ]
+    })
+    dialog.setBody(self.ui.labeledInputLine({
+      id: 'newItemName',
+      label: 'Name'
+    }))
+    dialog.open()
+  }
+
+  saveNewProgram (callback) {
+    let self = this
+    let programName = $('#newItemName_text').val()
     this.makeApiRequest({ method: 'newProgram', name: programName }).then(result => {
-      $('#newItemEditor').modal('hide')
       setTimeout(function () {
         self.queryProgramList()
       }, 2000)
+      if (callback) {
+        callback()
+      }
     })
   }
 
@@ -356,6 +492,14 @@ export class Application {
     this.makeApiRequest({ method: 'services' }).then(serviceList => {
       if (serviceList) {
         self.globalServiceList = serviceList
+        self.specialSericeList = []
+        Object.keys(serviceList).map(key => {
+          let service = serviceList[key]
+          if ((service.special) && (service.special === true)) {
+            service.service = key
+            self.specialSericeList.push(service)
+          }
+        })
       }
     })
   }
@@ -377,6 +521,72 @@ export class Application {
     })
   }
 
+  addNewSpecialService () {
+    let self = this
+    var options = []
+
+    self.specialSericeList.map(service => {
+      options.push(service.service)
+    })
+
+    // create a dummy device
+    let device = {
+      services: self.specialSericeList,
+      config: {}
+    }
+
+    let container = new Container()
+
+    container.addItem('new_service_name', this.ui.labeledInputLine({
+      id: 'service_name',
+      label: 'Name'
+    }))
+
+    container.addItem('service_class_item', this.ui.labeledOptionList({
+      id: 'service_class',
+      label: 'Service class',
+      options: options
+    }))
+    let firstServiceName = options[0]
+    container.addItem('service_class_settings', self.getServiceSettings(device, firstServiceName))
+
+    let dialog = new Dialog({
+      dialogId: 'newService',
+      title: 'New special service',
+      buttons: [
+        {
+          id: 'save',
+          label: 'Add new service',
+          isPrimary: true,
+          onClick: function (e) {
+            self.showNotification('top', 'center', 'info', 'autorenew', 'Please wait until your device was created')
+            device.address = $('#service_name').val()
+            self.saveSettings(device, function () {
+              dialog.close()
+            })
+          }
+        },
+        {
+          isSecondary: true,
+          label: 'Cofeve',
+          dismiss: true
+        }
+      ]
+    })
+
+    dialog.setBody(container.getItems())
+    dialog.open()
+
+    let soption = $('#service_class')
+    soption.bind('change', function () {
+      let newService = soption.val()
+      container.setItem('service_class_description', self.getServiceDescription(newService))
+      container.setItem('service_class_settings',
+        self.getServiceSettings(device, newService)
+      )
+    })
+  }
+
   hookKeys () {
     let self = this
     $('#publish_devices').bind('click', function () {
@@ -390,30 +600,16 @@ export class Application {
       })
     })
 
+    $('#buttonNewSpecial').bind('click', function () {
+      self.addNewSpecialService()
+    })
+
     $('#buttonNewVariable').bind('click', function () {
-      $('#newItemTitle').html('New variable ...')
-      $('#saveNewItem').html('Save new variable')
-      $('#saveNewItem').unbind()
-      $('#saveNewItem').bind('click', function (e) {
-        self.saveNewVariable()
-      })
-      $('#newItemEditor').modal({})
-      $('#newItemEditor').draggable({
-        handle: '.modal-header'
-      })
+      self.openNewVariableDialog()
     })
 
     $('#buttonNewProgram').bind('click', function () {
-      $('#newItemTitle').html('New program ...')
-      $('#saveNewItem').html('Save new program')
-      $('#saveNewItem').unbind()
-      $('#saveNewItem').bind('click', function (e) {
-        self.saveNewProgram()
-      })
-      $('#newItemEditor').modal({})
-      $('#newItemEditor').draggable({
-        handle: '.modal-header'
-      })
+      self.openNewProgramDialog()
     })
   }
 

@@ -121,18 +121,8 @@
                                     <h4 class="card-title">Mappings</h4>
                                     <p class="card-category">Device - Serviceclass Mappings</p>
                                 </div>
-                                <div class="card-body table-responsive">
-                                    <table class="table table-hover">
-                                        <thead class="text-info">
-                                            <th>Name</th>
-                                            <th>Address</th>
-                                            <th>Serviceclass</th>
-                                            <th></th>
-                                        </thead>
-                                        <tbody id="device_list">
-
-                                        </tbody>
-                                    </table>
+                                <div class="card-body table-responsive" id="device_list">
+                                    
                                 </div>
                             </div>
                         </div>
@@ -143,16 +133,7 @@
                                 <div class="card-header card-header-info">
                                     <h4 class="card-title">Programs</h4>
                                 </div>
-                                <div class="card-body table-responsive">
-                                    <table class="table table-hover">
-                                        <thead class="text-info">
-                                            <th>Program</th>
-                                            <th style="width: 20%;"></th>
-                                        </thead>
-                                        <tbody id="program_list">
-
-                                        </tbody>
-                                    </table>
+                                <div class="card-body table-responsive" id="program_list">
                                 </div>
                                 <div class="card-footer">
                                     <div class="stats">
@@ -166,16 +147,7 @@
                                 <div class="card-header card-header-info">
                                     <h4 class="card-title">Variables</h4>
                                 </div>
-                                <div class="card-body table-responsive">
-                                    <table class="table table-hover">
-                                        <thead class="text-info">
-                                            <th>Variable</th>
-                                            <th style="width: 20%;"></th>
-                                        </thead>
-                                        <tbody id="variable_list">
-
-                                        </tbody>
-                                    </table>
+                                <div class="card-body table-responsive" id="variable_list">
                                 </div>
                                 <div class="card-footer">
                                     <div class="stats">
@@ -185,6 +157,25 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12">
+                            <div class="card">
+                                <div class="card-header card-header-info">
+                                    <h4 class="card-title">Special services</h4>
+                                    <p class="card-category"></p>
+                                </div>
+                                <div class="card-body table-responsive" id="device_list_special">
+                                    
+                                </div>
+                                <div class="card-footer">
+                                    <div class="stats">
+                                        <button class="btn btn-info pull-left" id="buttonNewSpecial">New Applicance</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
             <footer class="footer">
@@ -204,83 +195,6 @@
             </footer>
         </div>
     </div>
-
-
-    <div class="modal fade" id="settings" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="settings_title"></h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="settings_content">
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="save_service" class="btn btn-primary">Save changes</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="modal fade" id="newItemEditor" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="newItemTitle"></h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="settingsNewItem">
-                    <div class="row">
-                        <div class="col-lg-3 col-md-12">
-                            Name
-                        </div>
-                        <div class="col-lg-9 col-md-12">
-                            <input type="text" name="newItemName" id="newItemName" />
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="saveNewItem" class="btn btn-primary">Save new Item</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="dialogDeleteItem" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-danger" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="deleleteItemName"></h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="py-3 text-center">
-                <i class="now-ui-icons ui-1_bell-53 ni-4x"></i>
-                <h4 class="heading mt-4" data-localize="Warning, there is no way back.">
-                  Warning, there is no way back.
-                </h4>
-              </div>
-              <br />
-            </div>
-            <div class="modal-footer">
-              <button id="buttonDeleteItem" type="button" class="btn btn-primary" data-localize='Delete'>Delete</button>
-              <button type="button" class="btn btn-link ml-auto" data-dismiss="modal"
-                data-localize='Covfefe'>Covfefe</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
     <!--   Core JS Files   -->
     <script src="./assets/js/jquery.min.js"></script>
     <script src="./assets/js/jquery-ui.min.js"></script>
