@@ -263,6 +263,7 @@ class HomeMaticCCU {
   }
 
   setupRPC () {
+    let self = this
     this.log.debug('[CCUManager] setupRPC')
 
     if (!this.isInTest) {
@@ -277,17 +278,25 @@ class HomeMaticCCU {
 
       this.rpcClient = new HomeMaticRPCUni(this.log, initialPort, this)
 
-      this.rpcClient.addInterface('BidCos-RF.', this.ccuIP, 2001, '/')
+      this.rpcClient.addInterface('BidCos-RF', this.ccuIP, 2001, '/')
 
-      this.rpcClient.addInterface('VirtualDevices.', this.ccuIP, 9292, '/groups')
+      this.rpcClient.addInterface('VirtualDevices', this.ccuIP, 9292, '/groups')
 
       if (this.config.enable_hmip !== undefined) {
-        this.rpcClient.addInterface('HmIP-RF.', this.ccuIP, 2010, '/')
+        this.rpcClient.addInterface('HmIP-RF', this.ccuIP, 2010, '/')
       }
 
       if (this.config.enable_wired !== undefined) {
-        this.rpcClient.addInterface('BidCos-Wired.', this.ccuIP, 2000, '/')
+        this.rpcClient.addInterface('BidCos-Wired', this.ccuIP, 2000, '/')
       }
+
+      Object.keys(this.config.externalinterfaces).map(key => {
+        let eif = self.config.externalinterfaces[key]
+        if ((eif) && (eif.host) && (eif.port) && (eif.path)) {
+          self.rpcClient.addInterface(key, eif.host, eif.port, eif.path)
+        }
+      })
+
       this.rpcClient.init()
     } else {
       /* setup only the test service */

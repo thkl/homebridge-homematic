@@ -273,6 +273,9 @@ class HomeMaticRPCUni {
   }
 
   addInterface (ifName, hostIP, hostPort, path) {
+    if (!ifName.endsWith('.')) {
+      ifName = ifName + '.'
+    }
     let client = new HomeMaticRPCClient(ifName, this.sysID, hostIP, hostPort, path, this.log)
     this.interfaces.push(client)
   }
