@@ -94,9 +94,9 @@ class HomeMaticHomeKitValveService extends HomeKitGenericService {
 
     this.c_isActive = this.service_item.getCharacteristic(Characteristic.Active)
       .on('get', function (callback) {
-        self.log.debug('[VALVE] get Active')
         self.query('STATE', function (value) {
           let hmState = self.isTrue(value) ? 1 : 0
+          self.log.debug('[VALVE] get Active %s', hmState)
           if (callback) callback(null, hmState)
         })
       })
@@ -123,13 +123,11 @@ class HomeMaticHomeKitValveService extends HomeKitGenericService {
         }
       })
 
-    this.c_isActive.updateValue(Characteristic.Active.ACTIVE, null)
-
     this.c_isInUse = this.service_item.getCharacteristic(Characteristic.InUse)
       .on('get', function (callback) {
-        self.log.debug('get Active')
         self.query('STATE', function (value) {
           let hmState = self.isTrue(value) ? 1 : 0
+          self.log.debug('[VALVE] get inUse %s', hmState)
           if (callback) callback(null, hmState)
         })
       })
@@ -168,7 +166,7 @@ class HomeMaticHomeKitValveService extends HomeKitGenericService {
     let self = this
     this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('STATE'), self, function (newValue) {
       let hmState = this.isTrue(newValue) ? 1 : 0
-      self.log.debug('[Switch Service] Event result %s hm %s', newValue, hmState)
+      self.log.debug('[VALVE] Event result %s hm %s', newValue, hmState)
       if (hmState === 0) {
         self.remainTime = 0
         if (self.c_timeRemain !== undefined) {
@@ -177,14 +175,17 @@ class HomeMaticHomeKitValveService extends HomeKitGenericService {
       }
 
       if (self.c_isActive !== undefined) {
+        self.log.debug('[VALVE] acTive %s', hmState)
         self.c_isActive.updateValue(hmState, null)
       }
 
       if (self.c_isOn !== undefined) {
+        self.log.debug('[VALVE] isOn %s', hmState)
         self.c_isOn.updateValue(hmState, null)
       }
 
       if (self.c_isInUse !== undefined) {
+        self.log.debug('[VALVE] inUse %s', hmState)
         self.c_isInUse.updateValue(hmState, null)
       }
     })

@@ -13,7 +13,7 @@ class HomeMaticHomeKitVariableService extends HomeKitGenericService {
     this.cc = vservice.getCharacteristic(Characteristic.On)
 
       .on('get', function (callback) {
-        self.remoteGetValue(self.buildHomeMaticAddress('Var.' + self.address + ':1.STATE'), function (value) {
+        self.remoteGetValue('1.STATE', function (value) {
           if (callback) callback(null, value)
         })
       })
@@ -22,7 +22,7 @@ class HomeMaticHomeKitVariableService extends HomeKitGenericService {
         self.log.debug('Variable %s set to %s', self.address, value)
         self.command('sendregacommand', '', 'var x=dom.GetObject("' + self.address + '");if (x) {x.State(' + value + ');}', function () {
           self.varTimer = setTimeout(function () {
-            self.remoteGetValue(self.buildHomeMaticAddress('Var.' + self.address + ':1.STATE'))
+            self.remoteGetValue('1.STATE')
           }, 500)
         })
 
