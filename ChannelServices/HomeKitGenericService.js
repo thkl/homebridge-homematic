@@ -965,7 +965,8 @@ class HomeKitGenericService {
 
   buildHomeMaticAddress (dp) {
     this.log.debug('[Generic] buildHomeMaticAddress %s', dp)
-    if (dp) {
+
+    if ((dp) && (typeof dp === 'string')) {
       var pos = dp.indexOf('.')
       if (pos === -1) {
         this.log.debug('[Generic] seems to be a single datapoint')
@@ -994,7 +995,7 @@ class HomeKitGenericService {
         }
       }
     } else {
-      throw new Error('[Generic] unable create HM Address from undefined Input')
+      this.log.error('[Generic] unable create HM Address from undefined Input %s', JSON.parse(dp))
     }
   }
 

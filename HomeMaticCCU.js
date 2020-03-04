@@ -1,7 +1,7 @@
 const HomeMaticRegaRequest = require('./HomeMaticRegaRequest.js').HomeMaticRegaRequest
 const HomeMaticRegaRequestTestDriver = require('./HomeMaticRegaRequestTestDriver.js').HomeMaticRegaRequestTestDriver
 const HomeMaticAddress = require('./HomeMaticAddress.js')
-const HomeMaticRPC = require('./HomeMaticRPC.js').HomeMaticRPC
+const HomeMaticRPCUni = require('./HomeMaticRPCUni.js')
 const HomeMaticRPCTestDriver = require('./HomeMaticRPCTestDriver.js').HomeMaticRPCTestDriver
 const fs = require('fs')
 
@@ -16,9 +16,11 @@ class HomeMaticCCU {
     this.localCache = platform.localCache
     this.timer = 0
     this.isInTest = isInTest
+    this.rpcEventClients = []
     if (this.isInTest === false) {
       this.log.info('[CCUManager] Manager initialized at %s', this.config.ccu_ip)
     }
+    this.isRunning = true
   }
 
   reloadConfig () {
@@ -27,6 +29,7 @@ class HomeMaticCCU {
     this.ccuRegaPort = this.config.ccuRegaPort
     this.ccuFetchTimeout = this.config.fetchtimeout || 120
     this.setupRPC()
+    this.isRunning = true
   }
 
   doCache (address, value) {
@@ -249,50 +252,43 @@ class HomeMaticCCU {
   }
 
   shutDown () {
-    if ((this.xmlrpc !== undefined) && (this.xmlrpc.stopping)) {
+    if (this.isRunning === false) {
+      this.log.warn('[CCUManager] called shutdown on not running manager')
       return
     }
-
-    if (this.xmlrpc !== undefined) {
-      this.xmlrpc.stopping = true
-      this.xmlrpc.stop()
-    }
-
-    if (this.xmlrpcwired !== undefined) {
-      this.xmlrpcwired.stop()
-    }
-    if (this.xmlrpchmip !== undefined) {
-      this.xmlrpchmip.stop()
-    }
-
-    if (this.virtual_xmlrpc !== undefined) {
-      this.virtual_xmlrpc.stop()
+    this.isRunning = false
+    if (this.rpcClient) {
+      this.rpcClient.stop()
     }
   }
 
   setupRPC () {
+    this.log.debug('[CCUManager] setupRPC')
+
     if (!this.isInTest) {
       let initialPort = this.config.local_port
       if (initialPort === undefined) {
         initialPort = 9090
       }
 
-      /* setup the real rpc services */
-      this.xmlrpc = new HomeMaticRPC(this.log, this.ccuIP, initialPort, 0, this)
-      this.xmlrpc.init()
-
-      this.virtual_xmlrpc = new HomeMaticRPC(this.log, this.ccuIP, initialPort + 3, 3, this)
-      this.virtual_xmlrpc.init()
-
-      if (this.config.enable_wired !== undefined) {
-        this.xmlrpcwired = new HomeMaticRPC(this.log, this.ccuIP, initialPort + 1, 1, this)
-        this.xmlrpcwired.init()
+      if (this.rpcClient) {
+        this.rpcClient.shutDown()
       }
+
+      this.rpcClient = new HomeMaticRPCUni(this.log, initialPort, this)
+
+      this.rpcClient.addInterface('BidCos-RF.', this.ccuIP, 2001, '/')
+
+      this.rpcClient.addInterface('VirtualDevices.', this.ccuIP, 9292, '/groups')
 
       if (this.config.enable_hmip !== undefined) {
-        this.xmlrpchmip = new HomeMaticRPC(this.log, this.ccuIP, initialPort + 2, 2, this)
-        this.xmlrpchmip.init()
+        this.rpcClient.addInterface('HmIP-RF.', this.ccuIP, 2010, '/')
       }
+
+      if (this.config.enable_wired !== undefined) {
+        this.rpcClient.addInterface('BidCos-Wired.', this.ccuIP, 2000, '/')
+      }
+      this.rpcClient.init()
     } else {
       /* setup only the test service */
       this.xmlrpc = new HomeMaticRPCTestDriver(this.log, '127.0.0.1', 0, 0, this)
