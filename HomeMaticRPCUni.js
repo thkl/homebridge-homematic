@@ -92,14 +92,19 @@ class HomeMaticRPCUni {
       ip = bindIP
     }
 
-    let mac = this.getMac()
-    let matches = mac.match(/([0-9A-Fa-f]{2})/g)
-    this.sysID = ((matches) && (matches.length > 5)) ? (matches[4] + matches[5]) : 'AABB'
+    if (this.platform.config.systemid) {
+      this.sysID = this.platform.config.systemid
+      this.log.debug('[RPC] Using SystemID (%s) from configuration', this.sysID)
+    } else {
+      let mac = this.getMac()
+      let matches = mac.match(/([0-9A-Fa-f]{2})/g)
+      this.sysID = ((matches) && (matches.length > 5)) ? (matches[4] + matches[5]) : 'AABB'
+      this.log.debug('[RPC] Using mac based SystemID (%s)', this.sysID)
+    }
     this.localIP = ip
     this.bindIP = bindIP
 
     this.log.info('[RPC] local ip used : %s. you may change self with local_ip parameter in config', ip)
-    this.log.debug('[RPC] SystemID is %s', this.sysID)
     this.isPortTaken(this.listeningPort, function (error, inUse) {
       if (error === null) {
         if (inUse === false) {
