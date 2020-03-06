@@ -55,7 +55,7 @@ class HomeMaticHomeKitSwitchService extends HomeKitGenericService {
           self.log.debug('[Switch Service] Launch Program ' + self.address)
           self.command('sendregacommand', '', 'var x=dom.GetObject(ID_PROGRAMS).Get("' + self.address + '");if (x) {x.ProgramExecute();}', function () {
           })
-          setTimeout(function () {
+          self.timer = setTimeout(function () {
             self.c_isOn.setValue(0, null)
           }, self.delayOnSet)
         }
@@ -132,6 +132,7 @@ class HomeMaticHomeKitSwitchService extends HomeKitGenericService {
   shutdown () {
     this.log.debug('[SWITCH] shutdown')
     super.shutdown()
+    clearTimeout(this.timer)
   }
 }
 
