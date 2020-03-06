@@ -71,7 +71,7 @@ class HomeKitGenericService {
       // will fix https://github.com/thkl/homebridge-homematic/issues/485
       this.isMultiChannel = true
       this.customService = false
-
+      this.Characteristic = Characteristic
       var self = this
 
       if (self.address.indexOf('CUxD.') > -1) {
@@ -121,17 +121,25 @@ class HomeKitGenericService {
     }
   }
 
-  getService (serviceType) {
+  getService (serviceType, name) {
+    var result
     if (this.accessory.getService(serviceType)) {
-      return this.accessory.getService(serviceType)
+      result = this.accessory.getService(serviceType)
     } else {
       this.log.debug('[Generic] addService')
-      let result = this.accessory.addService(serviceType, this.name)
+      result = this.accessory.addService(serviceType)
       if (!result) {
         this.log.warn('[Generic] unable to add service %s to accessory %s', serviceType, this.accessory.name)
       }
-      return result
     }
+    let Characteristic = this.platform.homebridge.hap.Characteristic
+    var nameCharacteristic =
+      result.getCharacteristic(Characteristic.Name) ||
+      result.addCharacteristic(Characteristic.Name)
+
+    nameCharacteristic.setValue(name)
+
+    return result
   }
 
   getCharacteristic (service, characteristicType) {

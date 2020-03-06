@@ -10,6 +10,7 @@ class HomeMaticHomeKitThermalControlService extends HomeKitGenericService {
     // init some outside values
     this.currentTemperature = -255
     this.currentHumidity = 0
+    this.controlMode = 0
     this.targetTemperature = -255
     this.usecache = false // cause of virtual devices
     this.delayOnSet = 500 // 500ms delay
@@ -132,13 +133,44 @@ class HomeMaticHomeKitThermalControlService extends HomeKitGenericService {
     if (this.type === 'THERMALCONTROL_TRANSMIT') {
       this.cleanVirtualDevice('ACTUAL_HUMIDITY')
     }
+    this.boostState = 0
+    this.boostButton = this.getService(Service.Switch)
+    this.boostCharacteristic = this.boostButton.getCharacteristic(Characteristic.On)
+      .on('get', function (callback) {
+        if (callback) callback(null, (self.boostState > 0))
+      })
+      .on('set', function (value, callback) {
+        self.log.debug('[TCS] SET Boost %s', value)
+        if (value === true) {
+          self.command('setrega', 'BOOST_MODE', 1)
+        } else {
+          if (self.controlMode === 0) {
+            self.log.debug('[TCS] boost is off restoring controlmode auto')
+            self.command('setrega', 'AUTO_MODE', 1)
+          } else {
+            self.log.debug('[TCS] boost is off restoring controlmode manu')
+            self.command('setrega', 'MANU_MODE', 1)
+          }
+        }
+        if (callback) {
+          callback()
+        }
+      })
 
     // register all Datapoints for Events
     this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('ACTUAL_HUMIDITY'), this, function (newValue) {
       self.processChange('ACTUAL_HUMIDITY', newValue)
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('CONTROL_MODE'), this)
+    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('CONTROL_MODE'), this, function (newValue) {
+      // Ignore Boost Mode (3) as previous control mode
+      if (parseInt(newValue) !== 3) {
+        self.controlMode = parseInt(newValue)
+        self.log.debug('[TCS] controlMode is %s', newValue)
+      } else {
+        self.log.debug('[TCS] ignore Boost Mode as controlMode 3')
+      }
+    })
 
     this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('ACTUAL_TEMPERATURE'), this, function (newValue) {
       self.processChange('ACTUAL_TEMPERATURE', newValue)
@@ -147,6 +179,14 @@ class HomeMaticHomeKitThermalControlService extends HomeKitGenericService {
     this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('SET_TEMPERATURE'), this, function (newValue) {
       self.processChange('SET_TEMPERATURE', newValue)
     })
+
+    if (this.boostCharacteristic) {
+      this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('BOOST_STATE'), this, function (newValue) {
+        self.log.debug('[TCS] BOOST STATE is %s', newValue)
+        self.boostState = parseInt(newValue)
+        self.boostCharacteristic.updateValue((self.boostState > 0), null)
+      })
+    }
 
     this.queryData()
   }
