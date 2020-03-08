@@ -4,6 +4,7 @@ const HomeMaticAddress = require('./HomeMaticAddress.js')
 const HomeMaticRPCUni = require('./HomeMaticRPCUni.js')
 const HomeMaticRPCTestDriver = require('./HomeMaticRPCTestDriver.js').HomeMaticRPCTestDriver
 const fs = require('fs')
+const url = require('url')
 
 class HomeMaticCCU {
   constructor (platform, isInTest) {
@@ -21,6 +22,7 @@ class HomeMaticCCU {
       this.log.info('[CCUManager] Manager initialized at %s', this.config.ccu_ip)
     }
     this.isRunning = true
+    this.interfaces = {}
   }
 
   reloadConfig () {
@@ -28,8 +30,12 @@ class HomeMaticCCU {
     this.ccuIP = this.config.ccu_ip
     this.ccuRegaPort = this.config.ccuRegaPort
     this.ccuFetchTimeout = this.config.fetchtimeout || 120
-    this.setupRPC()
     this.isRunning = true
+
+    if (this.isInTest) {
+      // have to switch on manual otherwise rpc will boot up after loading devices
+      this.setupRPC()
+    }
   }
 
   doCache (address, value) {
@@ -180,28 +186,77 @@ class HomeMaticCCU {
     })
   }
 
-  fetchDevices (callback) {
+  fetchDevices () {
     let self = this
     // kill all registered events
-    this.eventaddresses = []
-    let script = 'string sDeviceId;string sChannelId;boolean df = true;Write(\'{"devices":[\');foreach(sDeviceId, root.Devices().EnumIDs()){object oDevice = dom.GetObject(sDeviceId);if(oDevice){var oInterface = dom.GetObject(oDevice.Interface());if(df) {df = false;} else { Write(\',\');}Write(\'{\');Write(\'"id": "\' # sDeviceId # \'",\');Write(\'"name": "\' # oDevice.Name() # \'",\');Write(\'"address": "\' # oDevice.Address() # \'",\');Write(\'"type": "\' # oDevice.HssType() # \'",\');Write(\'"channels": [\');boolean bcf = true;foreach(sChannelId, oDevice.Channels().EnumIDs()){object oChannel = dom.GetObject(sChannelId);if(bcf) {bcf = false;} else {Write(\',\');}Write(\'{\');Write(\'"cId": \' # sChannelId # \',\');Write(\'"name": "\' # oChannel.Name() # \'",\');if(oInterface){Write(\'"intf": "\' # oInterface.Name() # \'",\');Write(\'"address": "\' # oInterface.Name() #\'.\' # oChannel.Address() # \'",\');}Write(\'"type": "\' # oChannel.HssType() # \'",\');Write(\'"access": "\' # oChannel.UserAccessRights(iulOtherThanAdmin)# \'"\');Write(\'}\');}Write(\']}\');}}Write(\']\');'
+    return new Promise((resolve, reject) => {
+      this.eventaddresses = []
+      var script = 'string sDeviceId;string sChannelId;boolean df = true;Write(\'{"devices":[\');foreach(sDeviceId, root.Devices().EnumIDs()){object oDevice = dom.GetObject(sDeviceId);if(oDevice){if(df) {df = false;} else { Write(\',\');}Write(\'{\');'
 
-    script += 'var s = dom.GetObject("'
-    script += this.subsection
-    script += '");string cid;boolean sdf = true;if (s) {Write(\',"subsection":[\');foreach(cid, s.EnumUsedIDs()){ '
-    script += ' if(sdf) {sdf = false;}'
-    script += ' else { Write(\',\');}Write(cid);}Write(\']\');}'
+      script = script + self._scriptPartForElement('id', 'sDeviceId', 'number', ',')
+      script = script + self._scriptPartForElement('name', 'oDevice.Name()', 'string', ',')
+      script = script + self._scriptPartForElement('address', 'oDevice.Address()', 'string', ',')
+      script = script + self._scriptPartForElement('type', 'oDevice.HssType()', 'string', ',')
+      script = script + 'Write(\'"channels": [\');boolean bcf = true;foreach(sChannelId, oDevice.Channels().EnumIDs()){object oChannel = dom.GetObject(sChannelId);'
+      script = script + 'if(bcf) {bcf = false;} else {Write(\',\');}Write(\'{\');'
+      script = script + self._scriptPartForElement('cId', 'sChannelId', 'number', ',')
+      script = script + self._scriptPartForElement('name', 'oChannel.Name()', 'string', ',')
+      script = script + self._scriptPartForElement('intfId', 'oDevice.Interface()', 'number', ',')
+      script = script + self._scriptPartForElement('address', 'oChannel.Address()', 'string', ',')
+      script = script + self._scriptPartForElement('type', 'oChannel.HssType()', 'string', ',')
+      script = script + self._scriptPartForElement('access', 'oChannel.UserAccessRights(iulOtherThanAdmin)', 'number')
+      script = script + 'Write(\'}\');}Write(\']}\');}}Write(\']\');'
+      script += 'var s = dom.GetObject("'
+      script += this.subsection
+      script += '");string cid;boolean sdf = true;if (s) {Write(\',"subsection":[\');foreach(cid, s.EnumUsedIDs()){ '
+      script += ' if(sdf) {sdf = false;}'
+      script += ' else { Write(\',\');}Write(cid);}Write(\']\');}'
 
-    script += 'Write(\'}\');'
+      script += 'Write(\'}\');'
 
-    var regarequest = this.createRegaRequest()
-    regarequest.timeout = this.ccuFetchTimeout
-    regarequest.script(script, data => {
-      self.saveCCUDevices(data)
-      if (callback) {
-        callback(data)
-      }
+      var regarequest = this.createRegaRequest()
+      regarequest.timeout = this.ccuFetchTimeout
+      regarequest.script(script, data => {
+        self.saveCCUDevices(data)
+        resolve(data)
+      })
     })
+  }
+
+  fetchInterfaces () {
+    let self = this
+    return new Promise((resolve, reject) => {
+      var regarequest = this.createRegaRequest()
+      regarequest.timeout = this.ccuFetchTimeout
+      var script = 'string sifId;boolean df = true;Write(\'{"interfaces":[\');foreach(sifId, root.Interfaces().EnumIDs()){object oIf = dom.GetObject(sifId);if(df) {df = false;} else { Write(\',\');}Write(\'{\')'
+      script = script + self._scriptPartForElement('id', 'sifId', 'number', ',')
+      script = script + self._scriptPartForElement('name', 'oIf.Name()', 'string', ',')
+      script = script + self._scriptPartForElement('type', 'oIf.Type()', 'string', ',')
+      script = script + self._scriptPartForElement('typename', 'oIf.TypeName()', 'string', ',')
+      script = script + self._scriptPartForElement('info', 'oIf.InterfaceInfo()', 'string', ',')
+      script = script + self._scriptPartForElement('url', 'oIf.InterfaceUrl()', 'string')
+      script = script + 'Write(\'}\');} Write(\']}\');'
+
+      regarequest.script(script, strInterfaces => {
+        if (strInterfaces) {
+          let interfaces = JSON.parse(strInterfaces)
+          interfaces.interfaces.map(oInterface => {
+            self.interfaces[oInterface.id] = oInterface
+          })
+          resolve()
+        } else {
+          reject(new Error('unable to fetch Interfaces'))
+        }
+      })
+    })
+  }
+
+  _scriptPartForElement (elementName, functionName, type, leadingComa = '') {
+    if (type === 'string') {
+      return 'Write(\'"' + elementName + '": "\' # ' + functionName + ' # \'"' + leadingComa + '\');'
+    } else {
+      return 'Write(\'"' + elementName + '": \' # ' + functionName + ' # \'' + leadingComa + '\');'
+    }
   }
 
   saveCCUDevices (data) {
@@ -262,9 +317,17 @@ class HomeMaticCCU {
     }
   }
 
+  intefaceWithId (ifId) {
+    return this.interfaces[ifId]
+  }
+
   setupRPC () {
     let self = this
     this.log.debug('[CCUManager] setupRPC')
+    /* ccu ports form outside are different as what is reported by the interface .. this is shit, the if should have an url for out and inside
+    https://github.com/eq-3/occu/issues/106
+    */
+    var portChanges = { 32000: 2000, 32001: 2001, 32010: 2010, 39292: 9292 }
 
     if (!this.isInTest) {
       let initialPort = this.config.local_port
@@ -278,22 +341,20 @@ class HomeMaticCCU {
 
       this.rpcClient = new HomeMaticRPCUni(this.log, initialPort, this)
 
-      this.rpcClient.addInterface('BidCos-RF', this.ccuIP, 2001, '/')
-
-      this.rpcClient.addInterface('VirtualDevices', this.ccuIP, 9292, '/groups')
-
-      if (this.config.enable_hmip !== undefined) {
-        this.rpcClient.addInterface('HmIP-RF', this.ccuIP, 2010, '/')
-      }
-
-      if (this.config.enable_wired !== undefined) {
-        this.rpcClient.addInterface('BidCos-Wired', this.ccuIP, 2000, '/')
-      }
-
-      Object.keys(this.config.externalinterfaces).map(key => {
-        let eif = self.config.externalinterfaces[key]
-        if ((eif) && (eif.host) && (eif.port) && (eif.path)) {
-          self.rpcClient.addInterface(key, eif.host, eif.port, eif.path)
+      Object.keys(this.interfaces).map(ifId => {
+        let oInteface = self.interfaces[ifId]
+        if (oInteface.inUse === true) {
+          let iUrl = oInteface.url.replace('xmlrpc://', 'http://').replace('xmlrpc_bin://', 'http://')
+          let oUrl = url.parse(iUrl)
+          self.log.debug('[CCU] adding interface %s', oInteface.name)
+          var host = oUrl.hostname
+          var port = oUrl.port
+          if (host === '127.0.0.1') {
+            host = self.ccuIP
+            port = portChanges[port]
+          }
+          self.log.debug('[CCU] preparing Init for %s on host %s port %s path %s', oInteface.name, host, port, oUrl.pathname)
+          self.rpcClient.addInterface(oInteface.name, host, port, oUrl.pathname)
         }
       })
 

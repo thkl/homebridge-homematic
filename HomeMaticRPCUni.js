@@ -373,6 +373,7 @@ class HomeMaticRPCUni {
       this.interfaces.map(iface => {
         iface.stop()
       })
+      this.server.close(() => {})
     }
   }
 

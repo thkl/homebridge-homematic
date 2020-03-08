@@ -180,7 +180,7 @@ class HomeMaticPlatform {
     }
   }
 
-  buildAccessories (changedAppliance) {
+  async buildAccessories (changedAppliance) {
     let self = this
     this.shutDownAppliances()
     this.invalidateAccessories()
@@ -202,18 +202,20 @@ class HomeMaticPlatform {
       this.updateAccesories(json, internalconfig, serviceclassLoader, changedAppliance)
     } else {
       this.log.debug('[Core] Local cache is set to %s', this.localCache)
-      this.homematicCCU.fetchDevices(data => {
-        var json
-        if (data !== undefined) {
-          json = JSON.parse(data)
-        }
-        if ((json === undefined) && (self.localCache !== undefined)) {
-          json = this.homematicCCU.loadCachedDevices()
-        }
-        this.log.info('[Core] Publishing Accessories')
-        this.updateAccesories(json, internalconfig, serviceclassLoader, changedAppliance)
-        this.log.info('[Core] %s accessories published', Object.keys(this.accessories).length)
-      })
+      await this.homematicCCU.fetchInterfaces()
+      let data = await this.homematicCCU.fetchDevices()
+
+      if (data !== undefined) {
+        json = JSON.parse(data)
+      }
+      if ((json === undefined) && (self.localCache !== undefined)) {
+        json = this.homematicCCU.loadCachedDevices()
+      }
+      this.log.info('[Core] Publishing Accessories')
+      this.updateAccesories(json, internalconfig, serviceclassLoader, changedAppliance)
+      this.log.info('[Core] %s accessories published', Object.keys(this.accessories).length)
+
+      this.homematicCCU.setupRPC()
     }
   }
 
@@ -221,40 +223,20 @@ class HomeMaticPlatform {
 
   updateAccesories (homematicObjects, internalconfig, serviceclassLoader, changedAppliance) {
     this.log.debug('[Core] updateAccesories changed : %s', changedAppliance)
+    this.log.debug('[Core] subsection entries : %s', homematicObjects.subsection)
     this.newAccessories = []
     let Service = this.homebridge.hap.Service
     let Characteristic = this.homebridge.hap.Characteristic
     var accessoriesToRemove = []
     let self = this
-    if ((homematicObjects !== undefined) && (homematicObjects.devices !== undefined)) {
+    if ((homematicObjects !== undefined) && (homematicObjects.subsection !== undefined) && (homematicObjects.devices !== undefined)) {
       homematicObjects.devices.map(device => {
         const cfg = self.deviceInfo(internalconfig, device.type)
-        let isFiltered = false
-        if ((self.filter_device !== undefined) && (self.filter_device.indexOf(device.address) > -1)) {
-          isFiltered = true
-        } else {
-          isFiltered = false
-        }
-
-        if ((device.channels !== undefined) && (!isFiltered)) {
+        if (device.channels !== undefined) {
           device.channels.map(ch => {
-            let isChannelFiltered = false
-            // var isSubsectionSelected = false
-            // If we have a subsection list check if the channel is here
-            if (homematicObjects.subsection !== undefined) {
-              const cin = (homematicObjects.subsection.indexOf(ch.cId) > -1)
-              // If not .. set filter flag
-              isChannelFiltered = !cin
-              // isSubsectionSelected = cin
-            }
-            if ((cfg !== undefined) && (cfg.filter !== undefined) && (cfg.filter.indexOf(ch.type) > -1)) {
-              isChannelFiltered = true
-            }
-            if ((self.filter_channel !== undefined) && (self.filter_channel.indexOf(ch.address) > -1)) {
-              isChannelFiltered = true
-            }
-            // self.log('name', ch.name, ' -> address:', ch.address)
-            if ((ch.address !== undefined) && (!isChannelFiltered)) {
+            if ((ch.address !== undefined) && (homematicObjects.subsection.indexOf(ch.cId) > -1)) {
+              self.log.debug('[Core] processing %s', ch.address)
+
               // Switch found
               // Check if marked as Outlet or Door
               let special // just here for historic reasons
@@ -270,6 +252,15 @@ class HomeMaticPlatform {
 
               if ((self.valves !== undefined) && (self.valves.indexOf(ch.address) > -1)) {
                 self.log.warn('[DEPRECATED] the use of the config.json VALVE key is deprecated. please setup %s via webconfig', ch.address)
+              }
+
+              // Build Interface for channel
+              let oInterface = self.homematicCCU.intefaceWithId(ch.intfId)
+              if (oInterface) {
+                ch.intf = oInterface.name
+                oInterface.inUse = true
+                ch.address = oInterface.name + '.' + ch.address
+                self.log.debug('[Core] updating channel address to %s', ch.address)
               }
 
               let uuid = UUID.generate(ch.address)
@@ -319,7 +310,10 @@ class HomeMaticPlatform {
           self.log.debug('[Core] %s has no channels or is filtered', device.name)
         }
       })
-    } // End Mapping all JSON Data
+    } else {
+      self.log.warn('[Core] ccu returned no devices')
+    }
+    // End Mapping all JSON Data
     if (self.programs !== undefined) {
       self.log.debug('[Core] %s programs to add', self.programs.length)
 
