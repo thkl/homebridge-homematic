@@ -30,7 +30,7 @@
     "assert": "1.5.0",
     "chalk": "latest",
     "mocha": "^7.0.1",
-    "release-it": "^12.4.3",
+    "release-it": "^13.1.0",
     "standard": "^12.0.1"
   },
   "scripts": {
