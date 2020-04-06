@@ -311,6 +311,10 @@
 		{
 			"type": "HmIP-STHO:CLIMATE_TRANSCEIVER",
 			"service": "HomeMaticHomeKitWeatherStationServiceIP"
+		},
+		{
+			"type": "BRIGHTNESS_TRANSMITTER",
+			"service": "HomeMaticHomeKitIPLuxMeterService"
 		}
 	]
 }
