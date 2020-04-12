@@ -6,6 +6,10 @@ const EveHomeKitTypes = require('./EveHomeKitTypes.js')
 let eve
 
 class HomeMaticHomeKitMotionDetectorService extends HomeKitGenericService {
+  propagateServices (homebridge, Service, Characteristic) {
+    eve = new EveHomeKitTypes(homebridge)
+  }
+
   createDeviceService (Service, Characteristic) {
     var self = this
 

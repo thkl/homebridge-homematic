@@ -75,3 +75,4 @@ typings/
 *.ipr
 *.iws
 *.iml
+package-lock.json

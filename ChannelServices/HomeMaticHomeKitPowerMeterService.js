@@ -18,7 +18,7 @@ class HomeMaticHomeKitPowerMeterService extends HomeKitGenericService {
   createDeviceService (Service, Characteristic) {
     var self = this
     self.enableLoggingService('energy')
-    var sensor = self.getService(eve.Service.PowerMeterService)
+    var sensor = this.getService(eve.Service.PowerMeterService)
     self.voltage = sensor.getCharacteristic(eve.Characteristic.Voltage)
       .on('get', function (callback) {
         self.query('2.VOLTAGE', function (value) {
@@ -54,7 +54,7 @@ class HomeMaticHomeKitPowerMeterService extends HomeKitGenericService {
 
     self.power.eventEnabled = true
 
-    var outlet = new Service['Outlet'](self.name)
+    var outlet = this.getService(Service.Outlet)
     outlet.getCharacteristic(Characteristic.OutletInUse)
       .on('get', function (callback) {
         if (callback) callback(null, 1)
@@ -69,20 +69,24 @@ class HomeMaticHomeKitPowerMeterService extends HomeKitGenericService {
       })
 
       .on('set', function (value, callback) {
+        self.log.debug('[PMS] switch %s', value)
         if (self.readOnly === false) {
-          if (value === 0) {
-            self.delayed('set', '1.STATE', false)
-          } else {
+          if (self.isTrue(value)) {
             self.delayed('set', '1.STATE', true)
+          } else {
+            self.delayed('set', '1.STATE', false)
           }
+        } else {
+          self.log.debug('[PMS] switch ignore is RO')
         }
         callback()
       })
 
     self.powerConsumption = sensor.getCharacteristic(eve.Characteristic.TotalConsumption)
       .on('get', function (callback) {
-        self.query(self.meterChannel + '.ENERGY_COUNTER', function (value) {
-          if (callback) callback(null, self.round((value / 1000), 4))
+        self.query('ENERGY_COUNTER', function (value) {
+          self.log.debug('[PMS] Energy Counter %s', value)
+          if (callback) callback(null, self.round((parseInt(value) / 1000), 4))
         })
       })
 
@@ -97,22 +101,24 @@ class HomeMaticHomeKitPowerMeterService extends HomeKitGenericService {
       self.addLogEntry({
         power: parseInt(newValue)
       })
-      self.power.updateValue(self.round(newValue, 2), null)
+      self.power.updateValue(self.round(parseInt(newValue), 2), null)
     })
 
     self.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('VOLTAGE'), self, function (newValue) {
-      self.voltage.updateValue(self.round(newValue, 2), null)
+      self.voltage.updateValue(self.round(parseInt(newValue), 2), null)
     })
 
     self.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('CURRENT'), self, function (newValue) {
-      self.current.updateValue(self.round((newValue / 1000), 2), null)
+      self.current.updateValue(self.round((parseInt(newValue) / 1000), 2), null)
     })
 
     self.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('.ENERGY_COUNTER'), self, function (newValue) {
-      self.powerConsumption.updateValue((self.round((newValue / 1000), 2)), null)
+      self.log.debug('[PMS] Energy Counter %s', newValue)
+      self.powerConsumption.updateValue((self.round((parseInt(newValue) / 1000), 2)), null)
     })
 
     self.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('1.STATE'), self, function (newValue) {
+      self.log.debug('[PMS] event state %s', newValue)
       self.isOn.updateValue(self.isTrue(newValue), null)
     })
   }
@@ -120,9 +126,9 @@ class HomeMaticHomeKitPowerMeterService extends HomeKitGenericService {
   queryData () {
     var self = this
 
-    let dps = ['2.POWER', '2.VOLTAGE', '2.CURRENT', '2.ENERGY_COUNTER']
+    let dps = ['POWER', 'VOLTAGE', 'CURRENT', 'ENERGY_COUNTER']
     dps.map(function (dp) {
-      self.remoteGetValue(dp)
+      self.remoteGetValue(self.buildHomeMaticAddress(dp))
     })
 
     // create timer to query device every 10 minutes

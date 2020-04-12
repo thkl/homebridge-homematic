@@ -16,16 +16,16 @@ class HomeMaticHomeKitThermometerService extends HomeKitGenericService {
         minValue: -100
       })
       .on('get', function (callback) {
-        this.remoteGetValue('TEMPERATURE', function (value) {
+        self.remoteGetValue('TEMPERATURE', function (value) {
           let fval = parseFloat(value)
           self.addLogEntry({
             currentTemp: fval
           })
           if (callback) callback(null, fval)
         })
-      }.bind(this))
+      })
 
-    this.eventEnabled = true
+    this.cctemp.eventEnabled = true
 
     this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('TEMPERATURE'), this, function (newValue) {
       self.log.debug('[HKTS] TEMPERATURE event %s', newValue)

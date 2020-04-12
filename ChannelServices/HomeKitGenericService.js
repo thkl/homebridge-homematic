@@ -121,15 +121,16 @@ class HomeKitGenericService {
     }
   }
 
-  getService (serviceType, name) {
+  getService (ServiceType, name) {
     var result
-    if (this.accessory.getService(serviceType)) {
-      result = this.accessory.getService(serviceType)
+    if (this.accessory.getService(ServiceType)) {
+      result = this.accessory.getService(ServiceType, name || this.name)
     } else {
       this.log.debug('[Generic] addService')
-      result = this.accessory.addService(serviceType)
+      result = this.accessory.addService(ServiceType)
+
       if (!result) {
-        this.log.warn('[Generic] unable to add service %s to accessory %s', serviceType, this.accessory.name)
+        this.log.warn('[Generic] unable to add service %s to accessory %s', ServiceType, this.accessory.name)
       }
     }
     let Characteristic = this.platform.homebridge.hap.Characteristic
@@ -137,7 +138,7 @@ class HomeKitGenericService {
       result.getCharacteristic(Characteristic.Name) ||
       result.addCharacteristic(Characteristic.Name)
 
-    nameCharacteristic.setValue(name)
+    nameCharacteristic.setValue(name || this.name)
 
     return result
   }
@@ -485,7 +486,13 @@ class HomeKitGenericService {
 
   getCache (dp) {
     let tp = this.buildHomeMaticAddress(dp)
-    return this.ccuManager.getCache(tp.address())
+    if (tp) {
+      return this.ccuManager.getCache(tp.address())
+    } else {
+      this.log.warn('[Generic] unable to parse datapoint %s for %s', dp, this.accessoryName)
+      this.log.warn('[Generic] at %s', new Error('').stack)
+      return undefined
+    }
   }
 
   removeCache (dp) {
@@ -633,59 +640,61 @@ class HomeKitGenericService {
     var self = this
     this.log.debug('[Generic] remoteGetValue %s', dp)
     var tp = this.buildHomeMaticAddress(dp)
-    this.log.debug('[Generic] datapoint %s', tp.dpName)
-    this.log.debug('[Generic] remoteGetValue Intf:%s, Adre:%s, ChI:%s, Dp:%s', tp.intf, tp.serial, tp.channelId, tp.dpName)
+    if (tp) {
+      this.log.debug('[Generic] datapoint %s', tp.dpName)
+      this.log.debug('[Generic] remoteGetValue Intf:%s, Adre:%s, ChI:%s, Dp:%s', tp.intf, tp.serial, tp.channelId, tp.dpName)
 
-    if (tp.intf === 'Var') {
+      if (tp.intf === 'Var') {
       // This is a variable so get the value
-      let script = "WriteLine(dom.GetObject(ID_SYSTEM_VARIABLES).Get('" + tp.serial + "').State());"
-      this.command('sendregacommand', '', script, function (result) {
+        let script = "WriteLine(dom.GetObject(ID_SYSTEM_VARIABLES).Get('" + tp.serial + "').State());"
+        this.command('sendregacommand', '', script, function (result) {
         // do not cache this
-        if (callback) {
-          self.log.debug('[Generic] run callback on variable %s with %s', tp.serial, result)
-          callback(result)
-        } else {
-          self.log.debug('[Generic] remoteGetValue response; empty callback route via event for Variable %s value is %s', tp.serial, result)
-          self.platform.fireEvent(tp.intf, tp.serial, tp.channelId, tp.dpName, result)
-        }
-      })
-    } else {
-      self.ccuManager.getValue(tp, newValue => {
-        self.log.debug('[Generic] got value for %s (Value:%s)', tp.address(), newValue)
-        if (callback !== undefined) {
-        // we have a callback so we have to convert some stuff here cache the value
-        // and run the callback
-          if ((newValue !== undefined) && (newValue !== null)) {
-            var processedValue = newValue
-
-            if ((tp[1] === 'COLOR') && (self.type === 'RGBW_COLOR')) {
-              processedValue = Math.round((newValue / 199) * 360)
-            }
-
-            if (tp[1] === 'BRIGHTNESS') {
-              processedValue = Math.pow(10, (newValue / 51))
-            }
-
-            self.eventupdate = true
-            // var ow = newValue;
-            processedValue = self.convertValue(dp, processedValue)
-            self.log.debug('[Generic] will cache %s for %s', processedValue, tp.address())
-            self.cache(tp.address(), processedValue)
-            self.eventupdate = false
+          if (callback) {
+            self.log.debug('[Generic] run callback on variable %s with %s', tp.serial, result)
+            callback(result)
           } else {
-          // newValue = 0;
-            processedValue = self.convertValue(dp, 0)
+            self.log.debug('[Generic] remoteGetValue response; empty callback route via event for Variable %s value is %s', tp.serial, result)
+            self.platform.fireEvent(tp.intf, tp.serial, tp.channelId, tp.dpName, result)
           }
-          self.log.debug('[Generic] run callback with %s', newValue)
-          callback(newValue)
-        } else {
-        // otherwise we will fire datapoint change event
-        // the conversion will be done there
-          self.log.debug('[Generic] remoteGetValue response; empty callback route via event for %s:%s.%s value is %s', tp.serial, tp.channelId, tp.dpName, newValue)
-          // send a Event - we have to walk a extra round to get the enclosure function back
-          self.platform.fireEvent(tp.intf, tp.serial, tp.channelId, tp.dpName, newValue)
-        }
-      })
+        })
+      } else {
+        self.ccuManager.getValue(tp, newValue => {
+          self.log.debug('[Generic] got value for %s (Value:%s)', tp.address(), newValue)
+          if (callback !== undefined) {
+            // we have a callback so we have to convert some stuff here cache the value
+            // and run the callback
+            if ((newValue !== undefined) && (newValue !== null)) {
+              var processedValue = newValue
+
+              if ((tp[1] === 'COLOR') && (self.type === 'RGBW_COLOR')) {
+                processedValue = Math.round((newValue / 199) * 360)
+              }
+
+              if (tp[1] === 'BRIGHTNESS') {
+                processedValue = Math.pow(10, (newValue / 51))
+              }
+
+              self.eventupdate = true
+              // var ow = newValue;
+              processedValue = self.convertValue(dp, processedValue)
+              self.log.debug('[Generic] will cache %s for %s', processedValue, tp.address())
+              self.cache(tp.address(), processedValue)
+              self.eventupdate = false
+            } else {
+              // newValue = 0;
+              processedValue = self.convertValue(dp, 0)
+            }
+            self.log.debug('[Generic] run callback with %s', newValue)
+            callback(newValue)
+          } else {
+            // otherwise we will fire datapoint change event
+            // the conversion will be done there
+            self.log.debug('[Generic] remoteGetValue response; empty callback route via event for %s:%s.%s value is %s', tp.serial, tp.channelId, tp.dpName, newValue)
+            // send a Event - we have to walk a extra round to get the enclosure function back
+            self.platform.fireEvent(tp.intf, tp.serial, tp.channelId, tp.dpName, newValue)
+          }
+        })
+      }
     }
   }
 
@@ -1003,7 +1012,7 @@ class HomeKitGenericService {
         }
       }
     } else {
-      this.log.error('[Generic] unable create HM Address from undefined Input %s', JSON.parse(dp))
+      this.log.error('[Generic] unable create HM Address from undefined Input %s', dp)
     }
   }
 

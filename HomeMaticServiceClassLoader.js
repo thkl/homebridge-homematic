@@ -155,7 +155,8 @@ HomeMaticServiceClassLoader.prototype.loadChannelService = function (accessory, 
       // Copy the BidCos Address to the HomeKit Accessory
       accessory.address = address
       if (accessory.grantAccess === undefined) {
-        accessory.appliance.setReadOnly((access !== '255'))
+        this.log.debug('[ServiceClassLoader] access is %s', access)
+        accessory.appliance.setReadOnly((parseInt(access) !== 255))
       }
 
       accessory.appliance.serviceClassName = serviceclass
