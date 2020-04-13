@@ -22,6 +22,7 @@ class HomeMaticPlatform {
   constructor (log, config, homebridge) {
     this.log = log
     this.config = config
+
     this.homebridge = homebridge
     this.accessories = {}
 
@@ -263,7 +264,9 @@ class HomeMaticPlatform {
                 self.log.debug('[Core] updating channel address to %s', ch.address)
               }
 
-              let uuid = UUID.generate(ch.address)
+              // let uuid = UUID.generate(ch.address)
+              let name = ch.name.replace(/[.:#_()-]/g, ' ')
+              let uuid = UUID.generate(self.config.name + ':' + name)
               self.log.debug('UUID for %s is %s', ch.address, uuid)
               var hkAccessory = self.accessories[uuid]
 
@@ -277,7 +280,6 @@ class HomeMaticPlatform {
               }
 
               if (!hkAccessory) {
-                let name = ch.name.replace(/[.:#_()-]/g, ' ')
                 self.log.debug('[Core] Build a new Accessory with name %s', name)
                 hkAccessory = new this.homebridge.platformAccessory(name, uuid)
                 self.log.debug('[Core] add new accessory %s', ch.address)
@@ -326,8 +328,9 @@ class HomeMaticPlatform {
           ch.type = 'PROGRAM_LAUNCHER'
           ch.address = program
           ch.name = program
-
-          let uuid = UUID.generate(ch.address)
+          let name = ch.name.replace(/[.:#_()-]/g, ' ')
+          let uuid = UUID.generate(self.config.name + ':' + name)
+          // let uuid = UUID.generate(ch.address)
           hkAccessory = this.accessories[uuid]
           if (!hkAccessory) {
             let name = ch.name.replace(/[.:#_()-]/g, ' ')
@@ -347,11 +350,11 @@ class HomeMaticPlatform {
           ch.type = 'SWITCH'
           ch.address = program
           ch.name = program
+          let name = ch.name.replace(/[.:#_()-]/g, ' ')
+          let uuid = UUID.generate(self.config.name + ':' + name)
 
-          let uuid = UUID.generate(ch.address)
           hkAccessory = this.accessories[uuid]
           if (!hkAccessory) {
-            let name = ch.name.replace(/[.:#_()-]/g, ' ')
             hkAccessory = new this.homebridge.platformAccessory(name, uuid)
             self.newAccessories.push(hkAccessory)
             self.log.debug('[Core] add new accessory %s', ch.address)
@@ -368,7 +371,7 @@ class HomeMaticPlatform {
         let type = specialdevice.type
 
         if (name !== undefined) {
-          let uuid = UUID.generate(name)
+          let uuid = UUID.generate(self.config.name + ':' + name)
           hkAccessory = this.accessories[uuid]
           if (!hkAccessory) {
             self.log.debug('[Core] special found %s added as %s', name, type)
@@ -398,7 +401,8 @@ class HomeMaticPlatform {
         const ch = {}
         const cfg = {}
 
-        let uuid = UUID.generate(variable)
+        let name = variable.replace(/[.:#_()-]/g, ' ')
+        let uuid = UUID.generate(self.config.name + ':' + name)
         hkAccessory = this.accessories[uuid]
         if (!hkAccessory) {
           self.log.debug('[Core] variable found %s added.', variable)
