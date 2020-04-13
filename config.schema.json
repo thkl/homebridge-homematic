@@ -4,7 +4,7 @@
     "dynamicSchemaVersion": 1,
     "singular": true,
     "headerDisplay": "Homebridge plugin for the Homematic CCUs",
-    "footerDisplay": "For the complete configuration for this plugin please [click](http://{myHost}:8081/)",
+    "footerDisplay": "For the complete configuration for this plugin please [click](http://{myHost}:{myPort}/)",
     "schema": {
         "type": "object",
         "properties": {

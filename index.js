@@ -82,7 +82,7 @@ class HomeMaticPlatform {
         this.mergeConfig()
         this.migrateConfig()
 
-        this.staticSchema = path.join(__dirname, '../config.schema.json')
+        this.staticSchema = path.join(__dirname, 'config.schema.json')
         this.dynamicSchema = path.join(this.localPath, '.' + PLUGIN_NAME + '-v' +
           SCHEMA_VERSION + '.schema.json')
 
@@ -465,8 +465,14 @@ class HomeMaticPlatform {
       let schemaData = JSON.parse(data)
       // switch {myhost} in footerDisplay to the real url
       var footerDisplay = schemaData.footerDisplay
-      schemaData.footerDisplay = footerDisplay.replace('{myhost}', this.getIPAddress())
+      footerDisplay = footerDisplay.replace('{myHost}', this.getIPAddress())
+      let port = this.config.ConfigServerPort || 8090
+      footerDisplay = footerDisplay.replace('{myPort}', port)
+      schemaData.footerDisplay = footerDisplay
+      this.log.info('Updating dynamic schema %s', this.dynamicSchema)
       fs.writeFileSync(this.dynamicSchema, JSON.stringify(schemaData, null, 2))
+    } else {
+      this.log.warn('Unable to load static schema %s', this.staticSchema)
     }
   }
 

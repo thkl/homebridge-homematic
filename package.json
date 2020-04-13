@@ -1,6 +1,6 @@
 {
   "name": "homebridge-homematic",
-  "version": "0.0.219",
+  "version": "0.1.222",
   "description": "Homematic plugin for homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
   "keywords": [
@@ -24,7 +24,8 @@
     "google-auth-library": "5.9.2",
     "googleapis": "47.0.0",
     "fakegato-history": "0.5.6",
-    "sprintf-js": "^1.0.3"
+    "sprintf-js": "1.1.2",
+    "chalk": "latest"
   },
   "devDependencies": {
     "assert": "1.5.0",
@@ -61,13 +62,17 @@
   },
   "files": [
     "ChannelServices/",
+    "PluginConfigurationService/",
     "README.md",
     "CHANGELOG.md",
+    "HomeMaticAddress.js",
+    "HomeMaticCCU.js",
     "HomeMaticServiceClassLoader.js",
     "HomeMaticRegaRequest.js",
     "HomeMaticRegaRequestTestDriver.js",
     "HomeMaticRPC.js",
     "HomeMaticRPCTestDriver.js",
+    "HomeMaticRPCUni.js",
     "HomeMaticCacheManager.js",
     "index.js",
     "internalconfig.json",
