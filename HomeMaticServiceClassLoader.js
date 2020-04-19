@@ -168,7 +168,6 @@ HomeMaticServiceClassLoader.prototype.loadChannelService = function (accessory, 
   } else {
     self.log.warn('[ServiceClassLoader] There is no service for ' + deviceType + ':' + channelType)
   }
-  this.log.debug('[ServiceClassLoader] == End == %s ==', accessory.appliance.serviceClassName)
 }
 
 HomeMaticServiceClassLoader.prototype.loadClass = function (serviceclass) {

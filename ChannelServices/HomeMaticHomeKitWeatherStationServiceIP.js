@@ -5,8 +5,7 @@ const util = require('util')
 
 class HomeMaticHomeKitWeatherStationServiceIP extends HomeKitGenericService {
   propagateServices (homebridge, Service, Characteristic) {
-    var uuid = homebridge.uuid
-
+    var uuid = homebridge.homebridge.hap.uuid
     Characteristic.IsRainingCharacteristic = function () {
       var charUUID = uuid.generate('HomeMatic:customchar:IsRainingCharacteristic')
       Characteristic.call(this, 'Regen', charUUID)
@@ -100,6 +99,7 @@ class HomeMaticHomeKitWeatherStationServiceIP extends HomeKitGenericService {
     }
     util.inherits(Characteristic.WindRangeCharacteristic, Characteristic)
 
+    this.log.debug('[WSIP] generate WindRangeService')
     Service.WindRangeService = function (displayName, subtype) {
       var servUUID = uuid.generate('HomeMatic:customchar:WindRangeService')
       Service.call(this, displayName, servUUID, subtype)
@@ -120,6 +120,7 @@ class HomeMaticHomeKitWeatherStationServiceIP extends HomeKitGenericService {
     }
     util.inherits(Characteristic.SunshineCharacteristic, Characteristic)
 
+    this.log.debug('[WSIP] generate SunshineService')
     Service.SunshineService = function (displayName, subtype) {
       var servUUID = uuid.generate('HomeMatic:customchar:SunshineService')
       Service.call(this, displayName, servUUID, subtype)

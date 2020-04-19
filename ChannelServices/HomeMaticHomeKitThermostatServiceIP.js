@@ -13,10 +13,8 @@ class HomeMaticHomeKitIPThermostatService extends HomeKitGenericService {
       .on('get', function (callback) {
         self.query('SET_POINT_TEMPERATURE', function (value) {
           if (value < 6.0) {
-            self.getCurrentStateCharacteristic('CONTROL_MODE').setValue(1, null)
             if (callback) callback(null, 0)
           } else {
-            self.getCurrentStateCharacteristic('CONTROL_MODE').setValue(0, null)
             if (callback) callback(null, 1)
           }
         })

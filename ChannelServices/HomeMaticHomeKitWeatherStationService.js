@@ -5,7 +5,7 @@ const util = require('util')
 
 class HomeMaticHomeKitWeatherStationService extends HomeKitGenericService {
   propagateServices (homebridge, Service, Characteristic) {
-    var uuid = homebridge.uuid
+    var uuid = homebridge.homebridge.hap.uuid
 
     Characteristic.IsRainingCharacteristic = function () {
       var charUUID = uuid.generate('HomeMatic:customchar:IsRainingCharacteristic')

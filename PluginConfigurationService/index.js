@@ -219,59 +219,59 @@ class PluginConfigurationService {
             'service': service,
             'options': {}
           }
-          if (serviceInstance.validateConfig(config)) {
-            // build the serviceconfig
-            Object.keys(config).map(key => {
-              if (itemKeysToSave.indexOf(key) > -1) {
-                newServiceConfig.options[key] = config[key]
-              }
-            })
-
-            // change the item in global config
-            let myServices = pluginHmConfig.services
-            if (myServices === undefined) {
-              logger.debug('[Save Config] empty services create a new Array')
-              myServices = []
+          // if (serviceInstance.validateConfig(config)) {
+          // build the serviceconfig
+          Object.keys(config).map(key => {
+            if (itemKeysToSave.indexOf(key) > -1) {
+              newServiceConfig.options[key] = config[key]
             }
-            // remove the old entry
-            myServices = myServices.filter(service => {
-              return (service.type !== address)
-            })
-            // add the new service config
-            myServices.push(newServiceConfig)
+          })
 
-            pluginHmConfig['services'] = myServices
-
-            // Check if its a special sevice
-            let serviceDev = this.serviceTemplates[service]
-            if ((serviceDev) && (serviceDev.special)) {
-              // load the special config setting
-              let spList = pluginHmConfig['special']
-              if (spList === undefined) {
-                spList = []
-              }
-              var found = false
-              spList.map(sv => {
-                if (sv.name === address) {
-                  found = true
-                }
-              })
-              if (found === false) {
-                spList.push({ name: address })
-              }
-              pluginHmConfig['special'] = spList
-            }
-
-            this.saveMyConfig(pluginHmConfig)
-            let message = {
-              topic: 'reloadApplicances',
-              changed: data.address
-            }
-            this.process.send(message)
-            return true
-          } else {
-            logger.warn('[Config] configuration for %s is invalid', service)
+          // change the item in global config
+          let myServices = pluginHmConfig.services
+          if (myServices === undefined) {
+            logger.debug('[Save Config] empty services create a new Array')
+            myServices = []
           }
+          // remove the old entry
+          myServices = myServices.filter(service => {
+            return (service.type !== address)
+          })
+          // add the new service config
+          myServices.push(newServiceConfig)
+
+          pluginHmConfig['services'] = myServices
+
+          // Check if its a special sevice
+          let serviceDev = this.serviceTemplates[service]
+          if ((serviceDev) && (serviceDev.special)) {
+            // load the special config setting
+            let spList = pluginHmConfig['special']
+            if (spList === undefined) {
+              spList = []
+            }
+            var found = false
+            spList.map(sv => {
+              if (sv.name === address) {
+                found = true
+              }
+            })
+            if (found === false) {
+              spList.push({ name: address })
+            }
+            pluginHmConfig['special'] = spList
+          }
+
+          this.saveMyConfig(pluginHmConfig)
+          let message = {
+            topic: 'reloadApplicances',
+            changed: data.address
+          }
+          this.process.send(message)
+          return true
+          // } else {
+          //  logger.warn('[Config] configuration for %s is invalid', service)
+          // }
         }
       } else {
         logger.warn('Serviceclass not found')

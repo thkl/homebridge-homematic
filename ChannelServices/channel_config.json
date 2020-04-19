@@ -292,6 +292,10 @@
 			"type": "HM-LC-Bl1PBU-FM:BLIND",
 			"service": "HomeMaticHomeKitBlindService"
 		},
+		{ 
+			"type": "HM-LC-Bl1-PB-FM:BLIND",
+			"service": "HomeMaticHomeKitBlindService"
+		},
 		{
 			"type": "HmIP-SWD:WATER_DETECTION_TRANSMITTER",
 			"service": "HomeMaticHomeKitWaterSensorService"

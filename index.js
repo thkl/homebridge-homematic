@@ -102,10 +102,12 @@ class HomeMaticPlatform {
 
         process.on('SIGINT', () => {
           self.homematicCCU.shutDown()
+          process.exit(0)
         })
 
         process.on('SIGTERM', () => {
           self.homematicCCU.shutDown()
+          process.exit(0)
         })
       }
     }
