@@ -35,7 +35,9 @@ class PluginConfigurationService {
   }
 
   shutdown () {
-    this.server.close()
+    if (this.server) {
+      this.server.close()
+    }
   }
 
   prepareAccessories (serverList) {

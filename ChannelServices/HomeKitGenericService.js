@@ -34,8 +34,6 @@ class HomeKitGenericService {
         this.serial = parts[2]
         this.channelnumber = parts[3]
         this.deviceaddress = this.intf + '.' + this.serial
-      } else {
-        this.log.warn('Unable to parse device address %s so nothing will work for %s', address, name)
       }
 
       this.platform = platform
@@ -644,11 +642,10 @@ class HomeKitGenericService {
       this.log.debug('[Generic] datapoint %s', tp.dpName)
       this.log.debug('[Generic] remoteGetValue Intf:%s, Adre:%s, ChI:%s, Dp:%s', tp.intf, tp.serial, tp.channelId, tp.dpName)
 
-      if (tp.intf === 'Var') {
+      if (tp.intf === 'Variable') {
       // This is a variable so get the value
-        let script = "WriteLine(dom.GetObject(ID_SYSTEM_VARIABLES).Get('" + tp.serial + "').State());"
-        this.command('sendregacommand', '', script, function (result) {
-        // do not cache this
+        this.log.debug('[Generic] its a variable %s', tp.serial)
+        this.ccuManager.getVariable(tp.serial, function (result) {
           if (callback) {
             self.log.debug('[Generic] run callback on variable %s with %s', tp.serial, result)
             callback(result)
@@ -1008,7 +1005,11 @@ class HomeKitGenericService {
           let chidx = parts[1]
           let dpn = parts[2]
           this.log.debug('[Generic] match C.D Format |I:%s|A:%s|C:%s|D:%s', this.intf, this.serial, chidx, dpn)
-          return new HomeMaticAddress(this.intf, this.serial, chidx, dpn)
+          if (this.intf === 'Variable') {
+            return new HomeMaticAddress(this.intf, this.address, chidx, dpn)
+          } else {
+            return new HomeMaticAddress(this.intf, this.serial, chidx, dpn)
+          }
         }
       }
     } else {

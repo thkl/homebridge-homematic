@@ -1,133 +1,12 @@
 'use strict'
 
 const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
-const util = require('util')
+const WeatherStationTypes = require('./WeatherStationTypes.js')
+let weatherTypes
 
 class HomeMaticHomeKitWeatherStationServiceIP extends HomeKitGenericService {
   propagateServices (homebridge, Service, Characteristic) {
-    var uuid = homebridge.homebridge.hap.uuid
-    Characteristic.IsRainingCharacteristic = function () {
-      var charUUID = uuid.generate('HomeMatic:customchar:IsRainingCharacteristic')
-      Characteristic.call(this, 'Regen', charUUID)
-      this.setProps({
-        format: Characteristic.Formats.BOOL,
-        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-      })
-      this.value = this.getDefaultValue()
-    }
-    util.inherits(Characteristic.IsRainingCharacteristic, Characteristic)
-
-    Service.IsRainingService = function (displayName, subtype) {
-      var servUUID = uuid.generate('HomeMatic:customchar:IsRainingService')
-      Service.call(this, displayName, servUUID, subtype)
-      this.addCharacteristic(Characteristic.IsRainingCharacteristic)
-    }
-
-    util.inherits(Service.IsRainingService, Service)
-
-    Characteristic.RainCountCharacteristic = function () {
-      var charUUID = uuid.generate('HomeMatic:customchar:RainCountCharacteristic')
-      Characteristic.call(this, 'Regenmenge', charUUID)
-      this.setProps({
-        format: Characteristic.Formats.FLOAT,
-        unit: 'mm',
-        minStep: 0.1,
-        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-      })
-      this.value = this.getDefaultValue()
-    }
-    util.inherits(Characteristic.RainCountCharacteristic, Characteristic)
-
-    Service.RainCountService = function (displayName, subtype) {
-      var servUUID = uuid.generate('HomeMatic:customchar:RainCountService')
-      Service.call(this, displayName, servUUID, subtype)
-      this.addCharacteristic(Characteristic.RainCountCharacteristic)
-    }
-
-    util.inherits(Service.RainCountService, Service)
-
-    Characteristic.WindSpeedCharacteristic = function () {
-      var charUUID = uuid.generate('HomeMatic:customchar:WindSpeedCharacteristic')
-      Characteristic.call(this, 'Wind Geschwindigkeit', charUUID)
-      this.setProps({
-        format: Characteristic.Formats.FLOAT,
-        unit: 'km/h',
-        minStep: 0.1,
-        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-      })
-      this.value = this.getDefaultValue()
-    }
-    util.inherits(Characteristic.WindSpeedCharacteristic, Characteristic)
-
-    Service.WindSpeedService = function (displayName, subtype) {
-      var servUUID = uuid.generate('HomeMatic:customchar:WindSpeedService')
-      Service.call(this, displayName, servUUID, subtype)
-      this.addCharacteristic(Characteristic.WindSpeedCharacteristic)
-    }
-
-    util.inherits(Service.WindSpeedService, Service)
-
-    Characteristic.WindDirectionCharacteristic = function () {
-      var charUUID = uuid.generate('HomeMatic:customchar:WindDirectionCharacteristic')
-      Characteristic.call(this, 'Wind Richtung', charUUID)
-      this.setProps({
-        format: Characteristic.Formats.INTEGER,
-        unit: 'Grad',
-        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-      })
-      this.value = this.getDefaultValue()
-    }
-    util.inherits(Characteristic.WindDirectionCharacteristic, Characteristic)
-
-    Service.WindDirectionService = function (displayName, subtype) {
-      var servUUID = uuid.generate('HomeMatic:customchar:WindDirectionService')
-      Service.call(this, displayName, servUUID, subtype)
-      this.addCharacteristic(Characteristic.WindDirectionCharacteristic)
-    }
-
-    util.inherits(Service.WindDirectionService, Service)
-
-    Characteristic.WindRangeCharacteristic = function () {
-      var charUUID = uuid.generate('HomeMatic:customchar:WindRangeCharacteristic')
-      Characteristic.call(this, 'Wind Schwankungsbreite', charUUID)
-      this.setProps({
-        format: Characteristic.Formats.INTEGER,
-        unit: 'Grad',
-        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-      })
-      this.value = this.getDefaultValue()
-    }
-    util.inherits(Characteristic.WindRangeCharacteristic, Characteristic)
-
-    this.log.debug('[WSIP] generate WindRangeService')
-    Service.WindRangeService = function (displayName, subtype) {
-      var servUUID = uuid.generate('HomeMatic:customchar:WindRangeService')
-      Service.call(this, displayName, servUUID, subtype)
-      this.addCharacteristic(Characteristic.WindRangeCharacteristic)
-    }
-
-    util.inherits(Service.WindRangeService, Service)
-
-    Characteristic.SunshineCharacteristic = function () {
-      var charUUID = uuid.generate('HomeMatic:customchar:SunshineCharacteristic')
-      Characteristic.call(this, 'Sonnenscheindauer', charUUID)
-      this.setProps({
-        format: Characteristic.Formats.FLOAT,
-        unit: 'Minuten',
-        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-      })
-      this.value = this.getDefaultValue()
-    }
-    util.inherits(Characteristic.SunshineCharacteristic, Characteristic)
-
-    this.log.debug('[WSIP] generate SunshineService')
-    Service.SunshineService = function (displayName, subtype) {
-      var servUUID = uuid.generate('HomeMatic:customchar:SunshineService')
-      Service.call(this, displayName, servUUID, subtype)
-      this.addCharacteristic(Characteristic.SunshineCharacteristic)
-    }
-
-    util.inherits(Service.SunshineService, Service)
+    weatherTypes = new WeatherStationTypes(homebridge)
   }
 
   createDeviceService (Service, Characteristic) {
@@ -174,21 +53,19 @@ class HomeMaticHomeKitWeatherStationServiceIP extends HomeKitGenericService {
 
     this.currentBrightnessCharacteristic.eventEnabled = true
 
-    var sunshineduration = this.getService(Service.SunshineService)
-
-    this.characteristicSunshine = sunshineduration.getCharacteristic(Characteristic.SunshineCharacteristic)
+    let sunshine = this.getService(weatherTypes.Service.SunshineWeatherService)
+    this.characteristicSunshine = sunshine.getCharacteristic(weatherTypes.Characteristic.SunshineCharacteristic)
       .on('get', function (callback) {
         this.query('SUNSHINEDURATION', function (value) {
           if (callback) callback(null, value)
         })
       }.bind(this))
-
     this.characteristicSunshine.eventEnabled = true
 
     if (this.deviceType === 'HmIP-SWO-B') {
-      var windspeed = this.getService(Service.WindSpeedService)
+      var windspeed = this.getService(weatherTypes.Service.WindSpeedWeatherService)
 
-      this.characteristicWindSpeed = windspeed.getCharacteristic(Characteristic.WindSpeedCharacteristic)
+      this.characteristicWindSpeed = windspeed.getCharacteristic(weatherTypes.Characteristic.WindSpeedCharacteristic)
         .on('get', function (callback) {
           this.query('WIND_SPEED', function (value) {
             if (callback) callback(null, value)
@@ -200,9 +77,9 @@ class HomeMaticHomeKitWeatherStationServiceIP extends HomeKitGenericService {
 
     // HmIP-SWO-PL - HmIP-SWO-B + RainSensor RainCountService
     if ((this.deviceType === 'HmIP-SWO-PL') || (this.deviceType === 'HmIP-SWO-PR')) {
-      var raining = this.getService(Service.IsRainingService)
+      var rainService = this.getService(weatherTypes.Service.RainService)
 
-      this.characteristicIsRaining = raining.getCharacteristic(Characteristic.IsRainingCharacteristic)
+      this.characteristicIsRaining = rainService.getCharacteristic(weatherTypes.Characteristic.IsRainingCharacteristic)
         .on('get', function (callback) {
           self.query('RAINING', function (value) {
             if (callback) callback(null, value)
@@ -211,9 +88,7 @@ class HomeMaticHomeKitWeatherStationServiceIP extends HomeKitGenericService {
 
       this.characteristicIsRaining.eventEnabled = true
 
-      var raincount = this.getService(Service.RainCountService)
-
-      this.characteristicRainCount = raincount.getCharacteristic(Characteristic.RainCountCharacteristic)
+      this.characteristicRainCount = rainService.getCharacteristic(weatherTypes.Characteristic.RainCountCharacteristic)
         .on('get', function (callback) {
           this.query('RAIN_COUNTER', function (value) {
             if (callback) callback(null, value)
@@ -225,9 +100,9 @@ class HomeMaticHomeKitWeatherStationServiceIP extends HomeKitGenericService {
 
     // HmIP-SWO-PR - HmIP-SWO-PL + WindDirectionService + WindRangeService
     if (this.deviceType === 'HmIP-SWO-PR') {
-      var winddirection = this.getService(Service.WindDirectionService)
+      var windService = this.getService(weatherTypes.Service.WindService)
 
-      this.characteristicWindDirection = winddirection.getCharacteristic(Characteristic.WindDirectionCharacteristic)
+      this.characteristicWindDirection = windService.getCharacteristic(Characteristic.WindDirectionCharacteristic)
         .on('get', function (callback) {
           this.query('WIND_DIR', function (value) {
             if (callback) callback(null, value)
@@ -236,9 +111,7 @@ class HomeMaticHomeKitWeatherStationServiceIP extends HomeKitGenericService {
 
       this.characteristicWindDirection.eventEnabled = true
 
-      var windrange = this.getService(Service.WindRangeService)
-
-      this.characteristicWindRange = windrange.getCharacteristic(Characteristic.WindRangeCharacteristic)
+      this.characteristicWindRange = windService.getCharacteristic(Characteristic.WindRangeCharacteristic)
         .on('get', function (callback) {
           this.query('WIND_DIR_RANGE', function (value) {
             if (callback) callback(null, value)
@@ -274,15 +147,25 @@ class HomeMaticHomeKitWeatherStationServiceIP extends HomeKitGenericService {
       })
     }
 
+    if (this.characteristicSunshine) {
+      this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('SUNSHINEDURATION'), this, function (newValue) {
+        self.characteristicSunshine.updateValue(parseFloat(newValue))
+      })
+    }
+
     if (this.characteristicIsRaining) {
       this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('RAINING'), this, function (newValue) {
         self.characteristicRain.updateValue(self.isTrue(newValue) ? 1 : 0)
       })
     }
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('WINDSPEED'), this, function (newValue) {
-      self.characteristicWindspeed.updateValue(parseFloat(newValue), null)
-    })
+    if (this.characteristicWindspeed) {
+      this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('WINDSPEED'), this, function (newValue) {
+        if (self.characteristicWindspeed) {
+          self.characteristicWindspeed.updateValue(parseFloat(newValue), null)
+        }
+      })
+    }
 
     if (this.characteristicWindDirection) {
       this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('WIND_DIR'), this, function (newValue) {

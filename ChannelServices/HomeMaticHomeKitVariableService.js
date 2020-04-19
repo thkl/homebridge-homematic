@@ -14,7 +14,8 @@ class HomeMaticHomeKitVariableService extends HomeKitGenericService {
 
       .on('get', function (callback) {
         self.remoteGetValue('1.STATE', function (value) {
-          if (callback) callback(null, value)
+          self.log.debug('VAR result is %s', value)
+          if (callback) callback(null, self.isTrue(value))
         })
       })
 

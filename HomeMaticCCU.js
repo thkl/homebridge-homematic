@@ -95,6 +95,11 @@ class HomeMaticCCU {
     rega.setVariable(varName, varValue, callback)
   }
 
+  getVariable (varName, callback) {
+    let rega = this.createRegaRequest()
+    rega.getVariable(varName, callback)
+  }
+
   runScript (script, callback) {
     let rega = this.createRegaRequest()
     rega.script(script, callback)
