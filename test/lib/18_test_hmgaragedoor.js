@@ -17,22 +17,20 @@ describe('Homematic Plugin (index)', function () {
   let data = fs.readFileSync(datapath).toString()
   let that = this
   var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
-  var platform = new homebridgeMock.PlatformType(log, config, homebridgeMock)
+  var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
     log.debug('Init Platform with DoorOpener')
-    platform.homebridge.setCCUDummyValue('HmIP-RF.ADR1234567890:1.DOOR_STATE', 1)
-    platform.homebridge.fireHomeBridgeEvent('didFinishLaunching')
-    platform.xmlrpc.interface = 'HmIP-RF.'
-    platform.homebridge.accessories(function (acc) {
+    platform.accessories(function (acc) {
       that.accessories = acc
     })
+    platform.xmlrpc.interface = 'HmIP-RF.'
   })
 
   after(function () {
     log.debug('Shutdown Platform')
     that.accessories.map(ac => {
-      ac.appliance.shutdown()
+      ac.shutdown()
     })
   })
 
@@ -43,33 +41,17 @@ describe('Homematic Plugin (index)', function () {
       done()
     })
 
-    it('test inital values', function (done) {
-      // check
-      that.accessories.map(ac => {
-        let s = ac.getService(Service.GarageDoorOpener)
-        assert.ok(s, 'Service.GarageDoorOpener not found in testdoor %s', ac.name)
-        let cc = s.getCharacteristic(Characteristic.CurrentDoorState)
-        assert.ok(cc, 'Characteristic.CurrentDoorState not found in testdoor %s', ac.name)
-        cc.getValue(function (context, value) {
-          assert.strict.equal(value, Characteristic.CurrentDoorState.OPEN)
-        })
-        // reset state
-        platform.homebridge.setCCUDummyValue('HmIP-RF.ADR1234567890:1.DOOR_STATE', 0)
-      })
-      done()
-    })
-
     it('test door open', function (done) {
       // send HmIP-RF.ADR1234567890:1.DOOR_RECEIVER a on Message
       platform.xmlrpc.event(['HmIP-RF.', 'ADR1234567890:1', 'DOOR_STATE', 1])
       // check
       that.accessories.map(ac => {
-        let s = ac.getService(Service.GarageDoorOpener)
+        let s = ac.get_Service(Service.GarageDoorOpener)
         assert.ok(s, 'Service.GarageDoorOpener not found in testdoor %s', ac.name)
         let cc = s.getCharacteristic(Characteristic.CurrentDoorState)
         assert.ok(cc, 'Characteristic.CurrentDoorState not found in testdoor %s', ac.name)
         cc.getValue(function (context, value) {
-          assert.strict.equal(value, Characteristic.CurrentDoorState.OPEN)
+          assert.strict.equal(value, 0)
         })
       })
       done()
@@ -80,12 +62,12 @@ describe('Homematic Plugin (index)', function () {
       platform.xmlrpc.event(['HmIP-RF.', 'ADR1234567890:1', 'DOOR_STATE', 0])
       // check
       that.accessories.map(ac => {
-        let s = ac.getService(Service.GarageDoorOpener)
+        let s = ac.get_Service(Service.GarageDoorOpener)
         assert.ok(s, 'Service.GarageDoorOpener not found in testdoor %s', ac.name)
         let cc = s.getCharacteristic(Characteristic.CurrentDoorState)
         assert.ok(cc, 'Characteristic.CurrentDoorState not found in testdoor %s', ac.name)
         cc.getValue(function (context, value) {
-          assert.strict.equal(value, Characteristic.CurrentDoorState.CLOSED)
+          assert.strict.equal(value, 1)
         })
       })
       done()
@@ -94,12 +76,12 @@ describe('Homematic Plugin (index)', function () {
     it('close door via HK', function (done) {
       // check
       that.accessories.map(ac => {
-        let s = ac.getService(Service.GarageDoorOpener)
+        let s = ac.get_Service(Service.GarageDoorOpener)
         assert.ok(s, 'Service.GarageDoorOpener not found in testdoor %s', ac.name)
         let co = s.getCharacteristic(Characteristic.TargetDoorState)
         assert.ok(co, 'Characteristic.TargetDoorState not found in testdoor %s', ac.name)
         co.emit('set', 1, function () {
-          let res = platform.homebridge.getCCUDummyValue(ac.appliance.address + '.DOOR_COMMAND')
+          let res = platform.homebridge.values[ac.adress + '.DOOR_COMMAND']
           assert.strict.equal(res, 3)
         })
       })
@@ -109,12 +91,12 @@ describe('Homematic Plugin (index)', function () {
     it('open door via HK', function (done) {
       // check
       that.accessories.map(ac => {
-        let s = ac.getService(Service.GarageDoorOpener)
+        let s = ac.get_Service(Service.GarageDoorOpener)
         assert.ok(s, 'Service.GarageDoorOpener not found in testdoor %s', ac.name)
         let co = s.getCharacteristic(Characteristic.TargetDoorState)
         assert.ok(co, 'Characteristic.TargetDoorState not found in testdoor %s', ac.name)
         co.emit('set', 0, function () {
-          let res = platform.homebridge.getCCUDummyValue(ac.appliance.address + '.DOOR_COMMAND')
+          let res = platform.homebridge.values[ac.adress + '.DOOR_COMMAND']
           assert.strict.equal(res, 1)
         })
       })

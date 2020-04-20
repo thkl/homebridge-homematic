@@ -15,12 +15,12 @@ HomeMaticCacheManager.prototype.doCache = function (address, value) {
   // sanity check
   var parts = address.split(':')
   if (parts.length !== 2) {
-    return undefined
+    return
   }
 
   parts = address.split('.')
   if (parts.length !== 3) {
-    return undefined
+    return
   }
 
   this.log.debug('[Cache] write %s for %s', value, address)

@@ -20,54 +20,27 @@ describe('Homematic Plugin (index)', function () {
     subsection: 'HomeKit',
     testdata: data
   }
-
-  this.randomInitValue = Math.random()
-  this.expInitValue = (that.randomInitValue * 100)
-
-  var platform = new homebridgeMock.PlatformType(log, config, homebridgeMock)
+  var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
-    platform.homebridge.setCCUDummyValue('HmIP-RF.ADR1234567890:1.LEVEL', that.randomInitValue)
-
-    platform.homebridge.fireHomeBridgeEvent('didFinishLaunching')
-    platform.xmlrpc.interface = 'HmIP-RF.'
     log.debug('Init Platform with Dimmer')
-    platform.homebridge.accessories(function (acc) {
+    platform.accessories(function (acc) {
       that.accessories = acc
     })
+    platform.xmlrpc.interface = 'HmIP-RF.'
   })
 
   after(function () {
     log.debug('Shutdown Platform')
     that.accessories.map(ac => {
-      ac.appliance.shutdown()
+      ac.shutdown()
     })
   })
 
-  describe('Homebridge Platform Dimmer Service (HMIP) Test', function () {
-    this.timeout(2000)
+  describe('Homebridge Platform Dimmer Service Test', function () {
     it('check accessory build', function (done) {
       assert.ok(that.accessories, 'Did not find any accessories!')
       assert.strict.equal(that.accessories.length, 1)
-      done()
-    })
-
-    it('test initial values dimmer must be random init value', function (done) {
-      let ac = that.accessories[0]
-      let s = ac.getService(Service.Lightbulb)
-      assert.ok(s, 'Service.Lightbulb not found in %s', ac.name)
-      let cc = s.getCharacteristic(Characteristic.On)
-      assert.ok(cc, 'Characteristic.On not found in %s', ac.name)
-      cc.getValue(function (context, value) {
-        assert.strict.equal(value, true, 'Dimmer must be on (true)')
-      })
-      let cb = s.getCharacteristic(Characteristic.Brightness)
-      assert.ok(cb, 'Characteristic.Brightness not found in %s', ac.name)
-      cb.getValue(function (context, value) {
-        assert.strict.equal(value, that.expInitValue, 'Dimmer Level must be ' + that.expInitValue + '%')
-      })
-      // Reset Value
-      platform.homebridge.setCCUDummyValue('HmIP-RF.ADR1234567890:1.LEVEL', 0)
       done()
     })
 
@@ -75,7 +48,7 @@ describe('Homematic Plugin (index)', function () {
       platform.xmlrpc.event(['HmIP-RF', 'ADR1234567890:1', 'LEVEL', 1])
       // check
       that.accessories.map(ac => {
-        let s = ac.getService(Service.Lightbulb)
+        let s = ac.get_Service(Service.Lightbulb)
         assert.ok(s, 'Service.Lightbulb not found in testdimmer %s', ac.name)
         let cc = s.getCharacteristic(Characteristic.On)
         assert.ok(cc, 'Characteristic.On not found in testdimmer %s', ac.name)
@@ -102,7 +75,7 @@ describe('Homematic Plugin (index)', function () {
       platform.xmlrpc.event(['HmIP-RF', 'ADR1234567890:1', 'LEVEL', 0])
       // check
       that.accessories.map(ac => {
-        let s = ac.getService(Service.Lightbulb)
+        let s = ac.get_Service(Service.Lightbulb)
         assert.ok(s, 'Service.Lightbulb not found in testdimmer %s', ac.name)
         let cc = s.getCharacteristic(Characteristic.On)
         assert.ok(cc, 'Characteristic.On not found in testdimmer %s', ac.name)
@@ -129,21 +102,21 @@ describe('Homematic Plugin (index)', function () {
     it('set test dimmer via HK to  50%', function (done) {
       // check
       that.accessories.map(ac => {
-        let s = ac.getService(Service.Lightbulb)
+        let s = ac.get_Service(Service.Lightbulb)
         assert.ok(s, 'Service.Lightbulb not found in testdimmer %s', ac.name)
         let cb = s.getCharacteristic(Characteristic.Brightness)
         assert.ok(cb, 'Characteristic.Brightness not found in testdimmer %s', ac.name)
         // Set Delay to 0 sec for use with tests
-        ac.appliance.delayOnSet = 0
+        ac.delayOnSet = 0
 
         cb.emit('set', 50, function () {
           setTimeout(function () {
-            let res = platform.homebridge.getCCUDummyValue(ac.appliance.address + '.LEVEL')
-            assert.strict.equal(res, 0.5, 'Brightness of ' + ac.appliance.address + '.LEVEL' + ' should be 0.5 is ' + res)
-            done()
+            let res = platform.homebridge.values[ac.adress + '.LEVEL']
+            assert.strict.equal(res, 0.5)
           }, 550)
         })
       })
+      done()
     })
   })
 })

@@ -1,34 +1,32 @@
 'use strict'
 
-const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
+var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
+var util = require('util')
 
-class HomeMaticHomeKitAirQualitySensorService extends HomeKitGenericService {
-  createDeviceService (Service, Characteristic) {
-    var self = this
-    var carbondioxideSensor = this.getService(Service.CarbonDioxideSensor)
-    this.state = carbondioxideSensor.getCharacteristic(Characteristic.CarbonDioxideDetected)
-      .on('get', function (callback) {
-        self.query('STATE', function (value) {
-          if (callback) callback(null, value)
-        })
+function HomeMaticHomeKitAirQualitySensorService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
+  HomeMaticHomeKitAirQualitySensorService.super_.apply(this, arguments)
+}
+
+util.inherits(HomeMaticHomeKitAirQualitySensorService, HomeKitGenericService)
+
+HomeMaticHomeKitAirQualitySensorService.prototype.createDeviceService = function (Service, Characteristic) {
+  var that = this
+  var carbondioxideSensor = new Service['CarbonDioxideSensor'](this.name)
+  var state = carbondioxideSensor.getCharacteristic(Characteristic.CarbonDioxideDetected)
+    .on('get', function (callback) {
+      that.query('STATE', function (value) {
+        if (callback) callback(null, value)
       })
-
-    this.addHomeMaticDatapoint('STATE')
-
-    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('STATE'), this, function (newValue) {
-      self.log.debug('[AKS] State event %s', newValue)
-      var hkresult = 0
-      switch (newValue) {
-        case 1:
-          hkresult = 1
-          break
-        case 2:
-          hkresult = 1
-          break
-      }
-      self.state.updateValue(hkresult, null)
     })
-  }
+
+  this.addValueMapping('STATE', 0, 0)
+  this.addValueMapping('STATE', 1, 1)
+  this.addValueMapping('STATE', 2, 1)
+
+  this.currentStateCharacteristic['STATE'] = state
+  state.eventEnabled = true
+  this.services.push(carbondioxideSensor)
+  this.remoteGetValue('STATE')
 }
 
 module.exports = HomeMaticHomeKitAirQualitySensorService

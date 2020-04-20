@@ -16,15 +16,11 @@ describe('Homematic Plugin (index)', function () {
   let data = fs.readFileSync(datapath).toString()
   let that = this
   var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
-  var platform = new homebridgeMock.PlatformType(log, config, homebridgeMock)
+  var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
     log.debug('Init Platform with Leagacy Wall Thermostat')
-    platform.homebridge.setCCUDummyValue('BidCos-RF.ABC1234560:1.TEMPERATURE', 12)
-    platform.homebridge.setCCUDummyValue('BidCos-RF.ABC1234560:1.HUMIDITY', 30)
-    platform.homebridge.setCCUDummyValue('BidCos-RF.ABC1234560:2.SETPOINT', 24)
-    platform.homebridge.fireHomeBridgeEvent('didFinishLaunching')
-    platform.homebridge.accessories(function (acc) {
+    platform.accessories(function (acc) {
       that.accessories = acc
     })
   })
@@ -32,7 +28,7 @@ describe('Homematic Plugin (index)', function () {
   after(function () {
     log.debug('Shutdown Platform')
     that.accessories.map(ac => {
-      ac.appliance.shutdown()
+      ac.shutdown()
     })
   })
 
@@ -40,32 +36,6 @@ describe('Homematic Plugin (index)', function () {
     it('test accessory build', function (done) {
       assert.ok(that.accessories, 'Did not find any accessories!')
       assert.strict.equal(that.accessories.length, 1)
-      done()
-    })
-
-    it('inital set test', function (done) {
-      that.accessories.map(ac => {
-        let s = ac.getService(Service.Thermostat)
-        assert.ok(s, 'Service.TemperatureSensor not found in Thermostat %s', ac.name)
-
-        let ct = s.getCharacteristic(Characteristic.CurrentTemperature)
-        assert.ok(ct, 'Characteristic.CurrentTemperature not found in Thermostat %s', ac.name)
-        ct.getValue(function (context, value) {
-          assert.strict.equal(value, 12, 'current temperature did not match 12 degrees')
-        })
-
-        let ch = s.getCharacteristic(Characteristic.CurrentRelativeHumidity)
-        assert.ok(ch, 'Characteristic.TargetTemperature not found in Thermostat %s', ac.name)
-        ch.getValue(function (context, value) {
-          assert.strict.equal(value, 30, 'humidity  did not match 30 %')
-        })
-
-        let tt = s.getCharacteristic(Characteristic.TargetTemperature)
-        assert.ok(tt, 'Characteristic.TargetTemperature not found in Thermostat %s', ac.name)
-        tt.getValue(function (context, value) {
-          assert.strict.equal(value, 24, 'target temperature did not match 24 degrees')
-        })
-      })
       done()
     })
 
@@ -80,7 +50,7 @@ describe('Homematic Plugin (index)', function () {
         platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'HUMIDITY', hum])
         // check
         that.accessories.map(ac => {
-          let s = ac.getService(Service.Thermostat)
+          let s = ac.get_Service(Service.Thermostat)
           assert.ok(s, 'Service.TemperatureSensor not found in Thermostat %s', ac.name)
           let cc = s.getCharacteristic(Characteristic.CurrentTemperature)
           assert.ok(cc, 'Characteristic.CurrentTemperature not found in Thermostat %s', ac.name)
@@ -104,7 +74,7 @@ describe('Homematic Plugin (index)', function () {
     it('test read target temperature set to 20', function (done) {
       platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:2', 'SETPOINT', 20])
       that.accessories.map(ac => {
-        let s = ac.getService(Service.Thermostat)
+        let s = ac.get_Service(Service.Thermostat)
         assert.ok(s, 'Service.TemperatureSensor not found in Thermostat %s', ac.name)
 
         let cc = s.getCharacteristic(Characteristic.TargetTemperature)
@@ -118,16 +88,16 @@ describe('Homematic Plugin (index)', function () {
 
     it('test set target temperature to 17 via SETPOINT', function (done) {
       that.accessories.map(ac => {
-        let s = ac.getService(Service.Thermostat)
+        let s = ac.get_Service(Service.Thermostat)
         // Set Delay to 0 sec for use with tests
-        ac.appliance.delayOnSet = 0
+        ac.delayOnSet = 0
         // We have to set ControlMode to 1 ... so the target Datapoint is SET_TEMPERATURE
         assert.ok(s, 'Service.TemperatureSensor not found in Thermostat %s', ac.name)
         let cc = s.getCharacteristic(Characteristic.TargetTemperature)
         assert.ok(cc, 'Characteristic.TargetTemperature not found in Thermostat %s', ac.name)
         cc.emit('set', 17, function () {
-          let dp = ac.appliance.deviceaddress + ':2.SETPOINT'
-          let res = platform.homebridge.getCCUDummyValue(dp)
+          let dp = ac.deviceAdress + ':2.SETPOINT'
+          let res = platform.homebridge.values[dp]
           assert.strict.equal(res, 17, 'SETPOINT shoud be at 17 degrees  is ' + res)
         })
       })

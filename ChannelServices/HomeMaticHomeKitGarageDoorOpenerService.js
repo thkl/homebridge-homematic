@@ -1,101 +1,105 @@
 'use strict'
 
-const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
+var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
+var util = require('util')
 
-class HomeMaticHomeKitGarageDoorOpenerService extends HomeKitGenericService {
-  propagateServices (homebridge, Service, Characteristic) { }
+function HomeMaticHomeKitGarageDoorOpenerService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
+  HomeMaticHomeKitGarageDoorOpenerService.super_.apply(this, arguments)
+}
 
-  createDeviceService (Service, Characteristic) {
-    let self = this
-    this.characteristic = Characteristic
+util.inherits(HomeMaticHomeKitGarageDoorOpenerService, HomeKitGenericService)
 
-    var garagedoorService = this.getService(Service.GarageDoorOpener)
+HomeMaticHomeKitGarageDoorOpenerService.prototype.propagateServices = function (homebridge, Service, Characteristic) {}
 
-    this.obstacle = garagedoorService.getCharacteristic(Characteristic.ObstructionDetected)
-      .on('get', function (callback) {
-        if (callback) callback(null, false)
-      })
+HomeMaticHomeKitGarageDoorOpenerService.prototype.createDeviceService = function (Service, Characteristic) {
+  let that = this
+  this.characteristic = Characteristic
 
-    this.currentDoorState = garagedoorService.getCharacteristic(Characteristic.CurrentDoorState)
+  var garagedoorService = new Service.GarageDoorOpener(this.name)
+  this.services.push(garagedoorService)
 
-      .on('get', function (callback) {
-        self.log.debug('[GOS]  homekit state request')
+  this.obstacle = garagedoorService.getCharacteristic(Characteristic.ObstructionDetected)
+    .on('get', function (callback) {
+      if (callback) callback(null, false)
+    })
 
-        self.query('DOOR_STATE', function (value) {
-          switch (value) {
-            case 0:
-              self.log.debug('[GOS]  ccu says door is closed')
-              if (callback) callback(null, Characteristic.CurrentDoorState.CLOSED)
-              break
-            case 1:
-            case 2:
-            case 3:
-              self.log.debug('[GOS]  ccu says door is open')
-              if (callback) callback(null, Characteristic.CurrentDoorState.OPEN)
-              break
+  this.currentDoorState = garagedoorService.getCharacteristic(Characteristic.CurrentDoorState)
 
-            default:
-              break
-          }
-        })
-      })
+    .on('get', function (callback) {
+      that.log.debug('HmIP-MOD-TM homekit state request')
 
-    this.targetDoorState = garagedoorService.getCharacteristic(Characteristic.TargetDoorState)
-      .on('set', function (value, callback) {
-        self.log.debug('[GOS]  Homekit Door Command %s', value)
-
+      that.query('DOOR_STATE', function (value) {
         switch (value) {
-          case Characteristic.TargetDoorState.OPEN:
-            self.log.debug('[GOS]  sent 1 to ccu ')
-            self.delayed('set', 'DOOR_COMMAND', 1)
+          case 0:
+            that.log.debug('HmIP-MOD-TM ccu says door is closed')
+            if (callback) callback(null, Characteristic.CurrentDoorState.CLOSED)
             break
-          case Characteristic.TargetDoorState.CLOSED:
-            self.log.debug('[GOS]  sent 3 to ccu ')
-            self.delayed('set', 'DOOR_COMMAND', 3)
+          case 1:
+          case 2:
+          case 3:
+            that.log.debug('HmIP-MOD-TM ccu says door is open')
+            if (callback) callback(null, Characteristic.CurrentDoorState.OPEN)
             break
 
           default:
             break
         }
       })
-
-    this.currentDoorState.eventEnabled = true
-    this.targetDoorState.eventEnabled = true
-    this.queryData()
-  }
-
-  queryData () {
-    let self = this
-    self.remoteGetValue('DOOR_STATE', function (value) {
-      self.log.debug('[GOS] remoteGetValue %s', value)
-      self.datapointEvent(self.channelnumber + '.DOOR_STATE', value)
     })
-  }
 
-  datapointEvent (dp, newValue) {
-    this.log.debug('[GOS] ccu datapoint event %s', newValue)
+  this.targetDoorState = garagedoorService.getCharacteristic(Characteristic.TargetDoorState)
+    .on('set', function (value, callback) {
+      that.log.debug('HmIP-MOD-TM Homekit Door Command %s', value)
 
-    if (this.isDataPointEvent(this.channelnumber + '.DOOR_STATE', dp)) {
-      this.log.debug('[GOS] ccu datapoint event %s', newValue)
-
-      switch (newValue) {
-        case 0:
-          this.log.debug('[GOS] sent Closed to Homekit')
-          this.currentDoorState.updateValue(this.characteristic.CurrentDoorState.CLOSED, null)
-          this.targetDoorState.updateValue(this.characteristic.TargetDoorState.CLOSED, null)
+      switch (value) {
+        case Characteristic.TargetDoorState.OPEN:
+          that.log.debug('HmIP-MOD-TM sent 1 to ccu ')
+          that.delayed('set', 'DOOR_COMMAND', 1)
           break
-        case 1:
-        case 2:
-        case 3:
-          this.log.debug('[GOS] sent open to Homekit')
-          this.currentDoorState.updateValue(this.characteristic.CurrentDoorState.OPEN, null)
-          this.targetDoorState.updateValue(this.characteristic.TargetDoorState.OPEN, null)
+        case Characteristic.TargetDoorState.CLOSED:
+          that.log.debug('HmIP-MOD-TM sent 3 to ccu ')
+          that.delayed('set', 'DOOR_COMMAND', 3)
           break
 
         default:
           break
       }
+    })
+
+  this.currentDoorState.eventEnabled = true
+  this.targetDoorState.eventEnabled = true
+  this.queryData()
+}
+
+HomeMaticHomeKitGarageDoorOpenerService.prototype.queryData = function () {
+  let that = this
+  that.query('DOOR_STATE', function (value) {
+    that.datapointEvent(that.channelnumber + '.DOOR_STATE', value)
+  })
+}
+
+HomeMaticHomeKitGarageDoorOpenerService.prototype.datapointEvent = function (dp, newValue) {
+  if (dp === this.channelnumber + '.DOOR_STATE') {
+    this.log.debug('HmIP-MOD-TM ccu datapoint event %s', newValue)
+
+    switch (newValue) {
+      case 0:
+        this.log.debug('HmIP-MOD-TM sent Closed to Homekit')
+        this.currentDoorState.updateValue(this.characteristic.CurrentDoorState.CLOSED, null)
+        this.targetDoorState.updateValue(this.characteristic.TargetDoorState.CLOSED, null)
+        break
+      case 1:
+      case 2:
+      case 3:
+        this.log.debug('HmIP-MOD-TM sent open to Homekit')
+        this.currentDoorState.updateValue(this.characteristic.CurrentDoorState.OPEN, null)
+        this.targetDoorState.updateValue(this.characteristic.TargetDoorState.OPEN, null)
+        break
+
+      default:
+        break
     }
   }
 }
+
 module.exports = HomeMaticHomeKitGarageDoorOpenerService

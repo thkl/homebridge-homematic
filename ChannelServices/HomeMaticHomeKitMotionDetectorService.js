@@ -1,93 +1,85 @@
 'use strict'
 
-const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
-const moment = require('moment')
-const EveHomeKitTypes = require('./EveHomeKitTypes.js')
+var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
+var util = require('util')
+var moment = require('moment')
 let eve
+var EveHomeKitTypes = require('./EveHomeKitTypes.js')
 
-class HomeMaticHomeKitMotionDetectorService extends HomeKitGenericService {
-  propagateServices (homebridge, Service, Characteristic) {
-    eve = new EveHomeKitTypes(homebridge)
-  }
+function HomeMaticHomeKitMotionDetectorService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
+  HomeMaticHomeKitMotionDetectorService.super_.apply(this, arguments)
+}
 
-  createDeviceService (Service, Characteristic) {
-    var self = this
+util.inherits(HomeMaticHomeKitMotionDetectorService, HomeKitGenericService)
 
-    this.historyEnabled = this.getClazzConfigValue('enable_history', false)
+HomeMaticHomeKitMotionDetectorService.prototype.propagateServices = function (homebridge, Service, Characteristic) {
+  eve = new EveHomeKitTypes(homebridge)
+}
 
-    if (this.historyEnabled === true) {
-      this.enableLoggingService('motion')
-    }
+HomeMaticHomeKitMotionDetectorService.prototype.createDeviceService = function (Service, Characteristic) {
+  var that = this
 
-    var sensor = this.getService(Service.MotionSensor)
-    this.state = sensor.getCharacteristic(Characteristic.MotionDetected)
-      .on('get', function (callback) {
-        self.query('MOTION', function (value) {
-          if ((self.historyEnabled === true) && (self.loggingService)) {
-            self.addLogEntry({ status: (value === true) ? 1 : 0 })
-          }
-          if (callback) callback(null, value)
-        })
+  this.enableLoggingService('motion', false)
+
+  var sensor = new Service['MotionSensor'](this.name)
+  this.state = sensor.getCharacteristic(Characteristic.MotionDetected)
+    .on('get', function (callback) {
+      that.query('MOTION', function (value) {
+        that.addLogEntry({ status: (value === true) ? 1 : 0 })
+        if (callback) callback(null, value)
       })
-
-    this.state.eventEnabled = true
-
-    var brightness = this.getService(Service.LightSensor)
-    this.cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
-      .on('get', function (callback) {
-        self.query('BRIGHTNESS', function (value) {
-          if (callback) { callback(null, value) } // calculation lux from HM Values is done in HomeKitGenericService.js via ... Math.pow(10, (value/51))
-        })
-      })
-
-    this.cbright.eventEnabled = true
-
-    this.addTamperedCharacteristic(sensor, Characteristic)
-    this.addLowBatCharacteristic(sensor, Characteristic)
-
-    sensor.addOptionalCharacteristic(eve.Characteristic.LastActivation)
-
-    this.lastActivation = this.getPersistentState('lastActivation', undefined)
-    if ((this.lastActivation === undefined) && (this.loggingService !== undefined)) {
-      this.lastActivation = moment().unix() - this.loggingService.getInitialTime()
-      this.setPersistentState('lastActivation', this.lastActivation)
-    }
-
-    this.CharacteristicLastActivation = sensor.getCharacteristic(eve.Characteristic.LastActivation)
-      .on('get', function (callback) {
-        callback(null, this.lastActivation)
-      }.bind(this))
-    this.CharacteristicLastActivation.setValue(this.lastActivation)
-
-    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('BRIGHTNESS'), this, function (newValue) {
-      self.cbright.updateValue(newValue, null) // calculation lux from HM Values is done in HomeKitGenericService.js via ... Math.pow(10, (value/51))
     })
 
-    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('MOTION'), this, function (newValue) {
-      self.state.updateValue(newValue, null)
-      self.addLogEntry({ status: (newValue === true) ? 1 : 0 })
-      if (newValue === true) {
-        if (self.loggingService !== undefined) {
-          let firstLog = self.loggingService.getInitialTime()
-          self.lastActivation = moment().unix() - firstLog
-          self.CharacteristicLastActivation.updateValue(self.lastActivation, null)
-          self.setPersistentState('lastActivation', self.lastActivation)
-        }
+  this.state.eventEnabled = true
+  this.services.push(sensor)
+
+  var brightness = new Service['LightSensor'](this.name)
+  this.cbright = brightness.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
+    .on('get', function (callback) {
+      that.query('BRIGHTNESS', function (value) {
+        if (callback) { callback(null, value) } // calculation lux from HM Values is done in HomeKitGenericService.js via ... Math.pow(10, (value/51))
+      })
+    })
+
+  this.cbright.eventEnabled = true
+  this.services.push(brightness)
+
+  this.addTamperedCharacteristic(sensor, Characteristic)
+  this.addLowBatCharacteristic(sensor, Characteristic)
+
+  sensor.addOptionalCharacteristic(eve.Characteristic.LastActivation)
+
+  this.lastActivation = this.getPersistentState('lastActivation', undefined)
+  if ((this.lastActivation === undefined) && (this.loggingService !== undefined)) {
+    this.lastActivation = moment().unix() - this.loggingService.getInitialTime()
+    this.setPersistentState('lastActivation', this.lastActivation)
+  }
+
+  this.CharacteristicLastActivation = sensor.getCharacteristic(eve.Characteristic.LastActivation)
+    .on('get', function (callback) {
+      callback(null, this.lastActivation)
+    }.bind(this))
+  this.CharacteristicLastActivation.setValue(this.lastActivation)
+
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + '.BRIGHTNESS', this, function (newValue) {
+    that.cbright.updateValue(newValue, null) // calculation lux from HM Values is done in HomeKitGenericService.js via ... Math.pow(10, (value/51))
+  })
+
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + '.MOTION', this, function (newValue) {
+    that.state.updateValue(newValue, null)
+    that.addLogEntry({ status: (newValue === true) ? 1 : 0 })
+    if (newValue === true) {
+      if (that.loggingService !== undefined) {
+        let firstLog = that.loggingService.getInitialTime()
+        that.lastActivation = moment().unix() - firstLog
+        that.CharacteristicLastActivation.updateValue(that.lastActivation, null)
+        that.setPersistentState('lastActivation', that.lastActivation)
       }
-    })
-  }
+    }
+  })
 
-  validateConfig (configuration) {
-    // things to check
-    return ((configuration) &&
-    (configuration.enable_history) &&
-    ([true, false].indexOf(configuration.enable_history) > -1)
-    )
-  }
-
-  configItems () {
-    return ['enable_history']
-  }
+  this.remoteGetValue('BRIGHTNESS')
+  this.remoteGetValue('MOTION')
 }
 
 module.exports = HomeMaticHomeKitMotionDetectorService

@@ -1,141 +1,142 @@
 'use strict'
 
-const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
-const EveHomeKitTypes = require('./EveHomeKitTypes.js')
+var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
+var util = require('util')
+var EveHomeKitTypes = require('./EveHomeKitTypes.js')
 let eve
 
-class HomeMaticHomeKitPowerMeterService extends HomeKitGenericService {
-  shutdown () {
-    this.log.debug('[PMS] shutdown')
-    super.shutdown()
-    clearTimeout(this.refreshTimer)
-  }
+function HomeMaticHomeKitPowerMeterService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
+  HomeMaticHomeKitPowerMeterService.super_.apply(this, arguments)
+}
 
-  propagateServices (homebridge, Service, Characteristic) {
-    eve = new EveHomeKitTypes(homebridge)
-  }
+util.inherits(HomeMaticHomeKitPowerMeterService, HomeKitGenericService)
 
-  createDeviceService (Service, Characteristic) {
-    var self = this
-    self.enableLoggingService('energy')
-    var sensor = this.getService(eve.Service.PowerMeterService)
-    self.voltage = sensor.getCharacteristic(eve.Characteristic.Voltage)
-      .on('get', function (callback) {
-        self.query('2.VOLTAGE', function (value) {
-          if (callback) callback(null, self.round(value, 2))
-        })
+HomeMaticHomeKitPowerMeterService.prototype.shutdown = function () {
+  clearTimeout(this.refreshTimer)
+}
+
+HomeMaticHomeKitPowerMeterService.prototype.propagateServices = function (homebridge, Service, Characteristic) {
+  eve = new EveHomeKitTypes(homebridge)
+}
+
+HomeMaticHomeKitPowerMeterService.prototype.createDeviceService = function (Service, Characteristic) {
+  var that = this
+  this.enableLoggingService('energy')
+  var sensor = new eve.Service.PowerMeterService(this.name)
+  this.voltage = sensor.getCharacteristic(eve.Characteristic.Voltage)
+    .on('get', function (callback) {
+      that.query('2.VOLTAGE', function (value) {
+        if (callback) callback(null, that.round(value, 2))
       })
+    })
 
-    self.voltage.eventEnabled = true
+  this.voltage.eventEnabled = true
 
-    self.current = sensor.getCharacteristic(eve.Characteristic.ElectricCurrent)
-      .on('get', function (callback) {
-        self.query('2.CURRENT', function (value) {
-          if (value !== undefined) {
-            value = self.round((value / 1000), 2)
-            if (callback) callback(null, value)
-          } else {
-            if (callback) callback(null, 0)
-          }
-        })
-      })
-
-    self.current.eventEnabled = true
-
-    self.power = sensor.getCharacteristic(eve.Characteristic.ElectricPower)
-      .on('get', function (callback) {
-        self.query('2.POWER', function (value) {
-          self.addLogEntry({
-            power: parseFloat(value)
-          })
-          if (callback) callback(null, self.round(value, 4))
-        })
-      })
-
-    self.power.eventEnabled = true
-
-    var outlet = this.getService(Service.Outlet)
-    outlet.getCharacteristic(Characteristic.OutletInUse)
-      .on('get', function (callback) {
-        if (callback) callback(null, 1)
-      })
-
-    this.isOn = outlet.getCharacteristic(Characteristic.On)
-      .on('get', function (callback) {
-        self.query('1.STATE', function (value) {
-          self.log.debug('State is %s', value)
+  this.current = sensor.getCharacteristic(eve.Characteristic.ElectricCurrent)
+    .on('get', function (callback) {
+      that.query('2.CURRENT', function (value) {
+        if (value !== undefined) {
+          value = that.round((value / 1000), 2)
           if (callback) callback(null, value)
-        })
-      })
-
-      .on('set', function (value, callback) {
-        self.log.debug('[PMS] switch %s', value)
-        if (self.readOnly === false) {
-          if (self.isTrue(value)) {
-            self.delayed('set', '1.STATE', true)
-          } else {
-            self.delayed('set', '1.STATE', false)
-          }
         } else {
-          self.log.debug('[PMS] switch ignore is RO')
+          if (callback) callback(null, 0)
         }
-        callback()
       })
+    })
 
-    self.powerConsumption = sensor.getCharacteristic(eve.Characteristic.TotalConsumption)
-      .on('get', function (callback) {
-        self.query('ENERGY_COUNTER', function (value) {
-          self.log.debug('[PMS] Energy Counter %s', value)
-          if (callback) callback(null, self.round((parseInt(value) / 1000), 4))
+  this.current.eventEnabled = true
+
+  this.power = sensor.getCharacteristic(eve.Characteristic.ElectricPower)
+    .on('get', function (callback) {
+      that.query('2.POWER', function (value) {
+        that.addLogEntry({
+          power: parseFloat(value)
         })
+        if (callback) callback(null, that.round(value, 4))
       })
+    })
 
-    self.powerConsumption.eventEnabled = true
+  this.power.eventEnabled = true
+  this.services.push(sensor)
 
-    this.isOn.eventEnabled = true
+  var outlet = new Service['Outlet'](this.name)
+  outlet.getCharacteristic(Characteristic.OutletInUse)
+    .on('get', function (callback) {
+      if (callback) callback(null, 1)
+    })
 
-    self.caddress = self.address.replace(':2', ':1')
-
-    self.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('POWER'), self, function (newValue) {
-      self.log.debug('[PMS] Event for POWER with %s. Save to HK', newValue)
-      self.addLogEntry({
-        power: parseInt(newValue)
+  var cc = outlet.getCharacteristic(Characteristic.On)
+    .on('get', function (callback) {
+      that.query('1.STATE', function (value) {
+        that.log.debug('State is %s', value)
+        if (callback) callback(null, value)
       })
-      self.power.updateValue(self.round(parseInt(newValue), 2), null)
     })
 
-    self.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('VOLTAGE'), self, function (newValue) {
-      self.voltage.updateValue(self.round(parseInt(newValue), 2), null)
+    .on('set', function (value, callback) {
+      if (that.readOnly === false) {
+        if (value === 0) {
+          that.delayed('set', '1.STATE', false)
+        } else {
+          that.delayed('set', '1.STATE', true)
+        }
+      }
+      callback()
     })
 
-    self.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('CURRENT'), self, function (newValue) {
-      self.current.updateValue(self.round((parseInt(newValue) / 1000), 2), null)
+  this.setCurrentStateCharacteristic('1.STATE', cc)
+
+  this.powerConsumption = sensor.getCharacteristic(eve.Characteristic.TotalConsumption)
+    .on('get', function (callback) {
+      that.query(that.meterChannel + '.ENERGY_COUNTER', function (value) {
+        if (callback) callback(null, that.round((value / 1000), 4))
+      })
     })
 
-    self.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('.ENERGY_COUNTER'), self, function (newValue) {
-      self.log.debug('[PMS] Energy Counter %s', newValue)
-      self.powerConsumption.updateValue((self.round((parseInt(newValue) / 1000), 2)), null)
+  this.powerConsumption.eventEnabled = true
+
+  cc.eventEnabled = true
+
+  this.remoteGetValue('1.STATE')
+
+  this.services.push(outlet)
+
+  this.cadress = this.adress.replace(':2', ':1')
+
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + '.POWER', this, function (newValue) {
+    that.addLogEntry({
+      power: parseInt(newValue)
     })
+    that.power.updateValue(that.round(newValue, 2), null)
+  })
 
-    self.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('1.STATE'), self, function (newValue) {
-      self.log.debug('[PMS] event state %s', newValue)
-      self.isOn.updateValue(self.isTrue(newValue), null)
-    })
-  }
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + '.VOLTAGE', this, function (newValue) {
+    that.voltage.updateValue(that.round(newValue, 2), null)
+  })
 
-  queryData () {
-    var self = this
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + '.CURRENT', this, function (newValue) {
+    that.current.updateValue(that.round((newValue / 1000), 2), null)
+  })
 
-    let dps = ['POWER', 'VOLTAGE', 'CURRENT', 'ENERGY_COUNTER']
-    dps.map(function (dp) {
-      self.remoteGetValue(self.buildHomeMaticAddress(dp))
-    })
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + '.ENERGY_COUNTER', this, function (newValue) {
+    that.powerConsumption.updateValue((that.round((newValue / 1000), 2)), null)
+  })
 
-    // create timer to query device every 10 minutes
-    self.refreshTimer = setTimeout(function () {
-      self.queryData()
-    }, 10 * 60 * 1000)
-  }
+  this.queryData()
+}
+
+HomeMaticHomeKitPowerMeterService.prototype.queryData = function () {
+  var that = this
+
+  let dps = ['2.POWER', '2.VOLTAGE', '2.CURRENT', '2.ENERGY_COUNTER']
+  dps.map(function (dp) {
+    that.remoteGetValue(dp)
+  })
+
+  // create timer to query device every 10 minutes
+  this.refreshTimer = setTimeout(function () {
+    that.queryData()
+  }, 10 * 60 * 1000)
 }
 
 module.exports = HomeMaticHomeKitPowerMeterService

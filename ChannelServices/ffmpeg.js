@@ -348,12 +348,12 @@ FFMPEG.prototype.handleStreamRequest = function (request) {
 }
 
 FFMPEG.prototype.createCameraControlService = function () {
-  var controlService = this.getService(Service.CameraControl)
+  var controlService = new Service.CameraControl()
 
   this.services.push(controlService)
 
   if (this.audio) {
-    var microphoneService = this.getService(Service.Microphone)
+    var microphoneService = new Service.Microphone()
     this.services.push(microphoneService)
   }
 }

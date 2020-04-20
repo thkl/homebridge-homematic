@@ -1,24 +1,31 @@
 'use strict'
 
-const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
+var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
+var util = require('util')
 
-class HomeMaticHomeKitSmokeDetectorService extends HomeKitGenericService {
-  createDeviceService (Service, Characteristic) {
-    var self = this
-    var sensor = this.getService(Service.SmokeSensor)
-    this.detectorstate = sensor.getCharacteristic(Characteristic.SmokeDetected)
-      .on('get', function (callback) {
-        self.query('STATE', function (value) {
-          if (callback) callback(null, value)
-        })
+function HomeMaticHomeKitSmokeDetectorService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
+  HomeMaticHomeKitSmokeDetectorService.super_.apply(this, arguments)
+}
+
+util.inherits(HomeMaticHomeKitSmokeDetectorService, HomeKitGenericService)
+
+HomeMaticHomeKitSmokeDetectorService.prototype.createDeviceService = function (Service, Characteristic) {
+  var that = this
+  var sensor = new Service.SmokeSensor(this.name)
+  this.detectorstate = sensor.getCharacteristic(Characteristic.SmokeDetected)
+    .on('get', function (callback) {
+      that.query('STATE', function (value) {
+        if (callback) callback(null, value)
       })
-    this.detectorstate.eventEnabled = true
-
-    let dpa = this.buildHomeMaticAddress('STATE')
-    this.platform.registeraddressForEventProcessingAtAccessory(dpa, self, function (newValue) {
-      self.log.debug('[SDS] event %s', newValue)
-      self.detectorstate.updateValue(self.isTrue(newValue), null)
     })
+  this.detectorstate.eventEnabled = true
+  this.services.push(sensor)
+  this.remoteGetValue('STATE')
+}
+
+HomeMaticHomeKitSmokeDetectorService.prototype.datapointEvent = function (dp, newValue) {
+  if (this.isDataPointEvent(dp, 'STATE')) {
+    this.detectorstate.updateValue((newValue === 1), null)
   }
 }
 

@@ -20,13 +20,11 @@ describe('Homematic Plugin (index)', function () {
     subsection: 'HomeKit',
     testdata: data
   }
-  var platform = new homebridgeMock.PlatformType(log, config, homebridgeMock)
+  var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
     log.debug('Init Platform with lightsensor')
-    platform.homebridge.setCCUDummyValue('BidCos-RF.ABC1234560:1.LUX', 75)
-    platform.homebridge.fireHomeBridgeEvent('didFinishLaunching')
-    platform.homebridge.accessories(function (acc) {
+    platform.accessories(function (acc) {
       that.accessories = acc
     })
   })
@@ -34,7 +32,7 @@ describe('Homematic Plugin (index)', function () {
   after(function () {
     log.debug('Shutdown Platform')
     that.accessories.map(ac => {
-      ac.appliance.shutdown()
+      ac.shutdown()
     })
   })
 
@@ -45,24 +43,11 @@ describe('Homematic Plugin (index)', function () {
       done()
     })
 
-    it('inital test lightsensor should be 75', function (done) {
-      that.accessories.map(ac => {
-        let s = ac.getService(Service.LightSensor)
-        assert.ok(s, 'Service.LightSensor not found in lightsensor %s', ac.name)
-        let cc = s.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
-        assert.ok(cc, 'Characteristic.CurrentAmbientLightLevel not found in lightsensor %s', ac.name)
-        cc.getValue(function (context, value) {
-          assert.strict.equal(value, 75)
-        })
-      })
-      done()
-    })
-
     it('test lightsensor set to 25', function (done) {
       platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'LUX', 25])
       // check
       that.accessories.map(ac => {
-        let s = ac.getService(Service.LightSensor)
+        let s = ac.get_Service(Service.LightSensor)
         assert.ok(s, 'Service.LightSensor not found in lightsensor %s', ac.name)
         let cc = s.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
         assert.ok(cc, 'Characteristic.CurrentAmbientLightLevel not found in lightsensor %s', ac.name)
@@ -77,7 +62,7 @@ describe('Homematic Plugin (index)', function () {
       platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'LUX', 100])
       // check
       that.accessories.map(ac => {
-        let s = ac.getService(Service.LightSensor)
+        let s = ac.get_Service(Service.LightSensor)
         assert.ok(s, 'Service.LightSensor not found in lightsensor %s', ac.name)
         let cc = s.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
         assert.ok(cc, 'Characteristic.CurrentAmbientLightLevel not found in lightsensor %s', ac.name)

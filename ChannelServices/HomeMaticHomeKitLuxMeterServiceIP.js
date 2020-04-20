@@ -3,15 +3,15 @@
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
 var util = require('util')
 
-function HomeMaticHomeKitLuxMeterService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
-  HomeMaticHomeKitLuxMeterService.super_.apply(this, arguments)
+function HomeMaticHomeKitLuxMeterServiceIP (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
+  HomeMaticHomeKitLuxMeterServiceIP.super_.apply(this, arguments)
 }
 
-util.inherits(HomeMaticHomeKitLuxMeterService, HomeKitGenericService)
+util.inherits(HomeMaticHomeKitLuxMeterServiceIP, HomeKitGenericService)
 
-HomeMaticHomeKitLuxMeterService.prototype.createDeviceService = function (Service, Characteristic) {
+HomeMaticHomeKitLuxMeterServiceIP.prototype.createDeviceService = function (Service, Characteristic) {
   var that = this
-  
+
   var lightSensor = new Service.LightSensor(this.name)
   this.services.push(lightSensor)
 
@@ -21,16 +21,15 @@ HomeMaticHomeKitLuxMeterService.prototype.createDeviceService = function (Servic
         if (callback) callback(null, value)
       })
     })
-    
+
   this.setCurrentStateCharacteristic('LUX', this.cbright)
   this.cbright.eventEnabled = true
-  
 }
 
-HomeMaticHomeKitLuxMeterService.prototype.datapointEvent = function (dp, newValue) {
+HomeMaticHomeKitLuxMeterServiceIP.prototype.datapointEvent = function (dp, newValue) {
   if (this.isDataPointEvent(dp, 'LUX')) {
     this.cbright.updateValue(parseFloat(newValue), null)
   }
 }
 
-module.exports = HomeMaticHomeKitLuxMeterService
+module.exports = HomeMaticHomeKitLuxMeterServiceIP

@@ -16,26 +16,12 @@ describe('Homematic Plugin (index)', function () {
   let data = fs.readFileSync(datapath).toString()
   let that = this
 
-  var config = { ccu_ip: '127.0.0.1',
-    subsection: 'HomeKit',
-    testdata: data,
-    services: [
-      {
-        'type': 'ABC1234560:1',
-        'service': 'HomeMaticHomeKitValveService',
-        'options': {
-          'valvetype': 'Shower head'
-        }
-      }
-    ]
-  }
-  var platform = new homebridgeMock.PlatformType(log, config, homebridgeMock)
+  var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data, valves: ['BidCos-RF.ABC1234560:1'] }
+  var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
     log.debug('Init Platform with Switch (Sprinkler mode)')
-    platform.homebridge.fireHomeBridgeEvent('didFinishLaunching')
-
-    platform.homebridge.accessories(function (acc) {
+    platform.accessories(function (acc) {
       that.accessories = acc
     })
   })
@@ -43,7 +29,7 @@ describe('Homematic Plugin (index)', function () {
   after(function () {
     log.debug('Shutdown Platform')
     that.accessories.map(ac => {
-      ac.appliance.shutdown()
+      ac.shutdown()
     })
   })
 
@@ -53,10 +39,10 @@ describe('Homematic Plugin (index)', function () {
       assert.strict.equal(that.accessories.length, 2)
       // Check the correct type for AC1
       let ac = that.accessories[0]
-      let s = ac.getService(Service.Valve)
-      assert.ok(s, 'this is not Service.Valve !')
+      let s = ac.get_Service(Service.Valve)
+      assert.ok(s, '%s is not Service.Valve !', ac.name)
       // Check Initial Remain Time -> 0
-      assert.strict.equal(ac.appliance.remainTime, 0, 'Time remain is not 0')
+      assert.strict.equal(ac.remainTime, 0, 'Time remain is not 0')
       done()
     })
 
@@ -65,7 +51,7 @@ describe('Homematic Plugin (index)', function () {
       platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'STATE', true])
       // check
       let ac = that.accessories[0]
-      let s = ac.getService(Service.Valve)
+      let s = ac.get_Service(Service.Valve)
       assert.ok(s, 'Service.Valve not found in sprinkler %s', ac.name)
       let ca = s.getCharacteristic(Characteristic.Active)
       assert.ok(ca, 'Characteristic.Active not found in sprinkler %s', ac.name)
@@ -82,7 +68,7 @@ describe('Homematic Plugin (index)', function () {
       platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:1', 'STATE', false])
       // check
       let ac = that.accessories[0]
-      let s = ac.getService(Service.Valve)
+      let s = ac.get_Service(Service.Valve)
       assert.ok(s, 'Service.Valve not found in sprinkler %s', ac.name)
       let ca = s.getCharacteristic(Characteristic.Active)
       assert.ok(ca, 'Characteristic.Active not found in sprinkler %s', ac.name)
@@ -92,24 +78,24 @@ describe('Homematic Plugin (index)', function () {
       ca.getValue(function (context, value) { assert.strict.equal(value, 0) })
       ciu.getValue(function (context, value) { assert.strict.equal(value, 0) })
       // time remain should set to 0
-      assert.strict.equal(ac.appliance.remainTime, 0)
+      assert.strict.equal(ac.remainTime, 0)
       done()
     })
 
     it('set switch valve to on via HK (SetDuration to 0)', function (done) {
       // check
       let ac = that.accessories[0]
-      let s = ac.getService(Service.Valve)
+      let s = ac.get_Service(Service.Valve)
       assert.ok(s, 'Service.Valve not found in sprinkler %s', ac.name)
       let ca = s.getCharacteristic(Characteristic.Active)
       assert.ok(ca, 'Characteristic.Active not found in sprinkler %s', ac.name)
       let ciu = s.getCharacteristic(Characteristic.InUse)
       assert.ok(ciu, 'Characteristic.InUse not found in sprinkler %s', ac.name)
       ca.emit('set', 1, function () {
-        let res = platform.homebridge.getCCUDummyValue(ac.appliance.address + '.STATE')
+        let res = platform.homebridge.values[ac.adress + '.STATE']
         assert.strict.equal(res, 1)
         // Time remain > 0
-        assert.strict.equal(ac.appliance.remainTime, 0, 'Time remain is ' + ac.appliance.remainTime + ' should be 0')
+        assert.strict.equal(ac.remainTime, 0, 'Time remain is %s should be 0')
       })
       done()
     })
@@ -117,22 +103,22 @@ describe('Homematic Plugin (index)', function () {
     it('set switch valve to on via HK (SetDuration to 100 - check Timer)', function (done) {
       // check
       let ac = that.accessories[0]
-      let s = ac.getService(Service.Valve)
+      let s = ac.get_Service(Service.Valve)
       assert.ok(s, 'Service.Valve not found in sprinkler %s', ac.name)
       let ca = s.getCharacteristic(Characteristic.Active)
       assert.ok(ca, 'Characteristic.Active not found in sprinkler %s', ac.name)
       let ciu = s.getCharacteristic(Characteristic.InUse)
       assert.ok(ciu, 'Characteristic.InUse not found in sprinkler %s', ac.name)
       // switch Valve off
-      ca.emit('set', 0, function () { })
+      ca.emit('set', 0, function () {})
       // set new duration time -> do not use SetDuration Characteristic there is no cache
-      ac.appliance.setDuration = 100
+      ac.setDuration = 100
 
       ca.emit('set', 1, function () {
-        let res = platform.homebridge.getCCUDummyValue(ac.appliance.address + '.STATE')
+        let res = platform.homebridge.values[ac.adress + '.STATE']
         assert.strict.equal(res, 1)
         // Time remain > 0
-        assert((ac.appliance.remainTime > 90), 'Time remain is not > 90')
+        assert((ac.remainTime > 90), 'Time remain is not > 90')
       })
       done()
     })

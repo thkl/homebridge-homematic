@@ -3,7 +3,7 @@
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
 var util = require('util')
 
-function HomeMaticHomeKitBlindSlatServiceIP(accessory, log, platform, id, name, type, address, special, cfg, Service, Characteristic) {
+function HomeMaticHomeKitBlindSlatServiceIP (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
   HomeMaticHomeKitBlindSlatServiceIP.super_.apply(this, arguments)
 }
 
@@ -11,7 +11,8 @@ util.inherits(HomeMaticHomeKitBlindSlatServiceIP, HomeKitGenericService)
 
 HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function (Service, Characteristic) {
   var that = this
-  var blind = this.getService(Service.WindowCovering)
+  var blind = new Service.WindowCovering(this.name)
+  this.services.push(blind)
 
   this.currentPos = blind.getCharacteristic(Characteristic.CurrentPosition)
 
@@ -89,7 +90,7 @@ HomeMaticHomeKitBlindSlatServiceIP.prototype.createDeviceService = function (Ser
   this.remoteGetValue('4.LEVEL')
   this.remoteGetValue('DIRECTION')
 
-  this.deviceaddress = this.address.slice(0, this.address.indexOf(':'))
+  this.deviceAdress = this.adress.slice(0, this.adress.indexOf(':'))
 }
 
 HomeMaticHomeKitBlindSlatServiceIP.prototype.endWorking = function () {

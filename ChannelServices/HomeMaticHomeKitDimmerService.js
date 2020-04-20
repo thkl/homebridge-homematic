@@ -1,155 +1,151 @@
 'use strict'
 
 var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
+var util = require('util')
+// var curLevel = 0
+// var lastLevel = 0
+// var onc
 
-class HomeMaticHomeKitDimmerService extends HomeKitGenericService {
-  createDeviceService (Service, Characteristic) {
-    var self = this
-    this.lightbulb = this.getService(Service.Lightbulb)
-    this.delayOnSet = 5
-    this.ignoreWorking = true
-    this.inhibitWhileWorking = false
-    this.newLevel = 0
-    this.isMultiChannel = false
-    if (!this.dimmerLevelDatapoint) { this.dimmerLevelDatapoint = 'LEVEL' }
-    if (!this.dimmerOldLevelDatapoint) { this.dimmerOldLevelDatapoint = 'OLD_LEVEL' }
-    if (!this.workingDatapoint) { this.workingDatapoint = 'WORKING' }
+function HomeMaticHomeKitDimmerService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
+  HomeMaticHomeKitDimmerService.super_.apply(this, arguments)
+}
 
-    this.onc = this.lightbulb.getCharacteristic(Characteristic.On)
+util.inherits(HomeMaticHomeKitDimmerService, HomeKitGenericService)
 
-      .on('get', function (callback) {
-        self.query(self.dimmerLevelDatapoint, function (value) {
-          if (value === undefined) {
-            value = 0
-          }
-          self.setCache('LAST', value)
-          if (callback) callback(null, value > 0)
-        })
-      })
+HomeMaticHomeKitDimmerService.prototype.createDeviceService = function (Service, Characteristic) {
+  var that = this
+  var lightbulb = new Service.Lightbulb(this.name)
+  this.delayOnSet = 5
+  this.services.push(lightbulb)
+  this.ignoreWorking = true
+  this.inhibitWhileWorking = false
+  this.newLevel = 0
 
-      .on('set', function (value, callback) {
-        var lastLevel = self.getCache('LAST')
-        if (lastLevel === undefined) {
-          lastLevel = -1
+  this.onc = lightbulb.getCharacteristic(Characteristic.On)
+
+    .on('get', function (callback) {
+      that.query('LEVEL', function (value) {
+        if (value === undefined) {
+          value = 0
         }
-        if (((value === true) || ((value === 1))) && ((lastLevel < 1))) {
-          self.command('set', self.dimmerOldLevelDatapoint, true)
-          self.setCache('LAST', undefined)
-        } else
-        if ((value === 0) || (value === false)) {
-          self.setCache('LAST', 0)
-          self.setDimmerLevel(0)
-        } else
-        if (((value === true) || ((value === 1))) && ((lastLevel > 0))) {
-
-        } else {
-          self.setDimmerLevel(lastLevel)
-        }
-        callback()
+        that.setCache('LAST', value)
+        if (callback) callback(null, value > 0)
       })
-
-    this.onc.eventEnabled = true
-
-    this.brightness = this.lightbulb.getCharacteristic(Characteristic.Brightness)
-      .on('get', function (callback) {
-        self.log.debug('[DIMMER] getCharacteristic Brightness')
-        self.query(self.dimmerLevelDatapoint, function (value) {
-          self.setCache('LAST', value)
-          if (callback) {
-            self.log.debug('[DIMMER] getCharacteristic Brightness is %s', value)
-            callback(null, (value * 100))
-          }
-        })
-      })
-
-      .on('set', function (value, callback) {
-        self.newLevel = value
-        clearTimeout(self.timer)
-        if (self.delayOnSet > 0) {
-          self.timer = setTimeout(function () {
-            self.setDimmerLevel(self.newLevel)
-          }, (self.delayOnSet * 100))
-        } else {
-          self.setDimmerLevel(self.newLevel)
-        }
-        if (callback) callback()
-      })
-
-    this.brightness.eventEnabled = true
-    var dpa = this.buildHomeMaticAddress(this.workingDatapoint)
-    this.log.debug('[DIMMER] registeraddressForEventProcessingAtAccessory working %s', dpa)
-    this.platform.registeraddressForEventProcessingAtAccessory(dpa, this, function (newValue) {
-      self.log.debug('[DIMMER] Working is %s', newValue)
-      self.inhibitWhileWorking = newValue
-      if (newValue === true) {
-        self.triggerWorkingTimer()
-      } else {
-        self.removeCache(self.dimmerLevelDatapoint)
-        self.remoteGetValue(self.dimmerLevelDatapoint, function (newValue) {
-          self.processDimmerLevel(newValue)
-        })
-      }
     })
 
-    dpa = this.buildHomeMaticAddress(this.dimmerLevelDatapoint)
-    this.log.debug('[DIMMER] registeraddressForEventProcessingAtAccessory level %s', dpa)
-    this.platform.registeraddressForEventProcessingAtAccessory(dpa, this, function (newValue) {
-      if (!self.inhibitWhileWorking) {
-        self.processDimmerLevel(newValue)
-      } else {
-        self.log.debug('[DIMMER] is Working save new level %s', newValue)
+    .on('set', function (value, callback) {
+      var lastLevel = that.getCache('LAST')
+      if (lastLevel === undefined) {
+        lastLevel = -1
       }
+      if (((value === true) || ((value === 1))) && ((lastLevel < 1))) {
+        that.command('set', 'OLD_LEVEL', true)
+        that.setCache('LAST', undefined)
+      } else
+      if ((value === 0) || (value === false)) {
+        that.setCache('LAST', 0)
+        that.setDimmerLevel(0)
+      } else
+      if (((value === true) || ((value === 1))) && ((lastLevel > 0))) {
+
+      } else {
+        that.setDimmerLevel(lastLevel)
+      }
+      callback()
     })
-  }
 
-  triggerWorkingTimer () {
-    let self = this
-    clearTimeout(this.workingTimer)
-    this.workingTimer = setTimeout(function () {
-      // switch off working after one second
-      // kill the cache and ask ccu for new level
-      self.log.warn('[DIMMER] working timeout .. set HK values')
-      self.inhibitWhileWorking = false
-      self.removeCache(self.dimmerLevelDatapoint)
-      self.remoteGetValue(self.dimmerLevelDatapoint, function (newValue) {
-        self.processDimmerLevel(newValue)
+  this.onc.eventEnabled = true
+
+  this.brightness = lightbulb.getCharacteristic(Characteristic.Brightness)
+    .on('get', function (callback) {
+      that.log.debug('[DIMMER] getCharacteristic Brightness')
+      that.query('LEVEL', function (value) {
+        that.setCache('LAST', value)
+        if (callback) {
+          that.log.debug('[DIMMER] getCharacteristic Brightness is %s', value)
+          callback(null, value)
+        }
       })
-    }, 10000)
-  }
+    })
 
-  setDimmerLevel (value) {
-    var lastLevel = this.getCache('LAST')
-    if (value !== lastLevel) {
-      this.inhibitWhileWorking = true
-      if (value === 0) {
-        // set On State
-        if ((this.onc !== undefined) && (this.onc.updateValue !== undefined)) {
-          this.onc.updateValue(false, null)
-        }
-      } else {
-        if ((this.onc !== undefined) && (this.onc.updateValue !== undefined)) {
-          this.onc.updateValue(true, null)
-        }
-      }
-      this.log.debug('[DIMMER] Set Brightness of ' + this.address + ' to ' + value + ' command. LastLevel is ' + lastLevel)
-      this.setCache('LAST', value)
-      this.isWorking = true
-      this.delayed('set', this.dimmerLevelDatapoint, (value / 100))
-      this.triggerWorkingTimer()
+    .on('set', function (value, callback) {
+      that.newLevel = value
+      clearTimeout(that.timer)
+      that.log.debug('[DIMMER] setCharacteristic Brightness to %s', value)
+      that.timer = setTimeout(function () {
+        that.setDimmerLevel(that.newLevel)
+      }, 500)
+      if (callback) callback()
+    })
+
+  this.brightness.eventEnabled = true
+
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + '.WORKING', this, function (newValue) {
+    that.log.debug('[DIMMER] Working is %s', newValue)
+    that.inhibitWhileWorking = newValue
+    if (newValue === true) {
+      that.triggerWorkingTimer()
+    } else {
+      that.removeCache('LEVEL')
+      that.remoteGetValue('LEVEL', function (newValue) {
+        that.processDimmerLevel(newValue)
+      })
     }
-  }
+  })
 
-  processDimmerLevel (newValue) {
-    this.log.debug('[DIMMER] Set HomeKit Brightness of %s to %s', this.address, newValue)
-    clearTimeout(this.workingTimer)
-    this.brightness.updateValue((newValue * 100), null)
-    this.onc.updateValue((newValue > 0), null)
-  }
-  shutdown () {
-    this.log.debug('[DIMMER] shutdown')
-    HomeKitGenericService.prototype.shutdown.call(this)
-    clearTimeout(this.workingTimer)
-    clearTimeout(this.timer)
+  this.platform.registerAdressForEventProcessingAtAccessory(this.adress + '.LEVEL', this, function (newValue) {
+    if (!that.inhibitWhileWorking) {
+      that.processDimmerLevel(newValue)
+    } else {
+      that.log.debug('[DIMMER] is Working save new level %s', newValue)
+    }
+  })
+
+  this.remoteGetValue('LEVEL', function (newValue) {
+    that.processDimmerLevel(newValue)
+  })
+}
+
+HomeMaticHomeKitDimmerService.prototype.triggerWorkingTimer = function () {
+  let that = this
+  clearTimeout(that.workingTimer)
+  that.workingTimer = setTimeout(function () {
+    // switch off working after one second
+    // kill the cache and ask ccu for new level
+    that.inhibitWhileWorking = false
+    that.removeCache('LEVEL')
+    that.remoteGetValue('LEVEL', function (newValue) {
+      that.processDimmerLevel(newValue)
+    })
+  }, 1000)
+}
+
+HomeMaticHomeKitDimmerService.prototype.setDimmerLevel = function (value) {
+  let that = this
+  var lastLevel = that.getCache('LAST')
+  if (value !== lastLevel) {
+    if (value === 0) {
+      // set On State
+      if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) {
+        that.onc.updateValue(false, null)
+      }
+    } else {
+      if ((that.onc !== undefined) && (that.onc.updateValue !== undefined)) {
+        that.onc.updateValue(true, null)
+      }
+    }
+    that.log.debug('[DIMMER] Set Brightness of ' + that.adress + ' to ' + value + ' command. LastLevel is ' + lastLevel)
+    that.setCache('LAST', value)
+    that.isWorking = true
+    that.inhibitWhileWorking = true
+    that.delayed('set', 'LEVEL', value, that.delayOnSet)
+    that.triggerWorkingTimer()
   }
 }
+
+HomeMaticHomeKitDimmerService.prototype.processDimmerLevel = function (newValue) {
+  this.brightness.updateValue(newValue, null)
+  this.onc.updateValue((newValue > 0), null)
+}
+
 module.exports = HomeMaticHomeKitDimmerService

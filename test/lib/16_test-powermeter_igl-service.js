@@ -20,57 +20,29 @@ describe('Homematic Plugin (index)', function () {
     subsection: 'HomeKit',
     testdata: data
   }
-  var platform = new homebridgeMock.PlatformType(log, config, homebridgeMock)
+  var platform = new homebridgeMock.PlatformType(log, config)
   eve = new EveHomeKitTypes(platform)
 
   before(function () {
     log.debug('Init Platform with Energy Counter')
-    platform.homebridge.setCCUDummyValue('BidCos-RF.ADR1234567890:1.POWER', 223)
-    platform.homebridge.setCCUDummyValue('BidCos-RF.ADR1234567890:1.ENERGY_COUNTER', 1234)
-    platform.homebridge.fireHomeBridgeEvent('didFinishLaunching')
-    platform.homebridge.accessories(function (acc) {
+    platform.accessories(function (acc) {
       that.accessories = acc
+      log.debug('ServiceClass %s', acc[0].serviceClassName)
     })
   })
 
   after(function () {
     log.debug('Shutdown Platform')
     that.accessories.map(ac => {
-      ac.appliance.shutdown()
+      ac.shutdown()
     })
   })
 
   describe('Homebridge Platform HM-ES-TX-WM Service Test', function () {
-    this.timeout(1000)
     it('test accessory build', function (done) {
       assert.ok(that.accessories, 'Did not find any accessories!')
       assert.strict.equal(that.accessories.length, 1)
       done()
-    })
-
-    it('initial data check', function (done) {
-      // we have to wait 550 ms until the initial query will be performed
-      setTimeout(function () {
-        // check
-
-        that.accessories.map(ac => {
-          let s = ac.getService(eve.Service.PowerMeterService)
-          assert.ok(s, 'Service.PowerMeterService not found in Energy Counter %s', ac.name)
-          let cp = s.getCharacteristic(eve.Characteristic.ElectricPower)
-          assert.ok(cp, 'Characteristic.ElectricPower not found in Energy Counter %s', ac.name)
-          cp.getValue(function (context, value) {
-            assert.strict.equal(value, 223, 'Power is ' + value + ' not 223')
-          })
-
-          let ce = s.getCharacteristic(eve.Characteristic.TotalConsumption)
-          assert.ok(ce, 'Characteristic.TotalConsumption not found in Energy Counter %s', ac.name)
-          ce.getValue(function (context, value) {
-            // haz to be devided by 1000 -> wh vs kwh
-            assert.strict.equal(value, '1.23')
-          })
-        })
-        done()
-      }, 550)
     })
 
     it('test set power to 230 w and consumption to 42.42kwh', function (done) {
@@ -79,7 +51,7 @@ describe('Homematic Plugin (index)', function () {
 
       // check
       that.accessories.map(ac => {
-        let s = ac.getService(eve.Service.PowerMeterService)
+        let s = ac.get_Service(eve.Service.PowerMeterService)
         assert.ok(s, 'Service.PowerMeterService not found in Energy Counter %s', ac.name)
         let cp = s.getCharacteristic(eve.Characteristic.ElectricPower)
         assert.ok(cp, 'Characteristic.ElectricPower not found in Energy Counter %s', ac.name)

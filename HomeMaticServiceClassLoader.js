@@ -14,21 +14,16 @@ HomeMaticServiceClassLoader.prototype.findServiceClass = function (type) {
   if (type === undefined) {
     return undefined
   }
-
-  this.log.debug('[ServiceClassLoader] try to find serviceclass for %s', type)
   let sv = this.getServiceClass(type)
   if (sv !== undefined) {
-    this.log.debug('[ServiceClassLoader] class found %s', sv.class)
     // not found try to find channeltype
     var options
     let serviceclass = sv.class
     // check if there are options for specific type
     if (sv.options === undefined) {
-      this.log.debug('[ServiceClassLoader] no buildIn Options')
       options = this.getOptions(type)
     } else {
       // if not use class dev options
-      this.log.debug('[ServiceClassLoader] buildIn Options %s', JSON.stringify(sv.options))
       options = sv.options
     }
     return {
@@ -36,18 +31,17 @@ HomeMaticServiceClassLoader.prototype.findServiceClass = function (type) {
       options: options
     }
   } else {
-    this.log.debug('[ServiceClassLoader] nothing found')
     return undefined
   }
 }
 
-HomeMaticServiceClassLoader.prototype.loadChannelService = function (accessory, deviceType, channel, platform, special, cfg, access, Service, Characteristic) {
-  var self = this
+HomeMaticServiceClassLoader.prototype.loadChannelService = function (list, deviceType, channel, platform, special, cfg, access, Service, Characteristic) {
+  var that = this
   var channelType = channel.type
   var log = platform.log
   var id = channel.id
   var name = channel.name
-  var address = channel.address
+  var adress = channel.address
   // var intf = channel.intf
   this.platform = platform
   this.localPath = platform.localPath
@@ -55,24 +49,21 @@ HomeMaticServiceClassLoader.prototype.loadChannelService = function (accessory, 
   var serviceclass
   var options
   var sv
-  this.log.debug('[ServiceClassLoader] ============== Init ====================')
-  this.log.debug('[ServiceClassLoader] Init Classloader for device with address %s', address)
 
-  // first try the address address comes as Interface.Serial:Channel
-  let arp = address.split('.')
+  // first try the adress adress comes as Interface.Serial:Channel
+  let arp = adress.split('.')
   if ((arp !== undefined) && (arp.length > 1)) {
     // if there is a Interface in front , just use the last part
     sv = this.findServiceClass(arp[1])
   } else {
     // should not be happend
-    sv = this.findServiceClass(address)
+    sv = this.findServiceClass(adress)
   }
 
   if (sv !== undefined) {
     serviceclass = sv.class
-    options = sv.options || {}
-    options.classloader = 'address'
-    this.log.debug('[ServiceClassLoader] Serviceclass %s found by address %s', serviceclass, address)
+    options = sv.options
+    this.log.debug('[ServiceClassLoader] Serviceclass %s found by adress %s', serviceclass, adress)
   }
 
   // then devicetype and channeltype
@@ -80,8 +71,7 @@ HomeMaticServiceClassLoader.prototype.loadChannelService = function (accessory, 
     sv = this.findServiceClass(deviceType + ':' + channelType)
     if (sv !== undefined) {
       serviceclass = sv.class
-      options = sv.options || {}
-      options.classloader = 'devchannel'
+      options = sv.options
       this.log.debug('[ServiceClassLoader] Serviceclass %s found by devtype:channeltype %s:%s', serviceclass, deviceType, channelType)
     }
   }
@@ -91,8 +81,7 @@ HomeMaticServiceClassLoader.prototype.loadChannelService = function (accessory, 
     sv = this.findServiceClass(channelType)
     if (sv !== undefined) {
       serviceclass = sv.class
-      options = sv.options || {}
-      options.classloader = 'channeltype'
+      options = sv.options
       this.log.debug('[ServiceClassLoader] Serviceclass %s found by channeltype %s', serviceclass, channelType)
     }
   }
@@ -102,8 +91,7 @@ HomeMaticServiceClassLoader.prototype.loadChannelService = function (accessory, 
     sv = this.findServiceClass(deviceType)
     if (sv !== undefined) {
       serviceclass = sv.class
-      options = sv.options || {}
-      options.classloader = 'devicetype'
+      options = sv.options
       this.log.debug('[ServiceClassLoader] Serviceclass %s found by devtype %s', serviceclass, deviceType)
     }
   }
@@ -115,29 +103,21 @@ HomeMaticServiceClassLoader.prototype.loadChannelService = function (accessory, 
       // add Options
       if (options !== undefined) {
         if (cfg !== undefined) {
-          this.log.debug('[ServiceClassLoader] adding parameter options')
-          Object.keys(options).map(key => {
-            self.log.debug('[ServiceClassLoader] adding %s for %s', options[key], key)
-            cfg[key] = options[key]
-          })
+          cfg.push.apply(cfg, options)
         } else {
-          this.log.debug('[ServiceClassLoader] use parameter options')
           cfg = options
         }
       }
       if (cfg === undefined) {
-        this.log.debug('[ServiceClassLoader] build empty configuration')
         cfg = {}
       }
-
-      this.log.debug('[ServiceClassLoader] Configuration : %s', JSON.stringify(cfg))
 
       cfg['interface'] = channel.intf
 
       // Replace Chars in name https://github.com/thkl/homebridge-homematic/issues/56
 
       name = name.replace(/[.:#_()-]/g, ' ')
-      self.log.debug('[ServiceClassLoader] Service for %s:%s is %s', deviceType, channelType, serviceclass)
+      that.log.debug('[ServiceClassLoader] Service for %s:%s is %s', deviceType, channelType, serviceclass)
 
       let cfgOptions = this.getConfigOptions(deviceType + ':' + channelType)
       if (cfgOptions !== undefined) {
@@ -145,28 +125,24 @@ HomeMaticServiceClassLoader.prototype.loadChannelService = function (accessory, 
         Object.keys(cfgOptions).forEach(function (key) {
           cfg[key] = cfgOptions[key]
         })
-      } else {
-        this.log.debug('[ServiceClassLoader] no deprecated configuraton settings found')
       }
 
-      this.log.debug('[ServiceClassLoader] Configuration : %s', JSON.stringify(cfg))
+      var accessory = new HKitService(log, platform, id, name, channelType, adress, special, cfg, Service, Characteristic, deviceType)
 
-      accessory.appliance = new HKitService(accessory, log, platform, id, name, channelType, address, special, cfg, Service, Characteristic, deviceType)
-      // Copy the BidCos Address to the HomeKit Accessory
-      accessory.address = address
       if (accessory.grantAccess === undefined) {
-        this.log.debug('[ServiceClassLoader] access is %s', access)
-        accessory.appliance.setReadOnly((parseInt(access) !== 255))
+        accessory.setReadOnly((access !== '255'))
       }
 
-      accessory.appliance.serviceClassName = serviceclass
-
+      accessory.serviceClassName = serviceclass
       // Only add if there are more than 1 Service (number 1 is the informationService)
       // see https://github.com/thkl/homebridge-homematic/issues/234#issuecomment-375764819
-      this.log.debug('[ServiceClassLoader] Number of Services in %s is %s', name, accessory.services.length)
+      this.log.debug('[ServiceClassLoader] Number of Services in %s is %s', name, accessory.getServices().length)
+      if (accessory.getServices().length > 1) {
+        list.push(accessory)
+      }
     }
   } else {
-    self.log.warn('[ServiceClassLoader] There is no service for ' + deviceType + ':' + channelType)
+    that.log.warn('[ServiceClassLoader] There is no service for ' + deviceType + ':' + channelType)
   }
 }
 

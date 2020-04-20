@@ -16,21 +16,20 @@ describe('Homematic Plugin (index)', function () {
   let data = fs.readFileSync(datapath).toString()
   let that = this
   var config = { ccu_ip: '127.0.0.1', subsection: 'HomeKit', testdata: data }
-  var platform = new homebridgeMock.PlatformType(log, config, homebridgeMock)
+  var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
     log.debug('Init Platform with NonIp SmokeDetector')
-    platform.homebridge.fireHomeBridgeEvent('didFinishLaunching')
-    platform.xmlrpc.interface = 'BidCos-RF.'
-    platform.homebridge.accessories(function (acc) {
+    platform.accessories(function (acc) {
       that.accessories = acc
     })
+    platform.xmlrpc.interface = 'BidCos-RF.'
   })
 
   after(function () {
     log.debug('Shutdown Platform')
     that.accessories.map(ac => {
-      ac.appliance.shutdown()
+      ac.shutdown()
     })
   })
 
@@ -46,7 +45,7 @@ describe('Homematic Plugin (index)', function () {
       platform.xmlrpc.event(['BidCos-RF', 'ADR1234567890:1', 'STATE', 1])
       // check
       that.accessories.map(ac => {
-        let s = ac.getService(Service.SmokeSensor)
+        let s = ac.get_Service(Service.SmokeSensor)
         assert.ok(s, 'Service.SmokeSensor not found in SmokeDetector %s', ac.name)
         let cc = s.getCharacteristic(Characteristic.SmokeDetected)
         assert.ok(cc, 'Characteristic.SmokeDetected not found in SmokeDetector %s', ac.name)
@@ -67,7 +66,7 @@ describe('Homematic Plugin (index)', function () {
       platform.xmlrpc.event(['BidCos-RF', 'ADR1234567890:1', 'STATE', 0])
       // check
       that.accessories.map(ac => {
-        let s = ac.getService(Service.SmokeSensor)
+        let s = ac.get_Service(Service.SmokeSensor)
         assert.ok(s, 'Service.SmokeSensor not found in SmokeDetector %s', ac.name)
         let cc = s.getCharacteristic(Characteristic.SmokeDetected)
         assert.ok(cc, 'Characteristic.SmokeDetected not found in SmokeDetector %s', ac.name)

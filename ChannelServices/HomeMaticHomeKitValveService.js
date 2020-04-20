@@ -1,211 +1,88 @@
 'use strict'
 
-const HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
-const path = require('path')
-const fs = require('fs')
+const util = require('util')
+var HomeKitGenericService = require('./HomeKitGenericService.js').HomeKitGenericService
 
-class HomeMaticHomeKitValveService extends HomeKitGenericService {
-  createDeviceService (Service, Characteristic) {
-    this.ignoreWorking = true
-    this.usecache = false
-    this.isMultiChannel = false
-    this.delayOnSet = 1000
-    var strValveType = this.getClazzConfigValue('valvetype', 'Generic valve')
-    // Load ValveType from parameters #268
-    // Characteristic.ValveType.GENERIC_VALVE = 0;
-    // Characteristic.ValveType.IRRIGATION = 1;
-    // Characteristic.ValveType.SHOWER_HEAD = 2;
-    // Characteristic.ValveType.WATER_FAUCET = 3;
-    this.valveType = 0
-    switch (strValveType) {
-      case 'Irrigation':
-        this.valveType = Characteristic.ValveType.IRRIGATION
-        break
-      case 'Shower head':
-        this.valveType = Characteristic.ValveType.SHOWER_HEAD
-        break
-      case 'Water faucet':
-        this.valveType = Characteristic.ValveType.WATER_FAUCET
-        break
-      default:
-        this.valveType = Characteristic.ValveType.GENERIC_VALVE
-        break
-    }
-    let strPath = path.join(this.platform.localPath, this.address) + '.json'
-    if (fs.existsSync(strPath)) {
-      let data = fs.readFileSync(strPath).toString()
-      if (data !== undefined) {
-        try {
-          var jData = JSON.parse(data)
-          this.setDuration = jData['duration']
-        } catch (e) {
-          this.setDuration = 0
-        }
+function HomeMaticHomeKitValveService (log, platform, id, name, type, adress, special, cfg, Service, Characteristic) {
+  HomeMaticHomeKitValveService.super_.apply(this, arguments)
+}
+
+util.inherits(HomeMaticHomeKitValveService, HomeKitGenericService)
+
+HomeMaticHomeKitValveService.prototype.createDeviceService = function (Service, Characteristic) {
+  let that = this
+  let channel = this.getClazzConfigValue('channel', undefined)
+  // build interface and address
+  let raw = channel.split(new RegExp('([a-z-]{1,}).([a-z0-9]{1,}):([0-9]{1,})', 'gmi'))
+  this.adress = raw[1] + '.' + raw[2] + ':' + raw[3]
+  this.interf = raw[1]
+  this.log.debug('Init Special Valve at Interface %s Adress %s Channel %s', this.interf, this.adress, this.channel)
+  var valveService = new Service['Valve'](this.name)
+
+  var valveType = valveService.getCharacteristic(Characteristic.ValveType)
+    .on('get', function (callback) {
+      callback(null, 0)
+    })
+
+  valveType.updateValue(0, null)
+
+  this.c_isActive = valveService.getCharacteristic(Characteristic.Active)
+    .on('get', function (callback) {
+      that.log.debug('get Active')
+      that.query('STATE', function (value) {
+        let hmState = ((value === 'true') || (value === true)) ? 1 : 0
+        if (callback) callback(null, hmState)
+      })
+    })
+
+    .on('set', function (value, callback) {
+      let evtmp = that.eventupdate
+      that.eventupdate = false
+      that.log.debug('Set Command %s', value)
+      if (value === 0) {
+        that.command('setrega', 'STATE', false)
+        that.eventupdate = evtmp
+        callback()
       } else {
-        this.setDuration = 0
-      }
-    }
-    this.remainTime = 0
-    this.createValveService(Service, Characteristic)
-    this.registerEvents()
-  }
-
-  createValveService (Service, Characteristic) {
-    let self = this
-    this.log.debug('[VALVE] generate Valvetype %s', self.valveType)
-
-    this.service_item = this.getService(Service.Valve)
-    this.remainTime = -99
-
-    this.configured = this.service_item.getCharacteristic(Characteristic.IsConfigured)
-      .on('get', function (callback) {
-        callback(null, Characteristic.IsConfigured.CONFIGURED)
-      })
-
-    this.configured.updateValue(Characteristic.IsConfigured.CONFIGURED, null)
-
-    this.cValveType = this.service_item.getCharacteristic(Characteristic.ValveType)
-      .on('get', function (callback) {
-        self.log.debug('[VALVE] get Valvetype %s', self.valveType)
-        callback(null, self.valveType)
-      })
-
-    setTimeout(function () {
-      self.cValveType.updateValue(self.valveType, null)
-    }, 1000)
-
-    this.setDurationCharacteristic = this.service_item.getCharacteristic(Characteristic.SetDuration)
-      .on('get', function (callback) {
-        self.log.debug('[VALVE] get Characteristic.SetDuration')
-        callback(null, self.setDuration)
-      })
-
-      .on('set', function (value, callback) {
-        self.setDuration = value
-        self.log.debug('[VALVE] set Characteristic.SetDuration %s', value)
-
-        let strPath = path.join(self.platform.localPath, self.address) + '.json'
-        fs.writeFileSync(strPath, JSON.stringify({
-          duration: self.setDuration
-        }))
-
+        that.command('setrega', 'STATE', true)
+        that.eventupdate = evtmp
         callback()
-      })
-
-    this.c_isActive = this.service_item.getCharacteristic(Characteristic.Active)
-      .on('get', function (callback) {
-        self.query('STATE', function (value) {
-          let hmState = self.isTrue(value) ? 1 : 0
-          self.log.debug('[VALVE] get Active %s', hmState)
-          if (callback) callback(null, hmState)
-        })
-      })
-
-      .on('set', function (value, callback) {
-        if (value === 0) {
-          self.command('setrega', 'STATE', 0)
-          self.remainTime = 0
-          clearTimeout(self.valveTimer)
-          callback()
-        } else {
-          self.remainTime = (self.setDuration) ? self.setDuration : 0
-          self.isInUse = 1
-          if (self.remainTime > 0) {
-            self.command('setrega', 'ON_TIME', self.remainTime, function () {
-              self.command('setrega', 'STATE', 1)
-              self.updateValveTimer()
-              callback()
-            })
-          } else {
-            self.command('setrega', 'STATE', 1)
-            callback()
-          }
-        }
-      })
-
-    this.c_isInUse = this.service_item.getCharacteristic(Characteristic.InUse)
-      .on('get', function (callback) {
-        self.query('STATE', function (value) {
-          let hmState = self.isTrue(value) ? 1 : 0
-          self.log.debug('[VALVE] get inUse %s', hmState)
-          if (callback) callback(null, hmState)
-        })
-      })
-
-      .on('set', function (value, callback) {
-        self.isInUse = value
-        callback()
-      })
-
-    this.c_timeRemain = this.service_item.getCharacteristic(Characteristic.RemainingDuration)
-      .on('get', function (callback) {
-        callback(null, self.remainTime)
-      })
-  }
-
-  updateValveTimer () {
-    let self = this
-    if (this.remainTime === 0) {
-      return
-    }
-
-    this.remainTime = this.remainTime - 1
-    // SET OFF
-    if (this.remainTime === 0) {
-      self.command('setrega', 'STATE', 0)
-      clearTimeout(this.valveTimer)
-      self.remoteGetValue('STATE')
-    }
-    this.c_timeRemain.updateValue(this.remainTime, null)
-    this.valveTimer = setTimeout(function () {
-      self.updateValveTimer()
-    }, 1000)
-  }
-
-  registerEvents () {
-    let self = this
-    this.platform.registeraddressForEventProcessingAtAccessory(this.buildHomeMaticAddress('STATE'), self, function (newValue) {
-      let hmState = this.isTrue(newValue) ? 1 : 0
-      self.log.debug('[VALVE] Event result %s hm %s', newValue, hmState)
-      if (hmState === 0) {
-        self.remainTime = 0
-        if (self.c_timeRemain !== undefined) {
-          self.c_timeRemain.updateValue(self.remainTime, null)
-        }
-      }
-
-      if (self.c_isActive !== undefined) {
-        self.log.debug('[VALVE] acTive %s', hmState)
-        self.c_isActive.updateValue(hmState, null)
-      }
-
-      if (self.c_isOn !== undefined) {
-        self.log.debug('[VALVE] isOn %s', hmState)
-        self.c_isOn.updateValue(hmState, null)
-      }
-
-      if (self.c_isInUse !== undefined) {
-        self.log.debug('[VALVE] inUse %s', hmState)
-        self.c_isInUse.updateValue(hmState, null)
       }
     })
-  }
 
-  shutdown () {
-    this.log.debug('[VALVE] shutdown')
-    super.shutdown()
-    clearTimeout(this.valveTimer)
-  }
-  validateConfig (configuration) {
-    // things to check
-    // valvetype has to be one of this items : 'Generic valve', 'Irrigation', 'Shower head', 'Water faucet'
-    return ((configuration) &&
-    (configuration.valvetype) &&
-    (['Generic valve', 'Irrigation', 'Shower head', 'Water faucet'].indexOf(configuration.valvetype) > -1))
-  }
+  this.c_isActive.updateValue(Characteristic.Active.ACTIVE, null)
 
-  configItems () {
-    return ['valvetype']
+  this.c_isInUse = valveService.getCharacteristic(Characteristic.InUse)
+    .on('get', function (callback) {
+      if (callback) callback(null, that.valvestate)
+    })
+
+    .on('set', function (value, callback) {
+      callback()
+    })
+
+  this.services.push(valveService)
+  this.remoteGetValue('STATE', function (result) {
+    that.setValve(result)
+  })
+}
+
+HomeMaticHomeKitValveService.prototype.setValve = function (state) {
+  this.log.debug('Set homkit valve State %s', state)
+  let that = this
+  let hkvalue = (state === true) ? 1 : 0
+  this.c_isActive.updateValue(hkvalue, null)
+  setTimeout(function () {
+    that.c_isInUse.updateValue(hkvalue, null)
+  }, 1000)
+}
+
+HomeMaticHomeKitValveService.prototype.datapointEvent = function (dp, newValue) {
+  this.log.debug('Valve event %s with value %s', dp, newValue)
+  if (dp === 'STATE') {
+    let hmState = !!(((newValue === 'true') || (newValue === true)))
+    this.valvestate = hmState
+    this.setValve(hmState)
   }
 }
 

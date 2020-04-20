@@ -19,46 +19,44 @@ describe('Homematic Plugin (index)', function () {
     ccu_ip: '127.0.0.1',
     subsection: 'HomeKit',
     testdata: data,
-    services: [
-      {
-        'type': 'Garage',
-        'service': 'HomeMaticHomeKitGarageDoorService',
-        'options': {
-          'address_sensor_close': 'BidCos-RF.ABC1234562:1.STATE',
-          'address_actor_open': 'BidCos-RF.ABC1234560:1.STATE',
-          'message_actor_open': {
-            'on': true,
-            'off': false
-          },
-          'delay_actor_open': 1,
-          'state_sensor_close': false
-        }
-      }
-    ],
+    services: [{
+      'type': 'HM-THKL-GARAGEDOOR',
+      'service': 'HomeMaticHomeKitGarageDoorService'
+    }],
     special: [{
-      'name': 'Garage'
+      'name': 'Garage',
+      'type': 'HM-THKL-GARAGEDOOR',
+      'parameter': {
+        'address_sensor_close': 'BidCos-RF.ABC1234562:1.STATE',
+        'address_actor_open': 'BidCos-RF.ABC1234560:1.STATE',
+        'message_actor_open': {
+          'on': true,
+          'off': false
+        },
+        'delay_actor_open': 1,
+        'state_sensor_close': false
+      }
     }]
   }
-  var platform = new homebridgeMock.PlatformType(log, config, homebridgeMock)
+  var platform = new homebridgeMock.PlatformType(log, config)
 
   before(function () {
     log.debug('Init Platform with Garage Door Service HM 1 Sensor Mode')
-    platform.homebridge.setCCUDummyValue('BidCos-RF.ABC1234562:1.STATE', 1)
-    platform.homebridge.fireHomeBridgeEvent('didFinishLaunching')
-    platform.homebridge.accessories(function (acc) {
+    platform.accessories(function (acc) {
       that.accessories = acc
     })
+    platform.xmlrpc.interface = 'BidCos-RF.'
   })
 
   after(function () {
     log.debug('Shutdown Platform')
     that.accessories.map(ac => {
-      ac.appliance.shutdown()
+      ac.shutdown()
     })
   })
 
   describe('Homebridge Platform GarageDoor Service Test HM 1 Sensor Mode', function () {
-    this.timeout(9000)
+    this.timeout(10000)
 
     it('test accessory build', function (done) {
       assert.ok(that.accessories, 'Did not find any accessories!')
@@ -71,7 +69,7 @@ describe('Homematic Plugin (index)', function () {
       platform.xmlrpc.event(['BidCos-RF.', 'ABC1234562:1', 'STATE', 1])
       // check
       that.accessories.map(ac => {
-        let s = ac.getService(Service.GarageDoorOpener)
+        let s = ac.get_Service(Service.GarageDoorOpener)
         assert.ok(s, 'Service.GarageDoorOpener not found in testdoor %s', ac.name)
         let tc = s.getCharacteristic(Characteristic.TargetDoorState)
         assert.ok(tc, 'Characteristic.TargetDoorState not found in testdoor %s', ac.name)
@@ -98,7 +96,7 @@ describe('Homematic Plugin (index)', function () {
         platform.xmlrpc.event(['BidCos-RF.', 'ABC1234562:1', 'STATE', 0])
         // check
         that.accessories.map(ac => {
-          let s = ac.getService(Service.GarageDoorOpener)
+          let s = ac.get_Service(Service.GarageDoorOpener)
           assert.ok(s, 'Service.GarageDoorOpener not found in testdoor %s', ac.name)
           let tc = s.getCharacteristic(Characteristic.TargetDoorState)
           assert.ok(tc, 'Characteristic.TargetDoorState not found in testdoor %s', ac.name)
@@ -121,19 +119,19 @@ describe('Homematic Plugin (index)', function () {
     it('Test Open Door - Expect address_actor_open = true and 1 sec later false', function (done) {
       // check
       that.accessories.map(ac => {
-        let s = ac.getService(Service.GarageDoorOpener)
+        let s = ac.get_Service(Service.GarageDoorOpener)
         assert.ok(s, 'Service.GarageDoorOpener not found in testdoor %s', ac.name)
         let co = s.getCharacteristic(Characteristic.TargetDoorState)
         assert.ok(co, 'Characteristic.TargetDoorState not found in testdoor %s', ac.name)
         // Set Delay to 0 sec for use with tests
-        ac.appliance.delayOnSet = 0
+        ac.delayOnSet = 0
         co.emit('set', Characteristic.TargetDoorState.OPEN, function () {
-          let res = platform.homebridge.getCCUDummyValue('BidCos-RF.ABC1234560:1.STATE')
+          let res = platform.homebridge.values['BidCos-RF.ABC1234560:1.STATE']
           assert.strict.equal(res, true)
         })
         // wait 1.2 seconds the actor should turn off
         setTimeout(function () {
-          let res = platform.homebridge.getCCUDummyValue('BidCos-RF.ABC1234560:1.STATE')
+          let res = platform.homebridge.values['BidCos-RF.ABC1234560:1.STATE']
           assert.strict.equal(res, false)
           done()
         }, 1200)
@@ -144,23 +142,23 @@ describe('Homematic Plugin (index)', function () {
       // we have to delay this about 2 seconds
       setTimeout(function () {
         that.accessories.map(ac => {
-          let s = ac.getService(Service.GarageDoorOpener)
+          let s = ac.get_Service(Service.GarageDoorOpener)
           assert.ok(s, 'Service.GarageDoorOpener not found in testdoor %s', ac.name)
           let co = s.getCharacteristic(Characteristic.TargetDoorState)
           assert.ok(co, 'Characteristic.TargetDoorState not found in testdoor %s', ac.name)
           // Set Delay to 0 sec for use with tests
-          ac.appliance.delayOnSet = 0
+          ac.delayOnSet = 0
           co.emit('set', Characteristic.TargetDoorState.CLOSE, function () {
-            let res = platform.homebridge.getCCUDummyValue('BidCos-RF.ABC1234560:1.STATE')
+            let res = platform.homebridge.values['BidCos-RF.ABC1234560:1.STATE']
             assert.strict.equal(res, true)
           })
           // wait 1.2 seconds the actor should turn off
           setTimeout(function () {
-            let res = platform.homebridge.getCCUDummyValue('BidCos-RF.ABC1234560:1.STATE')
+            let res = platform.homebridge.values['BidCos-RF.ABC1234560:1.STATE']
             assert.strict.equal(res, false)
+            done()
           }, 1200)
         })
-        done()
       }, 2000)
     })
   })
