@@ -224,9 +224,15 @@ HomeMaticHomeKitContactService.prototype.createContactAccessory = function (Serv
   this.CharacteristicTimesOpened = this.contact.getCharacteristic(eve.Characteristic.TimesOpened)
     .on('get', function (callback) {
       that.log.debug('[Contact] getTimesOpened will report %s', that.timesOpened)
-      callback(null, that.timesOpened)
+      if (!isNaN(that.timesOpened)) {
+        callback(null, that.timesOpened)
+      } else {
+        callback(null, 0)
+      }
     })
-  this.CharacteristicTimesOpened.setValue(this.timesOpened)
+  if (!isNaN(this.timesOpened)) {
+    this.CharacteristicTimesOpened.setValue(this.timesOpened)
+  }
 
   this.contactstate = this.contact.getCharacteristic(Characteristic.ContactSensorState)
     .on('get', function (callback) {
