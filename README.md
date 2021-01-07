@@ -10,6 +10,9 @@
 
 Supports the Homematic System on HomeBridge Platform
 
+If you just want to add your HomeMatic devices (CCU3/Raspberrymatic/pivCCU) you may also like https://github.com/thkl/hap-homematic
+
+
 
 Devices currently supported:
 
