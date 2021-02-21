@@ -90,7 +90,7 @@ HomeMaticHomeKitSwitchService.prototype.addCoreSwitchFunctions = function (Servi
       that.query('STATE', function (value) {
         let hkState = ((value === '1') || (value === true) || (value === 'true') || (value === 1))
         that.log.debug('[Switch Service] (%s) Switch Get CCU is %s will return %s', that.adress, value, hkState)
-        if (callback) callback(null, hkState)
+        if (callback) callback(null, hkState ? 1 : 0)
       })
     })
 
