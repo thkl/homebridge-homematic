@@ -67,8 +67,23 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function (Service
     .on('get', function (callback) {
       that.query('DIRECTION', function (value) {
         if (callback) {
+          var result = 2
           if (value !== undefined) {
-            callback(null, value)
+            switch (value) {
+              case 0:
+                result = 2 // Characteristic.PositionState.STOPPED
+                break
+              case 1:
+                result = 0 // Characteristic.PositionState.DECREASING
+                break
+              case 2:
+                result = 1 // Characteristic.PositionState.INCREASING
+                break
+              case 3:
+                result = 2 // Characteristic.PositionState.STOPPED
+                break
+            }
+            callback(null, result)
           } else {
             callback(null, '0')
           }

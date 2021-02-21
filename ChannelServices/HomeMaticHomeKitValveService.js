@@ -18,7 +18,7 @@ HomeMaticHomeKitValveService.prototype.createDeviceService = function (Service, 
   this.interf = raw[1]
   this.log.debug('Init Special Valve at Interface %s Adress %s Channel %s', this.interf, this.adress, this.channel)
   var valveService = new Service['Valve'](this.name)
-
+  this.valvestate = 0 // NOT_IN_USE = 0;
   var valveType = valveService.getCharacteristic(Characteristic.ValveType)
     .on('get', function (callback) {
       callback(null, 0)
@@ -80,7 +80,10 @@ HomeMaticHomeKitValveService.prototype.setValve = function (state) {
 HomeMaticHomeKitValveService.prototype.datapointEvent = function (dp, newValue) {
   this.log.debug('Valve event %s with value %s', dp, newValue)
   if (dp === 'STATE') {
-    let hmState = !!(((newValue === 'true') || (newValue === true)))
+    let hmState = 0 // NOT_IN_USE = 0;
+    if ((newValue === 'true') || (newValue === true)) {
+      hmState = 1 // IN_USE = 1;
+    }
     this.valvestate = hmState
     this.setValve(hmState)
   }
