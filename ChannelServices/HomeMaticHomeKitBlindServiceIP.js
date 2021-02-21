@@ -84,8 +84,6 @@ HomeMaticHomeKitBlindServiceIP.prototype.createDeviceService = function (Service
                 break
             }
             callback(null, result)
-          } else {
-            callback(null, '0')
           }
         }
       })
