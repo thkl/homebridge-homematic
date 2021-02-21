@@ -34,7 +34,7 @@ function HomeMaticPlatform (log, config, api) {
   this.config = config
   this.localCache = path.join(_homebridge.user.storagePath(), 'ccu.json')
   this.localPath = _homebridge.user.storagePath()
-  this.localHomematicConfig = path.join(this.localPath, 'homematic_config.json')
+  this.localHomematicConfig = path.join(this.localPath, 'homematic_' + (this.config.name || '') + '_config.json')
   this.ccuIP = config.ccu_ip
   this.cache = new HomeMaticCacheManager(log)
   if (api) {
@@ -90,6 +90,8 @@ function HomeMaticPlatform (log, config, api) {
     this.log.warn('you want to import into homekit. Then add the name of that')
     this.log.warn('section into your config.json as "subsection"="....".')
     return
+  } else {
+    this.log.info('using subsection %s', this.subsection)
   }
 
   this.sendQueue = []
