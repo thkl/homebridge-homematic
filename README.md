@@ -131,6 +131,7 @@ The following HMIP Devices should work:
 * HmIP-FSM
 * HmIP-BSM
 * HmIP-BDT
+* HmIP-PDT
 * HmIP-BROLL
 * HmIP-FROLL
 * HmIP-SWO-B
