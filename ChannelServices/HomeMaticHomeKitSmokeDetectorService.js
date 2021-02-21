@@ -16,16 +16,10 @@ HomeMaticHomeKitSmokeDetectorService.prototype.createDeviceService = function (S
     .on('get', function (callback) {
       that.query('STATE', function (value) {
         if (callback) {
-          switch (value) {
-            case true:
-              callback(null, 1)
-              break
-            case false:
-              callback(null, 0)
-              break
-            default:
-              callback(null, 0)
-              break
+          if (that.isTrue(value)) {
+            callback(null, 1) // SMOKE_DETECTED = 1;
+          } else {
+            callback(null, 0) // SMOKE_NOT_DETECTED = 0;
           }
         }
       })
@@ -37,7 +31,7 @@ HomeMaticHomeKitSmokeDetectorService.prototype.createDeviceService = function (S
 
 HomeMaticHomeKitSmokeDetectorService.prototype.datapointEvent = function (dp, newValue) {
   if (this.isDataPointEvent(dp, 'STATE')) {
-    this.detectorstate.updateValue((newValue === true) ? 1 : 0, null)
+    this.detectorstate.updateValue(this.isTrue(newValue) ? 1 : 0, null)
   }
 }
 
