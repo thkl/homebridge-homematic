@@ -152,7 +152,7 @@ HomeMaticHomeKitGarageDoorService.prototype.createDeviceService = function (Serv
 
       clearTimeout(this.requeryTimer)
 
-      if ((that.address_actor_open !== undefined) && (that.address_actor_close === undefined)) {
+      if ((that.address_actor_close !== undefined) && (that.address_actor_open === undefined)) {
         // there is only one actor
         if (value === Characteristic.TargetDoorState.OPEN) {
           that.currentDoorState.updateValue(that.characteristic.CurrentDoorState.OPENING, null)
@@ -241,7 +241,7 @@ HomeMaticHomeKitGarageDoorService.prototype.querySensors = function () {
   if (this.address_sensor_open !== undefined) {
     this.remoteGetDataPointValue(that.address_sensor_open, function (newValue) {
       that.log.debug('[GDS] result for open sensor %s', newValue)
-      let parts = that.address_sensor_close.split('.')
+      let parts = that.address_sensor_open.split('.')
       if (typeof value === 'number') {
         that.event(parts[0] + '.' + parts[1], parts[2], parseInt(newValue))
       } else {
