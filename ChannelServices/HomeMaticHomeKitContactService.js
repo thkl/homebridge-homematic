@@ -25,7 +25,6 @@ HomeMaticHomeKitContactService.prototype.createDeviceService = function (Service
   this.timeOpen = this.getPersistentState('timeOpen', 0)
   this.timeClosed = this.getPersistentState('timeClosed', 0)
   this.timeStamp = moment().unix()
-
   this.lastReset = this.getPersistentState('lastReset', undefined)
   if (this.lastReset === undefined) {
     // Set to now
@@ -243,15 +242,13 @@ HomeMaticHomeKitContactService.prototype.createContactAccessory = function (Serv
         } else {
           that.log.debug('[Contact] normal mode %s', value)
         }
-        switch (value) {
-          case false:
-            callback(null, 0)// CONTACT_DETECTED = 0;
-            break
-          case true:
-            callback(null, 1)// CONTACT_NOT_DETECTED = 1;
-            break
-          default:
-            callback(null, 1)// CONTACT_NOT_DETECTED = 1;
+
+        if (that.isTrue(value)) {
+          that.log.debug('[Contact] return 1')
+          callback(null, 1)
+        } else {
+          that.log.debug('[Contact] return 0')
+          callback(null, 0)
         }
       })
     })
@@ -280,9 +277,11 @@ HomeMaticHomeKitContactService.prototype.processContactState = function (newValu
   var result = 0
   if (this.contactstate !== undefined) {
     if (this.reverse === true) {
-      result = !(this.isTrue(newValue))
+      this.log.debug('[Contact] Reverse mode true (%s)', newValue)
+      result = this.isTrue(newValue) ? 0 : 1
     } else {
-      result = this.isTrue(newValue)
+      this.log.debug('[Contact] Reverse mode false (%s)', newValue)
+      result = this.isTrue(newValue) ? 1 : 0
     }
     this.log.debug('[Contact] Update Contact State to %s', result)
     this.contactstate.updateValue(result, null)
@@ -341,7 +340,7 @@ HomeMaticHomeKitContactService.prototype.datapointEvent = function (dp, newValue
     }
 
     let now = moment().unix()
-    if (newValue === true) {
+    if (this.isTrue(newValue)) {
       this.timeClosed = this.timeClosed + (moment().unix() - this.timeStamp)
       this.timesOpened = this.timesOpened + 1
       if (this.loggingService !== undefined) {
