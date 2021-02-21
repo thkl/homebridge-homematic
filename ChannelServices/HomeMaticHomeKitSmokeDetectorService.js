@@ -15,7 +15,19 @@ HomeMaticHomeKitSmokeDetectorService.prototype.createDeviceService = function (S
   this.detectorstate = sensor.getCharacteristic(Characteristic.SmokeDetected)
     .on('get', function (callback) {
       that.query('STATE', function (value) {
-        if (callback) callback(null, value)
+        if (callback) {
+          switch (value) {
+            case true:
+              callback(null, 1)
+              break
+            case false:
+              callback(null, 0)
+              break
+            default:
+              callback(null, 0)
+              break
+          }
+        }
       })
     })
   this.detectorstate.eventEnabled = true
@@ -25,7 +37,7 @@ HomeMaticHomeKitSmokeDetectorService.prototype.createDeviceService = function (S
 
 HomeMaticHomeKitSmokeDetectorService.prototype.datapointEvent = function (dp, newValue) {
   if (this.isDataPointEvent(dp, 'STATE')) {
-    this.detectorstate.updateValue((newValue === 1), null)
+    this.detectorstate.updateValue((newValue === true) ? 1 : 0, null)
   }
 }
 

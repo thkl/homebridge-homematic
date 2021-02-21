@@ -21,23 +21,23 @@ HomeMaticHomeKitSmokeDetectorServiceIP.prototype.createDeviceService = function 
         // https://github.com/thkl/homebridge-homematic/issues/229
         switch (value) {
           case 0: // idle
-            if (callback) callback(null, false)
+            if (callback) callback(null, 0) // SMOKE_NOT_DETECTED = 0;
             break
           case 1: // primary alarm
-            if (callback) callback(null, true)
+            if (callback) callback(null, 1) // SMOKE_DETECTED = 1;
             break
           case 2: // INTRUSION_ALARM
-            if (callback) callback(null, true)
+            if (callback) callback(null, 1) // SMOKE_DETECTED = 1;
             break
           case 3: // SECONDARY_ALARM only set if not a single signaling
             if (that.memyselfandi !== true) {
-              if (callback) callback(null, true)
+              if (callback) callback(null, 1) // SMOKE_DETECTED = 1;
             } else {
-              if (callback) callback(null, false)
+              if (callback) callback(null, 0)// SMOKE_NOT_DETECTED = 0;
             }
             break
           default:
-            if (callback) callback(null, false)
+            if (callback) callback(null, 0)// SMOKE_NOT_DETECTED = 0;
             break
         }
       })
@@ -52,17 +52,17 @@ HomeMaticHomeKitSmokeDetectorServiceIP.prototype.datapointEvent = function (dp, 
   if (this.isDataPointEvent(dp, 'SMOKE_DETECTOR_ALARM_STATUS')) {
     switch (newValue) {
       case 0: // idle
-        this.state.updateValue(false, null)
+        this.state.updateValue(0, null)// SMOKE_NOT_DETECTED = 0;
         break
       case 1: // primary alarm
-        this.state.updateValue(true, null)
+        this.state.updateValue(1, null)// SMOKE_DETECTED = 1;
         break
       case 2: // INTRUSION_ALARM
-        this.state.updateValue(true, null)
+        this.state.updateValue(1, null)// SMOKE_DETECTED = 1;
         break
       case 3: // SECONDARY_ALARM only set if not a single signaling
         if (this.memyselfandi !== true) {
-          this.state.updateValue(true, null)
+          this.state.updateValue(1, null)// SMOKE_DETECTED = 1;
         }
         break
     }

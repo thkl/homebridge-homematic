@@ -239,11 +239,20 @@ HomeMaticHomeKitContactService.prototype.createContactAccessory = function (Serv
       that.query('STATE', function (value) {
         if (that.reverse === true) {
           that.log.debug('[Contact] Reverse mode %s', value)
+          value = !value
         } else {
           that.log.debug('[Contact] normal mode %s', value)
         }
-
-        callback(null, value)
+        switch (value) {
+          case false:
+            callback(null, 0)// CONTACT_DETECTED = 0;
+            break
+          case true:
+            callback(null, 1)// CONTACT_NOT_DETECTED = 1;
+            break
+          default:
+            callback(null, 1)// CONTACT_NOT_DETECTED = 1;
+        }
       })
     })
 
