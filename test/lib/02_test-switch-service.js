@@ -86,7 +86,7 @@ describe('Homematic Plugin (index)', function () {
         assert.ok(co, 'Characteristic.On not found in testswitch %s', ac.name)
         // Set Delay to 0 sec for use with tests
         ac.delayOnSet = 0
-        co.emit('set', false, function () {
+        co.emit('set', 0, function () {
           let res = platform.homebridge.values[ac.adress + '.STATE']
           assert.strict.equal(res, false)
         })
@@ -106,7 +106,7 @@ describe('Homematic Plugin (index)', function () {
           let res = platform.homebridge.values[ac.adress + '.STATE']
           assert.strict.equal(res, true)
           cc.emit('get', function (context, result) {
-            assert.strict.equal(result, true)
+            assert.strict.equal(result, 1)
           })
         })
       })
@@ -125,13 +125,13 @@ describe('Homematic Plugin (index)', function () {
           let res = platform.homebridge.values[ac.adress + '.STATE']
           assert.strict.equal(res, true)
           cc.emit('get', function (context, result) {
-            assert.strict.equal(result, true)
+            assert.strict.equal(result, 1)
             // get address from my device
             let adr = ac.adress.split('.')[1]
             // set this to false
             platform.xmlrpc.event(['BidCos-RF', adr, 'STATE', false])
             cc.emit('get', function (context, result) {
-              assert.strict.equal(result, false)
+              assert.strict.equal(result, 0)
             })
           })
         })
@@ -148,7 +148,7 @@ describe('Homematic Plugin (index)', function () {
       let cc1 = s1.getCharacteristic(Characteristic.On)
       assert.ok(cc1, 'Characteristic.On not found in testswitch %s', ac1.name)
       cc1.emit('get', function (context, result1) {
-        assert.strict.equal(result1, false)
+        assert.strict.equal(result1, 0)
       })
 
       platform.xmlrpc.event(['BidCos-RF', 'ABC1234560:2', 'STATE', true])
@@ -159,11 +159,11 @@ describe('Homematic Plugin (index)', function () {
       let cc2 = s2.getCharacteristic(Characteristic.On)
       assert.ok(cc2, 'Characteristic.On not found in testswitch %s', ac2.name)
       cc2.emit('get', function (context, result2) {
-        assert.strict.equal(result2, true)
+        assert.strict.equal(result2, 1)
       })
 
       cc1.emit('get', function (context, result1) {
-        assert.strict.equal(result1, false)
+        assert.strict.equal(result1, 0)
       })
 
       done()

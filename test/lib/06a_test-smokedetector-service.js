@@ -51,11 +51,11 @@ describe('Homematic Plugin (index)', function () {
         assert.ok(cc, 'Characteristic.SmokeDetected not found in SmokeDetector %s', ac.name)
         // EventLogic
         cc.getValue(function (context, value) {
-          assert.strict.equal(value, true, 'event logic result should be true is ' + value)
+          assert.strict.equal(value, 1, 'event logic result should be 1 is ' + value)
         })
         // Getlogic
         cc.emit('get', function (context, result) {
-          assert.strict.equal(result, 1, 'get logic result should be true is ' + result)
+          assert.strict.equal(result, 1, 'get logic result should be 1 is ' + result)
         })
       })
       done()
@@ -71,10 +71,10 @@ describe('Homematic Plugin (index)', function () {
         let cc = s.getCharacteristic(Characteristic.SmokeDetected)
         assert.ok(cc, 'Characteristic.SmokeDetected not found in SmokeDetector %s', ac.name)
         cc.getValue(function (context, value) {
-          assert.strict.equal(value, false, 'event logic result should be false')
+          assert.strict.equal(value, 0, 'event logic result should be 0')
         })
         cc.emit('get', function (context, result) {
-          assert.strict.equal(result, 0, 'get logic result should be false')
+          assert.strict.equal(result, 0, 'get logic result should be 0')
         })
       })
       done()
