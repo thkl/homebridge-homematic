@@ -10,6 +10,7 @@ function HomeMaticHomeKitKeyService (log, platform, id, name, type, adress, spec
 util.inherits(HomeMaticHomeKitKeyService, HomeKitGenericService)
 
 HomeMaticHomeKitKeyService.prototype.createDeviceService = function (Service, Characteristic) {
+  this.isMultiChannel = false
   var key = new Service.StatelessProgrammableSwitch(this.name)
   var cc = key.getCharacteristic(Characteristic.ProgrammableSwitchEvent)
   this.currentStateCharacteristic['PRESS_SHORT'] = cc
