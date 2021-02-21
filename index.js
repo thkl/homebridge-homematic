@@ -34,7 +34,10 @@ function HomeMaticPlatform (log, config, api) {
   this.config = config
   this.localCache = path.join(_homebridge.user.storagePath(), 'ccu.json')
   this.localPath = _homebridge.user.storagePath()
-  this.localHomematicConfig = path.join(this.localPath, 'homematic_' + (this.config.name || '') + '_config.json')
+  this.localHomematicConfig = path.join(this.localPath, 'homematic_config.json')
+  if (this.config.instname !== undefined) {
+    this.localHomematicConfig = path.join(this.localPath, 'homematic_' + this.config.instname + '_config.json')
+  }
   this.ccuIP = config.ccu_ip
   this.cache = new HomeMaticCacheManager(log)
   if (api) {
