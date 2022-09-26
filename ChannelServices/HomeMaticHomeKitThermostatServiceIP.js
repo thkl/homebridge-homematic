@@ -74,7 +74,9 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function (Se
   this.cchum = thermo.getCharacteristic(Characteristic.CurrentRelativeHumidity)
     .on('get', function (callback) {
       this.remoteGetValue('HUMIDITY', function (value) {
-        if (callback) callback(null, value)
+        let newValue = 0
+        if (value !== '' ) newValue = value
+        if (callback) callback(null, newValue)
       })
     }.bind(this))
 
@@ -113,8 +115,10 @@ HomeMaticHomeKitIPThermostatService.prototype.createDeviceService = function (Se
 HomeMaticHomeKitIPThermostatService.prototype.queryData = function () {
   var that = this
   this.query('HUMIDITY', function (value) {
-    that.cchum.updateValue(parseFloat(value), null)
-    that.addLogEntry({ humidity: parseFloat(value) })
+    let newHumidity = 0
+    if (value !== '') newHumidity = value
+    that.cchum.updateValue(newHumidity, null)
+    that.addLogEntry({ humidity: newHumidity })
   })
 
   this.query('ACTUAL_TEMPERATURE', function (value) {
@@ -137,8 +141,10 @@ HomeMaticHomeKitIPThermostatService.prototype.datapointEvent = function (dp, new
   }
 
   if (this.isDataPointEvent(dp, 'HUMIDITY')) {
-    this.cchum.updateValue(parseFloat(newValue), null)
-    this.addLogEntry({ humidity: parseFloat(newValue) })
+    let newHumidity = 0
+    if (newValue !== '') newHumidity = newValue
+    this.cchum.updateValue(newHumidity, null)
+    this.addLogEntry({ humidity: newHumidity })
   }
 
   if (this.isDataPointEvent(dp, 'SET_POINT_TEMPERATURE')) {
