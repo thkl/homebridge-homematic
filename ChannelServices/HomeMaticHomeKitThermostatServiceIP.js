@@ -116,7 +116,7 @@ HomeMaticHomeKitIPThermostatService.prototype.queryData = function () {
   var that = this
   this.query('HUMIDITY', function (value) {
     let newHumidity = 0
-    if (value !== '') newHumidity = value
+    if (value !== '') newHumidity = parseFloat(value)
     that.cchum.updateValue(newHumidity, null)
     that.addLogEntry({ humidity: newHumidity })
   })
@@ -142,7 +142,7 @@ HomeMaticHomeKitIPThermostatService.prototype.datapointEvent = function (dp, new
 
   if (this.isDataPointEvent(dp, 'HUMIDITY')) {
     let newHumidity = 0
-    if (newValue !== '') newHumidity = newValue
+    if (newValue !== '') newHumidity = parseFloat(newValue)
     this.cchum.updateValue(newHumidity, null)
     this.addLogEntry({ humidity: newHumidity })
   }
