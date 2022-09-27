@@ -23,15 +23,23 @@ HomeMaticCacheManager.prototype.doCache = function (address, value) {
     return
   }
 
-  this.log.debug('[Cache] write %s for %s', value, address)
-  this.cache[address] = value
+  cacheEntry = {}
+  cacheEntry.value = value
+  cacheEntry.timestamp = Date.now()
+  this.log.debug('[Cache] write %s for %s', cacheEntry, address)
+  this.cache[address] = cacheEntry
 }
 
 HomeMaticCacheManager.prototype.getValue = function (address) {
   let cv = this.cache[address]
   if (cv) {
-    this.log.debug('[Cache] hit on %s %s', address, cv)
-    return cv
+  let age = Date.now() - cv.timestamp
+  if ( age > 60000 ) {
+    this.log.debug('[Cache] hit on %s %s - but outdated, ignoring', address, cv.value)
+    return undefined
+  }
+    this.log.debug('[Cache] hit on %s %s', address, cv.value)
+    return cv.value
   } else {
     this.log.debug('[Cache] fail on %s', address)
     return undefined
